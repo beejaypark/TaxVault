@@ -28,6 +28,12 @@ class TaxEvidence extends UuidModel
         'tax_category_id',
         'tax_subcategory_id',
         'classification_reason',
+        'rule_code',
+        'rule_version',
+        'ruleset_version',
+        'engine_version',
+        'rule_source',
+        'rule_provenance',
         'status',
         'verification_status',
         'confidence',
@@ -40,6 +46,7 @@ class TaxEvidence extends UuidModel
             'confidence' => 'decimal:2',
             'verified_at' => 'datetime',
             'extracted_value' => 'array',
+            'rule_provenance' => 'array',
         ];
     }
 

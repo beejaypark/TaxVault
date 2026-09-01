@@ -3,12 +3,12 @@
 namespace Tests\Unit\Domain\Evidence\Models;
 
 use App\Domain\Documents\Models\Document;
-use App\Domain\Documents\Models\DocumentType;
 use App\Domain\Documents\Models\DocumentExtraction;
+use App\Domain\Documents\Models\DocumentType;
 use App\Domain\Evidence\Models\TaxEvidence;
+use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Taxonomy\Models\TaxCategory;
 use App\Domain\Taxonomy\Models\TaxSubcategory;
-use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,6 +43,12 @@ class TaxEvidenceTest extends TestCase
             'tax_category_id',
             'tax_subcategory_id',
             'classification_reason',
+            'rule_code',
+            'rule_version',
+            'ruleset_version',
+            'engine_version',
+            'rule_source',
+            'rule_provenance',
             'status',
             'verification_status',
             'confidence',
@@ -50,7 +56,7 @@ class TaxEvidenceTest extends TestCase
         ], $evidence->getFillable());
     }
 
-    public function test_tax_evidence_casts_confidence_and_verified_at(): void
+    public function test_tax_evidence_casts_expected_attributes(): void
     {
         $evidence = new TaxEvidence();
 
@@ -58,12 +64,13 @@ class TaxEvidenceTest extends TestCase
 
         $this->assertSame('decimal:2', $casts['confidence']);
         $this->assertSame('datetime', $casts['verified_at']);
+        $this->assertSame('array', $casts['extracted_value']);
+        $this->assertSame('array', $casts['rule_provenance']);
     }
 
     public function test_tax_evidence_can_belong_to_user_and_financial_year(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $evidence = TaxEvidence::create([
@@ -87,7 +94,6 @@ class TaxEvidenceTest extends TestCase
     public function test_confidence_must_be_between_zero_and_one_hundred(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $this->expectException(QueryException::class);
@@ -107,7 +113,6 @@ class TaxEvidenceTest extends TestCase
     public function test_tax_evidence_can_link_to_source_document(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $documentType = DocumentType::create([
@@ -158,7 +163,6 @@ class TaxEvidenceTest extends TestCase
     public function test_document_source_requires_document_id(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $this->expectException(QueryException::class);
@@ -176,24 +180,9 @@ class TaxEvidenceTest extends TestCase
         ]);
     }
 
-    private function createFinancialYear(User $user): FinancialYear
-    {
-        $financialYear = new FinancialYear([
-            'user_id' => $user->id,
-            'year_code' => '2025-26',
-            'start_date' => '2025-07-01',
-            'end_date' => '2026-06-30',
-        ]);
-
-        $financialYear->save();
-
-        return $financialYear;
-    }
-
     public function test_tax_evidence_can_reference_extracted_fact(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $documentType = DocumentType::create([
@@ -287,10 +276,9 @@ class TaxEvidenceTest extends TestCase
     public function test_document_extraction_source_requires_extraction_metadata(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         TaxEvidence::create([
             'user_id' => $user->id,
@@ -310,7 +298,6 @@ class TaxEvidenceTest extends TestCase
     public function test_tax_evidence_can_record_classification(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
         $category = TaxCategory::create([
@@ -382,10 +369,9 @@ class TaxEvidenceTest extends TestCase
     public function test_classification_evidence_requires_tax_category_and_reason(): void
     {
         $user = User::factory()->create();
-
         $financialYear = $this->createFinancialYear($user);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         TaxEvidence::create([
             'user_id' => $user->id,
@@ -400,5 +386,89 @@ class TaxEvidenceTest extends TestCase
             'verification_status' => 'pending',
             'confidence' => 90.00,
         ]);
+    }
+
+    public function test_tax_evidence_can_record_rule_provenance(): void
+    {
+        $user = User::factory()->create();
+        $financialYear = $this->createFinancialYear($user);
+
+        $evidence = TaxEvidence::create([
+            'user_id' => $user->id,
+            'financial_year_id' => $financialYear->id,
+            'evidence_type' => 'tax_treatment',
+            'source_type' => 'tax_rule',
+            'source_id' => null,
+
+            'rule_code' => 'TAX-004',
+            'rule_version' => '2026.1',
+            'ruleset_version' => 'AUS-TAX-2026.1',
+            'engine_version' => 'tax-engine-1.0',
+            'rule_source' => 'TaxVault deductibility rules',
+
+            'rule_provenance' => [
+                'rule_code' => 'TAX-004',
+                'rule_version' => '2026.1',
+                'ruleset_version' => 'AUS-TAX-2026.1',
+            ],
+
+            'status' => 'active',
+            'verification_status' => 'pending',
+            'confidence' => 100.00,
+        ]);
+
+        $this->assertSame(
+            'TAX-004',
+            $evidence->rule_code
+        );
+
+        $this->assertSame(
+            '2026.1',
+            $evidence->rule_version
+        );
+
+        $this->assertSame(
+            'AUS-TAX-2026.1',
+            $evidence->ruleset_version
+        );
+
+        $this->assertSame(
+            'tax-engine-1.0',
+            $evidence->engine_version
+        );
+
+        $this->assertSame(
+            'TaxVault deductibility rules',
+            $evidence->rule_source
+        );
+
+        $this->assertSame(
+            'TAX-004',
+            $evidence->rule_provenance['rule_code']
+        );
+
+        $this->assertSame(
+            '2026.1',
+            $evidence->rule_provenance['rule_version']
+        );
+
+        $this->assertSame(
+            'AUS-TAX-2026.1',
+            $evidence->rule_provenance['ruleset_version']
+        );
+    }
+
+    private function createFinancialYear(User $user): FinancialYear
+    {
+        $financialYear = new FinancialYear([
+            'user_id' => $user->id,
+            'year_code' => '2025-26',
+            'start_date' => '2025-07-01',
+            'end_date' => '2026-06-30',
+        ]);
+
+        $financialYear->save();
+
+        return $financialYear;
     }
 }

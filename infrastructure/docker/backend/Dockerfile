@@ -8,6 +8,7 @@ RUN apt-get update \
         libzip-dev \
         curl \
     && docker-php-ext-install \
+        bcmath \
         pdo_pgsql \
         pgsql \
         zip \
