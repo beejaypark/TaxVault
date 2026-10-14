@@ -1,0 +1,348 @@
+﻿.upload-page {
+  width: min(100%, var(--tv-content-max-width));
+  margin: 0 auto;
+  padding: 40px 40px 64px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: var(--tv-color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.page-header p {
+  margin: 8px 0 0;
+  color: var(--tv-color-text-secondary);
+  font-size: 14px;
+}
+
+.back-link {
+  color: var(--tv-color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.back-link:hover {
+  color: var(--tv-color-text);
+}
+
+.upload-card {
+  padding: 32px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: var(--tv-radius-lg);
+  background: var(--tv-color-surface);
+  box-shadow: var(--tv-shadow-card);
+}
+
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  padding: 40px;
+  border: 2px dashed var(--tv-color-border);
+  border-radius: var(--tv-radius-lg);
+  text-align: center;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.drop-zone.dragging {
+  border-color: var(--tv-color-primary);
+  background: var(--tv-color-primary-soft);
+}
+
+.upload-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.drop-zone h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.drop-description {
+  max-width: 420px;
+  margin: 10px 0 20px;
+  color: var(--tv-color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.browse-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.browse-button:hover {
+  background: var(--tv-color-primary-dark);
+}
+
+.browse-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.file-hint {
+  margin: 14px 0 0;
+  color: var(--tv-color-text-muted);
+  font-size: 12px;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 96px;
+  padding: 20px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-background);
+}
+
+.selected-file-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--tv-color-success-soft);
+  color: var(--tv-color-success);
+  font-weight: 750;
+}
+
+.selected-file-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.selected-file-details strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.selected-file-details span {
+  display: block;
+  margin-top: 4px;
+  color: var(--tv-color-text-secondary);
+  font-size: 12px;
+}
+
+.remove-button {
+  border: 0;
+  background: transparent;
+  color: var(--tv-color-danger);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.remove-button:hover {
+  text-decoration: underline;
+}
+
+.next-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--tv-color-border);
+}
+
+.next-step h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.next-step p {
+  margin: 5px 0 0;
+  color: var(--tv-color-text-secondary);
+  font-size: 13px;
+}
+
+.primary-button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.primary-button:hover {
+  background: var(--tv-color-primary-dark);
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-danger-soft);
+  color: var(--tv-color-danger);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.error-message span {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tv-color-danger);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.help-section {
+  margin-top: 32px;
+}
+
+.help-section h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-surface);
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.step strong {
+  display: block;
+  font-size: 13px;
+}
+
+.step p {
+  margin: 4px 0 0;
+  color: var(--tv-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 800px) {
+  .upload-page {
+    padding: 28px 20px 48px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .upload-card {
+    padding: 20px;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .upload-page {
+    padding: 24px 16px 40px;
+  }
+
+  .page-header h1 {
+    font-size: 26px;
+  }
+
+  .drop-zone {
+    min-height: 300px;
+    padding: 28px 20px;
+  }
+
+  .selected-file {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .remove-button {
+    margin-left: 58px;
+  }
+
+  .next-step {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .primary-button {
+    width: 100%;
+  }
+}

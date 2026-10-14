@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Application\Documents\CreateDocument;
+use App\Application\Documents\UploadDocument;
 use App\Domain\Documents\Models\Document;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Documents\StoreDocumentRequest;
@@ -26,22 +26,15 @@ final class DocumentController extends Controller
 
     public function store(
         StoreDocumentRequest $request,
-        CreateDocument $createDocument,
+        UploadDocument $uploadDocument,
     ): JsonResponse {
-        $document = $createDocument->execute(
+        $validated = $request->validated();
+
+        $document = $uploadDocument->execute(
             user: $request->user(),
-            financialYearId: $request->string('financial_year_id')->toString(),
-            documentTypeId: $request->string('document_type_id')->toString(),
-            storageDisk: $request->string('storage_disk')->toString(),
-            objectKey: $request->string('object_key')->toString(),
-            contentSha256: $request->string('content_sha256')->toString(),
-            originalFilename: $request->input('original_filename'),
-            mimeType: $request->input('mime_type'),
-            sizeBytes: $request->integer('size_bytes'),
-            capturedAt: $request->input('captured_at'),
-            uploadedAt: $request->input('uploaded_at'),
-            provenance: $request->input('provenance'),
-            status: $request->input('status', 'active'),
+            financialYearId: $validated['financial_year_id'],
+            documentTypeId: $validated['document_type_id'],
+            file: $request->file('file'),
         );
 
         return response()->json([

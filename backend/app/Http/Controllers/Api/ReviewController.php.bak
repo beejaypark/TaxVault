@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Domain\Documents\Models\DocumentExtraction;
+use App\Domain\Reviews\Models\Review;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Reviews\StoreReviewDecisionRequest;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+final class ReviewController extends Controller
+{
+    public function index(Request $request): JsonResponse
+    {
+        $reviews = Review::query()
+            ->with([
+                'document',
+                'extraction',
+            ])
+            ->where(
+                'reviewer_id',
+                $request->user()->getKey()
+            )
+            ->when(
+                $request->filled('status'),
+                fn ($query) => $query->where(
+                    'status',
+                    $request->string('status')->toString()
+                )
+            )
+            ->when(
+                $request->filled('review_type'),
+                fn ($query) => $query->where(
+                    'review_type',
+                    $request->string('review_type')->toString()
+                )
+            )
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'data' => $reviews,
+        ]);
+    }
+
+    public function show(
+        Request $request,
+        string $id,
+    ): JsonResponse {
+        $review = Review::query()
+            ->with([
+                'document',
+                'extraction',
+            ])
+            ->whereKey($id)
+            ->where(
+                'reviewer_id',
+                $request->user()->getKey()
+            )
+            ->first();
+
+        if ($review === null) {
+            throw (new ModelNotFoundException)->setModel(
+                Review::class,
+                [$id],
+            );
+        }
+
+        return response()->json([
+            'data' => $review,
+        ]);
+    }
+
+    public function decision(
+        StoreReviewDecisionRequest $request,
+        string $id,
+    ): JsonResponse {
+        $review = Review::query()
+            ->whereKey($id)
+            ->where(
+                'reviewer_id',
+                $request->user()->getKey()
+            )
+            ->first();
+
+        if ($review === null) {
+            throw (new ModelNotFoundException)->setModel(
+                Review::class,
+                [$id],
+            );
+        }
+
+        if ($review->status !== 'pending') {
+            return response()->json([
+                'message' => 'Review is not pending.',
+            ], 409);
+        }
+
+        $review->update([
+            'status' => 'completed',
+            'decision' => $request->string('decision')->toString(),
+            'reviewer_notes' => $request->input(
+                'reviewer_notes',
+                $review->reviewer_notes
+            ),
+            'completed_at' => now(),
+        ]);
+
+        return response()->json([
+            'data' => $review->fresh([
+                'document',
+                'extraction',
+            ]),
+        ]);
+    }
+}

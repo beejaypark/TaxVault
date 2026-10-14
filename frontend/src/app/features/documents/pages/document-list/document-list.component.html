@@ -1,0 +1,80 @@
+<div class="documents-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">{{ financialYear }}</div>
+      <h1>Documents</h1>
+      <p>All your tax documents in one place.</p>
+    </div>
+
+    <a routerLink="/documents/upload" class="primary-button">
+      <span>+</span>
+      Upload receipt
+    </a>
+  </header>
+
+  <section class="documents-card">
+    <div class="card-header">
+      <div>
+        <h2>All documents</h2>
+        <p>
+          {{ documents.length }}
+          {{ documents.length === 1 ? 'document' : 'documents' }}
+        </p>
+      </div>
+    </div>
+
+    @if (optionsErrorMessage) {
+      <p class="options-notice" role="status">{{ optionsErrorMessage }}</p>
+    }
+
+    @if (isLoading) {
+      <div class="empty-state" role="status">Loading documents...</div>
+    } @else if (errorMessage) {
+      <div class="empty-state error-state" role="alert">
+        {{ errorMessage }}
+      </div>
+    } @else if (documents.length === 0) {
+      <div class="empty-state">
+        <h3>No documents yet</h3>
+        <p>Upload a receipt or tax document to see it listed here.</p>
+        <a routerLink="/documents/upload" class="empty-state-link">
+          Upload your first document
+        </a>
+      </div>
+    } @else {
+      <div class="document-table">
+        <div class="table-header">
+          <span>Document</span>
+          <span>Uploaded</span>
+          <span>File size</span>
+          <span>Status</span>
+        </div>
+
+        @for (document of documents; track document.id) {
+          <div class="document-row">
+            <div class="supplier-cell">
+              <div class="document-icon uploaded" aria-hidden="true">
+                ✓
+              </div>
+
+              <div class="document-name">
+                <strong>{{ document.original_filename }}</strong>
+                <span>{{ getDocumentTypeName(document) }}</span>
+              </div>
+            </div>
+
+            <span class="date-cell">{{ formatDate(document.uploaded_at) }}</span>
+
+            <strong class="amount-cell">
+              {{ formatFileSize(document.size_bytes) }}
+            </strong>
+
+            <span class="status uploaded">
+              {{ getStatusLabel(document.status) }}
+            </span>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>

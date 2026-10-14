@@ -1,0 +1,326 @@
+﻿@if (review) {
+  <section>
+    <h1>Review</h1>
+
+    <section aria-label="Review summary">
+      <h2>Review Summary</h2>
+
+      <p>Status: {{ review.status }}</p>
+      <p>Type: {{ review.type }}</p>
+
+      @if (review.target.documentId) {
+        <p>
+          Document ID:
+          {{ review.target.documentId }}
+        </p>
+      }
+
+      @if (review.target.documentExtractionId) {
+        <p>
+          Extraction ID:
+          {{ review.target.documentExtractionId }}
+        </p>
+      }
+
+      @if (review.decision) {
+        <p>
+          Decision:
+          {{ review.decision }}
+        </p>
+      }
+
+      @if (review.notes) {
+        <p>
+          Reviewer notes:
+          {{ review.notes }}
+        </p>
+      }
+    </section>
+
+    @if (review.document) {
+      <section aria-label="Source document">
+        <h2>Source Document</h2>
+
+        <p>
+          Filename:
+          {{ review.document.originalFilename }}
+        </p>
+
+        @if (review.document.mimeType) {
+          <p>
+            MIME type:
+            {{ review.document.mimeType }}
+          </p>
+        }
+
+        @if (review.document.sizeBytes !== null) {
+          <p>
+            Size:
+            {{ review.document.sizeBytes }}
+            bytes
+          </p>
+        }
+
+        @if (review.document.uploadedAt) {
+          <p>
+            Uploaded:
+            {{ review.document.uploadedAt }}
+          </p>
+        }
+      </section>
+    }
+
+    @if (review.extraction) {
+      <section aria-label="Document extraction">
+        <h2>Document Extraction</h2>
+
+        <p>
+          Provider:
+          {{ review.extraction.provider }}
+        </p>
+
+        @if (review.extraction.model) {
+          <p>
+            Model:
+            {{ review.extraction.model }}
+          </p>
+        }
+
+        @if (review.extraction.modelVersion) {
+          <p>
+            Model version:
+            {{ review.extraction.modelVersion }}
+          </p>
+        }
+
+        <p>
+          Extraction version:
+          {{ review.extraction.extractionVersion }}
+        </p>
+
+        @if (review.extraction.schemaVersion) {
+          <p>
+            Schema version:
+            {{ review.extraction.schemaVersion }}
+          </p>
+        }
+
+        <p>
+          Extraction status:
+          {{ review.extraction.status }}
+        </p>
+
+        @if (
+          (Object.keys(review.extraction.fields)).length > 0
+        ) {
+          <section aria-label="Extracted fields">
+            <h3>Extracted Fields</h3>
+
+            @for (
+              field of Object.entries(
+                review.extraction.fields
+              );
+              track field[0]
+            ) {
+              <article>
+                <h4>
+                  {{ field[0] }}
+                </h4>
+
+                <p>
+                  Original OCR value:
+                  {{ field[1].value }}
+                </p>
+
+                <p>
+                  Original OCR confidence:
+                  {{ field[1].confidence }}%
+                </p>
+
+                <p>
+                  Original OCR source:
+                  {{ field[1].source }}
+                </p>
+
+                @if (getCorrectionEvidence(field[0]); as correction) {
+                  <section
+                    aria-label="Authoritative correction"
+                  >
+                    <h5>Authoritative Correction</h5>
+
+                    <p>
+                      Corrected value:
+                      {{ correction.extractedValue.value }}
+                    </p>
+
+                    <p>
+                      Source:
+                      {{ correction.extractedValue.source }}
+                    </p>
+
+                    <p>
+                      Verification status:
+                      {{ correction.verificationStatus }}
+                    </p>
+
+                    <p>
+                      Confidence:
+                      {{ correction.confidence }}%
+                    </p>
+
+                    <p>
+                      Status:
+                      {{ correction.status }}
+                    </p>
+
+                    @if (correction.verifiedAt) {
+                      <p>
+                        Verified:
+                        {{ correction.verifiedAt }}
+                      </p>
+                    }
+                  </section>
+                }
+
+                @if (review.status === 'pending') {
+                  <section
+                    aria-label="Field correction"
+                  >
+                    <h5>Correction</h5>
+
+                    <label
+                      [attr.for]="
+                        'correction-' + field[0]
+                      "
+                    >
+                      Corrected value
+                    </label>
+
+                    <input
+                      type="text"
+                      [id]="
+                        'correction-' + field[0]
+                      "
+                      [value]="
+                        correctionValues[field[0]]
+                      "
+                      [disabled]="
+                        correctionSubmittingField !== null
+                      "
+                      (input)="
+                        setCorrectionValue(
+                          field[0],
+                          $any($event.target).value
+                        )
+                      "
+                    />
+
+                    <button
+                      type="button"
+                      [disabled]="
+                        correctionSubmittingField !== null
+                      "
+                      (click)="
+                        submitCorrection(field[0])
+                      "
+                    >
+                      {{
+                        isCorrectionSubmitting(
+                          field[0]
+                        )
+                          ? 'Saving...'
+                          : 'Save Correction'
+                      }}
+                    </button>
+
+                    @if (
+                      correctionSuccessField ===
+                      field[0]
+                    ) {
+                      <p role="status">
+                        Correction submitted
+                        successfully.
+                      </p>
+                    }
+                  </section>
+                }
+              </article>
+            }
+          </section>
+        }
+      </section>
+    }
+
+    @if (review.status === 'pending') {
+      <section aria-label="Review decision">
+        <h2>Decision</h2>
+
+        <label for="review-notes">
+          Reviewer notes
+        </label>
+
+        <textarea
+          id="review-notes"
+          #reviewNotes
+          rows="5"
+          [disabled]="isSubmitting"
+        ></textarea>
+
+        <div>
+          <button
+            type="button"
+            [disabled]="isSubmitting"
+            (click)="
+              submitDecision(
+                'approved',
+                reviewNotes.value
+              )
+            "
+          >
+            {{
+              isSubmitting
+                ? 'Submitting...'
+                : 'Approve'
+            }}
+          </button>
+
+          <button
+            type="button"
+            [disabled]="isSubmitting"
+            (click)="
+              submitDecision(
+                'rejected',
+                reviewNotes.value
+              )
+            "
+          >
+            {{
+              isSubmitting
+                ? 'Submitting...'
+                : 'Reject'
+            }}
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (correctionError) {
+      <p role="alert">
+        {{ correctionError }}
+      </p>
+    }
+
+    @if (decisionSuccess) {
+      <p role="status">
+        Review decision submitted successfully.
+      </p>
+    }
+
+    @if (decisionError) {
+      <p role="alert">
+        {{ decisionError }}
+      </p>
+    }
+  </section>
+}
+

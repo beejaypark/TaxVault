@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Documents;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDocumentRequest extends FormRequest
 {
@@ -13,62 +14,31 @@ class StoreDocumentRequest extends FormRequest
 
     public function rules(): array
     {
+        $userId = $this->user()?->getAuthIdentifier();
+
         return [
             'financial_year_id' => [
                 'required',
                 'uuid',
+                Rule::exists('financial_years', 'id')
+                    ->where('user_id', $userId)
+                    ->where('status', 'active'),
             ],
             'document_type_id' => [
                 'required',
                 'uuid',
+                Rule::exists('document_types', 'id')
+                    ->where('status', 'active'),
             ],
-            'storage_disk' => [
+            'file' => [
                 'required',
-                'string',
-                'max:50',
-            ],
-            'object_key' => [
-                'required',
-                'string',
-                'max:1024',
-            ],
-            'content_sha256' => [
-                'required',
-                'string',
-                'size:64',
-                'regex:/^[a-fA-F0-9]{64}$/',
-            ],
-            'original_filename' => [
-                'nullable',
-                'string',
-                'max:512',
-            ],
-            'mime_type' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-            'size_bytes' => [
-                'nullable',
-                'integer',
-                'min:0',
+                'file',
+                'mimes:pdf,jpg,jpeg,png,webp,tif,tiff',
+                'max:20480',
             ],
             'captured_at' => [
                 'nullable',
                 'date',
-            ],
-            'uploaded_at' => [
-                'nullable',
-                'date',
-            ],
-            'provenance' => [
-                'nullable',
-                'array',
-            ],
-            'status' => [
-                'nullable',
-                'string',
-                'max:30',
             ],
         ];
     }

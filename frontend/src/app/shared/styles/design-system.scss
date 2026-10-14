@@ -1,0 +1,81 @@
+﻿:root {
+  --tv-color-primary: #3157d5;
+  --tv-color-primary-dark: #2646b5;
+  --tv-color-primary-soft: #eef2ff;
+
+  --tv-color-success: #198754;
+  --tv-color-success-soft: #eaf7ef;
+
+  --tv-color-warning: #b7791f;
+  --tv-color-warning-soft: #fff7e6;
+
+  --tv-color-danger: #c0392b;
+  --tv-color-danger-soft: #fff0ee;
+
+  --tv-color-text: #1f2937;
+  --tv-color-text-secondary: #6b7280;
+  --tv-color-text-muted: #9ca3af;
+
+  --tv-color-background: #f7f8fa;
+  --tv-color-surface: #ffffff;
+  --tv-color-border: #e5e7eb;
+
+  --tv-sidebar-width: 240px;
+  --tv-content-max-width: 1200px;
+
+  --tv-radius-sm: 6px;
+  --tv-radius-md: 10px;
+  --tv-radius-lg: 14px;
+
+  --tv-space-1: 4px;
+  --tv-space-2: 8px;
+  --tv-space-3: 12px;
+  --tv-space-4: 16px;
+  --tv-space-5: 20px;
+  --tv-space-6: 24px;
+  --tv-space-8: 32px;
+  --tv-space-10: 40px;
+
+  --tv-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06),
+                    0 1px 2px rgba(15, 23, 42, 0.04);
+
+  --tv-font-family:
+    Inter,
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--tv-font-family);
+  color: var(--tv-color-text);
+  background: var(--tv-color-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

@@ -1,0 +1,122 @@
+﻿.app-shell {
+  min-height: 100vh;
+  display: flex;
+  background: var(--tv-color-background);
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--tv-sidebar-width);
+  display: flex;
+  flex-direction: column;
+  background: var(--tv-color-surface);
+  border-right: 1px solid var(--tv-color-border);
+  padding: 24px 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 32px;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--tv-color-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--tv-radius-md);
+  color: var(--tv-color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.nav-item:hover {
+  background: var(--tv-color-background);
+  color: var(--tv-color-text);
+}
+
+.nav-item.active {
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+  font-weight: 650;
+}
+
+.nav-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 8px 0;
+  border-top: 1px solid var(--tv-color-border);
+}
+
+.financial-year-label {
+  margin-bottom: 8px;
+  color: var(--tv-color-text-muted);
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.financial-year {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--tv-color-border);
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-surface);
+  color: var(--tv-color-text);
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.financial-year:hover {
+  border-color: #cbd5e1;
+  background: var(--tv-color-background);
+}
+
+.chevron {
+  color: var(--tv-color-text-muted);
+}
+
+.main-content {
+  width: calc(100% - var(--tv-sidebar-width));
+  min-height: 100vh;
+  margin-left: var(--tv-sidebar-width);
+}

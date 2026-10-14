@@ -1,0 +1,100 @@
+﻿<div class="dashboard-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">{{ financialYear }}</div>
+      <h1>Dashboard</h1>
+      <p>See what needs your attention.</p>
+    </div>
+
+    <a routerLink="/documents" class="primary-button">
+      <span>+</span>
+      Upload receipt
+    </a>
+  </header>
+
+  <section class="summary-grid" aria-label="Document summary">
+    <article class="summary-card">
+      <span class="summary-label">Documents</span>
+      <strong class="summary-value">{{ summary.documents }}</strong>
+      <span class="summary-description">Uploaded this financial year</span>
+    </article>
+
+    <article class="summary-card attention">
+      <span class="summary-label">Needs review</span>
+      <strong class="summary-value">{{ summary.needsReview }}</strong>
+      <span class="summary-description">Waiting for you</span>
+    </article>
+
+    <article class="summary-card">
+      <span class="summary-label">Ready</span>
+      <strong class="summary-value">{{ summary.ready }}</strong>
+      <span class="summary-description">Verified documents</span>
+    </article>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <div>
+        <h2>Needs attention</h2>
+        <p>These documents need you to check something.</p>
+      </div>
+
+      <a routerLink="/reviews" class="text-link">
+        View all reviews
+      </a>
+    </div>
+
+    <div class="document-list">
+      @for (document of attentionDocuments; track document.supplier) {
+        <a routerLink="/reviews" class="document-row">
+          <div class="document-main">
+            <div class="document-icon warning">!</div>
+
+            <div>
+              <strong>{{ document.supplier }}</strong>
+              <span>Tax document</span>
+            </div>
+          </div>
+
+          <div class="document-side">
+            <strong>{{ document.amount }}</strong>
+            <span class="status review">Needs review</span>
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <div class="section-heading">
+      <div>
+        <h2>Recent documents</h2>
+        <p>Your latest tax evidence.</p>
+      </div>
+
+      <a routerLink="/documents" class="text-link">
+        View all documents
+      </a>
+    </div>
+
+    <div class="document-list">
+      @for (document of recentDocuments; track document.supplier) {
+        <a routerLink="/documents" class="document-row">
+          <div class="document-main">
+            <div class="document-icon ready">✓</div>
+
+            <div>
+              <strong>{{ document.supplier }}</strong>
+              <span>Tax document</span>
+            </div>
+          </div>
+
+          <div class="document-side">
+            <strong>{{ document.amount }}</strong>
+            <span class="status ready">Ready</span>
+          </div>
+        </a>
+      }
+    </div>
+  </section>
+</div>

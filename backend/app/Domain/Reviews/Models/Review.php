@@ -4,10 +4,12 @@ namespace App\Domain\Reviews\Models;
 
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
+use App\Domain\Evidence\Models\TaxEvidence;
 use App\Domain\Shared\Models\UuidModel;
 use App\Domain\Transactions\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Review extends UuidModel
 {
@@ -62,5 +64,29 @@ class Review extends UuidModel
             self::class,
             'supersedes_review_id'
         );
+    }
+
+    /**
+     * Active authoritative corrections created during review.
+     *
+     * The original DocumentExtraction remains immutable.
+     * Corrections are represented separately as TaxEvidence.
+     */
+    public function corrections(): HasMany
+    {
+        return $this->hasMany(
+            TaxEvidence::class,
+            'extraction_id',
+            'document_extraction_id'
+        )
+            ->where(
+                'evidence_type',
+                'review_correction'
+            )
+            ->where(
+                'status',
+                'active'
+            )
+            ->orderBy('field_path');
     }
 }

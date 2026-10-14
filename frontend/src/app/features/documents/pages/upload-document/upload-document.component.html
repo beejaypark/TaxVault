@@ -1,0 +1,155 @@
+<div class="upload-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">{{ financialYearLabel }}</div>
+      <h1>Upload receipt</h1>
+      <p>Add a receipt or tax document to TaxVault.</p>
+    </div>
+
+    <a routerLink="/documents" class="back-link">
+      ← Back to documents
+    </a>
+  </header>
+
+  <main class="upload-card">
+    <div class="selection-fields">
+      <label>
+        <span>Financial year</span>
+        <select
+          [value]="selectedFinancialYearId"
+          (change)="onFinancialYearChange($event)"
+          [disabled]="isLoadingOptions || financialYears.length === 0 || isUploading"
+        >
+          <option value="">Select financial year</option>
+          @for (year of financialYears; track year.id) {
+            <option [value]="year.id">FY {{ year.year_code }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Document type</span>
+        <select
+          [value]="selectedDocumentTypeId"
+          (change)="onDocumentTypeChange($event)"
+          [disabled]="isLoadingOptions || documentTypes.length === 0 || isUploading"
+        >
+          <option value="">Select document type</option>
+          @for (type of documentTypes; track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    @if (isLoadingOptions) {
+      <p class="file-hint" role="status">Loading upload options…</p>
+    } @else if (financialYears.length === 0 || documentTypes.length === 0) {
+      <div class="error-message" role="status">
+        <span>!</span>
+        @if (financialYears.length === 0) {
+          No active financial year is available for your account.
+        } @else {
+          No active document types are configured yet.
+        }
+        Ask an administrator to configure the required options before uploading.
+      </div>
+    }
+
+    @if (!selectedFile) {
+      <div
+        class="drop-zone"
+        [class.dragging]="isDragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <div class="upload-icon">↑</div>
+        <h2>Upload your receipt</h2>
+        <p class="drop-description">
+          Drag and drop your file here, or choose a file from your computer.
+        </p>
+
+        <label class="browse-button">
+          Choose file
+          <input
+            type="file"
+            [accept]="acceptedExtensions"
+            (change)="onFileSelected($event)"
+          />
+        </label>
+
+        <p class="file-hint">PDF, JPG, PNG, WEBP, or TIFF · Maximum 20 MB</p>
+      </div>
+    } @else {
+      <div class="selected-file">
+        <div class="selected-file-icon">✓</div>
+        <div class="selected-file-details">
+          <strong>{{ selectedFile.name }}</strong>
+          <span>{{ formatFileSize(selectedFile.size) }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="remove-button"
+          [disabled]="isUploading"
+          (click)="removeFile()"
+        >
+          Remove
+        </button>
+      </div>
+
+      <div class="next-step">
+        <div>
+          <h2>Ready to upload</h2>
+          <p>The file will be securely stored. Information extraction is not started by this upload.</p>
+        </div>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="isUploading || isLoadingOptions || !selectedFinancialYearId || !selectedDocumentTypeId"
+          (click)="continue()"
+        >
+          {{ isUploading ? 'Uploading…' : 'Upload document' }}
+        </button>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="error-message" role="alert">
+        <span>!</span>
+        {{ errorMessage }}
+      </div>
+    }
+  </main>
+
+  <section class="help-section">
+    <h2>What happens next?</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div>
+          <strong>Upload</strong>
+          <p>Choose your financial year, document type, and file.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div>
+          <strong>Secure storage</strong>
+          <p>TaxVault stores the original document and its evidence metadata.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div>
+          <strong>Next processing stage</strong>
+          <p>Information extraction and review are handled separately.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

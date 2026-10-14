@@ -1,12 +1,12 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+﻿import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+import { AppShellComponent } from './shared/components/app-shell/app-shell.component';
 
 @Component({
-    selector: 'app-root',
-    imports: [RouterOutlet],
-    templateUrl: './app.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './app.component.scss'
+  selector: 'app-root',
+  imports: [AppShellComponent],
+  template: '<app-shell />',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   title = 'frontend';
