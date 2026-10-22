@@ -1,0 +1,51 @@
+﻿<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <span class="brand-name">TAXVAULT</span>
+    </div>
+
+    <nav class="navigation" aria-label="Main navigation">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+      >
+        <span class="nav-icon">⌂</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        routerLink="/documents"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span class="nav-icon">▣</span>
+        <span>Documents</span>
+      </a>
+
+      <a
+        routerLink="/reviews"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span class="nav-icon">✓</span>
+        <span>Reviews</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="financial-year-label">Financial year</div>
+
+      <button type="button" class="financial-year">
+        <span>FY 2025–26</span>
+        <span class="chevron">⌄</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

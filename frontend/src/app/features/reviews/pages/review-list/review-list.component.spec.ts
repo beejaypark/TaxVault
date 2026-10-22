@@ -476,9 +476,11 @@ describe('ReviewListComponent', () => {
 });
   it('should define review list and detail routes', async () => {
     const { routes } = await import('../../../../app.routes');
+    const shellRoute = routes.find((route) => route.path === '');
+    const childRoutes = shellRoute?.children ?? [];
 
     expect(
-      routes.some(
+      childRoutes.some(
         (route) =>
           route.path === 'reviews' &&
           route.component === ReviewListComponent,
@@ -486,11 +488,7 @@ describe('ReviewListComponent', () => {
     ).toBe(true);
 
     expect(
-      routes.some(
-        (route) =>
-          route.path === 'reviews/:id',
-      ),
+      childRoutes.some((route) => route.path === 'reviews/:id'),
     ).toBe(true);
   });
-
 

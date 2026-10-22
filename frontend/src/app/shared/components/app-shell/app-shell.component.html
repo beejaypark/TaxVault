@@ -6,42 +6,29 @@
     </div>
 
     <nav class="navigation" aria-label="Main navigation">
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="nav-item"
-      >
-        <span class="nav-icon">⌂</span>
-        <span>Dashboard</span>
+      <a routerLink="/dashboard" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <span class="nav-icon">⌂</span><span>Dashboard</span>
       </a>
-
-      <a
-        routerLink="/documents"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <span class="nav-icon">▣</span>
-        <span>Documents</span>
+      <a routerLink="/documents" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">▣</span><span>Documents</span>
       </a>
-
-      <a
-        routerLink="/reviews"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <span class="nav-icon">✓</span>
-        <span>Reviews</span>
+      <a routerLink="/reviews" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">✓</span><span>Reviews</span>
       </a>
     </nav>
 
     <div class="sidebar-bottom">
       <div class="financial-year-label">Financial year</div>
-
       <button type="button" class="financial-year">
-        <span>FY 2025–26</span>
-        <span class="chevron">⌄</span>
+        <span>FY 2025–26</span><span class="chevron">⌄</span>
       </button>
+
+      <div class="signed-in-user">
+        <span class="user-label">Signed in as</span>
+        <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
+        <button type="button" class="logout-button" (click)="logout()">Sign out</button>
+      </div>
     </div>
   </aside>
 
