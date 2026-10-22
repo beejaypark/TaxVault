@@ -27,3 +27,6 @@ Thumbs.db
 
 # Docker
 *.pid
+
+# Local authentication repair backups
+.auth-002-backup/
