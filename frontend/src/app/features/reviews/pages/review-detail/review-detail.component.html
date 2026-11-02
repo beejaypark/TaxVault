@@ -1,326 +1,316 @@
-﻿@if (review) {
-  <section>
-    <h1>Review</h1>
-
-    <section aria-label="Review summary">
-      <h2>Review Summary</h2>
-
-      <p>Status: {{ review.status }}</p>
-      <p>Type: {{ review.type }}</p>
-
-      @if (review.target.documentId) {
-        <p>
-          Document ID:
-          {{ review.target.documentId }}
-        </p>
-      }
-
-      @if (review.target.documentExtractionId) {
-        <p>
-          Extraction ID:
-          {{ review.target.documentExtractionId }}
-        </p>
-      }
-
-      @if (review.decision) {
-        <p>
-          Decision:
-          {{ review.decision }}
-        </p>
-      }
-
-      @if (review.notes) {
-        <p>
-          Reviewer notes:
-          {{ review.notes }}
-        </p>
-      }
+@if (isLoading) {
+  <main class="review-detail-page">
+    <div class="detail-state" role="status">
+      <span class="state-spinner" aria-hidden="true"></span>
+      Loading review...
+    </div>
+  </main>
+} @else if (loadError) {
+  <main class="review-detail-page">
+    <a class="back-link" routerLink="/reviews"><tv-icon name="arrowLeft" /> Back to reviews</a>
+    <section class="detail-state error-state" role="alert">
+      <h1>Review unavailable</h1>
+      <p>{{ loadError }}</p>
+      <button type="button" class="primary-button" (click)="retryLoad()">Try again</button>
     </section>
+  </main>
+} @else if (review) {
+  <main class="review-detail-page">
+    <a class="back-link" routerLink="/reviews"><tv-icon name="arrowLeft" /> Back to reviews</a>
 
-    @if (review.document) {
-      <section aria-label="Source document">
-        <h2>Source Document</h2>
+    <header class="detail-header">
+      <div>
+        <p class="eyebrow">Review queue</p>
+        <div class="title-row">
+          <h1>{{ typeLabel(review.type) }}</h1>
+          <span class="status-badge" [class]="'status-' + review.status.replace('_', '-')">
+            <span class="status-dot" aria-hidden="true"></span>
+            {{ statusLabel(review.status) }}
+          </span>
+        </div>
+        <p class="detail-subtitle">Review the source and extracted information before making a decision.</p>
+        <p class="refresh-indicator">Review status updates automatically every 5 seconds.</p>
+      </div>
+      @if (review.status === 'pending') {
+        <span class="attention-label"><tv-icon name="warning" /> Action required</span>
+      }
+    </header>
 
-        <p>
-          Filename:
-          {{ review.document.originalFilename }}
-        </p>
-
-        @if (review.document.mimeType) {
-          <p>
-            MIME type:
-            {{ review.document.mimeType }}
-          </p>
+    @if (decisionSuccess) {
+      <div class="inline-notice success-notice" role="status">
+        Review decision submitted successfully.
+        @if (review.target.transactionId) {
+          The transaction has been added to Income &amp; expenses.
         }
-
-        @if (review.document.sizeBytes !== null) {
-          <p>
-            Size:
-            {{ review.document.sizeBytes }}
-            bytes
-          </p>
-        }
-
-        @if (review.document.uploadedAt) {
-          <p>
-            Uploaded:
-            {{ review.document.uploadedAt }}
-          </p>
-        }
-      </section>
+      </div>
+    }
+    @if (decisionError) {
+      <div class="inline-notice error-notice" role="alert">{{ decisionError }}</div>
+    }
+    @if (correctionError) {
+      <div class="inline-notice error-notice" role="alert">{{ correctionError }}</div>
+    }
+    @if (refreshError) {
+      <div class="inline-notice error-notice" role="status">{{ refreshError }}</div>
     }
 
-    @if (review.extraction) {
-      <section aria-label="Document extraction">
-        <h2>Document Extraction</h2>
+    <div class="detail-layout">
+      <div class="detail-main-column">
+        <section class="detail-card source-card" aria-label="Source document">
+          <div class="section-title-row">
+            <div class="section-icon document-icon"><tv-icon name="document" /></div>
+            <div>
+              <p class="eyebrow">Evidence</p>
+              <h2>Source document</h2>
+            </div>
+          </div>
+          @if (review.document) {
+            <div class="source-document">
+              <div class="file-icon" aria-hidden="true">PDF</div>
+              <div class="source-file-copy">
+                <strong>{{ review.document.originalFilename }}</strong>
+                <span>
+                  @if (review.document.mimeType) { {{ review.document.mimeType }} }
+                  @if (review.document.sizeBytes !== null) {
+                    @if (review.document.mimeType) { · }
+                    {{ review.document.sizeBytes | number }} bytes
+                  }
+                </span>
+                <a [href]="'/api/documents/' + review.document.id + '/content'" target="_blank" rel="noopener">
+                  Download original document
+                </a>
+              </div>
+            </div>
+            <div class="source-facts">
+              <div>
+                <span>Uploaded</span>
+                <strong>{{ formatDate(review.document.uploadedAt) }}</strong>
+              </div>
+              <div>
+                <span>Document reference</span>
+                <strong class="reference-value">{{ review.target.documentId || 'Not available' }}</strong>
+              </div>
+            </div>
+          } @else {
+            <div class="source-document">
+              <div class="file-icon missing-file"><tv-icon name="warning" /></div>
+              <div class="source-file-copy">
+                <strong>Source document details unavailable</strong>
+                <span>Document reference: {{ review.target.documentId || 'Not available' }}</span>
+              </div>
+            </div>
+          }
+        </section>
 
-        <p>
-          Provider:
-          {{ review.extraction.provider }}
-        </p>
+        @if (review.extraction) {
+          <section class="detail-card extraction-card" aria-label="Document extraction">
+            <div class="section-title-row extraction-heading">
+              <div class="section-icon extraction-icon"><tv-icon name="extraction" /></div>
+              <div>
+                <p class="eyebrow">Extracted data</p>
+                <h2>Document Extraction</h2>
+              </div>
+              <span class="extraction-status">{{ review.extraction.status }}</span>
+            </div>
+            <div class="extraction-provenance">
+              <span>Provider: <strong>{{ review.extraction.provider }}</strong></span>
+              @if (review.extraction.model) {
+                <span>Model: <strong>{{ review.extraction.model }}</strong></span>
+              }
+              <span>Version: <strong>{{ review.extraction.extractionVersion }}</strong></span>
+            </div>
 
-        @if (review.extraction.model) {
-          <p>
-            Model:
-            {{ review.extraction.model }}
-          </p>
-        }
-
-        @if (review.extraction.modelVersion) {
-          <p>
-            Model version:
-            {{ review.extraction.modelVersion }}
-          </p>
-        }
-
-        <p>
-          Extraction version:
-          {{ review.extraction.extractionVersion }}
-        </p>
-
-        @if (review.extraction.schemaVersion) {
-          <p>
-            Schema version:
-            {{ review.extraction.schemaVersion }}
-          </p>
-        }
-
-        <p>
-          Extraction status:
-          {{ review.extraction.status }}
-        </p>
-
-        @if (
-          (Object.keys(review.extraction.fields)).length > 0
-        ) {
-          <section aria-label="Extracted fields">
-            <h3>Extracted Fields</h3>
-
-            @for (
-              field of Object.entries(
-                review.extraction.fields
-              );
-              track field[0]
-            ) {
-              <article>
-                <h4>
-                  {{ field[0] }}
-                </h4>
-
-                <p>
-                  Original OCR value:
-                  {{ field[1].value }}
-                </p>
-
-                <p>
-                  Original OCR confidence:
-                  {{ field[1].confidence }}%
-                </p>
-
-                <p>
-                  Original OCR source:
-                  {{ field[1].source }}
-                </p>
-
-                @if (getCorrectionEvidence(field[0]); as correction) {
-                  <section
-                    aria-label="Authoritative correction"
-                  >
-                    <h5>Authoritative Correction</h5>
-
-                    <p>
-                      Corrected value:
-                      {{ correction.extractedValue.value }}
-                    </p>
-
-                    <p>
-                      Source:
-                      {{ correction.extractedValue.source }}
-                    </p>
-
-                    <p>
-                      Verification status:
-                      {{ correction.verificationStatus }}
-                    </p>
-
-                    <p>
-                      Confidence:
-                      {{ correction.confidence }}%
-                    </p>
-
-                    <p>
-                      Status:
-                      {{ correction.status }}
-                    </p>
-
-                    @if (correction.verifiedAt) {
-                      <p>
-                        Verified:
-                        {{ correction.verifiedAt }}
-                      </p>
+            @if ((Object.keys(review.extraction.fields)).length > 0) {
+              <section class="extracted-fields" aria-label="Extracted fields">
+                <h3 class="fields-heading">Extracted Fields</h3>
+                @for (field of Object.entries(review.extraction.fields); track field[0]) {
+                  <article class="field-card">
+                    <div class="field-heading">
+                      <div>
+                        <h3>{{ field[0] }}</h3>
+                        @if (field[0] === 'document_text') {
+                          <pre class="document-text">{{ field[1].value }}</pre>
+                        } @else {
+                          <p>Original OCR value: <strong>{{ field[1].value }}</strong></p>
+                        }
+                      </div>
+                      @if (field[0] !== 'document_text') {
+                        <span class="confidence-badge" [class]="confidenceClass(field[1].confidence)">
+                          {{ field[1].confidence }}% confidence
+                        </span>
+                      }
+                    </div>
+                    @if (field[0] !== 'document_text') {
+                      <div class="confidence-track" aria-hidden="true">
+                        <span [style.width.%]="field[1].confidence" [class]="confidenceClass(field[1].confidence)"></span>
+                      </div>
+                      <p class="field-source">Original OCR source: {{ field[1].source }}</p>
                     }
-                  </section>
-                }
 
-                @if (review.status === 'pending') {
-                  <section
-                    aria-label="Field correction"
-                  >
-                    <h5>Correction</h5>
-
-                    <label
-                      [attr.for]="
-                        'correction-' + field[0]
-                      "
-                    >
-                      Corrected value
-                    </label>
-
-                    <input
-                      type="text"
-                      [id]="
-                        'correction-' + field[0]
-                      "
-                      [value]="
-                        correctionValues[field[0]]
-                      "
-                      [disabled]="
-                        correctionSubmittingField !== null
-                      "
-                      (input)="
-                        setCorrectionValue(
-                          field[0],
-                          $any($event.target).value
-                        )
-                      "
-                    />
-
-                    <button
-                      type="button"
-                      [disabled]="
-                        correctionSubmittingField !== null
-                      "
-                      (click)="
-                        submitCorrection(field[0])
-                      "
-                    >
-                      {{
-                        isCorrectionSubmitting(
-                          field[0]
-                        )
-                          ? 'Saving...'
-                          : 'Save Correction'
-                      }}
-                    </button>
-
-                    @if (
-                      correctionSuccessField ===
-                      field[0]
-                    ) {
-                      <p role="status">
-                        Correction submitted
-                        successfully.
-                      </p>
+                    @if (getCorrectionEvidence(field[0]); as correction) {
+                      <section class="correction-evidence" aria-label="Authoritative correction">
+                        <div class="correction-heading">
+                          <span class="correction-check"><tv-icon name="check" /></span>
+                          <h4>Authoritative Correction</h4>
+                        </div>
+                        <dl>
+                          <div><dt>Corrected value</dt><dd>{{ correction.extractedValue.value }}</dd></div>
+                          <div><dt>Source</dt><dd>{{ correction.extractedValue.source }}</dd></div>
+                          <div><dt>Verification status</dt><dd>{{ correction.verificationStatus }}</dd></div>
+                          <div><dt>Confidence</dt><dd>{{ correction.confidence }}%</dd></div>
+                          <div><dt>Status</dt><dd>{{ correction.status }}</dd></div>
+                          @if (correction.verifiedAt) {
+                            <div><dt>Verified</dt><dd>{{ formatDate(correction.verifiedAt) }}</dd></div>
+                          }
+                        </dl>
+                      </section>
                     }
-                  </section>
+
+                    @if (review.status === 'pending' && field[0] !== 'document_text') {
+                      <section class="correction-editor" aria-label="Field correction">
+                        <h4>Correct this value</h4>
+                        <label [attr.for]="'correction-' + field[0]">Corrected value</label>
+                        <div class="correction-input-row">
+                          <input
+                            type="text"
+                            [id]="'correction-' + field[0]"
+                            [value]="correctionValues[field[0]]"
+                            [disabled]="correctionSubmittingField !== null"
+                            (input)="setCorrectionValue(field[0], $any($event.target).value)"
+                          />
+                          <button
+                            type="button"
+                            class="secondary-button"
+                            [disabled]="correctionSubmittingField !== null"
+                            (click)="submitCorrection(field[0])"
+                          >
+                            {{ isCorrectionSubmitting(field[0]) ? 'Saving...' : 'Save Correction' }}
+                          </button>
+                        </div>
+                        @if (correctionSuccessField === field[0]) {
+                          <p class="field-success" role="status">Correction submitted successfully.</p>
+                        }
+                      </section>
+                    }
+                  </article>
                 }
-              </article>
+              </section>
+            } @else {
+              <p class="no-fields">No extracted fields are available for this review.</p>
             }
           </section>
         }
-      </section>
-    }
 
-    @if (review.status === 'pending') {
-      <section aria-label="Review decision">
-        <h2>Decision</h2>
+        @if (review.notes) {
+          <section class="detail-card notes-card" aria-label="Reviewer notes">
+            <p class="eyebrow">Review history</p>
+            <h2>Reviewer notes</h2>
+            <p>{{ review.notes }}</p>
+          </section>
+        }
+      </div>
 
-        <label for="review-notes">
-          Reviewer notes
-        </label>
+      <aside class="detail-side-column">
+        <section class="detail-card summary-card" aria-label="Review summary">
+          <p class="eyebrow">Review details</p>
+          <h2>Summary</h2>
+          <dl class="summary-list">
+            <div><dt>Status</dt><dd>{{ statusLabel(review.status) }}</dd></div>
+            <div><dt>Type</dt><dd>{{ typeLabel(review.type) }}</dd></div>
+            <div><dt>Created</dt><dd>{{ formatDate(review.createdAt) }}</dd></div>
+            @if (review.completedAt) {
+              <div><dt>Completed</dt><dd>{{ formatDate(review.completedAt) }}</dd></div>
+            }
+            @if (review.decision) {
+              <div><dt>Decision</dt><dd>{{ review.decision }}</dd></div>
+            }
+            @if (review.target.documentExtractionId) {
+              <div><dt>Extraction ID</dt><dd class="reference-value">{{ review.target.documentExtractionId }}</dd></div>
+            }
+          </dl>
+        </section>
 
-        <textarea
-          id="review-notes"
-          #reviewNotes
-          rows="5"
-          [disabled]="isSubmitting"
-        ></textarea>
-
-        <div>
-          <button
-            type="button"
-            [disabled]="isSubmitting"
-            (click)="
-              submitDecision(
-                'approved',
-                reviewNotes.value
-              )
-            "
-          >
-            {{
-              isSubmitting
-                ? 'Submitting...'
-                : 'Approve'
-            }}
-          </button>
-
-          <button
-            type="button"
-            [disabled]="isSubmitting"
-            (click)="
-              submitDecision(
-                'rejected',
-                reviewNotes.value
-              )
-            "
-          >
-            {{
-              isSubmitting
-                ? 'Submitting...'
-                : 'Reject'
-            }}
-          </button>
-        </div>
-      </section>
-    }
-
-    @if (correctionError) {
-      <p role="alert">
-        {{ correctionError }}
-      </p>
-    }
-
-    @if (decisionSuccess) {
-      <p role="status">
-        Review decision submitted successfully.
-      </p>
-    }
-
-    @if (decisionError) {
-      <p role="alert">
-        {{ decisionError }}
-      </p>
-    }
-  </section>
+        @if (review.status === 'pending') {
+          <section class="detail-card decision-card" aria-label="Review decision">
+            <div class="decision-heading">
+              <div>
+                <p class="eyebrow">Your decision</p>
+                <h2>Complete review</h2>
+              </div>
+              <span class="decision-icon"><tv-icon name="check" /></span>
+            </div>
+            <p class="decision-description">Confirm the extracted information or reject it if it needs further attention.</p>
+            @if (isBrisbaneCityCouncilDocument) {
+              <p class="expense-review-guidance">
+                Council rates detected. Check the billed period, property and rental-use dates, and amount against the original before recording an expense.
+              </p>
+            }
+            @if (review.document) {
+              <label class="expense-toggle">
+                <input type="checkbox" [(ngModel)]="recordExpense" [ngModelOptions]="{ standalone: true }"
+                  [disabled]="isSubmitting" />
+                Also save a transaction in Income &amp; expenses
+              </label>
+            }
+            @if (recordExpense) {
+              <label for="expense-date">Transaction date</label>
+              <input id="expense-date" type="date" [(ngModel)]="expenseDraft.transaction_date"
+                [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting" />
+              <label for="expense-direction">Record as</label>
+              <select id="expense-direction" [(ngModel)]="expenseDraft.direction"
+                [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+              <label for="expense-amount">Amount (AUD)</label>
+              <input id="expense-amount" type="number" min="0.01" step="0.01"
+                [(ngModel)]="expenseDraft.amount" [ngModelOptions]="{ standalone: true }"
+                [disabled]="isSubmitting" />
+              <label for="expense-description">Description</label>
+              <input id="expense-description" type="text" maxlength="1000"
+                [(ngModel)]="expenseDraft.description" [ngModelOptions]="{ standalone: true }"
+                [disabled]="isSubmitting" />
+              <p class="decision-description">
+                The date determines the financial year. This saves an uncategorised transaction linked to the source document; review its tax treatment separately.
+              </p>
+            }
+            <label for="review-notes">Reviewer notes <span>(optional)</span></label>
+            <textarea
+              id="review-notes"
+              #reviewNotes
+              rows="4"
+              placeholder="Add context for this decision..."
+              [disabled]="isSubmitting"
+            ></textarea>
+            <div class="decision-actions">
+              <button
+                type="button"
+                class="approve-button"
+                [disabled]="isSubmitting"
+                (click)="submitDecision('approved', reviewNotes.value)"
+              >
+                {{ isSubmitting ? 'Submitting...' : 'Approve' }}
+              </button>
+              <button
+                type="button"
+                class="reject-button"
+                [disabled]="isSubmitting"
+                (click)="submitDecision('rejected', reviewNotes.value)"
+              >
+                {{ isSubmitting ? 'Submitting...' : 'Reject' }}
+              </button>
+            </div>
+          </section>
+        } @else {
+          <section class="detail-card read-only-card">
+            <span class="read-only-icon"><tv-icon name="check" /></span>
+            <h2>This review is {{ review.status === 'completed' ? 'complete' : statusLabel(review.status).toLowerCase() }}</h2>
+            @if (review.decision) {
+              <p>Decision recorded: <strong>{{ review.decision }}</strong></p>
+            }
+          </section>
+        }
+      </aside>
+    </div>
+  </main>
 }
-

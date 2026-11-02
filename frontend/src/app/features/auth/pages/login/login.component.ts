@@ -19,6 +19,9 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
         <h1 id="login-title">Welcome back</h1>
         <p class="intro">Sign in to access your tax documents and reviews.</p>
 
+        <a class="oidc-button" [href]="keycloakLoginUrl">Continue with Keycloak</a>
+        <div class="separator" aria-hidden="true"><span>or use development login</span></div>
+
         <div class="notice" role="status">
           Development login is controlled by the backend environment.
           If sign-in is unavailable, contact your administrator.
@@ -84,6 +87,19 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
     .brand-name { font-size: 15px; font-weight: 750; letter-spacing: .05em; }
     h1 { margin: 0 0 8px; font-size: 27px; }
     .intro { margin: 0 0 24px; color: #64748b; line-height: 1.5; }
+    .oidc-button {
+      min-height: 46px; display: grid; place-items: center; border-radius: 8px;
+      background: var(--tv-color-primary, #4f46e5); color: white;
+      font-weight: 650; text-decoration: none;
+    }
+    .oidc-button:hover { filter: brightness(.95); }
+    .separator {
+      display: flex; align-items: center; gap: 12px; margin: 20px 0;
+      color: #64748b; font-size: 12px;
+    }
+    .separator::before, .separator::after {
+      content: ''; height: 1px; flex: 1; background: #e2e8f0;
+    }
     .notice {
       margin-bottom: 20px; padding: 12px; border-radius: 8px;
       background: #f1f5f9; color: #475569; font-size: 12px; line-height: 1.5;
@@ -111,6 +127,10 @@ export class LoginComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
+  get keycloakLoginUrl(): string {
+    return this.auth.oidcLoginUrl(this.getReturnUrl());
+  }
+
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router,
@@ -118,10 +138,22 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.auth.initialize().subscribe((user) => {
-      if (user) {
-        void this.router.navigateByUrl(this.getReturnUrl());
-      }
+    const authError = this.route.snapshot.queryParamMap.get('authError');
+    this.errorMessage = authError
+      ? authError === 'inactive'
+        ? 'This account is inactive. Contact your administrator.'
+        : 'Keycloak sign-in was not completed. Please try again.'
+      : '';
+
+    this.auth.initialize().subscribe({
+      next: (user) => {
+        if (user) {
+          void this.router.navigateByUrl(this.getReturnUrl());
+        }
+      },
+      error: () => {
+        this.errorMessage = 'Unable to check your sign-in status. Please try again.';
+      },
     });
   }
 

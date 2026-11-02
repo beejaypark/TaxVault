@@ -18,7 +18,7 @@ class StoreDocumentRequest extends FormRequest
 
         return [
             'financial_year_id' => [
-                'required',
+                'nullable',
                 'uuid',
                 Rule::exists('financial_years', 'id')
                     ->where('user_id', $userId)

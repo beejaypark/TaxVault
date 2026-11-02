@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'keycloak' => [
+        'base_url' => env('KEYCLOAK_URL', 'http://keycloak:8080/auth'),
+        'public_url' => env('KEYCLOAK_PUBLIC_URL', 'http://localhost:8080/auth'),
+        'realms' => env('KEYCLOAK_REALM', 'taxvault'),
+        'client_id' => env('KEYCLOAK_CLIENT_ID', 'taxvault-web'),
+        'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
+        'redirect' => env(
+            'KEYCLOAK_REDIRECT_URI',
+            'http://localhost:8080/api/auth/oidc/callback',
+        ),
+    ],
+
 ];

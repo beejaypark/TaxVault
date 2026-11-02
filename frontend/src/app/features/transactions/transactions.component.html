@@ -1,0 +1,95 @@
+<div class="transactions-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Tax workspace</div>
+      <h1>Income & expenses</h1>
+      <p>{{ financialYearLabel }} · Record and review the transactions that support your tax position.</p>
+      <p class="refresh-indicator">Records update automatically every 5 seconds.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="showForm = !showForm">
+      @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
+    </button>
+  </header>
+
+  @if (errorMessage) { <p class="notice error" role="alert">{{ errorMessage }}</p> }
+  @if (successMessage) { <p class="notice success" role="status">{{ successMessage }}</p> }
+
+  @if (showForm) {
+    <form class="transaction-form" (ngSubmit)="saveTransaction()">
+      <div class="form-heading">
+        <div><h2>Transaction details</h2><p>Records are assigned to a financial year using the transaction date.</p></div>
+      </div>
+      <div class="form-grid">
+        <label>Description <input name="description" [(ngModel)]="form.description" maxlength="1000" required placeholder="e.g. Interest from savings account" /></label>
+        <label>Type
+          <select name="direction" [(ngModel)]="form.direction">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </label>
+        <label>Date <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
+        <label>Amount (AUD) <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="secondary-button" (click)="showForm = false">Cancel</button>
+        <button type="submit" class="primary-button" [disabled]="isSaving || !form.transaction_date || !form.description.trim() || form.amount <= 0">
+          {{ isSaving ? 'Saving…' : 'Save transaction' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <section class="summary-grid" aria-label="Income and expenses summary">
+    <article class="summary-card"><span>Income</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
+    <article class="summary-card"><span>Expenses</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
+    <article class="summary-card"><span>Net records</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
+  </section>
+
+  <section class="records-card">
+    <div class="toolbar">
+      <div>
+        <h2>Transactions</h2>
+        <p>{{ filteredTransactions.length }} records</p>
+      </div>
+      <div class="filters">
+        <label class="sr-only" for="direction-filter">Transaction type</label>
+        <select id="direction-filter" [(ngModel)]="selectedDirection" name="directionFilter">
+          <option value="all">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expenses</option>
+        </select>
+        <label class="sr-only" for="transaction-search">Search transactions</label>
+        <input id="transaction-search" name="search" [(ngModel)]="searchText" placeholder="Search descriptions" />
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <p class="empty-state" role="status">Loading transactions...</p>
+    } @else if (filteredTransactions.length === 0) {
+      <div class="empty-state">
+        <h3>No transactions found</h3>
+        <p>Add income and expenses manually. Bank imports and receipt matching are planned follow-up features.</p>
+        <button class="secondary-button" type="button" (click)="showForm = true">Add a transaction</button>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th></tr></thead>
+          <tbody>
+            @for (transaction of filteredTransactions; track transaction.id) {
+              <tr>
+                <td><strong>{{ transaction.description }}</strong></td>
+                <td>{{ formatDate(transaction.transaction_date) }}</td>
+                <td><span class="type-badge" [class.income]="transaction.direction === 'income'">{{ transaction.direction }}</span></td>
+                <td>{{ financialYearFor(transaction.financial_year_id) }}</td>
+                <td class="amount" [class.income-amount]="transaction.direction === 'income'">
+                  {{ transaction.direction === 'income' ? '+' : '−' }}{{ formatCurrency(transaction.amount) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

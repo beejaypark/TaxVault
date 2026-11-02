@@ -7,7 +7,7 @@ use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
 use App\Domain\Documents\Models\DocumentType;
 use App\Domain\FinancialYears\Models\FinancialYear;
-use App\Jobs\OcrTestJob;
+use App\Jobs\ProcessUploadedDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -67,7 +67,7 @@ class OcrTestJobTest extends TestCase
     {
         $document = $this->createDocument();
 
-        $job = new OcrTestJob(
+        $job = new ProcessUploadedDocument(
             documentId: $document->getKey(),
         );
 
@@ -100,15 +100,31 @@ class OcrTestJobTest extends TestCase
 
         Queue::fake();
 
-        OcrTestJob::dispatch(
+        ProcessUploadedDocument::dispatch(
             $document->getKey(),
         );
 
         Queue::assertPushed(
-            OcrTestJob::class,
-            function (OcrTestJob $job) use ($document): bool {
+            ProcessUploadedDocument::class,
+            function (ProcessUploadedDocument $job) use ($document): bool {
                 return $job->documentId === $document->getKey();
             },
+        );
+    }
+
+    public function test_final_job_failure_persists_the_processing_error(): void
+    {
+        $document = $this->createDocument();
+        $job = new ProcessUploadedDocument($document->getKey());
+
+        $job->failed(new \RuntimeException('PDF text extraction failed.'));
+
+        $this->assertSame('processing_failed', $document->fresh()->status);
+        $extraction = DocumentExtraction::query()->sole();
+        $this->assertSame('failed', $extraction->status);
+        $this->assertSame(
+            'PDF text extraction failed.',
+            $extraction->error_metadata['message'],
         );
     }
 }

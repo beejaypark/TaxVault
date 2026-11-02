@@ -1,6 +1,17 @@
 ﻿import { Injectable, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 
 export interface AuthUser {
   id: string;
@@ -11,6 +22,10 @@ export interface AuthUser {
 
 interface ApiResponse<T> {
   data: T;
+}
+
+interface LogoutResponse {
+  logout_url: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,7 +53,9 @@ export class AuthService {
         })
         .pipe(
           map((response) => response.data),
-          catchError(() => of(null)),
+          catchError((error: HttpErrorResponse) =>
+            error.status === 401 ? of(null) : throwError(() => error),
+          ),
           tap((user) => this.user.set(user)),
           finalize(() => {
             this.initialized = true;
@@ -72,12 +89,22 @@ export class AuthService {
       );
   }
 
-  logout(): Observable<void> {
+  oidcLoginUrl(returnUrl: string): string {
+    const backendOrigin =
+      window.location.port === '4200' ? 'http://localhost:8080' : '';
+
+    return `${backendOrigin}/api/auth/oidc/redirect?returnUrl=${encodeURIComponent(returnUrl)}`;
+  }
+
+  logout(): Observable<string | null> {
     return this.http
-      .post('/api/auth/logout', {}, { withCredentials: true })
+      .post<ApiResponse<LogoutResponse>>(
+        '/api/auth/logout',
+        {},
+        { withCredentials: true },
+      )
       .pipe(
-        map(() => undefined),
-        catchError(() => of(undefined)),
+        map((response) => response.data.logout_url),
         tap(() => {
           this.user.set(null);
           this.initialized = true;

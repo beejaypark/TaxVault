@@ -1,0 +1,141 @@
+<div class="workspace-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Tax workspace</div>
+      <h1>Assets</h1>
+      <p>Asset records are maintained across years. The financial-year selector filters documents, transactions, and reviews, not these property and investment details.</p>
+    </div>
+    @if (activeTab === 'properties') {
+      <button class="primary-button" type="button" (click)="showPropertyForm = !showPropertyForm">
+        @if (showPropertyForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add property }
+      </button>
+    } @else {
+      <button class="primary-button" type="button" (click)="showInvestmentForm = !showInvestmentForm">
+        @if (showInvestmentForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add investment }
+      </button>
+    }
+  </header>
+
+  <nav class="tabs" aria-label="Asset sections">
+    <a routerLink="/properties" [class.active]="activeTab === 'properties'">Properties <span>{{ properties.length }}</span></a>
+    <a routerLink="/investments" [class.active]="activeTab === 'investments'">Investments <span>{{ investments.length }}</span></a>
+  </nav>
+
+  @if (errorMessage) {
+    <p class="notice error" role="alert">{{ errorMessage }}</p>
+  }
+  @if (successMessage) {
+    <p class="notice success" role="status">{{ successMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <div class="content-card loading" role="status">Loading asset records...</div>
+  } @else if (activeTab === 'properties') {
+    @if (showPropertyForm) {
+      <form class="content-card editor" (ngSubmit)="saveProperty()">
+        <div class="card-heading">
+          <div><h2>Property details</h2><p>Add an Australian property to your records.</p></div>
+        </div>
+        <div class="form-grid">
+          <label>Reference name <input name="referenceCode" [(ngModel)]="propertyForm.reference_code" maxlength="100" placeholder="e.g. Investment property" /></label>
+          <label class="wide">Address <input name="address" [(ngModel)]="propertyForm.address_line_1" maxlength="255" required /></label>
+          <label>Suburb <input name="suburb" [(ngModel)]="propertyForm.suburb" maxlength="100" /></label>
+          <label>State or territory
+            <select name="state" [(ngModel)]="propertyForm.state">
+              <option value="">Select</option>
+              @for (state of states; track state) { <option [value]="state">{{ state }}</option> }
+            </select>
+          </label>
+          <label>Postcode <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="showPropertyForm = false">Cancel</button>
+          <button type="submit" class="primary-button" [disabled]="isSaving || !propertyForm.address_line_1.trim()">
+            {{ isSaving ? 'Saving…' : 'Save property' }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (properties.length === 0 && !showPropertyForm) {
+      <div class="content-card empty-state">
+        <span class="empty-icon"><tv-icon name="property" /></span>
+        <h2>No properties added</h2>
+        <p>Record property details to keep rental and ownership evidence together.</p>
+        <button type="button" class="secondary-button" (click)="showPropertyForm = true">Add your first property</button>
+      </div>
+    } @else {
+      <section class="record-grid" aria-label="Properties">
+        @for (property of properties; track property.id) {
+          <article class="record-card">
+            <div class="record-icon"><tv-icon name="property" /></div>
+            <div class="record-title">
+              <h2>{{ property.reference_code || property.address_line_1 || 'Property' }}</h2>
+              <p>{{ propertyAddress(property) || 'Address details not provided' }}</p>
+            </div>
+            <span class="record-meta">{{ property.country_code }}</span>
+          </article>
+        }
+      </section>
+    }
+  } @else {
+    @if (showInvestmentForm) {
+      <form class="content-card editor" (ngSubmit)="saveInvestment()">
+        <div class="card-heading">
+          <div><h2>Investment details</h2><p>Record an acquisition or investment position.</p></div>
+        </div>
+        <div class="form-grid">
+          <label>Investment type
+            <select name="investmentType" [(ngModel)]="investmentForm.investment_type">
+              @for (type of investmentTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
+            </select>
+          </label>
+          <label>Acquisition date <input name="acquisitionDate" type="date" [(ngModel)]="investmentForm.acquisition_date" required /></label>
+          <label>Related property
+            <select name="propertyId" [(ngModel)]="investmentForm.property_id">
+              <option value="">None</option>
+              @for (property of properties; track property.id) { <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option> }
+            </select>
+          </label>
+          <label>Cost base (AUD) <input name="costBase" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.cost_base" /></label>
+          <label>Incidental costs (AUD) <input name="incidentalCosts" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.incidental_costs" /></label>
+          <label>Units / quantity <input name="quantity" type="number" min="0" step="any" [(ngModel)]="investmentForm.quantity" /></label>
+          <label>Ownership (%) <input name="ownership" type="number" min="0" max="100" step="0.01" [(ngModel)]="investmentForm.ownership_percentage" /></label>
+          <label>Sale proceeds (AUD) <input name="proceeds" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.proceeds" /></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="showInvestmentForm = false">Cancel</button>
+          <button type="submit" class="primary-button" [disabled]="isSaving || !investmentForm.acquisition_date">
+            {{ isSaving ? 'Saving…' : 'Save investment' }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (investments.length === 0 && !showInvestmentForm) {
+      <div class="content-card empty-state">
+        <span class="empty-icon"><tv-icon name="investment" /></span>
+        <h2>No investments recorded</h2>
+        <p>Add shares, funds, or other investments to organise acquisition and disposal details.</p>
+        <button type="button" class="secondary-button" (click)="showInvestmentForm = true">Add your first investment</button>
+      </div>
+    } @else {
+      <section class="record-list" aria-label="Investments">
+        @for (investment of investments; track investment.id) {
+          <article class="investment-row">
+            <div class="record-icon"><tv-icon name="investment" /></div>
+            <div class="record-title">
+              <h2>{{ investment.investment_type.replace('_', ' ') }}</h2>
+              <p>Acquired {{ formatDate(investment.acquisition_date) }}</p>
+            </div>
+            <div class="investment-value">
+              <strong>{{ formatCurrency(investment.cost_base) }}</strong>
+              <span>Cost base</span>
+            </div>
+            <span class="record-meta">{{ investment.disposal_date ? 'Disposed' : 'Held' }}</span>
+          </article>
+        }
+      </section>
+    }
+  }
+</div>

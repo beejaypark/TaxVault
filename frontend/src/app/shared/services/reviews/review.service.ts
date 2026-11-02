@@ -10,6 +10,7 @@ import {
 export interface ReviewListQuery {
   status?: ReviewStatus;
   type?: ReviewType;
+  financialYearId?: string;
   page?: number;
   perPage?: number;
 }
@@ -24,6 +25,12 @@ export interface ReviewListResponse {
 export interface ReviewDecisionRequest {
   decision: ReviewDecision;
   notes?: string;
+  expense?: {
+    transaction_date: string;
+    direction: 'income' | 'expense';
+    amount: number;
+    description: string;
+  };
 }
 
 export interface ReviewCorrectionRequest {

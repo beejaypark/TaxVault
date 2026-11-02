@@ -7,7 +7,7 @@ use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
 use App\Domain\Documents\Models\DocumentType;
 use App\Domain\FinancialYears\Models\FinancialYear;
-use App\Jobs\OcrTestJob;
+use App\Jobs\ProcessUploadedDocument;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -61,7 +61,7 @@ class OcrTestJobTest extends TestCase
             'status' => 'active',
         ]);
 
-        $job = new OcrTestJob(
+        $job = new ProcessUploadedDocument(
             documentId: $document->getKey(),
         );
 
@@ -85,7 +85,7 @@ class OcrTestJobTest extends TestCase
 
     public function test_job_uses_document_id_as_payload(): void
     {
-        $job = new OcrTestJob(
+        $job = new ProcessUploadedDocument(
             documentId: '00000000-0000-0000-0000-000000000001',
         );
 

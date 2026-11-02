@@ -145,7 +145,7 @@ class ProcessDocumentOcrConfidenceTest extends TestCase
         );
     }
 
-    public function test_high_confidence_completed_extraction_does_not_create_review(): void
+    public function test_high_confidence_completed_extraction_creates_classification_review(): void
     {
         Storage::fake('documents');
 
@@ -246,9 +246,10 @@ class ProcessDocumentOcrConfidenceTest extends TestCase
             $extraction->quality_metadata['review_required']
         );
 
-        $this->assertDatabaseMissing('reviews', [
+        $this->assertDatabaseHas('reviews', [
             'document_extraction_id' => $extraction->getKey(),
-            'review_type' => 'confidence',
+            'review_type' => 'classification',
+            'status' => 'pending',
         ]);
     }
 }

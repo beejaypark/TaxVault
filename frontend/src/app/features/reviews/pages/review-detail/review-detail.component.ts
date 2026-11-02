@@ -1,10 +1,18 @@
 ﻿import {
+  DestroyRef,
+  ChangeDetectorRef,
   Component,
   OnInit,
   inject,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { takeWhile } from 'rxjs';
 
+import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
   Review,
   ReviewDecision,
@@ -17,7 +25,7 @@ import {
 } from '../../../../shared/services/reviews/review.service';
 
 @Component({
-  imports: [],
+  imports: [DecimalPipe, FormsModule, RouterLink, TaxIconComponent],
   selector: 'app-review-detail',
   styleUrl: './review-detail.component.scss',
   templateUrl: './review-detail.component.html',
@@ -30,10 +38,16 @@ export class ReviewDetailComponent
 
   private readonly reviewService =
     inject(ReviewService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly Object = Object;
+  private statusRefreshStarted = false;
 
   review: Review | null = null;
+  isLoading = true;
+  loadError: string | null = null;
+  refreshError: string | null = null;
 
   isSubmitting = false;
   decisionError: string | null = null;
@@ -47,6 +61,13 @@ export class ReviewDetailComponent
   correctionSubmittingField: string | null = null;
   correctionError: string | null = null;
   correctionSuccessField: string | null = null;
+  recordExpense = false;
+  expenseDraft: {
+    transaction_date: string;
+    direction: 'income' | 'expense';
+    amount: number | null;
+    description: string;
+  } = this.emptyExpenseDraft();
 
   ngOnInit(): void {
     const id =
@@ -55,15 +76,141 @@ export class ReviewDetailComponent
       );
 
     if (!id) {
+      this.isLoading = false;
+      this.loadError = 'Review identifier is missing.';
       return;
     }
 
     this.reviewService
       .getReview(id)
-      .subscribe((review) => {
+      .subscribe({
+        next: (review) => {
+          this.review = review;
+          this.initializeCorrectionValues();
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          this.startStatusRefresh(id, review);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.loadError = 'Unable to load this review. Please try again.';
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  retryLoad(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+
+    if (!id) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.loadError = null;
+    this.reviewService.getReview(id).subscribe({
+      next: (review) => {
         this.review = review;
         this.initializeCorrectionValues();
-      });
+        this.isLoading = false;
+        this.cdr.markForCheck();
+        this.startStatusRefresh(id, review);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.loadError = 'Unable to load this review. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private startStatusRefresh(id: string, review: Review): void {
+    if (
+      this.statusRefreshStarted
+      || (review.status !== 'pending' && review.status !== 'in_progress')
+    ) {
+      return;
+    }
+
+    this.statusRefreshStarted = true;
+    refreshEvery(
+      () => this.reviewService.getReview(id),
+      () => {
+        this.refreshError = 'Unable to refresh this review status.';
+        this.cdr.markForCheck();
+      },
+    ).pipe(
+      takeWhile(
+        (updatedReview) =>
+          updatedReview.status === 'pending'
+          || updatedReview.status === 'in_progress',
+        true,
+      ),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((updatedReview) => {
+      this.review = updatedReview;
+      this.refreshError = null;
+      this.cdr.markForCheck();
+    });
+  }
+
+  statusLabel(status: Review['status']): string {
+    const labels: Record<Review['status'], string> = {
+      pending: 'Pending review',
+      in_progress: 'In progress',
+      completed: 'Completed',
+      rejected: 'Rejected',
+      superseded: 'Superseded',
+    };
+
+    return labels[status];
+  }
+
+  typeLabel(type: Review['type']): string {
+    const labels: Record<Review['type'], string> = {
+      confidence: 'Data confidence',
+      classification: 'Classification',
+      deductibility: 'Deductibility',
+      manual: 'Manual review',
+    };
+
+    return labels[type];
+  }
+
+  formatDate(value: string | null | undefined): string {
+    if (!value) {
+      return 'Not available';
+    }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? 'Not available'
+      : new Intl.DateTimeFormat('en-AU', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        }).format(date);
+  }
+
+  confidenceClass(confidence: number): string {
+    if (confidence < 80) {
+      return 'confidence-low';
+    }
+
+    if (confidence < 95) {
+      return 'confidence-medium';
+    }
+
+    return 'confidence-high';
+  }
+
+  get isBrisbaneCityCouncilDocument(): boolean {
+    return Object.values(this.review?.extraction?.fields ?? {}).some(
+      (field) => field.value === 'Brisbane City Council',
+    );
   }
 
   submitDecision(
@@ -80,11 +227,35 @@ export class ReviewDetailComponent
       return;
     }
 
+    if (
+      decision === 'approved'
+      && this.recordExpense
+      && (
+        !this.expenseDraft.transaction_date
+        || !this.expenseDraft.amount
+        || this.expenseDraft.amount <= 0
+        || !this.expenseDraft.description.trim()
+      )
+    ) {
+      this.decisionError = 'Enter a transaction date, positive amount, and description before saving this expense.';
+      return;
+    }
+
     const request:
       import('../../../../shared/services/reviews/review.service')
         .ReviewDecisionRequest = {
       decision,
       notes,
+      ...(decision === 'approved' && this.recordExpense
+        ? {
+            expense: {
+              transaction_date: this.expenseDraft.transaction_date,
+              direction: this.expenseDraft.direction,
+              amount: this.expenseDraft.amount ?? 0,
+              description: this.expenseDraft.description.trim(),
+            },
+          }
+        : {}),
     };
 
     this.isSubmitting = true;
@@ -101,6 +272,7 @@ export class ReviewDetailComponent
           this.review = review;
           this.isSubmitting = false;
           this.decisionSuccess = true;
+          this.cdr.markForCheck();
         },
 
         error: () => {
@@ -199,17 +371,14 @@ export class ReviewDetailComponent
     this.correctionValues = {};
     this.correctionEvidenceByField = {};
 
-    const fields =
-      this.review?.extraction?.fields;
+    const fields = this.review?.extraction?.fields ?? {};
 
-    if (fields) {
-      for (const [
-        fieldPath,
-        field,
-      ] of Object.entries(fields)) {
-        this.correctionValues[fieldPath] =
-          field.value;
-      }
+    for (const [
+      fieldPath,
+      field,
+    ] of Object.entries(fields)) {
+      this.correctionValues[fieldPath] =
+        field.value;
     }
 
     for (const correction of this.review
@@ -223,8 +392,54 @@ export class ReviewDetailComponent
       ] =
         correction.extractedValue.value;
     }
+
+    const supplier = Object.values(fields).find(
+      (field) => field.value === 'Brisbane City Council',
+    )?.value;
+    const extractedAmount =
+      fields['total_amount']?.value
+      ?? fields['transaction.total']?.value
+      ?? this.amountCandidateFromText(fields['document_text']?.value);
+    const invoiceDate =
+      fields['invoice_date']?.value
+      ?? fields['transaction.date']?.value;
+    const filename = this.review?.document?.originalFilename ?? 'Tax document';
+    const quarter = filename.match(/\bq([1-4])\b/i)?.[1];
+
+    this.expenseDraft = {
+      transaction_date: typeof invoiceDate === 'string' ? invoiceDate : '',
+      direction: 'expense',
+      amount: typeof extractedAmount === 'string' || typeof extractedAmount === 'number'
+        ? Number(extractedAmount)
+        : null,
+      description: supplier
+        ? `Brisbane City Council rates${quarter ? ` - Q${quarter}` : ''}`
+        : filename.replace(/\.[^.]+$/, ''),
+    };
+    this.recordExpense = false;
+  }
+
+  private amountCandidateFromText(value: unknown): number | null {
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const match = /(?:net(?:t)?\s+amount\s+payable|total\s+(?:amount\s+)?due|amount\s+due|pay\s+this\s+amount|total\s+payable|balance\s+due)\s*:?\s*\$?\s*(\d{1,3}(?:,\d{3})*\.\d{2}|\d+\.\d{2})/i.exec(value);
+
+    return match ? Number(match[1].replace(/,/g, '')) : null;
+  }
+
+  private emptyExpenseDraft(): {
+    transaction_date: string;
+    direction: 'income' | 'expense';
+    amount: number | null;
+    description: string;
+  } {
+    return {
+      transaction_date: '',
+      direction: 'expense',
+      amount: null,
+      description: '',
+    };
   }
 }
-
-
-

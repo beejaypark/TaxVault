@@ -37,27 +37,6 @@ services:
     networks:
       - taxvault
 
-  minio:
-    image: minio/minio:latest
-    container_name: taxvault-minio
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-taxvault}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-taxvault_dev_password}
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - taxvault
-
   keycloak:
     image: quay.io/keycloak/keycloak:26.3
     container_name: taxvault-keycloak
@@ -65,14 +44,19 @@ services:
     command:
       - start-dev
       - --http-port=8080
+      - --import-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}
       KC_HEALTH_ENABLED: "true"
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8080/auth}
+      KC_PROXY_HEADERS: xforwarded
     ports:
       - "8081:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
+      - ./infrastructure/keycloak/realm:/opt/keycloak/data/import:ro
     healthcheck:
       test:
         [
@@ -93,28 +77,40 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     environment:
+      APP_NAME: ${APP_NAME:-TaxVault}
       APP_ENV: local
       APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      APP_KEY: ${APP_KEY:-}
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
       DB_DATABASE: ${POSTGRES_DB:-taxvault}
       DB_USERNAME: ${POSTGRES_USER:-taxvault}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-taxvault_dev}
+      DB_QUEUE_RETRY_AFTER: ${DB_QUEUE_RETRY_AFTER:-300}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      FILESYSTEM_DISK: s3
-      AWS_ENDPOINT: http://minio:9000
-      AWS_USE_PATH_STYLE_ENDPOINT: "true"
-      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-taxvault}
-      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-taxvault_dev_password}
-      AWS_DEFAULT_REGION: ap-southeast-2
-      AWS_BUCKET: ${S3_BUCKET:-taxvault}
+      QUEUE_CONNECTION: database
+      OCR_PROVIDER: ${OCR_PROVIDER:-local}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}
+      DEV_ADMIN_LOGIN_ENABLED: ${DEV_ADMIN_LOGIN_ENABLED:-true}
+      DEV_ADMIN_LOGIN: ${DEV_ADMIN_LOGIN:-${KEYCLOAK_ADMIN:-admin}}
+      DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}}
+      FILESYSTEM_DISK: local
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://keycloak:8080/auth}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8080/auth}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-taxvault}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-taxvault-web}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
+      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-http://localhost:8080/api/auth/oidc/callback}
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
+      - backend_storage:/var/www/html/storage
     depends_on:
       postgres:
         condition: service_healthy
@@ -138,6 +134,44 @@ services:
     networks:
       - taxvault
 
+  document-worker:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/backend/Dockerfile
+    container_name: taxvault-document-worker
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: ["php", "artisan", "queue:work", "database", "--queue=default", "--sleep=2", "--tries=2", "--timeout=240"]
+    environment:
+      APP_NAME: ${APP_NAME:-TaxVault}
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-taxvault}
+      DB_USERNAME: ${POSTGRES_USER:-taxvault}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-taxvault_dev}
+      DB_QUEUE_RETRY_AFTER: ${DB_QUEUE_RETRY_AFTER:-300}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: database
+      OCR_PROVIDER: ${OCR_PROVIDER:-local}
+      FILESYSTEM_DISK: local
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+      - backend_storage:/var/www/html/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - taxvault
+
   nginx:
     image: nginx:1.27-alpine
     container_name: taxvault-nginx
@@ -149,6 +183,7 @@ services:
     depends_on:
       - frontend
       - backend
+      - keycloak
     networks:
       - taxvault
 
@@ -160,7 +195,7 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  minio_data:
   keycloak_data:
   backend_vendor:
+  backend_storage:
   frontend_node_modules:

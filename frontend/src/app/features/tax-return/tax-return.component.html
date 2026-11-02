@@ -1,0 +1,76 @@
+<div class="tax-return-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Tax workspace</div>
+      <h1>Tax return pack</h1>
+      <p>Prepare a structured financial-year record for your own files or tax agent.</p>
+    </div>
+  </header>
+
+  @if (errorMessage) {
+    <p class="notice error" role="alert">{{ errorMessage }}</p>
+  }
+  @if (successMessage) {
+    <p class="notice success" role="status">{{ successMessage }}</p>
+  }
+
+  <section class="export-layout">
+    <article class="export-card">
+      <div class="step-number">01</div>
+      <h2>Select a financial year</h2>
+      <p>TaxVault packages the records and evidence associated with the selected Australian financial year.</p>
+
+      @if (isLoading) {
+        <p role="status">Loading financial years...</p>
+      } @else if (financialYears.length === 0) {
+        <div class="empty-state">
+          <strong>No financial years available</strong>
+          <span>Add a financial year before generating an export.</span>
+        </div>
+      } @else {
+        <label for="financial-year">Financial year</label>
+        <select id="financial-year" name="financialYear" [(ngModel)]="selectedFinancialYearId"
+          (ngModelChange)="onFinancialYearChange($event)">
+          @for (year of financialYears; track year.id) {
+            <option [value]="year.id">FY {{ formatYearCode(year.year_code) }} · {{ year.start_date }} to {{ year.end_date }}</option>
+          }
+        </select>
+
+        <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
+          {{ isExporting ? 'Preparing pack…' : 'Generate tax return pack' }}
+        </button>
+      }
+    </article>
+
+    <article class="export-card included-card">
+      <div class="step-number">02</div>
+      <h2>What's included</h2>
+      <ul>
+        <li><span><tv-icon name="check" /></span> Financial-year manifest and export version</li>
+        <li><span><tv-icon name="check" /></span> Tax evidence, provenance, and classification records</li>
+        <li><span><tv-icon name="check" /></span> Data integrity hash for the generated snapshot</li>
+        <li><span><tv-icon name="check" /></span> A downloadable JSON record</li>
+      </ul>
+      <p class="disclaimer">This is an evidence export, not a lodged tax return or tax advice.</p>
+    </article>
+  </section>
+
+  @if (latestExport) {
+    <section class="result-card" aria-label="Generated tax return pack">
+      <div class="result-heading">
+        <div>
+          <div class="eyebrow">Export ready</div>
+          <h2>FY {{ exportedYearCode }} pack</h2>
+        </div>
+        <button type="button" class="secondary-button" (click)="downloadExport()">
+          <tv-icon name="download" /> Download JSON
+        </button>
+      </div>
+      <dl>
+        <div><dt>Generated</dt><dd>{{ formatDate(latestExport.generated_at) }}</dd></div>
+        <div><dt>Version</dt><dd>{{ latestExport.export_version }}</dd></div>
+        <div class="hash"><dt>SHA-256</dt><dd>{{ latestExport.sha256 }}</dd></div>
+      </dl>
+    </section>
+  }
+</div>

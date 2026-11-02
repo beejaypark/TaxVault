@@ -1,126 +1,150 @@
-﻿<section aria-label="Review list">
-  <header>
-    <h1>Reviews</h1>
-
-    <section
-      aria-label="Review filters"
-    >
-      <label for="review-status-filter">
-        Status
-      </label>
-
-      <select
-        id="review-status-filter"
-        data-testid="review-status-filter"
-        [value]="selectedStatus"
-        (change)="onStatusChange($any($event.target).value)"
-      >
-        <option value="">
-          All statuses
-        </option>
-
-        @for (status of statusOptions; track status) {
-          <option [value]="status">
-            {{ status }}
-          </option>
-        }
-      </select>
-
-      <label for="review-type-filter">
-        Type
-      </label>
-
-      <select
-        id="review-type-filter"
-        data-testid="review-type-filter"
-        [value]="selectedType"
-        (change)="onTypeChange($any($event.target).value)"
-      >
-        <option value="">
-          All types
-        </option>
-
-        @for (type of typeOptions; track type) {
-          <option [value]="type">
-            {{ type }}
-          </option>
-        }
-      </select>
-    </section>
+<div class="reviews-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Tax workspace</p>
+      <h1>Review queue</h1>
+      <p class="page-description">Check extracted details and resolve items that need your attention.</p>
+      <p class="refresh-indicator">Review statuses update automatically every 5 seconds.</p>
+    </div>
+    <div class="queue-count" aria-live="polite">
+      <span class="count-value">{{ total }}</span>
+      <span class="count-label">total items</span>
+    </div>
   </header>
 
-  @if (isLoading) {
-    <p role="status">Loading reviews...</p>
-  } @else if (errorMessage) {
-    <p role="alert">{{ errorMessage }}</p>
-  } @else if (reviews.length === 0) {
-    <p>No reviews found.</p>
-  } @else {
-    <section aria-label="Reviews">
-      @for (review of reviews; track review.id) {
-        <article>
-          <h2>{{ review.type }}</h2>
-
-          <p>
-            <a
-              [href]="'/reviews/' + review.id"
-              data-testid="review-detail-link"
-            >
-              View Review
-            </a>
-          </p>
-
-          <p>
-            Status:
-            <span>{{ review.status }}</span>
-          </p>
-
-          @if (review.target.documentId) {
-            <p>
-              Document:
-              <span>{{ review.target.documentId }}</span>
-            </p>
+  <section class="queue-toolbar" aria-label="Review filters">
+    <div class="filter-heading">
+      <div>
+        <h2>{{ financialYearLabel }} reviews</h2>
+        <p>Filter by status or review type</p>
+      </div>
+      <span class="result-count">{{ total }} {{ total === 1 ? 'review' : 'reviews' }}</span>
+    </div>
+    <div class="filters">
+      <label>
+        <span>Status</span>
+        <select
+          id="review-status-filter"
+          data-testid="review-status-filter"
+          [value]="selectedStatus"
+          (change)="onStatusChange($event)"
+        >
+          <option value="">All statuses</option>
+          @for (status of statusOptions; track status) {
+            <option [value]="status">{{ statusLabel(status) }}</option>
           }
+        </select>
+      </label>
+      <label>
+        <span>Review type</span>
+        <select
+          id="review-type-filter"
+          data-testid="review-type-filter"
+          [value]="selectedType"
+          (change)="onTypeChange($event)"
+        >
+          <option value="">All types</option>
+          @for (type of typeOptions; track type) {
+            <option [value]="type">{{ typeLabel(type) }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </section>
 
-          <p>
-            Created:
-            <time [attr.datetime]="review.createdAt">
-              {{ review.createdAt }}
-            </time>
-          </p>
+  @if (refreshErrorMessage) {
+    <p class="refresh-error" role="status">{{ refreshErrorMessage }}</p>
+  }
+
+  @if (isLoading) {
+    <div class="state-card" role="status">
+      <span class="state-spinner" aria-hidden="true"></span>
+      <span>Loading reviews...</span>
+    </div>
+  } @else if (errorMessage) {
+    <div class="state-card error-state" role="alert">
+      <div>
+        <h2>Reviews couldn’t be loaded</h2>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button type="button" class="secondary-button" (click)="loadReviews()">Try again</button>
+    </div>
+  } @else if (reviews.length === 0) {
+    <div class="state-card empty-state">
+      <span class="empty-icon"><tv-icon name="check" /></span>
+      <h2>{{ selectedStatus || selectedType ? 'No matching reviews' : 'You’re all caught up' }}</h2>
+      <p>
+        {{ selectedStatus || selectedType || financialYearLabel !== 'All financial years'
+          ? 'Try changing or clearing your filters to see other reviews.'
+          : 'There are no items waiting in your review queue right now.' }}
+      </p>
+      @if (selectedStatus || selectedType) {
+        <button type="button" class="text-button" (click)="clearFilters()">Clear filters</button>
+      }
+    </div>
+  } @else {
+    <section class="review-list" aria-label="Reviews" [attr.aria-busy]="isLoading">
+      @for (review of reviews; track review.id) {
+        <article class="review-card" [class.needs-attention]="review.status === 'pending'">
+          <div class="review-card-main">
+            <div class="review-type-icon" [class]="typeClass(review.type)" aria-hidden="true">
+              <tv-icon [name]="typeIcon(review.type)" />
+            </div>
+            <div class="review-copy">
+              <div class="review-card-heading">
+                <h3>{{ typeLabel(review.type) }}</h3>
+                <span class="status-badge" [class]="statusClass(review.status)">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  {{ statusLabel(review.status) }}
+                </span>
+              </div>
+              <p class="document-name">
+                @if (review.document?.originalFilename) {
+                  {{ review.document?.originalFilename }}
+                } @else if (review.target.documentId) {
+                  Document {{ review.target.documentId }}
+                } @else {
+                  Review item
+                }
+              </p>
+              <div class="review-meta">
+                @if (review.extraction?.fields; as fields) {
+                  <span>{{ fieldCount(fields) }} extracted {{ fieldCount(fields) === 1 ? 'field' : 'fields' }}</span>
+                  <span class="meta-separator" aria-hidden="true">·</span>
+                  <span>{{ lowConfidenceCount(review) }} below 80%</span>
+                  <span class="meta-separator" aria-hidden="true">·</span>
+                }
+                <time [attr.datetime]="review.createdAt">{{ formatDate(review.createdAt) }}</time>
+              </div>
+            </div>
+          </div>
+          <a
+            class="open-review"
+            [routerLink]="['/reviews', review.id]"
+            [attr.data-testid]="'review-detail-link'"
+            [attr.aria-label]="'Open ' + typeLabel(review.type) + ' review'"
+          >
+            <span>{{ review.status === 'pending' ? 'Review item' : 'View details' }}</span>
+            <tv-icon name="arrowRight" />
+          </a>
         </article>
       }
     </section>
 
     @if (lastPage > 1) {
-      <nav
-        aria-label="Review pagination"
-        data-testid="review-pagination"
-      >
-        <button
-          type="button"
-          data-testid="review-previous-page"
-          [disabled]="currentPage <= 1"
-          (click)="goToPreviousPage()"
-        >
-          Previous
-        </button>
-
-        <span data-testid="review-page-indicator">
-          Page {{ currentPage }} of {{ lastPage }}
-        </span>
-
-        <button
-          type="button"
-          data-testid="review-next-page"
-          [disabled]="currentPage >= lastPage"
-          (click)="goToNextPage()"
-        >
-          Next
-        </button>
+      <nav class="pagination" aria-label="Review pagination" data-testid="review-pagination">
+        <span data-testid="review-page-indicator">Page {{ currentPage }} of {{ lastPage }}</span>
+        <div class="pagination-actions">
+          <button type="button" class="secondary-button" data-testid="review-previous-page"
+            [disabled]="currentPage <= 1" (click)="goToPreviousPage()">
+            <tv-icon name="arrowLeft" /> Previous
+          </button>
+          <button type="button" class="secondary-button" data-testid="review-next-page"
+            [disabled]="currentPage >= lastPage" (click)="goToNextPage()">
+            Next <tv-icon name="arrowRight" />
+          </button>
+        </div>
       </nav>
     }
   }
-</section>
-
-
+</div>

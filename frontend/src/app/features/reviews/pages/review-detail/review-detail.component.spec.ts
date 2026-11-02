@@ -133,11 +133,11 @@ describe('ReviewDetailComponent', () => {
 
     expect(
       element.textContent,
-    ).toContain('pending');
+    ).toContain('Pending review');
 
     expect(
       element.textContent,
-    ).toContain('confidence');
+    ).toContain('Data confidence');
   });
 
   it('should submit an approved decision', () => {
@@ -166,6 +166,81 @@ describe('ReviewDetailComponent', () => {
         notes: 'Verified by reviewer',
       },
     );
+  });
+
+  it('should include a verified transaction when selected', () => {
+    reviewService.submitDecision.mockReturnValue(
+      of({
+        ...review,
+        status: 'completed',
+        decision: 'approved',
+      }),
+    );
+    component.recordExpense = true;
+    component.expenseDraft = {
+      transaction_date: '2026-07-15',
+      direction: 'expense',
+      amount: 145.6,
+      description: 'Brisbane City Council rates - Q1',
+    };
+
+    component.submitDecision('approved');
+
+    expect(reviewService.submitDecision).toHaveBeenCalledWith(
+      'review-1',
+      {
+        decision: 'approved',
+        notes: undefined,
+        expense: {
+          transaction_date: '2026-07-15',
+          direction: 'expense',
+          amount: 145.6,
+          description: 'Brisbane City Council rates - Q1',
+        },
+      },
+    );
+  });
+
+  it('should prefill an amount from the extracted bill text when no normalized amount exists', () => {
+    reviewService.getReview.mockReturnValueOnce(
+      of({
+        ...reviewWithExtraction,
+        document: {
+          id: 'document-1',
+          originalFilename: 'q1.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 100,
+          uploadedAt: '2026-09-01T00:00:00Z',
+        },
+        extraction: {
+          ...reviewWithExtraction.extraction!,
+          fields: {
+            'transaction.date': {
+              value: '2026-08-31',
+              confidence: 91,
+              source: 'ocr',
+            },
+            supplier: {
+              value: 'Brisbane City Council',
+              confidence: 95,
+              source: 'local_ocr',
+            },
+            'document_text': {
+              value: 'Gross Amount 548.82\nNett Amount Payable 548.80\nOptional donation 563.80',
+              confidence: 80,
+              source: 'local_ocr',
+            },
+          },
+        },
+      }),
+    );
+
+    component.retryLoad();
+
+    expect(component.expenseDraft.amount).toBe(548.8);
+    expect(component.expenseDraft.description).toBe('Brisbane City Council rates - Q1');
+    expect(component.expenseDraft.transaction_date).toBe('2026-08-31');
+    expect(component.recordExpense).toBe(false);
   });
 
   it('should update the review after a successful decision', () => {
@@ -1054,8 +1129,4 @@ describe('ReviewDetailComponent', () => {
     expect(saveButton!.disabled).toBe(true);
   });
 });
-
-
-
-
 

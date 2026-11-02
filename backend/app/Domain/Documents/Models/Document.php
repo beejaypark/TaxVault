@@ -2,14 +2,13 @@
 
 namespace App\Domain\Documents\Models;
 
+use App\Domain\Evidence\Models\TaxEvidence;
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Shared\Models\UuidModel;
 use App\Models\User;
-use App\Domain\Evidence\Models\TaxEvidence;
-use App\Domain\Documents\Models\DocumentExtraction;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Domain\Documents\Models\DocumentType;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
 
 class Document extends UuidModel
@@ -45,7 +44,6 @@ class Document extends UuidModel
         static::updating(function (self $document): void {
             $immutableAttributes = [
                 'user_id',
-                'financial_year_id',
                 'document_type_id',
                 'storage_disk',
                 'object_key',
@@ -63,9 +61,16 @@ class Document extends UuidModel
                 array_keys($document->getDirty())
             );
 
-            if ($changedImmutableAttributes !== []) {
+            $financialYearChanged = $document->isDirty('financial_year_id');
+            $financialYearWasAlreadyAssigned = $document->getOriginal('financial_year_id') !== null;
+
+            if (
+                $changedImmutableAttributes !== []
+                || ($financialYearChanged && $financialYearWasAlreadyAssigned)
+                || ($financialYearChanged && $document->financial_year_id === null)
+            ) {
                 throw new LogicException(
-                    'Document evidence metadata is immutable.'
+                    'Document evidence metadata is immutable except for assigning a financial year once.'
                 );
             }
         });
@@ -102,4 +107,10 @@ class Document extends UuidModel
         return $this->hasMany(DocumentExtraction::class);
     }
 
+    public function latestExtraction(): HasOne
+    {
+        return $this->hasOne(DocumentExtraction::class)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
+    }
 }

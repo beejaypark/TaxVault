@@ -1,11 +1,16 @@
 import {
+  DestroyRef,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   OnInit,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { formatFinancialYear } from '../../../../shared/utils/financial-year';
+import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
   DocumentApiService,
   DocumentDto,
@@ -15,7 +20,7 @@ import {
 
 @Component({
   selector: 'app-document-list',
-  imports: [RouterLink],
+  imports: [RouterLink, TaxIconComponent],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +28,7 @@ import {
 export class DocumentListComponent implements OnInit {
   private readonly api = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   documents: DocumentDto[] = [];
   financialYears: FinancialYearDto[] = [];
@@ -31,10 +37,118 @@ export class DocumentListComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
   optionsErrorMessage = '';
+  assigningFinancialYearDocumentId: string | null = null;
 
   get financialYear(): string {
-    const year = this.financialYears[0];
-    return year ? `FY ${year.year_code}` : 'Your financial years';
+    const selectedYearId = this.api.selectedFinancialYearId();
+
+    if (!selectedYearId) {
+      return 'All financial years';
+    }
+
+    const selectedYear = this.financialYears.find(
+      (year) => year.id === selectedYearId,
+    );
+
+    return selectedYear
+      ? `FY ${formatFinancialYear(selectedYear.year_code)}`
+      : 'Financial year';
+  }
+
+  get filteredDocuments(): DocumentDto[] {
+    const selectedYearId = this.api.selectedFinancialYearId();
+
+    return selectedYearId
+      ? this.documents.filter(
+          (document) => document.financial_year_id === selectedYearId,
+        ).concat(this.documents.filter((document) => document.financial_year_id === null))
+      : this.documents;
+  }
+
+  get hasSelectedFinancialYear(): boolean {
+    return this.api.selectedFinancialYearId() !== null;
+  }
+
+  getFinancialYearLabel(document: DocumentDto): string {
+    if (document.financial_year_id === null) {
+      return 'Financial year needed';
+    }
+
+    const year = this.financialYears.find(
+      (item) => item.id === document.financial_year_id,
+    );
+
+    return year
+      ? `FY ${formatFinancialYear(year.year_code)}`
+      : 'Financial year unavailable';
+  }
+
+  formatYearCode(yearCode: string): string {
+    return formatFinancialYear(yearCode);
+  }
+
+  getSuggestedFinancialYear(document: DocumentDto): string | null {
+    const dateValue = document.latest_extraction?.output?.normalized?.fields?.[
+      'invoice_date'
+    ]?.value;
+    if (typeof dateValue !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return null;
+    }
+
+    const [yearText, monthText] = dateValue.split('-');
+    const year = Number(yearText);
+    const month = Number(monthText);
+    const startYear = month >= 7 ? year : year - 1;
+    return `${startYear}-${String((startYear + 1) % 100).padStart(2, '0')}`;
+  }
+
+  confirmSuggestedFinancialYear(document: DocumentDto): void {
+    const yearCode = this.getSuggestedFinancialYear(document);
+    if (!yearCode || this.assigningFinancialYearDocumentId !== null) {
+      return;
+    }
+
+    this.assigningFinancialYearDocumentId = document.id;
+    this.errorMessage = '';
+    this.api.assignDocumentFinancialYear(document.id, yearCode).subscribe({
+      next: (updatedDocument) => {
+        this.replaceDocument(updatedDocument);
+        if (this.api.selectedFinancialYearId() === null) {
+          this.api.selectFinancialYear(updatedDocument.financial_year_id);
+        }
+        this.assigningFinancialYearDocumentId = null;
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.assigningFinancialYearDocumentId = null;
+        this.errorMessage = error.error?.message
+          ?? 'Unable to create or assign the suggested financial year. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  onManualFinancialYearChange(documentId: string, event: Event): void {
+    const financialYearId = (event.target as HTMLSelectElement).value;
+    if (!financialYearId || this.assigningFinancialYearDocumentId !== null) {
+      return;
+    }
+
+    this.assigningFinancialYearDocumentId = documentId;
+    this.errorMessage = '';
+    this.api.assignDocumentToFinancialYear(documentId, financialYearId).subscribe({
+      next: (updatedDocument) => {
+        this.replaceDocument(updatedDocument);
+        this.assigningFinancialYearDocumentId = null;
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.assigningFinancialYearDocumentId = null;
+        this.errorMessage = error.error?.message
+          ?? 'Unable to assign the selected financial year. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   ngOnInit(): void {
@@ -43,6 +157,7 @@ export class DocumentListComponent implements OnInit {
         this.documents = documents;
         this.isLoading = false;
         this.cdr.markForCheck();
+        this.pollProcessingDocuments();
       },
       error: () => {
         this.errorMessage = 'Unable to load your documents. Please try again.';
@@ -69,6 +184,31 @@ export class DocumentListComponent implements OnInit {
       },
       error: () => {
         this.optionsErrorMessage = 'Document type information is unavailable.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  retryProcessing(document: DocumentDto): void {
+    if (
+      document.status !== 'processing_failed'
+      && !(document.status === 'active' && !document.latest_extraction)
+    ) {
+      return;
+    }
+
+    const previousStatus = document.status;
+    document.status = 'processing';
+    this.errorMessage = '';
+    this.api.retryDocumentProcessing(document.id).subscribe({
+      next: (updatedDocument) => {
+        this.replaceDocument(updatedDocument);
+        this.pollProcessingDocuments();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        document.status = previousStatus;
+        this.errorMessage = 'Unable to restart document processing. Please try again.';
         this.cdr.markForCheck();
       },
     });
@@ -111,6 +251,22 @@ export class DocumentListComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
+    if (status === 'processing') {
+      return 'Extracting text';
+    }
+
+    if (status === 'review_required') {
+      return 'Review required';
+    }
+
+    if (status === 'processing_failed') {
+      return 'Processing failed';
+    }
+
+    if (status === 'awaiting_financial_year') {
+      return 'Financial year needed';
+    }
+
     if (status.toLowerCase() === 'active') {
       return 'Uploaded';
     }
@@ -118,5 +274,27 @@ export class DocumentListComponent implements OnInit {
     return status
       .replace(/[_-]+/g, ' ')
       .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  private pollProcessingDocuments(): void {
+    refreshEvery(
+      () => this.api.listDocuments(),
+      () => {
+        this.optionsErrorMessage = 'Unable to refresh document processing status. Reload the page to check again.';
+        this.cdr.markForCheck();
+      },
+    ).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((documents) => {
+      this.documents = documents;
+      this.optionsErrorMessage = '';
+      this.cdr.markForCheck();
+    });
+  }
+
+  private replaceDocument(updatedDocument: DocumentDto): void {
+    this.documents = this.documents.map((document) =>
+      document.id === updatedDocument.id ? updatedDocument : document,
+    );
   }
 }

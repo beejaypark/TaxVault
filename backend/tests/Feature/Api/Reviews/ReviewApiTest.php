@@ -21,15 +21,17 @@ class ReviewApiTest extends TestCase
         User $user,
         string $status = 'pending',
         string $reviewType = 'confidence',
+        string $yearCode = '2026-27',
     ): Review {
+        $startYear = (int) substr($yearCode, 0, 4);
         $financialYear = FinancialYear::query()->firstOrCreate(
             [
                 'user_id' => $user->getKey(),
-                'year_code' => '2026-27',
+                'year_code' => $yearCode,
             ],
             [
-                'start_date' => '2026-07-01',
-                'end_date' => '2027-06-30',
+                'start_date' => sprintf('%04d-07-01', $startYear),
+                'end_date' => sprintf('%04d-06-30', $startYear + 1),
                 'status' => 'active',
             ],
         );
@@ -47,7 +49,7 @@ class ReviewApiTest extends TestCase
             'financial_year_id' => $financialYear->getKey(),
             'document_type_id' => $documentType->getKey(),
             'storage_disk' => 'documents',
-            'object_key' => '2026-27/' . Str::uuid() . '.pdf',
+            'object_key' => $yearCode . '/' . Str::uuid() . '.pdf',
             'content_sha256' => hash('sha256', (string) Str::uuid()),
             'original_filename' => 'review.pdf',
             'mime_type' => 'application/pdf',
@@ -183,6 +185,52 @@ class ReviewApiTest extends TestCase
                 'data.reviewer_notes',
                 'OCR confidence review required for fields: amount'
             );
+    }
+
+    public function test_approving_review_can_create_a_linked_expense_transaction(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user, reviewType: 'classification');
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/reviews/' . $review->id . '/decision', [
+                'decision' => 'approve',
+                'reviewer_notes' => 'Verified against the original council notice.',
+                'expense' => [
+                    'transaction_date' => '2026-07-15',
+                    'direction' => 'expense',
+                    'amount' => 145.60,
+                    'description' => 'Brisbane City Council rates - Q1',
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.decision', 'approve');
+
+        $transactionId = $response->json('data.transaction_id');
+
+        $this->assertNotEmpty($transactionId);
+        $this->assertDatabaseHas('transactions', [
+            'id' => $transactionId,
+            'user_id' => $user->getKey(),
+            'document_id' => $review->document_id,
+            'transaction_date' => '2026-07-15',
+            'direction' => 'expense',
+            'amount' => '145.60',
+            'description' => 'Brisbane City Council rates - Q1',
+            'source_system' => 'document_review',
+        ]);
+        $this->assertDatabaseHas('expenses', [
+            'transaction_id' => $transactionId,
+            'user_id' => $user->getKey(),
+            'amount' => '145.60',
+            'source_system' => 'document_review',
+        ]);
+        $this->assertDatabaseHas('reviews', [
+            'id' => $review->getKey(),
+            'transaction_id' => $transactionId,
+            'status' => 'completed',
+        ]);
     }
 
     public function test_show_review_includes_active_authoritative_corrections(): void
@@ -435,6 +483,26 @@ class ReviewApiTest extends TestCase
         $this->assertNotSame(
             $confidenceReview->id,
             $transactionReview->id
+        );
+    }
+
+    public function test_reviews_can_be_filtered_by_financial_year(): void
+    {
+        $user = User::factory()->create();
+        $currentYearReview = $this->createReview($user, yearCode: '2026-27');
+        $priorYearReview = $this->createReview($user, yearCode: '2025-26');
+
+        $response = $this->actingAs($user)
+            ->getJson('/api/reviews?financial_year_id=' . $currentYearReview->document->financial_year_id);
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $currentYearReview->id);
+
+        $this->assertNotSame(
+            $currentYearReview->id,
+            $priorYearReview->id,
         );
     }
 
@@ -731,4 +799,3 @@ class ReviewApiTest extends TestCase
         ]);
     }
 }
-

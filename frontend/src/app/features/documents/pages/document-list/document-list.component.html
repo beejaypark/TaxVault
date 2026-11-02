@@ -4,10 +4,11 @@
       <div class="eyebrow">{{ financialYear }}</div>
       <h1>Documents</h1>
       <p>All your tax documents in one place.</p>
+      <p class="refresh-indicator">Processing and review statuses update automatically every 5 seconds.</p>
     </div>
 
     <a routerLink="/documents/upload" class="primary-button">
-      <span>+</span>
+      <tv-icon name="plus" />
       Upload receipt
     </a>
   </header>
@@ -17,8 +18,8 @@
       <div>
         <h2>All documents</h2>
         <p>
-          {{ documents.length }}
-          {{ documents.length === 1 ? 'document' : 'documents' }}
+          {{ filteredDocuments.length }}
+          {{ filteredDocuments.length === 1 ? 'document' : 'documents' }}
         </p>
       </div>
     </div>
@@ -33,10 +34,12 @@
       <div class="empty-state error-state" role="alert">
         {{ errorMessage }}
       </div>
-    } @else if (documents.length === 0) {
+    } @else if (filteredDocuments.length === 0) {
       <div class="empty-state">
-        <h3>No documents yet</h3>
-        <p>Upload a receipt or tax document to see it listed here.</p>
+        <h3>{{ hasSelectedFinancialYear ? 'No documents for this financial year' : 'No documents yet' }}</h3>
+        <p>{{ hasSelectedFinancialYear
+          ? 'Choose another year or upload a receipt or tax document.'
+          : 'Upload a receipt or tax document to see it listed here.' }}</p>
         <a routerLink="/documents/upload" class="empty-state-link">
           Upload your first document
         </a>
@@ -50,16 +53,19 @@
           <span>Status</span>
         </div>
 
-        @for (document of documents; track document.id) {
+        @for (document of filteredDocuments; track document.id) {
           <div class="document-row">
             <div class="supplier-cell">
               <div class="document-icon uploaded" aria-hidden="true">
-                ✓
+                <tv-icon name="check" />
               </div>
 
               <div class="document-name">
                 <strong>{{ document.original_filename }}</strong>
                 <span>{{ getDocumentTypeName(document) }}</span>
+                <span class="document-financial-year">
+                  {{ getFinancialYearLabel(document) }}
+                </span>
               </div>
             </div>
 
@@ -69,9 +75,64 @@
               {{ formatFileSize(document.size_bytes) }}
             </strong>
 
-            <span class="status uploaded">
-              {{ getStatusLabel(document.status) }}
-            </span>
+            <div class="document-processing">
+              <span class="status uploaded">{{ getStatusLabel(document.status) }}</span>
+              @if (document.status === 'processing_failed') {
+                <span class="processing-error">
+                  {{ document.latest_extraction?.error_metadata?.message || 'Text extraction did not complete.' }}
+                </span>
+                <button type="button" class="retry-processing" (click)="retryProcessing(document)">
+                  Retry
+                </button>
+              }
+              @if (document.status === 'active' && !document.latest_extraction) {
+                <button type="button" class="retry-processing" (click)="retryProcessing(document)">
+                  Process document
+                </button>
+              }
+              @if (document.status === 'awaiting_financial_year') {
+                @if (getSuggestedFinancialYear(document); as suggestedYear) {
+                  <p class="processing-error">
+                    Document date suggests FY {{ formatYearCode(suggestedYear) }}. Confirm before creating and linking this year.
+                  </p>
+                  <button
+                    type="button"
+                    class="retry-processing"
+                    [disabled]="assigningFinancialYearDocumentId !== null"
+                    (click)="confirmSuggestedFinancialYear(document)"
+                  >
+                    {{
+                      assigningFinancialYearDocumentId === document.id
+                        ? 'Creating financial year…'
+                        : 'Create and assign FY ' + formatYearCode(suggestedYear)
+                    }}
+                  </button>
+                } @else if (financialYears.length > 0) {
+                  <label class="financial-year-assignment">
+                    <span>Select the document's financial year</span>
+                    <select
+                      [disabled]="assigningFinancialYearDocumentId !== null"
+                      (change)="onManualFinancialYearChange(document.id, $event)"
+                    >
+                      <option value="">Select financial year</option>
+                      @for (year of financialYears; track year.id) {
+                        <option [value]="year.id">FY {{ formatYearCode(year.year_code) }}</option>
+                      }
+                    </select>
+                  </label>
+                } @else {
+                  <span class="processing-error">
+                    No document date was found. Create a financial year manually, then reload to assign it.
+                  </span>
+                  <a routerLink="/financial-years" class="review-document-link">
+                    Create financial year
+                  </a>
+                }
+              }
+              @if (document.status === 'review_required') {
+                <a routerLink="/reviews" class="review-document-link">Open review queue</a>
+              }
+            </div>
           </div>
         }
       </div>

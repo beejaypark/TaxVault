@@ -24,6 +24,29 @@ class StoreReviewDecisionRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+            'expense' => [
+                'sometimes',
+                'array',
+            ],
+            'expense.transaction_date' => [
+                'required_with:expense',
+                'date',
+            ],
+            'expense.direction' => [
+                'required_with:expense',
+                'string',
+                'in:income,expense',
+            ],
+            'expense.amount' => [
+                'required_with:expense',
+                'numeric',
+                'gt:0',
+            ],
+            'expense.description' => [
+                'required_with:expense',
+                'string',
+                'max:1000',
+            ],
         ];
     }
 }

@@ -1,100 +1,127 @@
-﻿<div class="dashboard-page">
+<div class="dashboard-page">
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
       <h1>Dashboard</h1>
-      <p>See what needs your attention.</p>
+      <p>Your tax records and next steps, all in one place.</p>
+      <p class="refresh-indicator">Statuses update automatically every 5 seconds.</p>
     </div>
 
-    <a routerLink="/documents" class="primary-button">
-      <span>+</span>
-      Upload receipt
+    <a routerLink="/documents/upload" class="primary-button">
+      <tv-icon name="plus" />
+      Upload document
     </a>
   </header>
 
-  <section class="summary-grid" aria-label="Document summary">
-    <article class="summary-card">
-      <span class="summary-label">Documents</span>
-      <strong class="summary-value">{{ summary.documents }}</strong>
-      <span class="summary-description">Uploaded this financial year</span>
-    </article>
+  @if (errorMessage) {
+    <p class="dashboard-error" role="alert">{{ errorMessage }}</p>
+  }
+  @if (refreshErrorMessage) {
+    <p class="dashboard-error" role="status">{{ refreshErrorMessage }}</p>
+  }
 
-    <article class="summary-card attention">
-      <span class="summary-label">Needs review</span>
-      <strong class="summary-value">{{ summary.needsReview }}</strong>
-      <span class="summary-description">Waiting for you</span>
-    </article>
+  @if (isLoading) {
+    <p class="dashboard-loading" role="status">Loading your tax workspace...</p>
+  } @else {
+    <section class="summary-grid" aria-label="Tax workspace summary">
+      <a routerLink="/documents" class="summary-card">
+        <span class="summary-label">Documents</span>
+        <strong class="summary-value">{{ filteredDocuments.length }}</strong>
+        <span class="summary-description">Tax records uploaded</span>
+      </a>
 
-    <article class="summary-card">
-      <span class="summary-label">Ready</span>
-      <strong class="summary-value">{{ summary.ready }}</strong>
-      <span class="summary-description">Verified documents</span>
-    </article>
-  </section>
+      <a routerLink="/reviews" class="summary-card attention">
+        <span class="summary-label">Needs attention</span>
+        <strong class="summary-value">{{ openReviews.length }}</strong>
+        <span class="summary-description">Reviews waiting for you</span>
+      </a>
 
-  <section class="dashboard-section">
-    <div class="section-heading">
-      <div>
-        <h2>Needs attention</h2>
-        <p>These documents need you to check something.</p>
+      <a routerLink="/reviews" class="summary-card">
+        <span class="summary-label">Reviewed</span>
+        <strong class="summary-value">{{ completedReviews }}</strong>
+        <span class="summary-description">Completed review items</span>
+      </a>
+    </section>
+
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <h2>Needs attention</h2>
+          <p>Review and confirm extracted tax information.</p>
+        </div>
+        <a routerLink="/reviews" class="text-link">View reviews</a>
       </div>
 
-      <a routerLink="/reviews" class="text-link">
-        View all reviews
-      </a>
-    </div>
-
-    <div class="document-list">
-      @for (document of attentionDocuments; track document.supplier) {
-        <a routerLink="/reviews" class="document-row">
-          <div class="document-main">
-            <div class="document-icon warning">!</div>
-
-            <div>
-              <strong>{{ document.supplier }}</strong>
-              <span>Tax document</span>
-            </div>
+      @if (openReviews.length === 0) {
+        <div class="empty-panel">
+          <span class="empty-icon"><tv-icon name="check" /></span>
+          <div>
+            <strong>You're all caught up</strong>
+            <p>New items needing your review will appear here.</p>
           </div>
-
-          <div class="document-side">
-            <strong>{{ document.amount }}</strong>
-            <span class="status review">Needs review</span>
-          </div>
-        </a>
+        </div>
+      } @else {
+        <div class="document-list">
+          @for (review of openReviews.slice(0, 5); track review.id) {
+            <a [routerLink]="['/reviews', review.id]" class="document-row">
+              <div class="document-main">
+                <div class="document-icon warning"><tv-icon name="warning" /></div>
+                <div>
+                  <strong>{{ review.document?.originalFilename || 'Tax record review' }}</strong>
+                  <span>{{ review.type }} · {{ review.status.replace('_', ' ') }}</span>
+                </div>
+              </div>
+              <span class="status review">Review now</span>
+            </a>
+          }
+        </div>
       }
-    </div>
-  </section>
+    </section>
 
-  <section class="dashboard-section">
-    <div class="section-heading">
-      <div>
-        <h2>Recent documents</h2>
-        <p>Your latest tax evidence.</p>
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <h2>Recent documents</h2>
+          <p>Your latest uploaded tax records.</p>
+        </div>
+        <a routerLink="/documents" class="text-link">View all documents</a>
       </div>
 
-      <a routerLink="/documents" class="text-link">
-        View all documents
-      </a>
-    </div>
-
-    <div class="document-list">
-      @for (document of recentDocuments; track document.supplier) {
-        <a routerLink="/documents" class="document-row">
-          <div class="document-main">
-            <div class="document-icon ready">✓</div>
-
-            <div>
-              <strong>{{ document.supplier }}</strong>
-              <span>Tax document</span>
-            </div>
+      @if (recentDocuments.length === 0) {
+        <div class="empty-panel">
+          <span class="empty-icon"><tv-icon name="upload" /></span>
+          <div>
+            <strong>Start with your tax documents</strong>
+            <p>Upload receipts and statements to keep your evidence together.</p>
           </div>
-
-          <div class="document-side">
-            <strong>{{ document.amount }}</strong>
-            <span class="status ready">Ready</span>
-          </div>
-        </a>
+          <a routerLink="/documents/upload" class="text-link">Upload a document</a>
+        </div>
+      } @else {
+        <div class="document-list">
+          @for (document of recentDocuments; track document.id) {
+            <a routerLink="/documents" class="document-row">
+              <div class="document-main">
+                <div class="document-icon ready"><tv-icon name="document" /></div>
+                <div>
+                  <strong>{{ document.original_filename }}</strong>
+                  <span>{{ formatFileSize(document.size_bytes) }}</span>
+                </div>
+              </div>
+              <div class="document-side">
+                <span>{{ formatDate(document.uploaded_at) }}</span>
+                <span class="status ready">{{ document.status }}</span>
+              </div>
+            </a>
+          }
+        </div>
       }
-    </div>
-  </section>
+    </section>
+
+    <section class="quick-actions" aria-label="Tax workspace">
+      <a routerLink="/transactions"><span><tv-icon name="transactions" /></span><strong>Income & expenses</strong><small>Record and review your transactions</small></a>
+      <a routerLink="/properties"><span><tv-icon name="property" /></span><strong>Properties</strong><small>Manage rental property records</small></a>
+      <a routerLink="/investments"><span><tv-icon name="investment" /></span><strong>Investments</strong><small>Track acquisition and disposal details</small></a>
+      <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><strong>Tax return pack</strong><small>Prepare a financial-year export</small></a>
+    </section>
+  }
 </div>

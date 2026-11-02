@@ -7,6 +7,8 @@ RUN apt-get update \
         libpq-dev \
         libzip-dev \
         curl \
+        poppler-utils \
+        tesseract-ocr \
     && docker-php-ext-install \
         bcmath \
         pdo_pgsql \
@@ -27,9 +29,12 @@ RUN composer install \
     --no-scripts
 
 COPY . .
+COPY docker/entrypoint.sh /usr/local/bin/taxvault-entrypoint
 
-RUN composer dump-autoload --optimize
+RUN composer dump-autoload --optimize \
+    && chmod +x /usr/local/bin/taxvault-entrypoint
 
 EXPOSE 8000
 
+ENTRYPOINT ["taxvault-entrypoint"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

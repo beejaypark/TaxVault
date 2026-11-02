@@ -1,5 +1,6 @@
 export interface ReviewDocument {
   id: string;
+  financialYearId?: string | null;
   originalFilename: string;
   mimeType: string | null;
   sizeBytes: number | null;

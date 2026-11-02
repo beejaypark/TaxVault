@@ -4,6 +4,7 @@ namespace Tests\Feature\Api;
 
 use App\Models\DevelopmentAdminCredential;
 use App\Models\User;
+use App\Services\DevelopmentAdminProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -28,6 +29,10 @@ class DevelopmentAdminAuthTest extends TestCase
             'Origin' => 'http://localhost:4200',
             'Referer' => 'http://localhost:4200/',
         ]);
+
+        $csrfToken = 'development-admin-test-token';
+        $this->withSession(['_token' => $csrfToken]);
+        $this->withHeader('X-CSRF-TOKEN', $csrfToken);
     }
 
     public function test_development_login_is_disabled_when_feature_flag_is_off(): void
@@ -66,6 +71,58 @@ class DevelopmentAdminAuthTest extends TestCase
             ->assertJsonPath('data.email', $user->email);
 
         $this->assertAuthenticatedAs($user, 'web');
+
+        $this->getJson('/api/auth/user')
+            ->assertOk()
+            ->assertJsonPath('data.id', $user->id);
+
+        $this->withHeader('X-CSRF-TOKEN', $this->app['session.store']->token());
+
+        $this->postJson('/api/auth/logout')
+            ->assertOk()
+            ->assertJsonPath('message', 'Logged out.');
+
+        $this->assertGuest('web');
+        $this->getJson('/api/auth/user')->assertUnauthorized();
+    }
+
+    public function test_default_admin_from_environment_can_log_in(): void
+    {
+        config([
+            'dev_admin.login' => 'provisioned-admin-test',
+            'dev_admin.password' => 'test-only-admin-password',
+        ]);
+        $this->assertTrue(app(DevelopmentAdminProvisioner::class)->provision(
+            'provisioned-admin-test',
+            'test-only-admin-password',
+        ));
+
+        $login = 'provisioned-admin-test';
+        $password = 'test-only-admin-password';
+        $credential = DevelopmentAdminCredential::query()
+            ->where('login_name', $login)
+            ->firstOrFail();
+
+        $this->assertTrue(Hash::check($password, $credential->password_hash));
+        $this->assertSame('Administrator', $credential->user->display_name);
+
+        $this->postJson('/api/auth/login', [
+            'login' => $login,
+            'password' => $password,
+        ])->assertOk()
+            ->assertJsonPath('data.id', $credential->user_id);
+
+        $this->assertAuthenticatedAs($credential->user, 'web');
+    }
+
+    public function test_default_admin_provisioning_skips_invalid_environment_without_failing(): void
+    {
+        config([
+            'dev_admin.login' => '',
+            'dev_admin.password' => '',
+        ]);
+
+        $this->assertNull(app(DevelopmentAdminProvisioner::class)->provision('', ''));
     }
 
     public function test_invalid_development_admin_password_is_rejected(): void

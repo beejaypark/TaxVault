@@ -2,6 +2,7 @@
   ComponentFixture,
   TestBed,
 } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
@@ -13,6 +14,7 @@ import {
 import {
   ReviewService,
 } from '../../../../shared/services/reviews/review.service';
+import { DocumentApiService } from '../../../../shared/services/documents/document-api.service';
 
 import { ReviewListComponent } from './review-list.component';
 
@@ -64,9 +66,11 @@ describe('ReviewListComponent', () => {
   const reviewService = {
     listReviews: vi.fn(() => of(response)),
   };
+  const selectedFinancialYearId = signal<string | null>(null);
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    selectedFinancialYearId.set(null);
     reviewService.listReviews.mockReturnValue(
       of(response),
     );
@@ -78,6 +82,10 @@ describe('ReviewListComponent', () => {
         {
           provide: ReviewService,
           useValue: reviewService,
+        },
+        {
+          provide: DocumentApiService,
+          useValue: { selectedFinancialYearId },
         },
       ],
     }).compileComponents();
@@ -103,24 +111,49 @@ describe('ReviewListComponent', () => {
     expect(component.reviews).toEqual(reviews);
   });
 
+  it('refreshes review statuses automatically', async () => {
+    fixture.destroy();
+    vi.useFakeTimers();
+    reviewService.listReviews.mockClear();
+    reviewService.listReviews
+      .mockReturnValueOnce(of(response))
+      .mockReturnValue(of({
+        ...response,
+        data: [{ ...reviews[0], status: 'completed' }, reviews[1]],
+      }));
+
+    fixture = TestBed.createComponent(ReviewListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    await vi.advanceTimersByTimeAsync(5000);
+    fixture.detectChanges();
+
+    expect(reviewService.listReviews).toHaveBeenCalledTimes(2);
+    expect(component.reviews[0].status).toBe('completed');
+
+    fixture.destroy();
+    vi.useRealTimers();
+  });
+
   it('should render review type and status', () => {
     const element =
       fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain(
-      'confidence',
+      'Data confidence',
     );
 
     expect(element.textContent).toContain(
-      'pending',
+      'Pending',
     );
 
     expect(element.textContent).toContain(
-      'deductibility',
+      'Deductibility',
     );
 
     expect(element.textContent).toContain(
-      'completed',
+      'Completed',
     );
   });
 
@@ -148,7 +181,7 @@ describe('ReviewListComponent', () => {
       fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain(
-      'No reviews found.',
+      'You’re all caught up',
     );
   });
 
@@ -243,6 +276,15 @@ describe('ReviewListComponent', () => {
       reviewService.listReviews,
     ).toHaveBeenLastCalledWith({
       type: 'deductibility',
+    });
+  });
+
+  it('should reload reviews when the shared financial year changes', () => {
+    selectedFinancialYearId.set('fy-2025-26');
+    fixture.detectChanges();
+
+    expect(reviewService.listReviews).toHaveBeenLastCalledWith({
+      financialYearId: 'fy-2025-26',
     });
   });
 
@@ -476,19 +518,28 @@ describe('ReviewListComponent', () => {
 });
   it('should define review list and detail routes', async () => {
     const { routes } = await import('../../../../app.routes');
-    const shellRoute = routes.find((route) => route.path === '');
+    const rootRoute = routes.find(
+      (route) => route.path === '' && route.pathMatch === 'full',
+    );
+    const shellRoute = routes.find(
+      (route) => route.path === '' && route.children,
+    );
     const childRoutes = shellRoute?.children ?? [];
 
+    expect(rootRoute?.redirectTo).toBe('login');
     expect(
       childRoutes.some(
         (route) =>
           route.path === 'reviews' &&
-          route.component === ReviewListComponent,
+          typeof route.loadComponent === 'function',
       ),
     ).toBe(true);
 
     expect(
-      childRoutes.some((route) => route.path === 'reviews/:id'),
+      childRoutes.some(
+        (route) =>
+          route.path === 'reviews/:id' &&
+          typeof route.loadComponent === 'function',
+      ),
     ).toBe(true);
   });
-

@@ -52,6 +52,7 @@ interface ReviewCorrectionApiResponse {
 interface ReviewApiDto {
   id: string;
   reviewer_id: string;
+  financial_year_id?: string | null;
 
   document_id?: string | null;
   document_extraction_id?: string | null;
@@ -75,6 +76,7 @@ interface ReviewApiDto {
 
 interface ReviewDocumentApiDto {
   id: string;
+  financial_year_id?: string | null;
   original_filename?: string | null;
   mime_type?: string | null;
   size_bytes?: number | null;
@@ -167,6 +169,13 @@ export class ReviewHttpService extends ReviewService {
       );
     }
 
+    if (query.financialYearId) {
+      params = params.set(
+        'financial_year_id',
+        query.financialYearId,
+      );
+    }
+
     if (query.page !== undefined) {
       params = params.set(
         'page',
@@ -216,6 +225,7 @@ export class ReviewHttpService extends ReviewService {
             ),
           reviewer_notes:
             request.notes ?? null,
+          ...(request.expense ? { expense: request.expense } : {}),
         },
       )
       .pipe(
@@ -263,6 +273,11 @@ export class ReviewHttpService extends ReviewService {
 
       type: dto.review_type,
       status: dto.status,
+      financialYearId:
+        dto.document?.financial_year_id
+        ?? dto.financial_year_id
+        ?? dto.corrections?.[0]?.financial_year_id
+        ?? null,
 
       target: {
         ...(dto.document_id
@@ -332,6 +347,7 @@ export class ReviewHttpService extends ReviewService {
   ): ReviewDocument {
     return {
       id: dto.id,
+      financialYearId: dto.financial_year_id ?? null,
 
       originalFilename:
         dto.original_filename ?? dto.id,
@@ -500,4 +516,3 @@ export class ReviewHttpService extends ReviewService {
     }
   }
 }
-

@@ -30,8 +30,11 @@
         <env name="DB_USERNAME" value="taxvault"/>
         <env name="DB_PASSWORD" value="taxvault_dev"/>
         <env name="DB_URL" value=""/>
+        <env name="DEV_ADMIN_LOGIN" value="admin"/>
+        <env name="DEV_ADMIN_PASSWORD" value="test-only-admin-password"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="OCR_PROVIDER" value="test"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

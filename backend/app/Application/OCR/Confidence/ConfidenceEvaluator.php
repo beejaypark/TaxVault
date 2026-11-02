@@ -18,6 +18,10 @@ final class ConfidenceEvaluator
         $reviewFields = [];
 
         foreach ($extraction->fields as $fieldPath => $field) {
+            if ($fieldPath === 'document_text') {
+                continue;
+            }
+
             $confidence = (float) $field['confidence'];
             $threshold = $this->policy->thresholdFor($fieldPath);
             $critical = in_array(

@@ -6,27 +6,63 @@
     </div>
 
     <nav class="navigation" aria-label="Main navigation">
+      <div class="nav-section-label">Overview</div>
       <a routerLink="/dashboard" routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-        <span class="nav-icon">⌂</span><span>Dashboard</span>
+        <span class="nav-icon"><tv-icon name="dashboard" /></span><span>Dashboard</span>
       </a>
+      <div class="nav-section-label">Tax workspace</div>
       <a routerLink="/documents" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">▣</span><span>Documents</span>
+        <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
+      </a>
+      <a routerLink="/financial-years" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><tv-icon name="financialYear" /></span><span>Financial years</span>
+      </a>
+      <a routerLink="/properties" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
+      </a>
+      <a routerLink="/investments" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
+      </a>
+      <a routerLink="/transactions" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
       </a>
       <a routerLink="/reviews" routerLinkActive="active" class="nav-item">
-        <span class="nav-icon">✓</span><span>Reviews</span>
+        <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
+      </a>
+      <a routerLink="/tax-return" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Tax return pack</span>
       </a>
     </nav>
 
     <div class="sidebar-bottom">
-      <div class="financial-year-label">Financial year</div>
-      <button type="button" class="financial-year">
-        <span>FY 2025–26</span><span class="chevron">⌄</span>
-      </button>
+      <label class="financial-year-label" for="active-financial-year">
+        Financial year
+      </label>
+      <select
+        id="active-financial-year"
+        class="financial-year"
+        [(ngModel)]="selectedFinancialYearId"
+        [disabled]="isLoadingFinancialYears || financialYears.length === 0"
+        (ngModelChange)="onFinancialYearChange($event)"
+      >
+        <option value="">All financial years</option>
+        @if (isLoadingFinancialYears) {
+          <option value="">Loading financial years…</option>
+        } @else if (financialYears.length === 0) {
+          <option value="">No financial years</option>
+        }
+        @for (year of financialYears; track year.id) {
+          <option [value]="year.id">FY {{ formatYearCode(year.year_code) }}</option>
+        }
+      </select>
 
       <div class="signed-in-user">
         <span class="user-label">Signed in as</span>
         <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
+        @if (logoutError) {
+          <span class="logout-error" role="alert">Unable to sign out. Please try again.</span>
+        }
         <button type="button" class="logout-button" (click)="logout()">Sign out</button>
       </div>
     </div>

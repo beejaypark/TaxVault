@@ -13,7 +13,7 @@ class CreateDocument
 {
     public function execute(
         User $user,
-        string $financialYearId,
+        ?string $financialYearId,
         string $documentTypeId,
         string $storageDisk,
         string $objectKey,
@@ -41,10 +41,11 @@ class CreateDocument
             $provenance,
             $status,
         ): Document {
-            $financialYearExists = FinancialYear::query()
-                ->whereKey($financialYearId)
-                ->where('user_id', $user->getKey())
-                ->exists();
+            $financialYearExists = $financialYearId === null
+                || FinancialYear::query()
+                    ->whereKey($financialYearId)
+                    ->where('user_id', $user->getKey())
+                    ->exists();
 
             if (! $financialYearExists) {
                 throw new LogicException(

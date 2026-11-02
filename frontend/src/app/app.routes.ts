@@ -6,10 +6,17 @@ import { LoginComponent } from './features/auth/pages/login/login.component';
 import { DashboardComponent } from './features/dashboard/pages/dashboard/dashboard.component';
 import { DocumentListComponent } from './features/documents/pages/document-list/document-list.component';
 import { UploadDocumentComponent } from './features/documents/pages/upload-document/upload-document.component';
-import { ReviewListComponent } from './features/reviews/pages/review-list/review-list.component';
-import { ReviewDetailComponent } from './features/reviews/pages/review-detail/review-detail.component';
+import { AssetsComponent } from './features/assets/assets.component';
+import { TaxReturnComponent } from './features/tax-return/tax-return.component';
+import { TransactionsComponent } from './features/transactions/transactions.component';
+import { FinancialYearsComponent } from './features/financial-years/financial-years.component';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login',
+  },
   {
     path: 'login',
     component: LoginComponent,
@@ -23,8 +30,25 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'documents', component: DocumentListComponent },
       { path: 'documents/upload', component: UploadDocumentComponent },
-      { path: 'reviews', component: ReviewListComponent },
-      { path: 'reviews/:id', component: ReviewDetailComponent },
+      { path: 'properties', component: AssetsComponent },
+      { path: 'investments', component: AssetsComponent },
+      { path: 'transactions', component: TransactionsComponent },
+      { path: 'financial-years', component: FinancialYearsComponent },
+      {
+        path: 'reviews',
+        loadComponent: () =>
+          import('./features/reviews/pages/review-list/review-list.component').then(
+            (module) => module.ReviewListComponent,
+          ),
+      },
+      {
+        path: 'reviews/:id',
+        loadComponent: () =>
+          import('./features/reviews/pages/review-detail/review-detail.component').then(
+            (module) => module.ReviewDetailComponent,
+          ),
+      },
+      { path: 'tax-return', component: TaxReturnComponent },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

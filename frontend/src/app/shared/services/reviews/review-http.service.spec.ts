@@ -84,6 +84,7 @@ describe('ReviewHttpService', () => {
     expect(result).toEqual({
       id: reviewId,
       userId: 'user-123',
+      financialYearId: null,
 
       type: 'confidence',
       status: 'pending',
@@ -248,6 +249,7 @@ describe('ReviewHttpService', () => {
 
     expect(result?.document).toEqual({
       id: 'document-123',
+      financialYearId: null,
       originalFilename:
         'receipt-2026-08-15.pdf',
       mimeType: 'application/pdf',
@@ -394,6 +396,12 @@ describe('ReviewHttpService', () => {
     const requestBody: ReviewDecisionRequest = {
       decision: 'approved',
       notes: 'Verified by reviewer',
+      expense: {
+        transaction_date: '2026-07-01',
+        direction: 'expense',
+        amount: 125.5,
+        description: 'Brisbane City Council rates - Q1',
+      },
     };
 
     service
@@ -415,6 +423,12 @@ describe('ReviewHttpService', () => {
       decision: 'approve',
       reviewer_notes:
         'Verified by reviewer',
+      expense: {
+        transaction_date: '2026-07-01',
+        direction: 'expense',
+        amount: 125.5,
+        description: 'Brisbane City Council rates - Q1',
+      },
     });
 
     request.flush({
@@ -650,6 +664,4 @@ describe('ReviewHttpService', () => {
     ).toBe('transaction.total');
   });
 });
-
-
 

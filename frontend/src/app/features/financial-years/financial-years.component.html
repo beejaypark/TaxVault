@@ -1,0 +1,62 @@
+<div class="financial-years-page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Tax workspace</div>
+      <h1>Financial years</h1>
+      <p>Manage the Australian financial years used to organise your tax records.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="showForm = !showForm">
+      @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add financial year }
+    </button>
+  </header>
+
+  @if (errorMessage) { <p class="notice error" role="alert">{{ errorMessage }}</p> }
+  @if (successMessage) { <p class="notice success" role="status">{{ successMessage }}</p> }
+
+  @if (showForm) {
+    <form class="editor-card" (ngSubmit)="createFinancialYear()">
+      <h2>Add an Australian financial year</h2>
+      <p>Use the format YYYY - YY. Tax years run from 1 July to 30 June.</p>
+      <label for="year-code">Financial year</label>
+      <input id="year-code" name="yearCode" [(ngModel)]="yearCode" placeholder="2025 - 26" maxlength="9" required />
+      @if (yearCode && !isValidYearCode) {
+        <span class="field-error" role="alert">Enter a year such as 2025 - 26.</span>
+      }
+      <div class="form-actions">
+        <button type="button" class="secondary-button" (click)="showForm = false">Cancel</button>
+        <button type="submit" class="primary-button" [disabled]="isSaving || !isValidYearCode">
+          {{ isSaving ? 'Saving…' : 'Save financial year' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <section class="years-card" aria-label="Financial year list">
+    <div class="card-heading">
+      <div><h2>Your financial years</h2><p>{{ financialYears.length }} configured</p></div>
+    </div>
+
+    @if (isLoading) {
+      <p class="empty-state" role="status">Loading financial years...</p>
+    } @else if (financialYears.length === 0) {
+      <div class="empty-state">
+        <h3>No financial years yet</h3>
+        <p>Add a financial year to start uploading tax documents and recording transactions.</p>
+        <button type="button" class="secondary-button" (click)="showForm = true">Add your first financial year</button>
+      </div>
+    } @else {
+      <div class="year-list">
+        @for (year of financialYears; track year.id) {
+          <article class="year-row">
+            <div class="year-icon"><tv-icon name="financialYear" /></div>
+            <div class="year-description">
+              <h3>FY {{ formatYearCode(year.year_code) }}</h3>
+              <p>{{ formatDate(year.start_date) }} – {{ formatDate(year.end_date) }}</p>
+            </div>
+            <span class="year-status" [class.inactive]="year.status !== 'active'">{{ year.status }}</span>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

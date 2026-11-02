@@ -33,6 +33,7 @@ export interface Review {
 
   type: ReviewType;
   status: ReviewStatus;
+  financialYearId?: string | null;
 
   target: ReviewTarget;
 

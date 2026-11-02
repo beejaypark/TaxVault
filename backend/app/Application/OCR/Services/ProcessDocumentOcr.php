@@ -7,7 +7,7 @@ use App\Application\OCR\Contracts\OcrProvider;
 use App\Application\OCR\Data\NormalizedExtraction;
 use App\Application\OCR\Data\OcrRequest;
 use App\Application\OCR\Validation\NormalizedExtractionValidator;
-use App\Application\Reviews\Services\CreateConfidenceReview;
+use App\Application\Reviews\Services\CreateReviewForDocumentExtraction;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
 use Illuminate\Support\Facades\DB;
@@ -20,15 +20,23 @@ final class ProcessDocumentOcr
     public function __construct(
         private readonly OcrProvider $provider,
         ?NormalizedExtractionValidator $validator = null,
-        private readonly ConfidenceEvaluator $confidenceEvaluator = new ConfidenceEvaluator(),
-        private readonly CreateConfidenceReview $createConfidenceReview = new CreateConfidenceReview(),
+        private readonly ConfidenceEvaluator $confidenceEvaluator = new ConfidenceEvaluator,
+        private readonly CreateReviewForDocumentExtraction $createReview = new CreateReviewForDocumentExtraction,
     ) {
         $this->validator = $validator
-            ?? new NormalizedExtractionValidator();
+            ?? new NormalizedExtractionValidator;
     }
 
     public function execute(Document $document): DocumentExtraction
     {
+        $latestExtraction = $document->extractions()
+            ->latest('created_at')
+            ->first();
+
+        if ($latestExtraction?->status === 'completed') {
+            return $latestExtraction;
+        }
+
         $request = new OcrRequest(
             documentId: $document->getKey(),
             storageDisk: $document->storage_disk,
@@ -94,10 +102,7 @@ final class ProcessDocumentOcr
                 'error_metadata' => $result->errorMetadata ?: null,
             ]);
 
-            if (
-                $result->status === 'completed'
-                && ($qualityMetadata['review_required'] ?? false) === true
-            ) {
+            if ($result->status === 'completed') {
                 $normalized = $result->output['normalized'] ?? null;
 
                 $normalizedExtraction = new NormalizedExtraction(
@@ -109,20 +114,21 @@ final class ProcessDocumentOcr
                         : [],
                 );
 
-                $confidenceEvaluation = $this->confidenceEvaluator->evaluate(
-                    $normalizedExtraction
-                );
-
-                $this->createConfidenceReview->execute(
-                    $document,
-                    $extraction,
-                    $confidenceEvaluation,
-                );
+                if ($document->financial_year_id === null) {
+                    $document->update(['status' => 'awaiting_financial_year']);
+                } else {
+                    $this->createReview->execute(
+                        $document,
+                        $extraction,
+                        $normalizedExtraction,
+                    );
+                    $document->update(['status' => 'review_required']);
+                }
+            } else {
+                $document->update(['status' => 'processing_failed']);
             }
 
             return $extraction;
         });
     }
 }
-
-

@@ -2,12 +2,12 @@
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYearLabel }}</div>
-      <h1>Upload receipt</h1>
-      <p>Add a receipt or tax document to TaxVault.</p>
+      <h1>Upload documents</h1>
+      <p>Add receipts or tax documents to TaxVault.</p>
     </div>
 
     <a routerLink="/documents" class="back-link">
-      ← Back to documents
+      <tv-icon name="arrowLeft" /> Back to documents
     </a>
   </header>
 
@@ -18,11 +18,17 @@
         <select
           [value]="selectedFinancialYearId"
           (change)="onFinancialYearChange($event)"
-          [disabled]="isLoadingOptions || financialYears.length === 0 || isUploading"
+          [disabled]="isLoadingFinancialYears || financialYears.length === 0 || isUploading"
         >
-          <option value="">Select financial year</option>
+          @if (financialYears.length === 0) {
+            <option value="" selected>No financial years yet</option>
+          } @else if (!selectedFinancialYearId) {
+            <option value="" selected>Select financial year</option>
+          }
           @for (year of financialYears; track year.id) {
-            <option [value]="year.id">FY {{ year.year_code }}</option>
+            <option [value]="year.id" [selected]="year.id === selectedFinancialYearId">
+              FY {{ formatYearCode(year.year_code) }}
+            </option>
           }
         </select>
       </label>
@@ -32,11 +38,15 @@
         <select
           [value]="selectedDocumentTypeId"
           (change)="onDocumentTypeChange($event)"
-          [disabled]="isLoadingOptions || documentTypes.length === 0 || isUploading"
+          [disabled]="isLoadingDocumentTypes || documentTypes.length === 0 || isUploading"
         >
-          <option value="">Select document type</option>
+          @if (!selectedDocumentTypeId) {
+            <option value="" selected>Select document type</option>
+          }
           @for (type of documentTypes; track type.id) {
-            <option [value]="type.id">{{ type.name }}</option>
+            <option [value]="type.id" [selected]="type.id === selectedDocumentTypeId">
+              {{ type.name }}
+            </option>
           }
         </select>
       </label>
@@ -44,19 +54,22 @@
 
     @if (isLoadingOptions) {
       <p class="file-hint" role="status">Loading upload options…</p>
-    } @else if (financialYears.length === 0 || documentTypes.length === 0) {
-      <div class="error-message" role="status">
-        <span>!</span>
-        @if (financialYears.length === 0) {
-          No active financial year is available for your account.
-        } @else {
-          No active document types are configured yet.
-        }
-        Ask an administrator to configure the required options before uploading.
+    }
+
+    @if (!isLoadingFinancialYears && financialYears.length === 0) {
+      <div class="file-hint" role="status">
+        No financial year exists yet. You can still upload; after local text extraction, TaxVault will suggest a year from the document date and ask before creating it.
       </div>
     }
 
-    @if (!selectedFile) {
+    @if (!isLoadingDocumentTypes && documentTypes.length === 0) {
+      <div class="error-message" role="status">
+        <tv-icon name="warning" />
+        No active document types are available. Ask an administrator to enable document types before uploading.
+      </div>
+    }
+
+    @if (selectedFiles.length === 0) {
       <div
         class="drop-zone"
         [class.dragging]="isDragging"
@@ -64,54 +77,146 @@
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
       >
-        <div class="upload-icon">↑</div>
-        <h2>Upload your receipt</h2>
+        <div class="upload-icon"><tv-icon name="upload" /></div>
+        <h2>Upload documents in bulk</h2>
         <p class="drop-description">
-          Drag and drop your file here, or choose a file from your computer.
+          Drag and drop multiple files, choose files, or select a folder. Each file will use the financial year and document type selected above.
         </p>
 
-        <label class="browse-button">
-          Choose file
-          <input
-            type="file"
-            [accept]="acceptedExtensions"
-            (change)="onFileSelected($event)"
-          />
-        </label>
-
-        <p class="file-hint">PDF, JPG, PNG, WEBP, or TIFF · Maximum 20 MB</p>
-      </div>
-    } @else {
-      <div class="selected-file">
-        <div class="selected-file-icon">✓</div>
-        <div class="selected-file-details">
-          <strong>{{ selectedFile.name }}</strong>
-          <span>{{ formatFileSize(selectedFile.size) }}</span>
+        <div class="browse-actions">
+          <label class="browse-button">
+            Choose files
+            <input
+              type="file"
+              multiple
+              [accept]="acceptedExtensions"
+              (change)="onFileSelected($event)"
+            />
+          </label>
+          <label class="browse-button browse-button-secondary">
+            Choose folder
+            <input
+              type="file"
+              multiple
+              webkitdirectory
+              directory
+              [accept]="acceptedExtensions"
+              (change)="onFileSelected($event)"
+            />
+          </label>
         </div>
 
-        <button
-          type="button"
-          class="remove-button"
-          [disabled]="isUploading"
-          (click)="removeFile()"
-        >
-          Remove
-        </button>
+        <p class="file-hint">
+          PDF, JPG, PNG, WEBP, or TIFF · Maximum 20 MB per file
+        </p>
       </div>
+    } @else {
+      <div class="file-selection-header">
+        <div>
+          <h2>{{ selectedFiles.length }} file{{ selectedFiles.length === 1 ? '' : 's' }} selected</h2>
+          <p>{{ formatFileSize(totalFileSize) }} total · {{ pendingFileCount }} remaining</p>
+        </div>
+        <div class="browse-actions compact">
+          <label class="browse-button">
+            Add files
+            <input
+              type="file"
+              multiple
+              [accept]="acceptedExtensions"
+              [disabled]="isUploading"
+              (change)="onFileSelected($event)"
+            />
+          </label>
+          <label class="browse-button browse-button-secondary">
+            Add folder
+            <input
+              type="file"
+              multiple
+              webkitdirectory
+              directory
+              [accept]="acceptedExtensions"
+              [disabled]="isUploading"
+              (change)="onFileSelected($event)"
+            />
+          </label>
+        </div>
+      </div>
+
+      <ul class="selected-files">
+        @for (item of selectedFiles; track $index) {
+          <li
+            class="selected-file"
+            [class.file-failed]="item.status === 'failed'"
+            [class.file-duplicate]="item.status === 'duplicate'"
+          >
+            <div class="selected-file-icon">
+              <tv-icon [name]="item.status === 'uploaded' ? 'check' : item.status === 'duplicate' ? 'warning' : 'upload'" />
+            </div>
+            <div class="selected-file-details">
+              <strong [title]="item.file.webkitRelativePath || item.file.name">
+                {{ item.file.webkitRelativePath || item.file.name }}
+              </strong>
+              <span>
+                {{ formatFileSize(item.file.size) }}
+                @if (item.status === 'uploading') { · Uploading }
+                @if (item.status === 'uploaded') { · Uploaded }
+                @if (item.status === 'failed') { · {{ item.error }} }
+                @if (item.status === 'duplicate') {
+                  · Duplicate of {{ item.duplicate?.original_filename || 'existing document' }}
+                  @if (item.duplicate?.financial_year_code) {
+                    (FY {{ formatYearCode(item.duplicate?.financial_year_code || '') }})
+                  }
+                }
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="remove-button"
+              [disabled]="isUploading"
+              (click)="removeFile($index)"
+            >
+              Remove
+            </button>
+          </li>
+        }
+      </ul>
 
       <div class="next-step">
         <div>
-          <h2>Ready to upload</h2>
-          <p>The file will be securely stored. Information extraction is not started by this upload.</p>
+          <h2>
+            {{
+              pendingFileCount > 0
+                ? 'Ready to upload'
+                : duplicateFileCount > 0
+                  ? 'Duplicate files were skipped'
+                  : 'All files uploaded'
+            }}
+          </h2>
+          <p>
+            {{
+              duplicateFileCount > 0 && pendingFileCount === 0
+                ? 'TaxVault kept the previously uploaded document. Review the matching document in your document list.'
+                : 'Files are uploaded one at a time. Each will be stored securely and queued for local text extraction and review.'
+            }}
+          </p>
         </div>
 
         <button
           type="button"
           class="primary-button"
-          [disabled]="isUploading || isLoadingOptions || !selectedFinancialYearId || !selectedDocumentTypeId"
-          (click)="continue()"
+          [disabled]="isUploading || (pendingFileCount === 0 && duplicateFileCount === 0) || (pendingFileCount > 0 && (isLoadingOptions || !selectedDocumentTypeId))"
+          (click)="pendingFileCount > 0 ? continue() : viewDocuments()"
         >
-          {{ isUploading ? 'Uploading…' : 'Upload document' }}
+          {{
+            isUploading
+              ? 'Uploading…'
+              : pendingFileCount > 0
+                ? 'Upload ' + pendingFileCount + ' file' + (pendingFileCount === 1 ? '' : 's')
+                : duplicateFileCount > 0
+                  ? 'View documents'
+                  : 'Uploaded'
+          }}
         </button>
       </div>
     }
@@ -131,7 +236,7 @@
         <div class="step-number">1</div>
         <div>
           <strong>Upload</strong>
-          <p>Choose your financial year, document type, and file.</p>
+          <p>Choose a document type and select multiple files or a folder. If no financial year exists yet, TaxVault will suggest one after extracting the document date.</p>
         </div>
       </div>
 
@@ -146,8 +251,8 @@
       <div class="step">
         <div class="step-number">3</div>
         <div>
-          <strong>Next processing stage</strong>
-          <p>Information extraction and review are handled separately.</p>
+          <strong>Extract and review</strong>
+          <p>TaxVault reads the document locally, then asks you to verify extracted details before recording a transaction.</p>
         </div>
       </div>
     </div>

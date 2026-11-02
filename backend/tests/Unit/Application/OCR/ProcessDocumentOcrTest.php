@@ -3,11 +3,14 @@
 namespace Tests\Unit\Application\OCR;
 
 use App\Application\OCR\Contracts\OcrProvider;
+use App\Application\OCR\Data\OcrRequest;
+use App\Application\OCR\Data\OcrResult;
 use App\Application\OCR\Services\ProcessDocumentOcr;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
 use App\Domain\Documents\Models\DocumentType;
 use App\Domain\FinancialYears\Models\FinancialYear;
+use App\Infrastructure\OCR\Providers\TestOcrProvider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +19,41 @@ use Tests\TestCase;
 class ProcessDocumentOcrTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_unassigned_document_waits_for_financial_year_confirmation_after_extraction(): void
+    {
+        Storage::fake('documents');
+        $content = '%PDF-1.4 Invoice date will be extracted';
+        Storage::disk('documents')->put('unassigned/invoice.pdf', $content);
+
+        $user = User::factory()->create();
+        $documentType = DocumentType::query()->create([
+            'code' => 'invoice',
+            'name' => 'Invoice',
+            'description' => 'Invoice document',
+            'metadata' => [],
+            'status' => 'active',
+        ]);
+        $document = Document::query()->create([
+            'user_id' => $user->getKey(),
+            'financial_year_id' => null,
+            'document_type_id' => $documentType->getKey(),
+            'storage_disk' => 'documents',
+            'object_key' => 'unassigned/invoice.pdf',
+            'content_sha256' => hash('sha256', $content),
+            'original_filename' => 'invoice.pdf',
+            'mime_type' => 'application/pdf',
+            'size_bytes' => strlen($content),
+            'uploaded_at' => now(),
+            'status' => 'processing',
+        ]);
+
+        $extraction = app(ProcessDocumentOcr::class)->execute($document);
+
+        $this->assertSame('completed', $extraction->status);
+        $this->assertSame('awaiting_financial_year', $document->fresh()->status);
+        $this->assertDatabaseCount('reviews', 0);
+    }
 
     public function test_document_is_processed_and_extraction_is_persisted(): void
     {
@@ -82,7 +120,7 @@ class ProcessDocumentOcrTest extends TestCase
         $this->assertEquals('completed', $extraction->status);
 
         $this->assertEquals(
-            'OCR test extraction for document ' . $document->getKey(),
+            'OCR test extraction for document '.$document->getKey(),
             $extraction->output['text']
         );
 
@@ -150,10 +188,11 @@ class ProcessDocumentOcrTest extends TestCase
             'status' => 'active',
         ]);
 
-        $provider = new class implements OcrProvider {
+        $provider = new class implements OcrProvider
+        {
             public function process(
-                \App\Application\OCR\Data\OcrRequest $request
-            ): \App\Application\OCR\Data\OcrResult {
+                OcrRequest $request
+            ): OcrResult {
                 throw new \RuntimeException(
                     'OCR provider temporary failure'
                 );
@@ -169,6 +208,7 @@ class ProcessDocumentOcrTest extends TestCase
 
         $service->execute($document);
     }
+
     public function test_provider_returned_failed_result_is_persisted(): void
     {
         Storage::fake('documents');
@@ -213,11 +253,12 @@ class ProcessDocumentOcrTest extends TestCase
             'status' => 'active',
         ]);
 
-        $provider = new class implements OcrProvider {
+        $provider = new class implements OcrProvider
+        {
             public function process(
-                \App\Application\OCR\Data\OcrRequest $request
-            ): \App\Application\OCR\Data\OcrResult {
-                return new \App\Application\OCR\Data\OcrResult(
+                OcrRequest $request
+            ): OcrResult {
+                return new OcrResult(
                     provider: 'test-failure',
                     model: 'test-ocr',
                     modelVersion: '1',
@@ -281,12 +322,13 @@ class ProcessDocumentOcrTest extends TestCase
             'status' => 'failed',
         ]);
     }
+
     public function test_ocr_provider_can_be_resolved_from_the_container(): void
     {
         $provider = app(OcrProvider::class);
 
         $this->assertInstanceOf(
-            \App\Infrastructure\OCR\Providers\TestOcrProvider::class,
+            TestOcrProvider::class,
             $provider
         );
     }

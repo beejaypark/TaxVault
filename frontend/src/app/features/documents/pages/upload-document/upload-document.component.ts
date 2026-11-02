@@ -6,7 +6,11 @@ import {
   inject,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { EMPTY, from } from 'rxjs';
+import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 
+import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { formatFinancialYear } from '../../../../shared/utils/financial-year';
 import {
   DocumentApiService,
   DocumentTypeDto,
@@ -15,7 +19,7 @@ import {
 
 @Component({
   selector: 'app-upload-document',
-  imports: [RouterLink],
+  imports: [RouterLink, TaxIconComponent],
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,10 +34,11 @@ export class UploadDocumentComponent implements OnInit {
 
   selectedFinancialYearId = '';
   selectedDocumentTypeId = '';
-  selectedFile: File | null = null;
+  selectedFiles: UploadFile[] = [];
 
   isDragging = false;
-  isLoadingOptions = true;
+  isLoadingFinancialYears = true;
+  isLoadingDocumentTypes = true;
   isUploading = false;
   errorMessage = '';
 
@@ -48,27 +53,55 @@ export class UploadDocumentComponent implements OnInit {
   readonly acceptedExtensions = '.pdf,.jpg,.jpeg,.png,.webp,.tif,.tiff';
   readonly maxFileSize = 20 * 1024 * 1024;
 
+  get isLoadingOptions(): boolean {
+    return this.isLoadingFinancialYears || this.isLoadingDocumentTypes;
+  }
+
   get financialYearLabel(): string {
     const year = this.financialYears.find(
       (item) => item.id === this.selectedFinancialYearId,
     );
 
-    return year ? `FY ${year.year_code}` : 'Select financial year';
+    return year
+      ? `FY ${formatFinancialYear(year.year_code)}`
+      : 'Financial year pending';
+  }
+
+  formatYearCode(yearCode: string): string {
+    return formatFinancialYear(yearCode);
+  }
+
+  get totalFileSize(): number {
+    return this.selectedFiles.reduce((total, item) => total + item.file.size, 0);
+  }
+
+  get pendingFileCount(): number {
+    return this.selectedFiles.filter(
+      (item) => item.status === 'pending' || item.status === 'failed',
+    ).length;
+  }
+
+  get duplicateFileCount(): number {
+    return this.selectedFiles.filter((item) => item.status === 'duplicate').length;
   }
 
   ngOnInit(): void {
     this.api.listFinancialYears().subscribe({
       next: (years) => {
         this.financialYears = years;
-        if (!this.selectedFinancialYearId && years.length > 0) {
-          this.selectedFinancialYearId = years[0].id;
-        }
-        this.isLoadingOptions = false;
+        const currentYearId = this.api.selectedFinancialYearId();
+        this.selectedFinancialYearId = years.some(
+          (year) => year.id === currentYearId,
+        )
+          ? years.find((year) => year.id === currentYearId)?.id ?? ''
+          : years[0]?.id ?? '';
+        this.api.selectFinancialYear(this.selectedFinancialYearId || null);
+        this.isLoadingFinancialYears = false;
         this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Unable to load financial years. Please try again.';
-        this.isLoadingOptions = false;
+        this.isLoadingFinancialYears = false;
         this.cdr.markForCheck();
       },
     });
@@ -79,10 +112,12 @@ export class UploadDocumentComponent implements OnInit {
         if (!this.selectedDocumentTypeId && types.length > 0) {
           this.selectedDocumentTypeId = types[0].id;
         }
+        this.isLoadingDocumentTypes = false;
         this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Unable to load document types. Please try again.';
+        this.isLoadingDocumentTypes = false;
         this.cdr.markForCheck();
       },
     });
@@ -91,6 +126,7 @@ export class UploadDocumentComponent implements OnInit {
   onFinancialYearChange(event: Event): void {
     this.selectedFinancialYearId =
       (event.target as HTMLSelectElement).value;
+    this.api.selectFinancialYear(this.selectedFinancialYearId || null);
   }
 
   onDocumentTypeChange(event: Event): void {
@@ -100,7 +136,7 @@ export class UploadDocumentComponent implements OnInit {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectFile(input.files?.[0] ?? null);
+    this.addFiles(Array.from(input.files ?? []));
     input.value = '';
   }
 
@@ -120,11 +156,15 @@ export class UploadDocumentComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     this.isDragging = false;
-    this.selectFile(event.dataTransfer?.files?.[0] ?? null);
+    this.addFiles(Array.from(event.dataTransfer?.files ?? []));
   }
 
-  removeFile(): void {
-    this.selectedFile = null;
+  removeFile(index: number): void {
+    if (this.isUploading) {
+      return;
+    }
+
+    this.selectedFiles = this.selectedFiles.filter((_, itemIndex) => itemIndex !== index);
     this.errorMessage = '';
   }
 
@@ -133,47 +173,97 @@ export class UploadDocumentComponent implements OnInit {
       return;
     }
 
-    if (!this.selectedFile) {
-      this.errorMessage = 'Please choose a file first.';
+    const filesToUpload = this.selectedFiles.filter(
+      (item) => item.status === 'pending' || item.status === 'failed',
+    );
+
+    if (filesToUpload.length === 0) {
+      this.errorMessage = 'Please choose at least one file to upload.';
       return;
     }
 
-    if (!this.selectedFinancialYearId || !this.selectedDocumentTypeId) {
+    if (!this.selectedDocumentTypeId) {
       this.errorMessage =
-        'An active financial year and document type are required before uploading.';
+        'An active document type is required before uploading.';
       return;
     }
 
     this.errorMessage = '';
     this.isUploading = true;
 
-    this.api.uploadDocument(
-      this.selectedFinancialYearId,
-      this.selectedDocumentTypeId,
-      this.selectedFile,
-    ).subscribe({
-      next: () => {
-        this.isUploading = false;
+    from(filesToUpload).pipe(
+      concatMap((item) => {
+        item.status = 'uploading';
+        item.error = '';
         this.cdr.markForCheck();
-        void this.router.navigateByUrl('/documents');
-      },
-      error: (error: { status?: number; error?: { message?: string } }) => {
-        this.isUploading = false;
 
-        if (error.status === 401) {
-          this.errorMessage = 'Your session may have expired. Please sign in again.';
-        } else if (error.status === 422) {
-          this.errorMessage =
-            'The upload was rejected. Check the selected file and required fields.';
+        return this.api.uploadDocument(
+          this.selectedFinancialYearId,
+          this.selectedDocumentTypeId,
+          item.file,
+        ).pipe(
+          tap(() => {
+            item.status = 'uploaded';
+            this.cdr.markForCheck();
+          }),
+          catchError((error: {
+            status?: number;
+            error?: {
+              code?: string;
+              message?: string;
+              duplicate_document?: DuplicateDocument;
+            };
+          }) => {
+            if (
+              error.status === 409
+              && error.error?.code === 'duplicate_document'
+              && error.error.duplicate_document
+            ) {
+              item.status = 'duplicate';
+              item.duplicate = error.error.duplicate_document;
+              item.error = '';
+            } else {
+              item.status = 'failed';
+              item.error = error.status === 401
+                ? 'Session expired.'
+                : error.status === 422
+                  ? 'Rejected: check file type, size, and upload fields.'
+                  : error.error?.message ?? 'Upload failed.';
+            }
+            this.cdr.markForCheck();
+            return EMPTY;
+          }),
+        );
+      }),
+      finalize(() => {
+        this.isUploading = false;
+        const failedCount = this.selectedFiles.filter(
+          (item) => item.status === 'failed',
+        ).length;
+        const duplicateCount = this.duplicateFileCount;
+        if (failedCount === 0 && duplicateCount === 0) {
+          void this.router.navigateByUrl('/documents');
         } else {
-          this.errorMessage =
-            error.error?.message ??
-            'Upload failed. Please try again.';
+          const messages = [];
+          if (failedCount > 0) {
+            messages.push(
+              `${failedCount} file${failedCount === 1 ? '' : 's'} failed. Fix the listed issues or retry them.`,
+            );
+          }
+          if (duplicateCount > 0) {
+            messages.push(
+              `${duplicateCount} duplicate file${duplicateCount === 1 ? ' was' : 's were'} not uploaded; the existing document was kept.`,
+            );
+          }
+          this.errorMessage = messages.join(' ');
         }
-
         this.cdr.markForCheck();
-      },
-    });
+      }),
+    ).subscribe();
+  }
+
+  viewDocuments(): void {
+    void this.router.navigateByUrl('/documents');
   }
 
   formatFileSize(bytes: number): string {
@@ -188,25 +278,29 @@ export class UploadDocumentComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  private selectFile(file: File | null): void {
+  private addFiles(files: File[]): void {
     this.errorMessage = '';
 
-    if (!file) {
+    if (files.length === 0) {
       return;
     }
 
-    if (!this.isSupportedFile(file)) {
-      this.errorMessage =
-        'Please choose a PDF, JPG, PNG, WEBP, or TIFF file.';
-      return;
+    const accepted: UploadFile[] = [];
+    const rejected: string[] = [];
+    for (const file of files) {
+      if (!this.isSupportedFile(file)) {
+        rejected.push(`${file.name}: unsupported file type`);
+      } else if (file.size > this.maxFileSize) {
+        rejected.push(`${file.name}: larger than 20 MB`);
+      } else {
+        accepted.push({ file, status: 'pending', error: '' });
+      }
     }
 
-    if (file.size > this.maxFileSize) {
-      this.errorMessage = 'The maximum file size is 20 MB.';
-      return;
+    this.selectedFiles = [...this.selectedFiles, ...accepted];
+    if (rejected.length > 0) {
+      this.errorMessage = `${rejected.length} file${rejected.length === 1 ? '' : 's'} not added: ${rejected.slice(0, 3).join('; ')}${rejected.length > 3 ? '; …' : ''}.`;
     }
-
-    this.selectedFile = file;
   }
 
   private isSupportedFile(file: File): boolean {
@@ -220,4 +314,19 @@ export class UploadDocumentComponent implements OnInit {
       extension ?? '',
     );
   }
+}
+
+interface UploadFile {
+  file: File;
+  status: 'pending' | 'uploading' | 'uploaded' | 'failed' | 'duplicate';
+  error: string;
+  duplicate?: DuplicateDocument;
+}
+
+interface DuplicateDocument {
+  id: string;
+  original_filename: string | null;
+  financial_year_code: string | null;
+  uploaded_at: string;
+  status: string;
 }

@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Reference taxonomy and document types are seeded only after their
-        // canonical, versioned datasets are approved by the tax domain workstream.
+        $this->call(StarterDocumentTypesSeeder::class);
     }
 }

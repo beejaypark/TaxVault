@@ -1,24 +1,93 @@
-﻿import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { TaxIconComponent } from '../tax-icon/tax-icon.component';
+import { formatFinancialYear } from '../../utils/financial-year';
 import { AuthService } from '../../services/auth/auth.service';
+import {
+  DocumentApiService,
+  FinancialYearDto,
+} from '../../services/documents/document-api.service';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppShellComponent {
+export class AppShellComponent implements OnInit {
+  private readonly documentsApi = inject(DocumentApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  logoutError = false;
+  selectedFinancialYearId = '';
+  isLoadingFinancialYears = true;
+
+  get financialYears(): FinancialYearDto[] {
+    return this.documentsApi.financialYears().filter(
+      (year) => year.status === 'active',
+    );
+  }
+
+  formatYearCode(yearCode: string): string {
+    return formatFinancialYear(yearCode);
+  }
+
   constructor(
     public readonly auth: AuthService,
     private readonly router: Router,
   ) {}
 
+  ngOnInit(): void {
+    this.documentsApi.listFinancialYears().subscribe({
+      next: (years) => {
+        const selectedYearId = this.documentsApi.selectedFinancialYearId();
+        this.selectedFinancialYearId = years.some(
+          (year) => year.id === selectedYearId,
+        )
+          ? years.find((year) => year.id === selectedYearId)?.id ?? ''
+          : this.documentsApi.defaultFinancialYearId(years) ?? '';
+        this.documentsApi.selectFinancialYear(
+          this.selectedFinancialYearId || null,
+        );
+        this.isLoadingFinancialYears = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoadingFinancialYears = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  onFinancialYearChange(financialYearId: string): void {
+    this.selectedFinancialYearId = financialYearId;
+    this.documentsApi.selectFinancialYear(financialYearId || null);
+  }
+
   logout(): void {
-    this.auth.logout().subscribe(() => {
-      void this.router.navigate(['/login']);
+    this.logoutError = false;
+
+    this.auth.logout().subscribe({
+      next: (logoutUrl) => {
+        if (logoutUrl) {
+          window.location.assign(logoutUrl);
+          return;
+        }
+
+        void this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.logoutError = true;
+      },
     });
   }
 }

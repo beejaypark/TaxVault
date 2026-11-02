@@ -60,6 +60,21 @@ describe('AuthService', () => {
     expect(service.currentUser).toBeNull();
   });
 
+  it('propagates server errors while restoring an authenticated session', () => {
+    let receivedError: unknown;
+
+    service.initialize().subscribe({
+      error: (error) => (receivedError = error),
+    });
+
+    http.expectOne('/api/auth/user').flush(
+      { message: 'Server error.' },
+      { status: 500, statusText: 'Server Error' },
+    );
+
+    expect(receivedError).toBeTruthy();
+  });
+
   it('requests a CSRF cookie before submitting login credentials', () => {
     let result: AuthUser | undefined;
 
@@ -86,13 +101,24 @@ describe('AuthService', () => {
   it('clears local authentication state on logout', () => {
     service.user.set(user);
 
-    service.logout().subscribe();
+    let logoutUrl: string | null | undefined;
+    service.logout().subscribe((url) => (logoutUrl = url));
 
     const request = http.expectOne('/api/auth/logout');
     expect(request.request.method).toBe('POST');
     expect(request.request.withCredentials).toBe(true);
-    request.flush({ message: 'Logged out.' });
+    request.flush({
+      message: 'Logged out.',
+      data: { logout_url: 'https://identity.example/logout' },
+    });
 
     expect(service.currentUser).toBeNull();
+    expect(logoutUrl).toBe('https://identity.example/logout');
+  });
+
+  it('creates a same-origin OIDC redirect URL with an encoded return path', () => {
+    expect(service.oidcLoginUrl('/documents?filter=recent')).toBe(
+      '/api/auth/oidc/redirect?returnUrl=%2Fdocuments%3Ffilter%3Drecent',
+    );
   });
 });

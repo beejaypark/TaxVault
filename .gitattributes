@@ -1,0 +1,2 @@
+*.sh text eol=lf
+infrastructure/docker/nginx/default.conf text eol=lf
