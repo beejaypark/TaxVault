@@ -7,7 +7,7 @@
   </main>
 } @else if (loadError) {
   <main class="review-detail-page">
-    <a class="back-link" routerLink="/reviews"><tv-icon name="arrowLeft" /> Back to reviews</a>
+    <tv-back-navigation />
     <section class="detail-state error-state" role="alert">
       <h1>Review unavailable</h1>
       <p>{{ loadError }}</p>
@@ -16,7 +16,7 @@
   </main>
 } @else if (review) {
   <main class="review-detail-page">
-    <a class="back-link" routerLink="/reviews"><tv-icon name="arrowLeft" /> Back to reviews</a>
+    <tv-back-navigation />
 
     <header class="detail-header">
       <div>
@@ -166,7 +166,7 @@
                       </section>
                     }
 
-                    @if (review.status === 'pending' && field[0] !== 'document_text') {
+                    @if (canEditCorrections && field[0] !== 'document_text') {
                       <section class="correction-editor" aria-label="Field correction">
                         <h4>Correct this value</h4>
                         <label [attr.for]="'correction-' + field[0]">Corrected value</label>
@@ -307,6 +307,16 @@
             <h2>This review is {{ review.status === 'completed' ? 'complete' : statusLabel(review.status).toLowerCase() }}</h2>
             @if (review.decision) {
               <p>Decision recorded: <strong>{{ review.decision }}</strong></p>
+            }
+            @if (review.status === 'completed' && review.extraction) {
+              <button
+                type="button"
+                class="secondary-button"
+                [disabled]="correctionSubmittingField !== null"
+                (click)="toggleCorrectionEditing()"
+              >
+                {{ isEditingCompletedReview ? 'Done' : 'Edit' }}
+              </button>
             }
           </section>
         }

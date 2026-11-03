@@ -65,17 +65,39 @@ final class FinancialYearExportService
 
         $documentIds = array_column($documents, 'id');
 
-        $documentExtractions = $this->whereInOrEmpty(
-            'document_extractions',
-            'document_id',
-            $documentIds,
-        );
+        $documentExtractions = DB::table('document_extractions')
+            ->where(function ($query) use ($documentIds, $financialYear): void {
+                if ($documentIds !== []) {
+                    $query->whereIn('document_id', $documentIds);
+                }
 
-        $evidenceLinks = $this->whereInOrEmpty(
-            'financial_record_documents',
-            'document_id',
-            $documentIds,
-        );
+                $query->orWhere('source_financial_year_id', $financialYear->getKey());
+            })
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
+
+        $evidenceLinks = $documentIds === [] && $transactionIds === []
+            ? []
+            : DB::table('financial_record_documents')
+                ->where(function ($query) use ($documentIds, $transactionIds): void {
+                    if ($documentIds !== []) {
+                        $query->whereIn('document_id', $documentIds);
+                    }
+
+                    if ($transactionIds !== []) {
+                        $query->orWhere(function ($query) use ($transactionIds): void {
+                            $query
+                                ->whereIn('transaction_id', $transactionIds)
+                                ->whereNull('document_id');
+                        });
+                    }
+                })
+                ->orderBy('id')
+                ->get()
+                ->map(fn ($row) => (array) $row)
+                ->all();
 
         $properties = DB::table('properties')
             ->where('user_id', $user->getKey())
@@ -115,6 +137,7 @@ final class FinancialYearExportService
             $documentIds,
             $transactionIds,
             array_column($documentExtractions, 'id'),
+            $financialYear->getKey(),
         );
 
         $auditEvents = $this->loadAuditEvents(
@@ -214,12 +237,14 @@ final class FinancialYearExportService
         array $documentIds,
         array $transactionIds,
         array $extractionIds,
+        string $financialYearId,
     ): array {
         return DB::table('reviews')
             ->where(function ($query) use (
                 $documentIds,
                 $transactionIds,
                 $extractionIds,
+                $financialYearId,
             ): void {
                 if ($documentIds !== []) {
                     $query->whereIn('document_id', $documentIds);
@@ -232,6 +257,8 @@ final class FinancialYearExportService
                 if ($extractionIds !== []) {
                     $query->orWhereIn('document_extraction_id', $extractionIds);
                 }
+
+                $query->orWhere('source_financial_year_id', $financialYearId);
             })
             ->orderBy('id')
             ->get()

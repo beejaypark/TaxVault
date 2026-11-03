@@ -8,6 +8,10 @@ import {
   DocumentApiService,
   DocumentDto,
 } from '../../../../shared/services/documents/document-api.service';
+import {
+  TaxWorkspaceApiService,
+  TransactionDto,
+} from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewService } from '../../../../shared/services/reviews/review.service';
 import { DashboardComponent } from './dashboard.component';
 
@@ -20,6 +24,9 @@ describe('DashboardComponent', () => {
   };
   let reviewService: {
     listReviews: ReturnType<typeof vi.fn>;
+  };
+  let workspaceApi: {
+    listTransactions: ReturnType<typeof vi.fn>;
   };
 
   const documents: DocumentDto[] = [
@@ -62,6 +69,42 @@ describe('DashboardComponent', () => {
     },
   ];
 
+  const transactions: TransactionDto[] = [
+    {
+      id: 'transaction-1',
+      financial_year_id: 'year-1',
+      document_id: 'document-1',
+      transaction_date: '2025-07-12',
+      description: 'Rental income',
+      direction: 'income',
+      amount: '2500.00',
+      currency: 'AUD',
+      source_system: 'manual',
+    },
+    {
+      id: 'transaction-2',
+      financial_year_id: 'year-1',
+      document_id: null,
+      transaction_date: '2025-07-14',
+      description: 'Repairs',
+      direction: 'expense',
+      amount: '400.00',
+      currency: 'AUD',
+      source_system: 'manual',
+    },
+    {
+      id: 'transaction-3',
+      financial_year_id: 'year-2',
+      document_id: null,
+      transaction_date: '2026-07-14',
+      description: 'Another year',
+      direction: 'expense',
+      amount: '900.00',
+      currency: 'AUD',
+      source_system: 'manual',
+    },
+  ];
+
   beforeEach(async () => {
     documentsApi = {
       listDocuments: vi.fn().mockReturnValue(of(documents)),
@@ -77,6 +120,9 @@ describe('DashboardComponent', () => {
     reviewService = {
       listReviews: vi.fn().mockReturnValue(of({ data: reviews })),
     };
+    workspaceApi = {
+      listTransactions: vi.fn().mockReturnValue(of(transactions)),
+    };
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
@@ -84,6 +130,7 @@ describe('DashboardComponent', () => {
         provideRouter([]),
         { provide: DocumentApiService, useValue: documentsApi },
         { provide: ReviewService, useValue: reviewService },
+        { provide: TaxWorkspaceApiService, useValue: workspaceApi },
       ],
     }).compileComponents();
 
@@ -157,5 +204,48 @@ describe('DashboardComponent', () => {
       .toEqual(['document-2']);
     expect(component.openReviews.map((review) => review.id))
       .toEqual(['review-2']);
+  });
+
+  it('summarizes and charts transactions for the selected financial year', () => {
+    const component = fixture.componentInstance;
+
+    expect(component.totalIncome).toBe(2500);
+    expect(component.totalExpenses).toBe(400);
+    expect(component.netAmount).toBe(2100);
+    expect(component.monthlyTransactions).toHaveLength(12);
+    expect(component.monthlyTransactions[0]).toMatchObject({
+      key: '2025-07',
+      income: 2500,
+      expenses: 400,
+      incomeHeight: 100,
+      expensesHeight: 16,
+    });
+    expect(component.monthlyTransactions[11].key).toBe('2026-06');
+  });
+
+  it('shows financial analysis and review progress in the dashboard', () => {
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+    expect(text).toContain('Financial year at a glance');
+    expect(text).toContain('Monthly income & expenses');
+    expect(text).toContain('$2,500');
+    expect(text).toContain('$400');
+    expect(text).toContain('Document review progress');
+  });
+
+  it('reports transaction analysis errors instead of showing an empty chart', () => {
+    workspaceApi.listTransactions.mockReturnValue(
+      throwError(() => new Error('API unavailable')),
+    );
+
+    const errorFixture = TestBed.createComponent(DashboardComponent);
+    errorFixture.detectChanges();
+
+    expect(errorFixture.componentInstance.financialAnalysisError)
+      .toBe('Unable to load financial analysis for this year.');
+    expect((errorFixture.nativeElement as HTMLElement).textContent)
+      .toContain('Unable to load financial analysis for this year.');
+    expect((errorFixture.nativeElement as HTMLElement).textContent)
+      .not.toContain('No transactions recorded for this financial year yet.');
   });
 });

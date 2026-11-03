@@ -35,6 +35,10 @@ export interface DocumentDto {
   size_bytes: number;
   uploaded_at: string;
   status: string;
+  payment_status?: 'unconfirmed' | 'paid';
+  payment_date?: string | null;
+  payment_method?: string | null;
+  payment_amount?: number | string | null;
   latest_extraction?: {
     id: string;
     status: string;
@@ -163,5 +167,24 @@ export class DocumentApiService {
     return this.http
       .post<ApiItem<DocumentDto>>(`/api/documents/${documentId}/retry`, {})
       .pipe(map((response) => response.data));
+  }
+
+  confirmDocumentPayment(
+    documentId: string,
+    paymentDate: string,
+    paymentMethod: string,
+    amount: string,
+  ): Observable<DocumentDto> {
+    return this.http
+      .post<ApiItem<DocumentDto>>(`/api/documents/${documentId}/payment`, {
+        payment_date: paymentDate,
+        payment_method: paymentMethod,
+        amount,
+      })
+      .pipe(map((response) => response.data));
+  }
+
+  deleteDocument(documentId: string): Observable<void> {
+    return this.http.delete<void>(`/api/documents/${documentId}`);
   }
 }

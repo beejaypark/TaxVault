@@ -8,7 +8,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
+import { ModalDialogComponent } from '../../../../shared/components/modal-dialog/modal-dialog.component';
 import { formatFinancialYear } from '../../../../shared/utils/financial-year';
 import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
@@ -20,7 +23,7 @@ import {
 
 @Component({
   selector: 'app-document-list',
-  imports: [RouterLink, TaxIconComponent],
+  imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +41,26 @@ export class DocumentListComponent implements OnInit {
   errorMessage = '';
   optionsErrorMessage = '';
   assigningFinancialYearDocumentId: string | null = null;
+  deletingDocumentId: string | null = null;
+  failedDeletionDocumentId: string | null = null;
+  deleteErrorMessage = '';
+  confirmingPaymentDocumentId: string | null = null;
+  confirmingPaymentRequestId: string | null = null;
+  paymentDate = new Date().toISOString().slice(0, 10);
+  paymentAmount = '';
+  paymentMethod = 'bpay';
+  failedPaymentDocumentId: string | null = null;
+  paymentErrorMessage = '';
+  private readonly deletedDocumentIds = new Set<string>();
+
+  readonly paymentMethods = [
+    { value: 'bpay', label: 'BPAY' },
+    { value: 'bank_transfer', label: 'Bank transfer' },
+    { value: 'card', label: 'Card' },
+    { value: 'direct_debit', label: 'Direct debit' },
+    { value: 'cash', label: 'Cash' },
+    { value: 'other', label: 'Other' },
+  ];
 
   get financialYear(): string {
     const selectedYearId = this.api.selectedFinancialYearId();
@@ -67,6 +90,12 @@ export class DocumentListComponent implements OnInit {
 
   get hasSelectedFinancialYear(): boolean {
     return this.api.selectedFinancialYearId() !== null;
+  }
+
+  get paymentConfirmationDocument(): DocumentDto | null {
+    return this.documents.find(
+      (document) => document.id === this.confirmingPaymentDocumentId,
+    ) ?? null;
   }
 
   getFinancialYearLabel(document: DocumentDto): string {
@@ -214,6 +243,91 @@ export class DocumentListComponent implements OnInit {
     });
   }
 
+  openPaymentConfirmation(document: DocumentDto): void {
+    if (document.financial_year_id === null || document.payment_status === 'paid') {
+      return;
+    }
+
+    this.confirmingPaymentDocumentId = document.id;
+    this.paymentDate = this.today();
+    this.paymentAmount = '';
+    this.paymentMethod = 'bpay';
+    this.failedPaymentDocumentId = null;
+    this.paymentErrorMessage = '';
+  }
+
+  cancelPaymentConfirmation(): void {
+    this.confirmingPaymentDocumentId = null;
+    this.paymentErrorMessage = '';
+  }
+
+  confirmPayment(document: DocumentDto): void {
+    if (
+      this.confirmingPaymentDocumentId !== document.id
+      || this.confirmingPaymentRequestId !== null
+      || !this.paymentDate
+      || !Number.isFinite(Number(this.paymentAmount))
+      || Number(this.paymentAmount) <= 0
+    ) {
+      return;
+    }
+
+    this.confirmingPaymentRequestId = document.id;
+    this.failedPaymentDocumentId = null;
+    this.paymentErrorMessage = '';
+    this.api.confirmDocumentPayment(
+      document.id,
+      this.paymentDate,
+      this.paymentMethod,
+      this.paymentAmount,
+    ).subscribe({
+      next: (updatedDocument) => {
+        this.replaceDocument(updatedDocument);
+        this.confirmingPaymentDocumentId = null;
+        this.confirmingPaymentRequestId = null;
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.confirmingPaymentRequestId = null;
+        this.failedPaymentDocumentId = document.id;
+        this.paymentErrorMessage = error.error?.message
+          ?? 'Unable to confirm payment. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  deleteDocument(document: DocumentDto): void {
+    if (
+      document.status === 'processing'
+      || this.deletingDocumentId !== null
+      || !window.confirm(
+        `Permanently delete "${document.original_filename}"? The original file, document entry, and its review items will be removed. OCR extractions, evidence, and transactions will be kept, but detached from the document. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    this.deletingDocumentId = document.id;
+    this.failedDeletionDocumentId = null;
+    this.deleteErrorMessage = '';
+    this.api.deleteDocument(document.id).subscribe({
+      next: () => {
+        this.deletedDocumentIds.add(document.id);
+        this.documents = this.documents.filter((item) => item.id !== document.id);
+        this.deletingDocumentId = null;
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.deletingDocumentId = null;
+        this.failedDeletionDocumentId = document.id;
+        this.deleteErrorMessage = error.error?.message
+          ?? 'Unable to delete the document. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   getDocumentTypeName(document: DocumentDto): string {
     return this.documentTypes.find(
       (type) => type.id === document.document_type_id,
@@ -232,6 +346,30 @@ export class DocumentListComponent implements OnInit {
       month: 'short',
       year: 'numeric',
     }).format(date);
+  }
+
+  formatPaymentAmount(amount: number | string | null | undefined): string {
+    const value = Number(amount);
+    return Number.isFinite(value)
+      ? new Intl.NumberFormat('en-AU', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(value)
+      : 'Amount unavailable';
+  }
+
+  paymentMethodLabel(method: string | null | undefined): string {
+    return this.paymentMethods.find((item) => item.value === method)?.label
+      ?? 'Payment method unavailable';
+  }
+
+  private today(): string {
+    const today = new Date();
+    return [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0'),
+    ].join('-');
   }
 
   formatFileSize(bytes: number): string {
@@ -276,6 +414,18 @@ export class DocumentListComponent implements OnInit {
       .replace(/\b\w/g, (character) => character.toUpperCase());
   }
 
+  getStatusClass(status: string): string {
+    const statusClass: Record<string, string> = {
+      processing: 'status-processing',
+      review_required: 'status-review',
+      processing_failed: 'status-failed',
+      awaiting_financial_year: 'status-attention',
+      active: 'status-uploaded',
+    };
+
+    return `status ${statusClass[status] ?? 'status-neutral'}`;
+  }
+
   private pollProcessingDocuments(): void {
     refreshEvery(
       () => this.api.listDocuments(),
@@ -286,7 +436,9 @@ export class DocumentListComponent implements OnInit {
     ).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((documents) => {
-      this.documents = documents;
+      this.documents = documents.filter(
+        (document) => !this.deletedDocumentIds.has(document.id),
+      );
       this.optionsErrorMessage = '';
       this.cdr.markForCheck();
     });

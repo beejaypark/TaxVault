@@ -22,6 +22,7 @@ import {
   faReceipt,
   faRightLeft,
   faTags,
+  faTrashCan,
   faWandMagicSparkles,
   faXmark,
   type IconDefinition,
@@ -50,6 +51,7 @@ export type TaxIconName =
   | 'transactions'
   | 'classification'
   | 'extraction'
+  | 'delete'
   | 'close';
 
 const ICONS: Record<TaxIconName, IconDefinition> = {
@@ -75,6 +77,7 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   transactions: faRightLeft,
   classification: faTags,
   extraction: faWandMagicSparkles,
+  delete: faTrashCan,
   close: faXmark,
 };
 

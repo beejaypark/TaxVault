@@ -93,10 +93,10 @@
 .table-header,
 .document-row {
   display: grid;
-  grid-template-columns: minmax(240px, 2fr) 1fr 1fr 150px;
+  grid-template-columns: minmax(240px, 2fr) minmax(105px, 0.8fr) minmax(90px, 0.65fr) minmax(220px, 1.35fr);
   align-items: center;
-  gap: 20px;
-  padding: 0 24px;
+  gap: 24px;
+  padding: 0 28px;
 }
 
 .table-header {
@@ -111,7 +111,7 @@
 }
 
 .document-row {
-  min-height: 76px;
+  min-height: 96px;
   border-bottom: 1px solid var(--tv-color-border);
   color: var(--tv-color-text);
   transition:
@@ -124,48 +124,41 @@
 }
 
 .document-row:hover {
-  background: #fafbfc;
+  background: color-mix(in srgb, var(--tv-color-background) 72%, white);
 }
 
 .supplier-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
 .supplier-cell strong {
   display: block;
+  overflow-wrap: anywhere;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .supplier-cell span {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
   color: var(--tv-color-text-secondary);
   font-size: 12px;
 }
 
 .document-icon {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   display: grid;
   place-items: center;
-  border-radius: 9px;
-  font-size: 14px;
-  font-weight: 750;
-}
-
-.document-icon.warning {
-  background: var(--tv-color-warning-soft);
-  color: var(--tv-color-warning);
-}
-
-.document-icon.ready {
-  background: var(--tv-color-success-soft);
-  color: var(--tv-color-success);
+  border: 1px solid var(--tv-color-border);
+  border-radius: 11px;
+  background: var(--tv-color-background);
+  color: var(--tv-color-text-secondary);
+  font-size: 15px;
 }
 
 .date-cell {
@@ -173,41 +166,79 @@
   font-size: 13px;
 }
 
-.amount-cell {
+.file-size-cell {
+  color: var(--tv-color-text);
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .status {
-  justify-self: start;
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
+  gap: 7px;
+  min-height: 27px;
+  padding: 0 9px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.status.review {
+.status::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.status-review {
+  border-color: #f4d48b;
   background: var(--tv-color-warning-soft);
   color: var(--tv-color-warning);
 }
 
-.status.ready {
-  background: var(--tv-color-success-soft);
-  color: var(--tv-color-success);
-}
-
-.status.uploaded {
+.status-processing {
+  border-color: #c7d2fe;
   background: #eef2ff;
   color: #4f46e5;
 }
 
+.status-failed,
+.status-attention {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b42318;
+}
+
+.status-uploaded {
+  border-color: #b7e4ca;
+  background: var(--tv-color-success-soft);
+  color: var(--tv-color-success);
+}
+
+.status-neutral {
+  border-color: var(--tv-color-border);
+  background: var(--tv-color-background);
+  color: var(--tv-color-text-secondary);
+}
+
 .document-processing {
-  display: grid;
-  justify-items: start;
-  gap: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 0;
+}
+
+.status-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .financial-year-assignment {
@@ -234,15 +265,173 @@
 
 .retry-processing,
 .review-document-link {
-  padding: 0;
-  border: 0;
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #dce5ff;
+  border-radius: 7px;
+  background: #f6f8ff;
   color: var(--tv-color-primary);
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.retry-processing:hover,
+.review-document-link:hover {
+  border-color: #b8c8ff;
+  background: #eef2ff;
+}
+
+.delete-document {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--tv-color-text-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delete-document:hover:not(:disabled) {
+  border-color: #fecaca;
+  background: #fff7f7;
+  color: var(--tv-color-danger);
+}
+
+.delete-document:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.payment-paid {
+  border-color: #b7e4ca;
+  background: var(--tv-color-success-soft);
+  color: var(--tv-color-success);
+}
+
+.payment-meta,
+.payment-note {
+  color: var(--tv-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.payment-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #dce5ff;
+  border-radius: 7px;
+  background: #f6f8ff;
+  color: var(--tv-color-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.payment-action:hover {
+  border-color: #b8c8ff;
+  background: #eef2ff;
+}
+
+.document-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.payment-confirmation {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.payment-confirmation p {
+  margin: 0;
+  color: var(--tv-color-text-secondary);
+  line-height: 1.5;
+}
+
+.payment-confirmation label {
+  display: grid;
+  gap: 6px;
+  color: var(--tv-color-text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.payment-confirmation input,
+.payment-confirmation select {
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: 8px;
+  background: var(--tv-color-surface);
+  color: var(--tv-color-text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.payment-confirmation input:focus,
+.payment-confirmation select:focus {
+  border-color: var(--tv-color-primary);
+  outline: 3px solid color-mix(in srgb, var(--tv-color-primary) 16%, transparent);
+}
+
+.modal-primary-button,
+.modal-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.modal-primary-button {
+  background: var(--tv-color-primary);
+  color: white;
+}
+
+.modal-primary-button:hover:not(:disabled) {
+  background: var(--tv-color-primary-dark);
+}
+
+.modal-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.modal-secondary-button {
+  border-color: var(--tv-color-border);
+  background: var(--tv-color-surface);
+  color: var(--tv-color-text-secondary);
+}
+
+.modal-secondary-button:hover {
+  background: var(--tv-color-background);
 }
 
 @media (max-width: 800px) {
@@ -260,7 +449,7 @@
   }
 
   .document-row {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px 16px;
     padding: 16px 20px;
   }
@@ -276,16 +465,20 @@
     text-align: right;
   }
 
-  .amount-cell {
+  .file-size-cell {
     grid-column: 2;
     grid-row: 2;
     text-align: right;
   }
 
-  .status {
+  .document-processing {
     grid-column: 1 / -1;
-    justify-self: start;
-    margin-top: 4px;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--tv-color-border);
+  }
+
+  .document-actions {
+    justify-content: flex-end;
   }
 }
 
@@ -308,17 +501,6 @@
   }
 }
 
-/* API-backed document list states */
-.document-icon.uploaded {
-  background: var(--tv-color-success-soft);
-  color: var(--tv-color-success);
-}
-
-.status.uploaded {
-  background: var(--tv-color-success-soft);
-  color: var(--tv-color-success);
-}
-
 .document-name {
   min-width: 0;
 }
@@ -331,7 +513,16 @@
 }
 
 .document-name .document-financial-year {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 23px;
+  padding: 0 8px;
+  border: 1px solid #dce5ff;
+  border-radius: 6px;
+  background: #f6f8ff;
   color: var(--tv-color-primary);
+  font-size: 11px;
   font-weight: 650;
 }
 

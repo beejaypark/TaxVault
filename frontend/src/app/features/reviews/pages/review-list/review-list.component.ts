@@ -15,6 +15,7 @@ import {
   TaxIconComponent,
   type TaxIconName,
 } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
 import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
   Review,
@@ -32,7 +33,7 @@ import { DocumentApiService } from '../../../../shared/services/documents/docume
 @Component({
   selector: 'app-review-list',
   standalone: true,
-  imports: [RouterLink, TaxIconComponent],
+  imports: [RouterLink, TaxIconComponent, BackNavigationComponent],
   templateUrl: './review-list.component.html',
   styleUrl: './review-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +55,8 @@ export class ReviewListComponent implements OnInit {
 
   isLoading = false;
   errorMessage: string | null = null;
+  deleteErrorMessage = '';
+  deletingReviewId: string | null = null;
   refreshErrorMessage = '';
 
   selectedStatus: ReviewStatus | '' = '';
@@ -186,6 +189,40 @@ export class ReviewListComponent implements OnInit {
     this.selectedType = '';
     this.currentPage = 1;
     this.loadReviews();
+  }
+
+  deleteReview(review: Review): void {
+    if (
+      this.deletingReviewId !== null
+      || !window.confirm(
+        'Permanently delete this review item? The source document, transactions, and evidence will be kept. This cannot be undone.',
+      )
+    ) {
+      return;
+    }
+
+    this.deletingReviewId = review.id;
+    this.deleteErrorMessage = '';
+    this.reviewService.deleteReview(review.id).subscribe({
+      next: () => {
+        this.reviews = this.reviews.filter((item) => item.id !== review.id);
+        this.total = Math.max(0, this.total - 1);
+        this.deletingReviewId = null;
+
+        if (this.reviews.length === 0 && this.currentPage > 1) {
+          this.currentPage -= 1;
+          this.loadReviews();
+        } else {
+          this.cdr.markForCheck();
+        }
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.deletingReviewId = null;
+        this.deleteErrorMessage = error.error?.message
+          ?? 'Unable to delete this review. Please try again.';
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   statusLabel(status: ReviewStatus): string {

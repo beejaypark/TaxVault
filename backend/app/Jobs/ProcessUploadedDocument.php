@@ -20,7 +20,12 @@ class ProcessUploadedDocument implements ShouldQueue
 
     public function handle(ProcessDocumentOcr $processDocumentOcr): void
     {
-        $document = Document::query()->findOrFail($this->documentId);
+        $document = Document::query()->find($this->documentId);
+
+        if ($document === null) {
+            return;
+        }
+
         $processDocumentOcr->execute($document);
     }
 

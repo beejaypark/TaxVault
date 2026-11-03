@@ -27,6 +27,10 @@ class Document extends UuidModel
         'uploaded_at',
         'provenance',
         'status',
+        'payment_status',
+        'payment_date',
+        'payment_method',
+        'payment_amount',
     ];
 
     protected function casts(): array
@@ -36,6 +40,8 @@ class Document extends UuidModel
             'captured_at' => 'datetime',
             'uploaded_at' => 'datetime',
             'provenance' => 'array',
+            'payment_date' => 'date:Y-m-d',
+            'payment_amount' => 'decimal:2',
         ];
     }
 
@@ -75,11 +81,6 @@ class Document extends UuidModel
             }
         });
 
-        static::deleting(function (): void {
-            throw new LogicException(
-                'Documents cannot be deleted.'
-            );
-        });
     }
 
     public function user(): BelongsTo

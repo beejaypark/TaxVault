@@ -1,7 +1,5 @@
 :host { display: block; }
 .review-detail-page { width: min(100% - 48px, var(--tv-content-max-width)); margin: 0 auto; padding: 32px 0 64px; }
-.back-link { display: inline-flex; margin-bottom: 24px; color: var(--tv-color-text-secondary); font-size: 12px; font-weight: 600; text-decoration: none; }
-.back-link:hover { color: var(--tv-color-primary); }
 .detail-header, .title-row, .section-title-row, .source-document, .field-heading, .decision-heading, .correction-input-row { display: flex; }
 .detail-header { align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
 h1, h2, h3, h4, p { margin: 0; }
@@ -94,6 +92,7 @@ h2 { font-size: 15px; font-weight: 650; }
 .read-only-card { display: grid; justify-items: start; gap: 9px; }
 .read-only-card h2 { font-size: 13px; }
 .read-only-card p { color: var(--tv-color-text-secondary); font-size: 11px; }
+.read-only-card .secondary-button { margin-top: 3px; }
 .notes-card > h2 { margin-bottom: 10px; }
 .notes-card > p:last-child { color: var(--tv-color-text-secondary); font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
 .detail-state { display: grid; justify-items: center; gap: 12px; min-height: 240px; padding: 30px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); color: var(--tv-color-text-secondary); font-size: 13px; text-align: center; }

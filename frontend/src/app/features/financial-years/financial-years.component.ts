@@ -8,6 +8,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
 import {
   formatFinancialYear,
   normalizeFinancialYearInput,
@@ -19,7 +20,7 @@ import {
 
 @Component({
   selector: 'app-financial-years',
-  imports: [FormsModule, TaxIconComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
   templateUrl: './financial-years.component.html',
   styleUrl: './financial-years.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

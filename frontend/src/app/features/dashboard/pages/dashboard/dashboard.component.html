@@ -43,6 +43,116 @@
       </a>
     </section>
 
+    <section class="analysis-section" aria-labelledby="financial-analysis-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="financial-analysis-heading">Financial year at a glance</h2>
+          <p>Income and expenses from transactions recorded for {{ financialYear }}.</p>
+        </div>
+        <a routerLink="/transactions" class="text-link">View transactions</a>
+      </div>
+
+      @if (!selectedFinancialYear) {
+        <div class="empty-panel">
+          <div>
+            <strong>Select a financial year</strong>
+            <p>Choose a year from the sidebar to see its financial trends.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="analysis-metrics">
+          <article class="analysis-metric">
+            <span>Total income</span>
+            <strong>{{ formatCurrency(totalIncome) }}</strong>
+          </article>
+          <article class="analysis-metric">
+            <span>Total expenses</span>
+            <strong>{{ formatCurrency(totalExpenses) }}</strong>
+          </article>
+          <article class="analysis-metric" [class.negative]="netAmount < 0">
+            <span>Net</span>
+            <strong>{{ formatCurrency(netAmount) }}</strong>
+          </article>
+        </div>
+
+        <div class="analysis-grid">
+          <section class="analysis-card" aria-labelledby="monthly-chart-heading">
+            <div class="analysis-card-heading">
+              <div>
+                <h3 id="monthly-chart-heading">Monthly income &amp; expenses</h3>
+                <p>Amounts grouped by transaction date.</p>
+              </div>
+              <div class="chart-legend" aria-hidden="true">
+                <span><i class="income-swatch"></i>Income</span>
+                <span><i class="expense-swatch"></i>Expenses</span>
+              </div>
+            </div>
+
+            @if (financialAnalysisError) {
+              <div class="chart-empty" role="alert">{{ financialAnalysisError }}</div>
+            } @else if (filteredTransactions.length === 0) {
+              <div class="chart-empty">
+                No transactions recorded for this financial year yet.
+                <a routerLink="/transactions">Add a transaction</a>
+              </div>
+            } @else {
+              <div
+                class="monthly-chart"
+                role="img"
+                [attr.aria-label]="'Monthly income and expenses in ' + financialYear"
+              >
+                @for (month of monthlyTransactions; track month.key) {
+                  <div class="month-column">
+                    <div class="month-bars">
+                      <span
+                        class="chart-bar income-bar"
+                        [style.height.%]="month.incomeHeight"
+                        [title]="'Income: ' + formatCurrency(month.income)"
+                      ></span>
+                      <span
+                        class="chart-bar expense-bar"
+                        [style.height.%]="month.expensesHeight"
+                        [title]="'Expenses: ' + formatCurrency(month.expenses)"
+                      ></span>
+                    </div>
+                    <span class="month-label">{{ month.label }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="analysis-card review-analysis" aria-labelledby="review-chart-heading">
+            <div class="analysis-card-heading">
+              <div>
+                <h3 id="review-chart-heading">Document review progress</h3>
+                <p>{{ filteredReviews.length }} review items this year</p>
+              </div>
+              <a routerLink="/reviews" class="text-link">Open reviews</a>
+            </div>
+            @if (filteredReviews.length === 0) {
+              <div class="chart-empty">No review items for this financial year.</div>
+            } @else {
+              <div
+                class="review-progress-chart"
+                role="img"
+                [attr.aria-label]="reviewChartDescription"
+              >
+                <span class="review-progress-completed" [style.width.%]="completedReviewWidth"></span>
+                <span class="review-progress-open" [style.width.%]="openReviewWidth"></span>
+                <span class="review-progress-other" [style.width.%]="otherReviewWidth"></span>
+              </div>
+              <ul class="review-legend">
+                <li><i class="completed-swatch"></i><span>Completed</span><strong>{{ completedReviews }}</strong></li>
+                <li><i class="open-swatch"></i><span>Needs attention</span><strong>{{ openReviews.length }}</strong></li>
+                <li><i class="other-swatch"></i><span>Other</span><strong>{{ otherReviews }}</strong></li>
+              </ul>
+            }
+          </section>
+        </div>
+      }
+    </section>
+
     <section class="dashboard-section">
       <div class="section-heading">
         <div>

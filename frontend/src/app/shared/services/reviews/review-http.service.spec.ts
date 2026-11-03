@@ -112,6 +112,38 @@ describe('ReviewHttpService', () => {
     });
   });
 
+  it('deletes a review through the review API', () => {
+    service.deleteReview(reviewId).subscribe();
+
+    const request = httpMock.expectOne(`/api/reviews/${reviewId}`);
+
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ message: 'Review permanently deleted.' });
+  });
+
+  it('preserves a deleted document target and financial year', () => {
+    let result: Review | undefined;
+
+    service
+      .getReview(reviewId)
+      .subscribe((review) => {
+        result = review;
+      });
+
+    const request = httpMock.expectOne(`/api/reviews/${reviewId}`);
+    request.flush({
+      data: {
+        ...apiReview,
+        document_id: null,
+        source_document_id: 'deleted-document-123',
+        source_financial_year_id: 'fy-2026',
+      },
+    });
+
+    expect(result?.target.documentId).toBe('deleted-document-123');
+    expect(result?.financialYearId).toBe('fy-2026');
+  });
+
   it('should map persisted authoritative corrections from the review response', () => {
     let result: Review | undefined;
 
@@ -664,4 +696,3 @@ describe('ReviewHttpService', () => {
     ).toBe('transaction.total');
   });
 });
-

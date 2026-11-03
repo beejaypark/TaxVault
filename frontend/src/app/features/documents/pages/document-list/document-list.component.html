@@ -1,4 +1,5 @@
 <div class="documents-page">
+  <tv-back-navigation />
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
@@ -50,14 +51,14 @@
           <span>Document</span>
           <span>Uploaded</span>
           <span>File size</span>
-          <span>Status</span>
+          <span>Status &amp; actions</span>
         </div>
 
         @for (document of filteredDocuments; track document.id) {
           <div class="document-row">
             <div class="supplier-cell">
-              <div class="document-icon uploaded" aria-hidden="true">
-                <tv-icon name="check" />
+              <div class="document-icon" aria-hidden="true">
+                <tv-icon name="document" />
               </div>
 
               <div class="document-name">
@@ -71,12 +72,24 @@
 
             <span class="date-cell">{{ formatDate(document.uploaded_at) }}</span>
 
-            <strong class="amount-cell">
+            <strong class="file-size-cell">
               {{ formatFileSize(document.size_bytes) }}
             </strong>
 
             <div class="document-processing">
-              <span class="status uploaded">{{ getStatusLabel(document.status) }}</span>
+              <div class="status-summary">
+                <span [class]="getStatusClass(document.status)">{{ getStatusLabel(document.status) }}</span>
+                @if (document.payment_status === 'paid') {
+                  <span class="status payment-paid">Paid</span>
+                }
+              </div>
+              @if (document.payment_status === 'paid') {
+                <span class="payment-meta">
+                  {{ formatPaymentAmount(document.payment_amount) }} AUD
+                  · {{ paymentMethodLabel(document.payment_method) }}
+                  · {{ formatDate(document.payment_date ?? '') }}
+                </span>
+              }
               @if (document.status === 'processing_failed') {
                 <span class="processing-error">
                   {{ document.latest_extraction?.error_metadata?.message || 'Text extraction did not complete.' }}
@@ -132,10 +145,99 @@
               @if (document.status === 'review_required') {
                 <a routerLink="/reviews" class="review-document-link">Open review queue</a>
               }
+              @if (document.payment_status !== 'paid' && document.financial_year_id) {
+                <button
+                  type="button"
+                  class="payment-action"
+                  (click)="openPaymentConfirmation(document)"
+                >
+                  Mark as paid
+                </button>
+              } @else if (document.payment_status !== 'paid' && !document.financial_year_id) {
+                <span class="payment-note">Assign a financial year before recording payment.</span>
+              }
+              <div class="document-actions">
+                <button
+                  type="button"
+                  class="delete-document"
+                  [disabled]="document.status === 'processing' || deletingDocumentId !== null"
+                  [title]="document.status === 'processing' ? 'Wait for text extraction to finish before deleting.' : 'Permanently delete this document'"
+                  (click)="deleteDocument(document)"
+                >
+                  <tv-icon name="delete" />
+                  {{ deletingDocumentId === document.id ? 'Deleting…' : 'Delete' }}
+                </button>
+              </div>
+              @if (failedDeletionDocumentId === document.id) {
+                <span class="processing-error" role="alert">{{ deleteErrorMessage }}</span>
+              }
             </div>
           </div>
         }
       </div>
     }
+
+    <tv-modal-dialog
+      [open]="confirmingPaymentDocumentId !== null"
+      title="Confirm payment"
+      [description]="paymentConfirmationDocument?.original_filename ?? ''"
+      (closed)="cancelPaymentConfirmation()"
+    >
+      @if (paymentConfirmationDocument; as paymentDocument) {
+        <form
+          modal-body
+          id="payment-confirmation-form"
+          class="payment-confirmation"
+          (ngSubmit)="confirmPayment(paymentDocument)"
+        >
+          <p>
+            Record the payment details. TaxVault will create one linked, uncategorised expense.
+          </p>
+          <label>
+            Paid date
+            <input name="paymentDate" type="date" [(ngModel)]="paymentDate" required />
+          </label>
+          <label>
+            Payment method
+            <select name="paymentMethod" [(ngModel)]="paymentMethod">
+              @for (method of paymentMethods; track method.value) {
+                <option [value]="method.value">{{ method.label }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Paid amount (AUD)
+            <input name="paymentAmount" type="number" min="0.01" step="0.01" [(ngModel)]="paymentAmount" required />
+          </label>
+          <p class="payment-note">
+            You can confirm from the bill or bank record; no separate image is required.
+          </p>
+          @if (failedPaymentDocumentId === paymentDocument.id) {
+            <span class="processing-error" role="alert">{{ paymentErrorMessage }}</span>
+          }
+        </form>
+      }
+      @if (paymentConfirmationDocument) {
+        <button
+          modal-actions
+          type="button"
+          class="modal-secondary-button"
+          (click)="cancelPaymentConfirmation()"
+        >
+          Cancel
+        </button>
+      }
+      @if (paymentConfirmationDocument; as paymentDocument) {
+        <button
+          modal-actions
+          type="submit"
+          form="payment-confirmation-form"
+          class="modal-primary-button"
+          [disabled]="confirmingPaymentRequestId !== null || !paymentDate || !paymentAmount || +paymentAmount <= 0"
+        >
+          {{ confirmingPaymentRequestId === paymentDocument.id ? 'Saving…' : 'Confirm paid' }}
+        </button>
+      }
+    </tv-modal-dialog>
   </section>
 </div>

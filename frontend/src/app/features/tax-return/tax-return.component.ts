@@ -8,6 +8,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
 import {
   DocumentApiService,
@@ -20,7 +21,7 @@ import {
 
 @Component({
   selector: 'app-tax-return',
-  imports: [FormsModule, TaxIconComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

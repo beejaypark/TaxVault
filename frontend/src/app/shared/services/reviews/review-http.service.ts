@@ -55,6 +55,8 @@ interface ReviewApiDto {
   financial_year_id?: string | null;
 
   document_id?: string | null;
+  source_document_id?: string | null;
+  source_financial_year_id?: string | null;
   document_extraction_id?: string | null;
   transaction_id?: string | null;
 
@@ -264,9 +266,15 @@ export class ReviewHttpService extends ReviewService {
       );
   }
 
+  override deleteReview(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiBaseUrl}/${id}`);
+  }
+
   private mapReview(
     dto: ReviewApiDto,
   ): Review {
+    const sourceDocumentId = dto.document_id ?? dto.source_document_id;
+
     return {
       id: dto.id,
       userId: dto.reviewer_id,
@@ -275,15 +283,16 @@ export class ReviewHttpService extends ReviewService {
       status: dto.status,
       financialYearId:
         dto.document?.financial_year_id
+        ?? dto.source_financial_year_id
         ?? dto.financial_year_id
         ?? dto.corrections?.[0]?.financial_year_id
         ?? null,
 
       target: {
-        ...(dto.document_id
+        ...(sourceDocumentId
           ? {
               documentId:
-                dto.document_id,
+                sourceDocumentId,
             }
           : {}),
 

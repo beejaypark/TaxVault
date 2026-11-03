@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
 import { refreshEvery } from '../../shared/utils/status-refresh';
 import {
@@ -23,7 +24,7 @@ import {
 
 @Component({
   selector: 'app-transactions',
-  imports: [FormsModule, TaxIconComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

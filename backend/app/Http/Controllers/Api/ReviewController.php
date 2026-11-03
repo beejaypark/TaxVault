@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Application\Expenses\CreateExpense;
 use App\Application\Income\CreateIncome;
+use App\Application\Reviews\DeleteReview;
 use App\Application\Reviews\Services\CreateAuthoritativeCorrection;
 use App\Application\Transactions\CreateTransaction;
 use App\Domain\Reviews\Models\Review;
+use App\Domain\Transactions\Models\Transaction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reviews\StoreReviewCorrectionRequest;
 use App\Http\Requests\Reviews\StoreReviewDecisionRequest;
@@ -63,6 +65,7 @@ final class ReviewController extends Controller
                                     $financialYearId
                                 )
                             )
+                            ->orWhere('source_financial_year_id', $financialYearId)
                             ->orWhereHas(
                                 'transaction',
                                 fn ($transactionQuery) => $transactionQuery->where(
@@ -117,6 +120,18 @@ final class ReviewController extends Controller
         ]);
     }
 
+    public function destroy(
+        Request $request,
+        string $id,
+        DeleteReview $deleteReview,
+    ): JsonResponse {
+        $deleteReview->execute($request->user(), $id);
+
+        return response()->json([
+            'message' => 'Review permanently deleted.',
+        ]);
+    }
+
     public function decision(
         StoreReviewDecisionRequest $request,
         string $id,
@@ -163,37 +178,49 @@ final class ReviewController extends Controller
                     abort(422, 'A source document is required to record an expense from a review.');
                 }
 
-                $transaction = $createTransaction->execute(
-                    user: $request->user(),
-                    transactionDate: $expenseDetails['transaction_date'],
-                    direction: $expenseDetails['direction'],
-                    amount: (string) $expenseDetails['amount'],
-                    currency: 'AUD',
-                    documentId: $review->document_id,
-                    description: $expenseDetails['description'],
-                    sourceSystem: 'document_review',
-                    provenance: [
-                        'review_id' => $review->getKey(),
-                        'extraction_id' => $review->document_extraction_id,
-                    ],
-                );
+                if ($review->document->payment_status === 'paid') {
+                    $transaction = Transaction::query()
+                        ->where('document_id', $review->document_id)
+                        ->where('direction', 'expense')
+                        ->where('amount', $expenseDetails['amount'])
+                        ->first();
 
-                if ($transaction->direction === 'income') {
-                    $createIncome->execute(
-                        user: $request->user(),
-                        transaction: $transaction,
-                        amount: $transaction->amount,
-                        sourceSystem: 'document_review',
-                        metadata: ['review_id' => $review->getKey()],
-                    );
+                    if ($transaction === null) {
+                        abort(422, 'This document is already marked paid. Review its existing linked expense instead of creating another transaction.');
+                    }
                 } else {
-                    $createExpense->execute(
+                    $transaction = $createTransaction->execute(
                         user: $request->user(),
-                        transaction: $transaction,
-                        amount: $transaction->amount,
+                        transactionDate: $expenseDetails['transaction_date'],
+                        direction: $expenseDetails['direction'],
+                        amount: (string) $expenseDetails['amount'],
+                        currency: 'AUD',
+                        documentId: $review->document_id,
+                        description: $expenseDetails['description'],
                         sourceSystem: 'document_review',
-                        metadata: ['review_id' => $review->getKey()],
+                        provenance: [
+                            'review_id' => $review->getKey(),
+                            'extraction_id' => $review->document_extraction_id,
+                        ],
                     );
+
+                    if ($transaction->direction === 'income') {
+                        $createIncome->execute(
+                            user: $request->user(),
+                            transaction: $transaction,
+                            amount: $transaction->amount,
+                            sourceSystem: 'document_review',
+                            metadata: ['review_id' => $review->getKey()],
+                        );
+                    } else {
+                        $createExpense->execute(
+                            user: $request->user(),
+                            transaction: $transaction,
+                            amount: $transaction->amount,
+                            sourceSystem: 'document_review',
+                            metadata: ['review_id' => $review->getKey()],
+                        );
+                    }
                 }
 
                 $transactionId = $transaction->getKey();

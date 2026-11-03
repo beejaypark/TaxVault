@@ -1,4 +1,5 @@
 <div class="reviews-page">
+  <tv-back-navigation />
   <header class="page-header">
     <div>
       <p class="eyebrow">Tax workspace</p>
@@ -54,6 +55,9 @@
 
   @if (refreshErrorMessage) {
     <p class="refresh-error" role="status">{{ refreshErrorMessage }}</p>
+  }
+  @if (deleteErrorMessage) {
+    <p class="refresh-error" role="alert">{{ deleteErrorMessage }}</p>
   }
 
   @if (isLoading) {
@@ -127,6 +131,16 @@
             <span>{{ review.status === 'pending' ? 'Review item' : 'View details' }}</span>
             <tv-icon name="arrowRight" />
           </a>
+          <button
+            type="button"
+            class="delete-review"
+            [disabled]="deletingReviewId !== null"
+            [attr.aria-label]="'Delete ' + typeLabel(review.type) + ' review'"
+            (click)="deleteReview(review)"
+          >
+            <tv-icon name="delete" />
+            {{ deletingReviewId === review.id ? 'Deleting…' : 'Delete' }}
+          </button>
         </article>
       }
     </section>

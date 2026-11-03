@@ -145,6 +145,60 @@ class ReviewApiTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_user_can_delete_own_review_without_deleting_its_source_records(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user);
+
+        $this->actingAs($user)
+            ->deleteJson('/api/reviews/'.$review->id)
+            ->assertOk()
+            ->assertJsonPath('message', 'Review permanently deleted.');
+
+        $this->assertDatabaseMissing('reviews', ['id' => $review->id]);
+        $this->assertDatabaseHas('documents', ['id' => $review->document_id]);
+        $this->assertDatabaseHas('document_extractions', [
+            'id' => $review->document_extraction_id,
+        ]);
+    }
+
+    public function test_deleting_a_review_unlinks_reviews_that_supersede_it(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user);
+        $successor = Review::query()->create([
+            'reviewer_id' => $user->getKey(),
+            'document_id' => $review->document_id,
+            'document_extraction_id' => $review->document_extraction_id,
+            'review_type' => 'confidence',
+            'status' => 'pending',
+            'supersedes_review_id' => $review->getKey(),
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson('/api/reviews/'.$review->id)
+            ->assertOk();
+
+        $this->assertDatabaseMissing('reviews', ['id' => $review->id]);
+        $this->assertDatabaseHas('reviews', [
+            'id' => $successor->id,
+            'supersedes_review_id' => null,
+        ]);
+    }
+
+    public function test_user_cannot_delete_another_users_review(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $review = $this->createReview($owner);
+
+        $this->actingAs($otherUser)
+            ->deleteJson('/api/reviews/'.$review->id)
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('reviews', ['id' => $review->id]);
+    }
+
     public function test_unauthenticated_user_cannot_access_reviews(): void
     {
         $this->getJson('/api/reviews')
@@ -618,7 +672,7 @@ class ReviewApiTest extends TestCase
         $this->assertDatabaseCount('tax_evidences', 0);
     }
 
-    public function test_completed_review_cannot_create_correction(): void
+    public function test_completed_review_can_create_correction_without_changing_review_status(): void
     {
         $user = User::factory()->create();
 
@@ -635,7 +689,7 @@ class ReviewApiTest extends TestCase
             ],
         ]);
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->postJson(
                 '/api/reviews/' . $review->id . '/correction',
                 [
@@ -643,12 +697,21 @@ class ReviewApiTest extends TestCase
                     'value' => 150.75,
                 ]
             )
-            ->assertStatus(422)
-            ->assertJsonValidationErrors([
-                'review',
-            ]);
+            ->assertOk()
+            ->assertJsonPath('data.review.status', 'completed')
+            ->assertJsonPath('data.review.decision', 'approve')
+            ->assertJsonPath('data.evidence.extracted_value.value', 150.75);
 
-        $this->assertDatabaseCount('tax_evidences', 0);
+        $this->assertDatabaseHas('tax_evidences', [
+            'id' => $response->json('data.evidence.id'),
+            'status' => 'active',
+            'field_path' => 'amount',
+        ]);
+        $this->assertDatabaseHas('reviews', [
+            'id' => $review->id,
+            'status' => 'completed',
+            'decision' => 'approve',
+        ]);
     }
 
     public function test_correction_requires_existing_normalized_field(): void

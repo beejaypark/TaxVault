@@ -5,11 +5,12 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { EMPTY, from } from 'rxjs';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
 import { formatFinancialYear } from '../../../../shared/utils/financial-year';
 import {
   DocumentApiService,
@@ -19,7 +20,7 @@ import {
 
 @Component({
   selector: 'app-upload-document',
-  imports: [RouterLink, TaxIconComponent],
+  imports: [TaxIconComponent, BackNavigationComponent],
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

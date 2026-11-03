@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
 import {
   InvestmentDto,
   PropertyDto,
@@ -18,7 +19,7 @@ import {
 
 @Component({
   selector: 'app-assets',
-  imports: [FormsModule, RouterLink, TaxIconComponent],
+  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

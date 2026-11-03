@@ -3,18 +3,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { BrandLogoComponent } from '../../../../shared/components/brand-logo/brand-logo.component';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, BrandLogoComponent],
   template: `
     <main class="login-page">
       <section class="login-card" aria-labelledby="login-title">
-        <div class="brand">
-          <div class="brand-mark">T</div>
-          <span class="brand-name">TAXVAULT</span>
-        </div>
+        <tv-brand-logo class="brand" [size]="38" />
 
         <h1 id="login-title">Welcome back</h1>
         <p class="intro">Sign in to access your tax documents and reviews.</p>
@@ -78,13 +76,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
       background: var(--tv-color-surface, #fff);
       box-shadow: 0 16px 48px rgb(15 23 42 / 8%);
     }
-    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
-    .brand-mark {
-      width: 34px; height: 34px; display: grid; place-items: center;
-      border-radius: 9px; background: var(--tv-color-primary, #4f46e5);
-      color: white; font-weight: 750;
-    }
-    .brand-name { font-size: 15px; font-weight: 750; letter-spacing: .05em; }
+    .brand { margin-bottom: 30px; }
     h1 { margin: 0 0 8px; font-size: 27px; }
     .intro { margin: 0 0 24px; color: #64748b; line-height: 1.5; }
     .oidc-button {

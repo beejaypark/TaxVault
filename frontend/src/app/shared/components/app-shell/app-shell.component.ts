@@ -9,8 +9,10 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { TaxIconComponent } from '../tax-icon/tax-icon.component';
+import { BrandLogoComponent } from '../brand-logo/brand-logo.component';
 import { formatFinancialYear } from '../../utils/financial-year';
 import { AuthService } from '../../services/auth/auth.service';
+import { NavigationHistoryService } from '../../services/navigation-history.service';
 import {
   DocumentApiService,
   FinancialYearDto,
@@ -18,13 +20,14 @@ import {
 
 @Component({
   selector: 'app-shell',
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent, BrandLogoComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppShellComponent implements OnInit {
   private readonly documentsApi = inject(DocumentApiService);
+  readonly navigationHistory = inject(NavigationHistoryService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   logoutError = false;

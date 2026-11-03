@@ -715,7 +715,7 @@ describe('ReviewDetailComponent', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it('should prevent correction submission for completed reviews', () => {
+  it('should prevent correction submission for completed reviews until editing is enabled', () => {
     component.review = {
       ...reviewWithExtraction,
       status: 'completed',
@@ -733,6 +733,43 @@ describe('ReviewDetailComponent', () => {
     expect(
       reviewService.submitCorrection,
     ).not.toHaveBeenCalled();
+
+    component.toggleCorrectionEditing();
+    expect(component.canEditCorrections).toBe(true);
+
+    reviewService.submitCorrection.mockReturnValue(
+      of({
+        review: {
+          ...reviewWithExtraction,
+          status: 'completed',
+        },
+        evidence: {
+          id: 'evidence-completed',
+          fieldPath: 'transaction.total',
+          extractedValue: {
+            value: 135.75,
+            source: 'reviewer',
+          },
+          evidenceType: 'review_correction',
+          sourceType: 'document_extraction',
+          status: 'active',
+          verificationStatus: 'verified',
+          confidence: 100,
+          verifiedAt: '2026-09-02T03:00:00Z',
+        },
+      }),
+    );
+
+    component.submitCorrection('transaction.total');
+
+    expect(reviewService.submitCorrection).toHaveBeenCalledWith(
+      'review-1',
+      {
+        fieldPath: 'transaction.total',
+        value: 135.75,
+      },
+    );
+    expect(component.review?.status).toBe('completed');
   });
 
   it('should handle correction submission errors', () => {
@@ -955,7 +992,7 @@ describe('ReviewDetailComponent', () => {
   it('should not render decision buttons for completed review', () => {
     reviewService.getReview.mockReturnValue(
       of({
-        ...review,
+        ...reviewWithExtraction,
         status: 'completed',
         decision: 'approved',
         completedAt: '2026-09-07T07:00:00Z',
@@ -984,6 +1021,31 @@ describe('ReviewDetailComponent', () => {
 
     expect(buttons).not.toContain('Approve');
     expect(buttons).not.toContain('Reject');
+    expect(buttons).toContain('Edit');
+  });
+
+  it('should show correction controls after Edit is clicked for a completed review', () => {
+    reviewService.getReview.mockReturnValue(
+      of({
+        ...reviewWithExtraction,
+        status: 'completed',
+        decision: 'approved',
+      }),
+    );
+
+    fixture.destroy();
+    fixture = TestBed.createComponent(ReviewDetailComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ) as HTMLButtonElement[];
+    buttons.find((button) => button.textContent?.trim() === 'Edit')?.click();
+    fixture.detectChanges();
+
+    expect(component.canEditCorrections).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Save Correction');
   });
 
   it('should submit correction when Save Correction is clicked', () => {
@@ -1129,4 +1191,3 @@ describe('ReviewDetailComponent', () => {
     expect(saveButton!.disabled).toBe(true);
   });
 });
-

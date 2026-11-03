@@ -8,10 +8,11 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { takeWhile } from 'rxjs';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
+import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
 import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
   Review,
@@ -25,7 +26,7 @@ import {
 } from '../../../../shared/services/reviews/review.service';
 
 @Component({
-  imports: [DecimalPipe, FormsModule, RouterLink, TaxIconComponent],
+  imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent],
   selector: 'app-review-detail',
   styleUrl: './review-detail.component.scss',
   templateUrl: './review-detail.component.html',
@@ -61,6 +62,7 @@ export class ReviewDetailComponent
   correctionSubmittingField: string | null = null;
   correctionError: string | null = null;
   correctionSuccessField: string | null = null;
+  isEditingCompletedReview = false;
   recordExpense = false;
   expenseDraft: {
     transaction_date: string;
@@ -213,6 +215,25 @@ export class ReviewDetailComponent
     );
   }
 
+  get canEditCorrections(): boolean {
+    return this.review?.status === 'pending'
+      || (
+        this.review?.status === 'completed'
+        && this.isEditingCompletedReview
+      );
+  }
+
+  toggleCorrectionEditing(): void {
+    if (
+      this.review?.status !== 'completed'
+      || this.correctionSubmittingField !== null
+    ) {
+      return;
+    }
+
+    this.isEditingCompletedReview = !this.isEditingCompletedReview;
+  }
+
   submitDecision(
     decision: ReviewDecision,
     notes?: string,
@@ -300,7 +321,7 @@ export class ReviewDetailComponent
     if (
       !id ||
       !this.review ||
-      this.review.status !== 'pending' ||
+      !this.canEditCorrections ||
       this.correctionSubmittingField !== null
     ) {
       return;

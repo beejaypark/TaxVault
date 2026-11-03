@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Application\Documents\AssignDocumentFinancialYear;
+use App\Application\Documents\ConfirmDocumentPayment;
+use App\Application\Documents\DeleteDocument;
+use App\Application\Documents\DocumentDeletionConflict;
 use App\Application\Documents\DuplicateDocumentException;
 use App\Application\Documents\FinancialYearSuggestionUnavailable;
 use App\Application\Documents\UploadDocument;
+use App\Application\Reviews\DeleteReview;
 use App\Domain\Documents\Models\Document;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Documents\AssignDocumentFinancialYearRequest;
+use App\Http\Requests\Documents\ConfirmDocumentPaymentRequest;
 use App\Http\Requests\Documents\StoreDocumentRequest;
 use App\Jobs\ProcessUploadedDocument;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -129,6 +134,45 @@ final class DocumentController extends Controller
             $document->original_filename ?? 'tax-document',
             ['Content-Type' => $document->mime_type ?? 'application/octet-stream'],
         );
+    }
+
+    public function destroy(
+        Request $request,
+        string $id,
+        DeleteDocument $deleteDocument,
+        DeleteReview $deleteReview,
+    ): JsonResponse {
+        try {
+            $deleteDocument->execute($request->user(), $id, $deleteReview);
+        } catch (DocumentDeletionConflict $exception) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Document permanently deleted.',
+        ]);
+    }
+
+    public function confirmPayment(
+        ConfirmDocumentPaymentRequest $request,
+        string $id,
+        ConfirmDocumentPayment $confirmDocumentPayment,
+    ): JsonResponse {
+        $validated = $request->validated();
+
+        $document = $confirmDocumentPayment->execute(
+            user: $request->user(),
+            documentId: $id,
+            paymentDate: $validated['payment_date'],
+            paymentMethod: $validated['payment_method'],
+            amount: (string) $validated['amount'],
+        );
+
+        return response()->json([
+            'data' => $document,
+        ]);
     }
 
     public function retry(Request $request, string $id): JsonResponse

@@ -16,28 +16,7 @@
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   padding: 0 8px 32px;
-}
-
-.brand-mark {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: var(--tv-color-primary);
-  color: white;
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.brand-name {
-  font-size: 16px;
-  font-weight: 750;
-  letter-spacing: 0.04em;
 }
 
 .navigation {

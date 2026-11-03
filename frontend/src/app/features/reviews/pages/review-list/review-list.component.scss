@@ -71,3 +71,28 @@ h1 { font-size: 30px; letter-spacing: -.025em; }
   .open-review { align-self: flex-end; }
   .pagination { align-items: flex-start; flex-direction: column; }
 }
+.delete-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-surface);
+  color: var(--tv-color-danger);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.delete-review:hover:not(:disabled) {
+  background: var(--tv-color-danger-soft);
+}
+
+.delete-review:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}

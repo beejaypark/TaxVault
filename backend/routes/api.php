@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store']);
     Route::get('/documents/{id}', [DocumentController::class, 'show']);
+    Route::post('/documents/{id}/payment', [DocumentController::class, 'confirmPayment']);
+    Route::delete('/documents/{id}', [DocumentController::class, 'destroy']);
     Route::post(
         '/documents/{id}/financial-year',
         [DocumentController::class, 'assignFinancialYear']
@@ -63,6 +65,7 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/{id}', [ReviewController::class, 'show']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
     Route::post(
         '/reviews/{id}/decision',
         [ReviewController::class, 'decision']

@@ -80,4 +80,6 @@ export abstract class ReviewService {
     id: string,
     request: ReviewCorrectionRequest,
   ): Observable<ReviewCorrectionResponse>;
+
+  abstract deleteReview(id: string): Observable<void>;
 }

@@ -31,9 +31,9 @@ final class CreateAuthoritativeCorrection
             ]);
         }
 
-        if ($review->status !== 'pending') {
+        if (! in_array($review->status, ['pending', 'completed'], true)) {
             throw ValidationException::withMessages([
-                'review' => 'Only pending reviews can be corrected.',
+                'review' => 'Only pending or completed reviews can be corrected.',
             ]);
         }
 

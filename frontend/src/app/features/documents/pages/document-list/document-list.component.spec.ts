@@ -17,6 +17,8 @@ describe('DocumentListComponent', () => {
     listDocumentTypes: () => ReturnType<DocumentApiService['listDocumentTypes']>;
     assignDocumentFinancialYear: ReturnType<typeof vi.fn>;
     assignDocumentToFinancialYear: ReturnType<typeof vi.fn>;
+    deleteDocument: ReturnType<typeof vi.fn>;
+    confirmDocumentPayment: ReturnType<typeof vi.fn>;
   };
 
   const financialYears = [
@@ -74,6 +76,15 @@ describe('DocumentListComponent', () => {
         id: documentId,
         financial_year_id: yearId,
         status: 'review_required',
+      })),
+      deleteDocument: vi.fn(() => of(void 0)),
+      confirmDocumentPayment: vi.fn((documentId, paymentDate, paymentMethod, amount) => of({
+        ...document,
+        id: documentId,
+        payment_status: 'paid',
+        payment_date: paymentDate,
+        payment_method: paymentMethod,
+        payment_amount: amount,
       })),
     };
 
@@ -212,8 +223,16 @@ describe('DocumentListComponent', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('Uploaded');
+    expect(element.querySelector('.status-uploaded')).toBeTruthy();
     expect(element.textContent).not.toContain('Needs review');
     expect(element.textContent).not.toContain('Ready');
+  });
+
+  it('uses a distinct attention style for documents that need review', () => {
+    component.documents = [{ ...document, status: 'review_required' }];
+    fixture.detectChanges();
+
+    expect(component.getStatusClass('review_required')).toBe('status status-review');
   });
 
   it('should show an empty state when there are no documents', () => {
@@ -243,5 +262,70 @@ describe('DocumentListComponent', () => {
 
     expect(link).toBeTruthy();
     expect(link?.textContent).toContain('Upload receipt');
+  });
+
+  it('permanently deletes a document after confirmation and removes it from the list', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    component.deleteDocument(document);
+    fixture.detectChanges();
+
+    expect(apiMock.deleteDocument).toHaveBeenCalledWith(document.id);
+    expect(component.documents).toEqual([]);
+    expect(fixture.nativeElement.textContent).toContain('No documents yet');
+  });
+
+  it('does not delete a document when confirmation is declined', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    component.deleteDocument(document);
+
+    expect(apiMock.deleteDocument).not.toHaveBeenCalled();
+    expect(component.documents).toEqual([document]);
+  });
+
+  it('keeps the document and shows the API error when deletion fails', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    apiMock.deleteDocument.mockReturnValue(
+      throwError(() => ({ error: { message: 'Document is locked.' } })),
+    );
+
+    component.deleteDocument(document);
+    fixture.detectChanges();
+
+    expect(component.documents).toEqual([document]);
+    expect(component.deleteErrorMessage).toBe('Document is locked.');
+    expect(component.failedDeletionDocumentId).toBe(document.id);
+    expect(fixture.nativeElement.textContent).toContain('Document is locked.');
+    expect(fixture.nativeElement.textContent).toContain('office-receipt.pdf');
+  });
+
+  it('confirms payment and records payment details without duplicating a document', () => {
+    component.openPaymentConfirmation(document);
+    component.paymentDate = '2026-10-06';
+    component.paymentMethod = 'bpay';
+    component.paymentAmount = '2085.63';
+    component.confirmPayment(document);
+    fixture.detectChanges();
+
+    expect(apiMock.confirmDocumentPayment).toHaveBeenCalledWith(
+      document.id,
+      '2026-10-06',
+      'bpay',
+      '2085.63',
+    );
+    expect(component.documents).toHaveLength(1);
+    expect(component.documents[0].payment_status).toBe('paid');
+    expect(fixture.nativeElement.textContent).toContain('Paid');
+    expect(fixture.nativeElement.textContent).toContain('2,085.63 AUD');
+    expect(fixture.nativeElement.textContent).toContain('BPAY');
+  });
+
+  it('does not open payment confirmation until a financial year is assigned', () => {
+    const unassignedDocument = { ...document, financial_year_id: null };
+
+    component.openPaymentConfirmation(unassignedDocument);
+
+    expect(component.confirmingPaymentDocumentId).toBeNull();
   });
 });

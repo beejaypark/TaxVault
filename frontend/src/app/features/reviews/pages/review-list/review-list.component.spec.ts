@@ -4,7 +4,7 @@
 } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { Review } from '../../../../shared/models/reviews/review.model';
@@ -65,6 +65,7 @@ describe('ReviewListComponent', () => {
 
   const reviewService = {
     listReviews: vi.fn(() => of(response)),
+    deleteReview: vi.fn(() => of(undefined)),
   };
   const selectedFinancialYearId = signal<string | null>(null);
 
@@ -74,6 +75,7 @@ describe('ReviewListComponent', () => {
     reviewService.listReviews.mockReturnValue(
       of(response),
     );
+    reviewService.deleteReview.mockReturnValue(of(undefined));
 
     await TestBed.configureTestingModule({
       imports: [ReviewListComponent],
@@ -220,6 +222,42 @@ describe('ReviewListComponent', () => {
       ),
     ).toBe('/reviews/review-2');
   });
+
+  it('deletes a review item after confirmation and keeps the remaining queue', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    component.deleteReview(reviews[0]);
+    fixture.detectChanges();
+
+    expect(reviewService.deleteReview).toHaveBeenCalledWith('review-1');
+    expect(component.reviews).toEqual([reviews[1]]);
+    expect(component.total).toBe(1);
+    expect(fixture.nativeElement.textContent).not.toContain('document-1');
+  });
+
+  it('keeps the review and reports an error when deletion fails', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    reviewService.deleteReview.mockReturnValue(
+      throwError(() => ({ error: { message: 'Review is locked.' } })),
+    );
+
+    component.deleteReview(reviews[0]);
+    fixture.detectChanges();
+
+    expect(component.reviews).toEqual(reviews);
+    expect(component.deleteErrorMessage).toBe('Review is locked.');
+    expect(fixture.nativeElement.textContent).toContain('Review is locked.');
+  });
+
+  it('does not delete a review when confirmation is declined', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    component.deleteReview(reviews[0]);
+
+    expect(reviewService.deleteReview).not.toHaveBeenCalled();
+    expect(component.reviews).toEqual(reviews);
+  });
+
   it('should render status and type filter controls', () => {
     const element =
       fixture.nativeElement as HTMLElement;
