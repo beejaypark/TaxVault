@@ -24,8 +24,8 @@ class EvaluateDeductibilityTest extends TestCase
         $financialYear = $this->createFinancialYear($user);
 
         $service = new EvaluateDeductibility(
-            new DeductibilityEvaluator(),
-            new TaxRuleEvidenceRecorder(),
+            new DeductibilityEvaluator,
+            new TaxRuleEvidenceRecorder,
         );
 
         $result = $service->execute(
@@ -122,8 +122,8 @@ class EvaluateDeductibilityTest extends TestCase
         $financialYear = $this->createFinancialYear($user);
 
         $service = new EvaluateDeductibility(
-            new DeductibilityEvaluator(),
-            new TaxRuleEvidenceRecorder(),
+            new DeductibilityEvaluator,
+            new TaxRuleEvidenceRecorder,
         );
 
         $result = $service->execute(
@@ -161,8 +161,8 @@ class EvaluateDeductibilityTest extends TestCase
         $financialYear = $this->createFinancialYear($user);
 
         $service = new EvaluateDeductibility(
-            new DeductibilityEvaluator(),
-            new TaxRuleEvidenceRecorder(),
+            new DeductibilityEvaluator,
+            new TaxRuleEvidenceRecorder,
         );
 
         $result = $service->execute(
@@ -212,4 +212,3 @@ class EvaluateDeductibilityTest extends TestCase
         return $financialYear;
     }
 }
-

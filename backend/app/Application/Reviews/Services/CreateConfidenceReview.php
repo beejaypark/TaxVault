@@ -2,10 +2,10 @@
 
 namespace App\Application\Reviews\Services;
 
+use App\Application\OCR\Confidence\ConfidenceEvaluationResult;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
 use App\Domain\Reviews\Models\Review;
-use App\Application\OCR\Confidence\ConfidenceEvaluationResult;
 
 final class CreateConfidenceReview
 {
@@ -45,6 +45,6 @@ final class CreateConfidenceReview
         ConfidenceEvaluationResult $evaluation,
     ): string {
         return 'OCR confidence review required for fields: '
-            . implode(', ', $evaluation->reviewFields);
+            .implode(', ', $evaluation->reviewFields);
     }
 }

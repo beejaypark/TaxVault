@@ -2,9 +2,9 @@
 
 namespace App\Domain\Taxonomy\Models;
 
+use App\Domain\Evidence\Models\TaxEvidence;
 use App\Domain\Shared\Models\UuidModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Domain\Evidence\Models\TaxEvidence;
 
 class TaxCategory extends UuidModel
 {
@@ -14,10 +14,9 @@ class TaxCategory extends UuidModel
     {
         return $this->hasMany(TaxSubcategory::class);
     }
+
     public function evidences(): HasMany
     {
         return $this->hasMany(TaxEvidence::class);
     }
-
-
 }

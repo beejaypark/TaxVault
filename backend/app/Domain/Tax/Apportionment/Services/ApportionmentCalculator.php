@@ -33,7 +33,7 @@ final class ApportionmentCalculator
 
     private function assertAmount(string $amount): void
     {
-        if (!preg_match('/^\d+(?:\.\d{1,4})?$/', $amount)) {
+        if (! preg_match('/^\d+(?:\.\d{1,4})?$/', $amount)) {
             throw new InvalidArgumentException(
                 'Apportionment amount must be a non-negative decimal string.'
             );
@@ -42,7 +42,7 @@ final class ApportionmentCalculator
 
     private function assertPercentage(string $percentage): void
     {
-        if (!preg_match('/^\d+(?:\.\d{1,4})?$/', $percentage)) {
+        if (! preg_match('/^\d+(?:\.\d{1,4})?$/', $percentage)) {
             throw new InvalidArgumentException(
                 'Apportionment percentage must be a non-negative decimal string.'
             );

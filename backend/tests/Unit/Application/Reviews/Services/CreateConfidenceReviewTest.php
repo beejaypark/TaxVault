@@ -6,8 +6,8 @@ use App\Application\OCR\Confidence\ConfidenceEvaluationResult;
 use App\Application\Reviews\Services\CreateConfidenceReview;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentExtraction;
-use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Documents\Models\DocumentType;
+use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Reviews\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -99,7 +99,7 @@ class CreateConfidenceReviewTest extends TestCase
             ],
         );
 
-        $service = new CreateConfidenceReview();
+        $service = new CreateConfidenceReview;
 
         $review = $service->execute(
             $document,
@@ -132,6 +132,7 @@ class CreateConfidenceReviewTest extends TestCase
             $review->document_extraction_id
         );
     }
+
     public function test_it_does_not_create_duplicate_pending_confidence_reviews(): void
     {
         $user = User::factory()->create();
@@ -199,7 +200,7 @@ class CreateConfidenceReviewTest extends TestCase
             ],
         );
 
-        $service = new CreateConfidenceReview();
+        $service = new CreateConfidenceReview;
 
         $firstReview = $service->execute(
             $document,
@@ -230,6 +231,7 @@ class CreateConfidenceReviewTest extends TestCase
                 ->count()
         );
     }
+
     public function test_it_creates_a_pending_confidence_review(): void
     {
         Storage::fake('documents');
@@ -281,7 +283,7 @@ class CreateConfidenceReviewTest extends TestCase
             'model_version' => '1',
             'extraction_version' => 'ocr-v1',
             'status' => 'completed',
-            'correlation_id' => (string) \Illuminate\Support\Str::uuid(),
+            'correlation_id' => (string) Str::uuid(),
             'started_at' => now(),
             'completed_at' => now(),
             'output' => [
@@ -307,7 +309,7 @@ class CreateConfidenceReviewTest extends TestCase
             reviewFields: ['amount'],
         );
 
-        $review = (new CreateConfidenceReview())->execute(
+        $review = (new CreateConfidenceReview)->execute(
             $document,
             $extraction,
             $evaluation,
@@ -362,4 +364,3 @@ class CreateConfidenceReviewTest extends TestCase
         ]);
     }
 }
-

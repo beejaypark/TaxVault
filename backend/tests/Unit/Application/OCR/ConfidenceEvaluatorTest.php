@@ -22,7 +22,7 @@ class ConfidenceEvaluatorTest extends TestCase
             ],
         );
 
-        $result = (new ConfidenceEvaluator())->evaluate($extraction);
+        $result = (new ConfidenceEvaluator)->evaluate($extraction);
 
         $this->assertSame('pass', $result->status);
         $this->assertFalse($result->requiresReview());
@@ -43,7 +43,7 @@ class ConfidenceEvaluatorTest extends TestCase
             ],
         );
 
-        $result = (new ConfidenceEvaluator())->evaluate($extraction);
+        $result = (new ConfidenceEvaluator)->evaluate($extraction);
 
         $this->assertSame('review', $result->status);
         $this->assertTrue($result->requiresReview());
@@ -65,7 +65,7 @@ class ConfidenceEvaluatorTest extends TestCase
             ],
         );
 
-        $result = (new ConfidenceEvaluator())->evaluate($extraction);
+        $result = (new ConfidenceEvaluator)->evaluate($extraction);
 
         $this->assertSame('pass', $result->status);
         $this->assertSame([], $result->reviewFields);
@@ -138,7 +138,7 @@ class ConfidenceEvaluatorTest extends TestCase
             ],
         );
 
-        $result = (new ConfidenceEvaluator())->evaluate($extraction);
+        $result = (new ConfidenceEvaluator)->evaluate($extraction);
 
         $this->assertSame(
             ['amount', 'invoice_number'],

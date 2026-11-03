@@ -38,7 +38,7 @@ class TaxRuleEvidenceRecorderTest extends TestCase
             source: 'TaxVault deductibility rules',
         );
 
-        $evidence = (new TaxRuleEvidenceRecorder())->record(
+        $evidence = (new TaxRuleEvidenceRecorder)->record(
             userId: $user->id,
             result: $result,
             ruleVersion: '2026.1',
@@ -144,7 +144,7 @@ class TaxRuleEvidenceRecorderTest extends TestCase
             'A financial year is required to record tax rule evidence.'
         );
 
-        (new TaxRuleEvidenceRecorder())->record(
+        (new TaxRuleEvidenceRecorder)->record(
             userId: $user->id,
             result: $result,
             ruleVersion: '2026.1',
@@ -179,7 +179,7 @@ class TaxRuleEvidenceRecorderTest extends TestCase
             'A rule ID is required to record tax rule evidence.'
         );
 
-        (new TaxRuleEvidenceRecorder())->record(
+        (new TaxRuleEvidenceRecorder)->record(
             userId: $user->id,
             result: $result,
             ruleVersion: '2026.1',
@@ -215,7 +215,7 @@ class TaxRuleEvidenceRecorderTest extends TestCase
             'A rule source is required to record tax rule evidence.'
         );
 
-        (new TaxRuleEvidenceRecorder())->record(
+        (new TaxRuleEvidenceRecorder)->record(
             userId: $user->id,
             result: $result,
             ruleVersion: '2026.1',

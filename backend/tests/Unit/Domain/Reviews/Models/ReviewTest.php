@@ -15,7 +15,7 @@ class ReviewTest extends TestCase
 {
     public function test_review_uses_uuid_model(): void
     {
-        $review = new Review();
+        $review = new Review;
 
         $this->assertInstanceOf(UuidModel::class, $review);
         $this->assertFalse($review->getIncrementing());
@@ -25,7 +25,7 @@ class ReviewTest extends TestCase
 
     public function test_review_has_expected_fillable_attributes(): void
     {
-        $review = new Review();
+        $review = new Review;
 
         $this->assertSame([
             'reviewer_id',
@@ -43,7 +43,7 @@ class ReviewTest extends TestCase
 
     public function test_review_casts_completed_at_to_datetime(): void
     {
-        $review = new Review();
+        $review = new Review;
 
         $casts = $review->getCasts();
 
@@ -53,7 +53,7 @@ class ReviewTest extends TestCase
 
     public function test_review_belongs_to_reviewer(): void
     {
-        $relation = (new Review())->reviewer();
+        $relation = (new Review)->reviewer();
 
         $this->assertInstanceOf(BelongsTo::class, $relation);
         $this->assertInstanceOf(User::class, $relation->getRelated());
@@ -62,7 +62,7 @@ class ReviewTest extends TestCase
 
     public function test_review_belongs_to_document(): void
     {
-        $relation = (new Review())->document();
+        $relation = (new Review)->document();
 
         $this->assertInstanceOf(BelongsTo::class, $relation);
         $this->assertInstanceOf(Document::class, $relation->getRelated());
@@ -71,7 +71,7 @@ class ReviewTest extends TestCase
 
     public function test_review_belongs_to_document_extraction(): void
     {
-        $relation = (new Review())->extraction();
+        $relation = (new Review)->extraction();
 
         $this->assertInstanceOf(BelongsTo::class, $relation);
         $this->assertInstanceOf(DocumentExtraction::class, $relation->getRelated());
@@ -83,7 +83,7 @@ class ReviewTest extends TestCase
 
     public function test_review_belongs_to_transaction(): void
     {
-        $relation = (new Review())->transaction();
+        $relation = (new Review)->transaction();
 
         $this->assertInstanceOf(BelongsTo::class, $relation);
         $this->assertInstanceOf(Transaction::class, $relation->getRelated());
@@ -92,7 +92,7 @@ class ReviewTest extends TestCase
 
     public function test_review_can_reference_superseded_review(): void
     {
-        $relation = (new Review())->supersededReview();
+        $relation = (new Review)->supersededReview();
 
         $this->assertInstanceOf(BelongsTo::class, $relation);
         $this->assertInstanceOf(Review::class, $relation->getRelated());
