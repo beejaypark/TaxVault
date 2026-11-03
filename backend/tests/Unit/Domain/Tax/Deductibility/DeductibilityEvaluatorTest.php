@@ -15,7 +15,7 @@ class DeductibilityEvaluatorTest extends TestCase
     {
         parent::setUp();
 
-        $this->evaluator = new DeductibilityEvaluator();
+        $this->evaluator = new DeductibilityEvaluator;
     }
 
     public function test_wholly_business_expenditure_is_deductible(): void

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Application\OCR;
 
 use App\Application\OCR\Contracts\OcrProvider;
+use App\Application\OCR\Data\OcrRequest;
 use App\Application\OCR\Data\OcrResult;
 use App\Application\OCR\Services\ProcessDocumentOcr;
 use App\Domain\Documents\Models\Document;
@@ -62,9 +63,10 @@ class ProcessDocumentOcrConfidenceTest extends TestCase
             'status' => 'active',
         ]);
 
-        $provider = new class implements OcrProvider {
+        $provider = new class implements OcrProvider
+        {
             public function process(
-                \App\Application\OCR\Data\OcrRequest $request
+                OcrRequest $request
             ): OcrResult {
                 return new OcrResult(
                     provider: 'test-confidence',
@@ -189,9 +191,10 @@ class ProcessDocumentOcrConfidenceTest extends TestCase
             'status' => 'active',
         ]);
 
-        $provider = new class implements OcrProvider {
+        $provider = new class implements OcrProvider
+        {
             public function process(
-                \App\Application\OCR\Data\OcrRequest $request
+                OcrRequest $request
             ): OcrResult {
                 return new OcrResult(
                     provider: 'test-high-confidence',

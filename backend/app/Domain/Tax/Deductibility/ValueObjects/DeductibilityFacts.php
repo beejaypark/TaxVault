@@ -20,7 +20,7 @@ final readonly class DeductibilityFacts
         }
 
         if ($businessUsePercentage !== null) {
-            if (!preg_match('/^\d+(?:\.\d{1,2})?$/', $businessUsePercentage)) {
+            if (! preg_match('/^\d+(?:\.\d{1,2})?$/', $businessUsePercentage)) {
                 throw new InvalidArgumentException(
                     'Business use percentage must be a non-negative decimal string.'
                 );

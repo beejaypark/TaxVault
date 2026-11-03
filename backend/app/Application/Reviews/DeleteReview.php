@@ -57,7 +57,7 @@ final class DeleteReview
     }
 
     /**
-     * @param Collection<int, string> $reviewIds
+     * @param  Collection<int, string>  $reviewIds
      */
     private function deleteReviews(Collection $reviewIds): void
     {

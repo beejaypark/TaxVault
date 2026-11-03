@@ -20,7 +20,7 @@ class TaxEvidenceTest extends TestCase
 
     public function test_tax_evidence_uses_uuid_primary_key(): void
     {
-        $evidence = new TaxEvidence();
+        $evidence = new TaxEvidence;
 
         $this->assertFalse($evidence->incrementing);
         $this->assertSame('string', $evidence->getKeyType());
@@ -28,7 +28,7 @@ class TaxEvidenceTest extends TestCase
 
     public function test_tax_evidence_has_expected_fillable_attributes(): void
     {
-        $evidence = new TaxEvidence();
+        $evidence = new TaxEvidence;
 
         $this->assertSame([
             'user_id',
@@ -58,7 +58,7 @@ class TaxEvidenceTest extends TestCase
 
     public function test_tax_evidence_casts_expected_attributes(): void
     {
-        $evidence = new TaxEvidence();
+        $evidence = new TaxEvidence;
 
         $casts = $evidence->getCasts();
 
@@ -325,8 +325,7 @@ class TaxEvidenceTest extends TestCase
             'source_id' => null,
             'tax_category_id' => $category->id,
             'tax_subcategory_id' => $subcategory->id,
-            'classification_reason' =>
-                'The extracted transaction description indicates work equipment.',
+            'classification_reason' => 'The extracted transaction description indicates work equipment.',
             'status' => 'active',
             'verification_status' => 'pending',
             'confidence' => 94.50,

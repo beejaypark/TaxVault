@@ -9,9 +9,13 @@ use InvalidArgumentException;
 final class TaxRuleEvidenceRecorder
 {
     private const EVIDENCE_TYPE = 'tax_treatment';
+
     private const SOURCE_TYPE = 'tax_rule';
+
     private const STATUS = 'active';
+
     private const VERIFICATION_STATUS = 'pending';
+
     private const CONFIDENCE = '100.00';
 
     public function record(

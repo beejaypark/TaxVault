@@ -140,19 +140,18 @@ class KeycloakOidcAuthTest extends TestCase
     }
 
     /**
-     * @param array{keys: list<array<string, string>>} $jwks
+     * @param  array{keys: list<array<string, string>>}  $jwks
      */
     private function fakeJwks(array $jwks): void
     {
         Http::fake([
-            'http://keycloak:8080/auth/realms/taxvault/protocol/openid-connect/certs'
-                => Http::response($jwks),
+            'http://keycloak:8080/auth/realms/taxvault/protocol/openid-connect/certs' => Http::response($jwks),
         ]);
     }
 
     private function mockKeycloakProvider(string $idToken, string $subject): void
     {
-        $oauthUser = (new SocialiteUser())->setRaw([
+        $oauthUser = (new SocialiteUser)->setRaw([
             'sub' => $subject,
             'email' => 'admin@example.test',
             'name' => 'TaxVault Admin',

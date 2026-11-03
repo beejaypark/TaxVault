@@ -89,7 +89,7 @@ class OcrTestJobTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame(
-            'OCR test extraction for document ' . $document->getKey(),
+            'OCR test extraction for document '.$document->getKey(),
             $extraction->output['text'],
         );
     }

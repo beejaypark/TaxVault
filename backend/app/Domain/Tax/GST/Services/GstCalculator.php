@@ -64,7 +64,7 @@ final class GstCalculator
 
     private function assertAmount(string $amount): void
     {
-        if (!preg_match('/^\d+(?:\.\d{1,4})?$/', $amount)) {
+        if (! preg_match('/^\d+(?:\.\d{1,4})?$/', $amount)) {
             throw new InvalidArgumentException(
                 'GST amount must be a non-negative decimal string.'
             );
