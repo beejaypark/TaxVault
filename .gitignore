@@ -30,3 +30,6 @@ Thumbs.db
 
 # Local authentication repair backups
 .auth-002-backup/
+
+# Editor/manual backups
+*.bak
