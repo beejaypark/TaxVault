@@ -1,4 +1,4 @@
-name: Tests
+name: Backend Tests
 
 on:
   push:
@@ -7,6 +7,9 @@ on:
       - master
       - '*.x'
   pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
   schedule:
     - cron: '0 0 * * *'
 
@@ -16,6 +19,10 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
 
     strategy:
       fail-fast: true
