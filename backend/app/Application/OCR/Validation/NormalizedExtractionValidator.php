@@ -17,13 +17,13 @@ final class NormalizedExtractionValidator
         }
 
         foreach ($extraction->fields as $fieldPath => $field) {
-            if (!is_string($fieldPath) || trim($fieldPath) === '') {
+            if (! is_string($fieldPath) || trim($fieldPath) === '') {
                 throw new InvalidArgumentException(
                     'Normalized extraction field path must be a non-empty string.'
                 );
             }
 
-            if (!is_array($field)) {
+            if (! is_array($field)) {
                 throw new InvalidArgumentException(
                     sprintf(
                         'Normalized extraction field "%s" must be an array.',
@@ -32,7 +32,7 @@ final class NormalizedExtractionValidator
                 );
             }
 
-            if (!array_key_exists('value', $field)) {
+            if (! array_key_exists('value', $field)) {
                 throw new InvalidArgumentException(
                     sprintf(
                         'Normalized extraction field "%s" requires value.',
@@ -41,7 +41,7 @@ final class NormalizedExtractionValidator
                 );
             }
 
-            if (!array_key_exists('confidence', $field)) {
+            if (! array_key_exists('confidence', $field)) {
                 throw new InvalidArgumentException(
                     sprintf(
                         'Normalized extraction field "%s" requires confidence.',
@@ -51,8 +51,8 @@ final class NormalizedExtractionValidator
             }
 
             if (
-                !is_int($field['confidence']) &&
-                !is_float($field['confidence'])
+                ! is_int($field['confidence']) &&
+                ! is_float($field['confidence'])
             ) {
                 throw new InvalidArgumentException(
                     sprintf(
@@ -75,8 +75,8 @@ final class NormalizedExtractionValidator
             }
 
             if (
-                !array_key_exists('source', $field) ||
-                !is_string($field['source']) ||
+                ! array_key_exists('source', $field) ||
+                ! is_string($field['source']) ||
                 trim($field['source']) === ''
             ) {
                 throw new InvalidArgumentException(

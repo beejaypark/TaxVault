@@ -19,7 +19,7 @@ class TaxClassificationEvidenceRecorderTest extends TestCase
 
     private function recorder(): TaxClassificationEvidenceRecorder
     {
-        return new TaxClassificationEvidenceRecorder();
+        return new TaxClassificationEvidenceRecorder;
     }
 
     /**

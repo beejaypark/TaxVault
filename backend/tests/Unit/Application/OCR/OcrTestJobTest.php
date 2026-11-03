@@ -78,7 +78,7 @@ class OcrTestJobTest extends TestCase
         $this->assertSame('test-ocr', $extraction->model);
         $this->assertSame('completed', $extraction->status);
         $this->assertSame(
-            'OCR test extraction for document ' . $document->getKey(),
+            'OCR test extraction for document '.$document->getKey(),
             $extraction->output['text'],
         );
     }

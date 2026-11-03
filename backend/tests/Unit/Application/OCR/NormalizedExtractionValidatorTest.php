@@ -27,7 +27,7 @@ class NormalizedExtractionValidatorTest extends TestCase
             ],
         );
 
-        $validated = (new NormalizedExtractionValidator())
+        $validated = (new NormalizedExtractionValidator)
             ->validate($extraction);
 
         $this->assertSame($extraction, $validated);
@@ -37,7 +37,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: '',
                 fields: [
@@ -55,7 +55,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -72,7 +72,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -90,7 +90,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -108,7 +108,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -126,7 +126,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -153,7 +153,7 @@ class NormalizedExtractionValidatorTest extends TestCase
             ],
         );
 
-        $validated = (new NormalizedExtractionValidator())
+        $validated = (new NormalizedExtractionValidator)
             ->validate($extraction);
 
         $this->assertSame($extraction, $validated);
@@ -172,7 +172,7 @@ class NormalizedExtractionValidatorTest extends TestCase
             ],
         );
 
-        $validated = (new NormalizedExtractionValidator())
+        $validated = (new NormalizedExtractionValidator)
             ->validate($extraction);
 
         $this->assertSame($extraction, $validated);
@@ -182,7 +182,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -200,7 +200,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [
@@ -217,7 +217,7 @@ class NormalizedExtractionValidatorTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new NormalizedExtractionValidator())->validate(
+        (new NormalizedExtractionValidator)->validate(
             new NormalizedExtraction(
                 schemaVersion: 'ocr-extraction-v1',
                 fields: [

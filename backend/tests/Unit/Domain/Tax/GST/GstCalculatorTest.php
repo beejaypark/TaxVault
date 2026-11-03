@@ -14,7 +14,7 @@ class GstCalculatorTest extends TestCase
     {
         parent::setUp();
 
-        $this->calculator = new GstCalculator();
+        $this->calculator = new GstCalculator;
     }
 
     public function test_exclusive_taxable_amount_calculates_gst(): void

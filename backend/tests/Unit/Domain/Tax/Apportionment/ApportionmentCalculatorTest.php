@@ -13,7 +13,7 @@ class ApportionmentCalculatorTest extends TestCase
     {
         parent::setUp();
 
-        $this->calculator = new ApportionmentCalculator();
+        $this->calculator = new ApportionmentCalculator;
     }
 
     public function test_it_apportions_amount_by_percentage(): void

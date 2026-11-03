@@ -9,13 +9,14 @@ use App\Domain\Tax\Deductibility\ValueObjects\DeductibilityResult;
 final class DeductibilityEvaluator
 {
     private const RULE_ID = 'TAX-004';
+
     private const SOURCE = 'TaxVault deductibility rules';
 
     public function evaluate(
         DeductibilityFacts $facts,
         ?string $financialYearId = null,
     ): DeductibilityResult {
-        if (!$facts->businessPurpose && !$facts->privatePurpose) {
+        if (! $facts->businessPurpose && ! $facts->privatePurpose) {
             return new DeductibilityResult(
                 outcome: DeductibilityOutcome::ReviewRequired,
                 reason: 'Purpose of expenditure is not sufficiently established.',
@@ -37,7 +38,7 @@ final class DeductibilityEvaluator
         }
 
         if ($facts->capitalAsset) {
-            if (!$facts->immediateDeductionEligible) {
+            if (! $facts->immediateDeductionEligible) {
                 return new DeductibilityResult(
                     outcome: DeductibilityOutcome::Capital,
                     reason: 'Capital expenditure is subject to capital treatment rather than immediate deduction.',

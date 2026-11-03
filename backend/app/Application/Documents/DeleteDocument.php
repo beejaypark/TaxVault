@@ -2,8 +2,8 @@
 
 namespace App\Application\Documents;
 
-use App\Domain\Documents\Models\Document;
 use App\Application\Reviews\DeleteReview;
+use App\Domain\Documents\Models\Document;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -16,8 +16,7 @@ final class DeleteDocument
         User $user,
         string $documentId,
         DeleteReview $deleteReview,
-    ): void
-    {
+    ): void {
         DB::transaction(function () use ($user, $documentId, $deleteReview): void {
             $document = Document::query()
                 ->whereKey($documentId)

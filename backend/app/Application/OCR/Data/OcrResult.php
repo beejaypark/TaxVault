@@ -13,6 +13,5 @@ final readonly class OcrResult
         public array $output = [],
         public array $qualityMetadata = [],
         public array $errorMetadata = [],
-    ) {
-    }
+    ) {}
 }

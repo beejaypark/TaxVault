@@ -7,9 +7,8 @@ use App\Application\OCR\Data\NormalizedExtraction;
 final class ConfidenceEvaluator
 {
     public function __construct(
-        private readonly ConfidencePolicy $policy = new ConfidencePolicy(),
-    ) {
-    }
+        private readonly ConfidencePolicy $policy = new ConfidencePolicy,
+    ) {}
 
     public function evaluate(
         NormalizedExtraction $extraction
