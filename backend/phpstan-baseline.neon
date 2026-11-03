@@ -1,0 +1,182 @@
+parameters:
+    ignoreErrors:
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 1
+            path: app/Application/Documents/AssignDocumentFinancialYear.php
+        -
+            message: '#^.*$#'
+            identifier: identical.alwaysFalse
+            count: 1
+            path: app/Application/Documents/AssignDocumentFinancialYear.php
+        -
+            message: '#^.*$#'
+            identifier: argument.type
+            count: 1
+            path: app/Application/Documents/AssignDocumentFinancialYear.php
+        -
+            message: '#^.*$#'
+            identifier: nullsafe.neverNull
+            count: 1
+            path: app/Application/Documents/UploadDocument.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 1
+            path: app/Application/OCR/Services/ProcessDocumentOcr.php
+        -
+            message: '#^.*$#'
+            identifier: return.type
+            count: 1
+            path: app/Application/OCR/Services/ProcessDocumentOcr.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 3
+            path: app/Application/Reviews/Services/CreateAuthoritativeCorrection.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 6
+            path: app/Http/Controllers/Api/AuthController.php
+        -
+            message: '#^.*$#'
+            identifier: argument.type
+            count: 1
+            path: app/Http/Controllers/Api/AuthController.php
+        -
+            message: '#^.*$#'
+            identifier: method.notFound
+            count: 5
+            path: app/Http/Controllers/Api/AuthController.php
+        -
+            message: '#^.*$#'
+            identifier: function.alreadyNarrowedType
+            count: 1
+            path: app/Http/Controllers/Api/AuthController.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 1
+            path: app/Http/Controllers/Api/DocumentController.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 1
+            path: app/Http/Controllers/Api/ReviewController.php
+        -
+            message: '#^.*$#'
+            identifier: return.type
+            count: 1
+            path: app/Services/DevelopmentAdminProvisioner.php
+        -
+            message: '#^.*$#'
+            identifier: nullsafe.neverNull
+            count: 1
+            path: app/Services/DevelopmentAdminProvisioner.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 1
+            path: tests/Feature/Api/DevelopmentAdminAuthTest.php
+        -
+            message: '#^.*$#'
+            identifier: argument.type
+            count: 1
+            path: tests/Feature/Api/DevelopmentAdminAuthTest.php
+        -
+            message: '#^.*$#'
+            identifier: staticMethod.notFound
+            count: 1
+            path: tests/Feature/Api/Documents/DocumentUploadApiTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 9
+            path: tests/Feature/Api/Exports/FinancialYearExportApiTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 3
+            path: tests/Feature/Api/Reviews/ReviewApiTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 6
+            path: tests/Feature/Database/Db001To008DatabaseTest.php
+        -
+            message: '#^.*$#'
+            identifier: method.impossibleType
+            count: 2
+            path: tests/Feature/Database/Db001To008DatabaseTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.unused
+            count: 3
+            path: tests/Feature/Database/Db009To016DatabaseTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.onlyWritten
+            count: 1
+            path: tests/Feature/Database/Db009To016DatabaseTest.php
+        -
+            message: '#^.*$#'
+            identifier: property.notFound
+            count: 8
+            path: tests/Feature/Properties/CreatePropertyPeriodTest.php
+        -
+            message: '#^.*$#'
+            identifier: method.notFound
+            count: 2
+            path: tests/Unit/Application/OCR/OcrProviderContractTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 1
+            path: tests/Unit/Application/OCR/OcrTestJobTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 4
+            path: tests/Unit/Application/OCR/ProcessDocumentOcrConfidenceTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 5
+            path: tests/Unit/Application/OCR/ProcessDocumentOcrTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 10
+            path: tests/Unit/Application/Tax/Deductibility/EvaluateDeductibilityTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 4
+            path: tests/Unit/Domain/Evidence/Models/TaxEvidenceTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 7
+            path: tests/Unit/Domain/Evidence/Services/TaxClassificationEvidenceRecorderTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 6
+            path: tests/Unit/Domain/Evidence/Services/TaxRuleEvidenceRecorderTest.php
+        -
+            message: '#^.*$#'
+            identifier: method.alreadyNarrowedType
+            count: 1
+            path: tests/Unit/Domain/FinancialYears/FinancialYearTest.php
+        -
+            message: '#^.*$#'
+            identifier: method.alreadyNarrowedType
+            count: 1
+            path: tests/Unit/ExampleTest.php
+        -
+            message: '#^.*$#'
+            identifier: offsetAccess.notFound
+            count: 2
+            path: tests/Unit/Jobs/OcrTestJobTest.php
