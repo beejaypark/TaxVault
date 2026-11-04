@@ -12,7 +12,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
       [style.height.px]="size"
       aria-hidden="true"
     >
-      <circle cx="24" cy="24" r="20" fill="#3157d5" />
+      <circle cx="24" cy="24" r="20" fill="#1f7ac4" />
       <circle cx="24" cy="24" r="13" fill="none" stroke="#fff" stroke-width="3" />
       <circle cx="24" cy="24" r="3.5" fill="#fff" />
       <path d="M24 11v5M24 32v5M11 24h5M32 24h5" stroke="#fff" stroke-width="3" stroke-linecap="round" />
@@ -22,7 +22,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styles: [`
     :host { display: inline-flex; align-items: center; gap: 10px; }
     .logo-mark { flex: none; }
-    .logo-name { font-size: 16px; font-weight: 750; letter-spacing: 0.05em; }
+    .logo-name { font-family: var(--tv-font-heading); font-size: 17px; font-weight: 800; letter-spacing: 0.08em; }
   `],
 })
 export class BrandLogoComponent {

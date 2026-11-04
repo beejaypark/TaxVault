@@ -128,12 +128,20 @@ h1 {
 }
 
 .card-heading {
-  padding: 20px 22px;
-  border-bottom: 1px solid var(--tv-color-border);
+  padding: 16px 22px;
+  background: var(--tv-color-navy);
+  color: #fff;
+}
+
+.card-heading h2 {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .card-heading p {
   margin-top: 4px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .year-row {

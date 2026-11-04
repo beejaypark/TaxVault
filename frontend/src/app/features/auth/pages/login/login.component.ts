@@ -103,7 +103,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
       box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px;
       border: 1px solid #cbd5e1; border-radius: 8px; font: inherit;
     }
-    input:focus { outline: 2px solid #818cf8; outline-offset: 1px; }
+    input:focus { outline: 2px solid var(--tv-color-accent, #1f7ac4); outline-offset: 1px; }
     button {
       min-height: 46px; margin-top: 16px; border: 0; border-radius: 8px;
       background: var(--tv-color-primary, #4f46e5); color: white;

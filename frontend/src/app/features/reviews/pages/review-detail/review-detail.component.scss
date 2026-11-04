@@ -15,7 +15,7 @@ h2 { font-size: 15px; font-weight: 650; }
 .status-pending, .confidence-low { background: var(--tv-color-warning-soft); color: var(--tv-color-warning); }
 .status-completed, .confidence-high { background: var(--tv-color-success-soft); color: var(--tv-color-success); }
 .status-rejected { background: var(--tv-color-danger-soft); color: var(--tv-color-danger); }
-.status-in-progress { background: #eef2ff; color: #4f46e5; }
+.status-in-progress { background: var(--tv-color-primary-soft); color: var(--tv-color-primary); }
 .inline-notice { margin-bottom: 16px; padding: 12px 14px; border-radius: var(--tv-radius-md); font-size: 12px; }
 .success-notice { background: var(--tv-color-success-soft); color: var(--tv-color-success); }
 .error-notice { background: var(--tv-color-danger-soft); color: var(--tv-color-danger); }

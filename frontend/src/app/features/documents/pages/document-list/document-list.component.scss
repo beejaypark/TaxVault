@@ -70,19 +70,22 @@
 }
 
 .card-header {
-  padding: 24px;
-  border-bottom: 1px solid var(--tv-color-border);
+  padding: 16px 24px;
+  background: var(--tv-color-navy);
+  color: #fff;
 }
 
 .card-header h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .card-header p {
   margin: 5px 0 0;
-  color: var(--tv-color-text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 13px;
 }
 
@@ -102,8 +105,8 @@
 .table-header {
   min-height: 44px;
   border-bottom: 1px solid var(--tv-color-border);
-  background: var(--tv-color-background);
-  color: var(--tv-color-text-muted);
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -123,8 +126,12 @@
   border-bottom: 0;
 }
 
+.document-row:nth-child(even) {
+  background: var(--tv-color-table-stripe);
+}
+
 .document-row:hover {
-  background: color-mix(in srgb, var(--tv-color-background) 72%, white);
+  background: var(--tv-color-primary-soft);
 }
 
 .supplier-cell {
@@ -201,9 +208,9 @@
 }
 
 .status-processing {
-  border-color: #c7d2fe;
-  background: #eef2ff;
-  color: #4f46e5;
+  border-color: #c3d3e8;
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
 }
 
 .status-failed,
@@ -285,7 +292,7 @@
 .retry-processing:hover,
 .review-document-link:hover {
   border-color: #b8c8ff;
-  background: #eef2ff;
+  background: var(--tv-color-primary-soft);
 }
 
 .delete-document {
@@ -345,7 +352,7 @@
 
 .payment-action:hover {
   border-color: #b8c8ff;
-  background: #eef2ff;
+  background: var(--tv-color-primary-soft);
 }
 
 .document-actions {

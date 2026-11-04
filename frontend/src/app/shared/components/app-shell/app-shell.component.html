@@ -1,49 +1,14 @@
-﻿<div class="app-shell">
-  <aside class="sidebar">
-    <tv-brand-logo class="brand" [size]="34" />
+<div class="app-shell">
+  <header class="topbar no-print">
+    <button type="button" class="menu-toggle" aria-label="Toggle navigation"
+            [attr.aria-expanded]="menuOpen" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
 
-    <nav class="navigation" aria-label="Main navigation">
-      <div class="nav-section-label">Overview</div>
-      <a routerLink="/dashboard" routerLinkActive="active"
-         [routerLinkActiveOptions]="{ exact: true }" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/dashboard')">
-        <span class="nav-icon"><tv-icon name="dashboard" /></span><span>Dashboard</span>
-      </a>
-      <div class="nav-section-label">Tax workspace</div>
-      <a routerLink="/documents" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/documents')">
-        <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
-      </a>
-      <a routerLink="/financial-years" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/financial-years')">
-        <span class="nav-icon"><tv-icon name="financialYear" /></span><span>Financial years</span>
-      </a>
-      <a routerLink="/properties" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/properties')">
-        <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
-      </a>
-      <a routerLink="/investments" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/investments')">
-        <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
-      </a>
-      <a routerLink="/transactions" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/transactions')">
-        <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
-      </a>
-      <a routerLink="/reviews" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/reviews')">
-        <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
-      </a>
-      <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">
-        <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Accountant pack</span>
-      </a>
-    </nav>
+    <div class="topbar-spacer"></div>
 
-    <div class="sidebar-bottom">
-      <label class="financial-year-label" for="active-financial-year">
-        Financial year
-      </label>
+    <div class="fy-picker">
+      <label class="fy-label" for="active-financial-year">Financial year</label>
       <select
         id="active-financial-year"
         class="financial-year"
@@ -61,17 +26,74 @@
           <option [value]="year.id">FY {{ formatYearCode(year.year_code) }}</option>
         }
       </select>
-
-      <div class="signed-in-user">
-        <span class="user-label">Signed in as</span>
-        <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
-        @if (logoutError) {
-          <span class="logout-error" role="alert">Unable to sign out. Please try again.</span>
-        }
-        <button type="button" class="logout-button" (click)="logout()">Sign out</button>
-      </div>
     </div>
+
+    <div class="user-menu">
+      <button type="button" class="user-button" aria-haspopup="menu"
+              [attr.aria-expanded]="userMenuOpen" (click)="toggleUserMenu()">
+        <span class="avatar" aria-hidden="true">{{ userInitial }}</span>
+        <span class="caret" aria-hidden="true"></span>
+      </button>
+      @if (userMenuOpen) {
+        <div class="user-dropdown" role="menu">
+          <span class="user-label">Signed in as</span>
+          <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
+          @if (logoutError) {
+            <span class="logout-error" role="alert">Unable to sign out. Please try again.</span>
+          }
+          <button type="button" class="logout-button" role="menuitem" (click)="logout()">Sign out</button>
+        </div>
+      }
+    </div>
+  </header>
+
+  <aside class="sidebar no-print" [class.open]="menuOpen">
+    <tv-brand-logo class="brand" [size]="32" />
+
+    <nav class="navigation" aria-label="Main navigation" (click)="closeMenu()">
+      <div class="nav-section-label">Overview</div>
+      <a routerLink="/dashboard" routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/dashboard')">
+        <span class="nav-icon"><tv-icon name="dashboard" /></span><span>Dashboard</span>
+      </a>
+      <div class="nav-section-label">Tax workspace</div>
+      <a routerLink="/documents" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/documents')">
+        <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
+      </a>
+      <a routerLink="/financial-years" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/financial-years')">
+        <span class="nav-icon"><tv-icon name="financialYear" /></span><span>Financial years</span>
+      </a>
+      <a routerLink="/reviews" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/reviews')">
+        <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
+      </a>
+      <a routerLink="/transactions" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/transactions')">
+        <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
+      </a>
+      <div class="nav-section-label">Assets</div>
+      <a routerLink="/properties" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/properties')">
+        <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
+      </a>
+      <a routerLink="/investments" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/investments')">
+        <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
+      </a>
+      <div class="nav-section-label">Reports</div>
+      <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">
+        <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Accountant pack</span>
+      </a>
+    </nav>
   </aside>
+
+  @if (menuOpen) {
+    <div class="scrim no-print" (click)="closeMenu()"></div>
+  }
 
   <main class="main-content">
     <router-outlet />

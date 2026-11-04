@@ -213,11 +213,20 @@ td {
 }
 
 th {
-  background: var(--tv-color-background);
-  color: var(--tv-color-text-muted);
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
   font-size: 10px;
-  letter-spacing: .05em;
+  font-weight: 700;
+  letter-spacing: .06em;
   text-transform: uppercase;
+}
+
+tbody tr:nth-child(even) td {
+  background: var(--tv-color-table-stripe);
+}
+
+tbody tr:hover td {
+  background: var(--tv-color-primary-soft);
 }
 
 td {

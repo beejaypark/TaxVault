@@ -1,7 +1,11 @@
 ﻿:root {
-  --tv-color-primary: #3157d5;
-  --tv-color-primary-dark: #2646b5;
-  --tv-color-primary-soft: #eef2ff;
+  --tv-color-primary: #0f3d78;
+  --tv-color-primary-dark: #0a2c57;
+  --tv-color-primary-soft: #e8eef7;
+  --tv-color-accent: #1f7ac4;
+  --tv-color-navy: #14325a;
+  --tv-color-navy-deep: #0d2442;
+  --tv-color-table-stripe: #f6f8fb;
 
   --tv-color-success: #198754;
   --tv-color-success-soft: #eaf7ef;
@@ -39,12 +43,49 @@
   --tv-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06),
                     0 1px 2px rgba(15, 23, 42, 0.04);
 
+  --tv-header-height: 56px;
+
   --tv-font-family:
+    Roboto,
     Inter,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  --tv-font-heading:
+    Raleway,
     Roboto,
     "Helvetica Neue",
     Arial,
     sans-serif;
+}
+
+h1,
+h2 {
+  font-family: var(--tv-font-heading);
+}
+
+/* Shared widget card: navy title bar + body, as used across the app. */
+.tv-panel {
+  overflow: hidden;
+  border-radius: var(--tv-radius-md);
+  background: var(--tv-color-surface);
+  box-shadow: var(--tv-shadow-card);
+}
+
+.tv-panel-title {
+  margin: 0;
+  padding: 14px 20px;
+  background: var(--tv-color-navy);
+  color: #fff;
+  font-family: var(--tv-font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tv-panel-body {
+  padding: 20px;
 }
 
 html,

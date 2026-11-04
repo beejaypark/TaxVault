@@ -34,7 +34,7 @@ h1 { font-size: 30px; letter-spacing: -.025em; }
 .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: var(--tv-color-background); color: var(--tv-color-text-secondary); font-size: 10px; font-weight: 700; white-space: nowrap; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .status-pending { background: var(--tv-color-warning-soft); color: var(--tv-color-warning); }
-.status-in-progress { background: #eef2ff; color: #4f46e5; }
+.status-in-progress { background: var(--tv-color-primary-soft); color: var(--tv-color-primary); }
 .status-completed { background: var(--tv-color-success-soft); color: var(--tv-color-success); }
 .status-rejected { background: var(--tv-color-danger-soft); color: var(--tv-color-danger); }
 .document-name { overflow: hidden; margin-top: 5px; color: var(--tv-color-text-secondary); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }

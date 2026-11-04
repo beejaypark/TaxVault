@@ -117,7 +117,8 @@ h1 {
 
 .analysis-card {
   min-width: 0;
-  padding: 20px;
+  overflow: hidden;
+  padding: 0 20px 20px;
 }
 
 .analysis-card-heading {
@@ -125,15 +126,27 @@ h1 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
+  margin: 0 -20px 16px;
+  padding: 14px 20px;
+  background: var(--tv-color-navy);
+  color: #fff;
 }
 
 .analysis-card-heading h3 {
   margin: 0;
-  font-size: 14px;
+  font-family: var(--tv-font-heading);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .analysis-card-heading p {
   margin: 5px 0 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.analysis-card-heading .chart-legend span {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .chart-legend,

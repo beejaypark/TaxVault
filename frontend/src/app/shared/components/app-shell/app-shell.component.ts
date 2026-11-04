@@ -31,7 +31,26 @@ export class AppShellComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   logoutError = false;
+  menuOpen = false;
+  userMenuOpen = false;
   selectedFinancialYearId = '';
+
+  get userInitial(): string {
+    const name = this.auth.currentUser?.display_name || this.auth.currentUser?.email || '?';
+    return name.trim().charAt(0);
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu(): void {
+    this.menuOpen = false;
+  }
+
+  toggleUserMenu(): void {
+    this.userMenuOpen = !this.userMenuOpen;
+  }
   isLoadingFinancialYears = true;
 
   get financialYears(): FinancialYearDto[] {

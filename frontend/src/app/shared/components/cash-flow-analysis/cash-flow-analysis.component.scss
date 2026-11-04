@@ -5,7 +5,8 @@
 }
 
 .card {
-  padding: 22px;
+  overflow: hidden;
+  padding: 0 22px 22px;
   border: 1px solid var(--tv-color-border);
   border-radius: var(--tv-radius-lg);
   background: var(--tv-color-surface);
@@ -17,14 +18,18 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  margin: 0 -22px 16px;
+  padding: 14px 22px;
+  background: var(--tv-color-navy);
+  color: #fff;
 }
 
 h3, h4, p { margin: 0; }
-h3 { font-size: 15px; }
+h3 { font-family: var(--tv-font-heading); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
 h4 { margin-bottom: 12px; font-size: 12px; color: var(--tv-color-text-secondary); text-transform: uppercase; }
 .heading p, .muted, small { color: var(--tv-color-text-secondary); font-size: 12px; }
-.heading p { margin-top: 4px; }
+.heading p { margin-top: 4px; color: rgba(255, 255, 255, 0.7); }
+.heading .legend { color: rgba(255, 255, 255, 0.85); }
 .lens, .takeaway { margin: 0 0 8px; font-size: 12px; line-height: 1.5; color: var(--tv-color-text-secondary); }
 .lens b { color: var(--tv-color-text); }
 .takeaway { padding: 8px 10px; border-radius: var(--tv-radius-md); background: var(--tv-color-background); color: var(--tv-color-text); }
@@ -32,7 +37,7 @@ h4 { margin-bottom: 12px; font-size: 12px; color: var(--tv-color-text-secondary)
 .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--tv-color-text-secondary); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; }
-.legend .balance { height: 3px; background: #4f46e5; }
+.legend .balance { height: 3px; background: #1f7ac4; }
 .income { fill: #16a34a; background: #16a34a; }
 .expense { fill: #e11d48; background: #e11d48; }
 
@@ -40,7 +45,7 @@ h4 { margin-bottom: 12px; font-size: 12px; color: var(--tv-color-text-secondary)
 .grid { stroke: var(--tv-color-border); stroke-width: 1; }
 .zero { stroke: var(--tv-color-text-muted); stroke-width: 1; }
 .axis { fill: var(--tv-color-text-muted); font-size: 10px; }
-.balance-line { fill: none; stroke: #4f46e5; stroke-width: 2.5; stroke-linejoin: round; }
+.balance-line { fill: none; stroke: #1f7ac4; stroke-width: 2.5; stroke-linejoin: round; }
 .balance-note { margin-top: 8px; font-size: 13px; }
 .balance-note.negative strong { color: var(--tv-color-danger); }
 
