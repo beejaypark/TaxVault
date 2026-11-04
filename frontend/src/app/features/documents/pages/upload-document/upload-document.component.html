@@ -102,6 +102,16 @@
               (change)="onFileSelected($event)"
             />
           </label>
+          <label class="browse-button browse-button-secondary">
+            Take photo
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              data-testid="camera-input"
+              (change)="onFileSelected($event)"
+            />
+          </label>
         </div>
 
         <p class="file-hint">
@@ -133,6 +143,16 @@
               webkitdirectory
               directory
               [accept]="acceptedExtensions"
+              [disabled]="isUploading"
+              (change)="onFileSelected($event)"
+            />
+          </label>
+          <label class="browse-button browse-button-secondary">
+            Take photo
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
               [disabled]="isUploading"
               (change)="onFileSelected($event)"
             />

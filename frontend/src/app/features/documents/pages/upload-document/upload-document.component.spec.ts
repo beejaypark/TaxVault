@@ -175,6 +175,24 @@ describe('UploadDocumentComponent', () => {
     expect(component.errorMessage).toBe('');
   });
 
+  it('should offer a camera capture input that adds the photo', () => {
+    const fixture = TestBed.createComponent(UploadDocumentComponent);
+    fixture.detectChanges();
+    const camera = fixture.nativeElement.querySelector(
+      'input[capture="environment"]',
+    ) as HTMLInputElement;
+
+    expect(camera).not.toBeNull();
+    expect(camera.accept).toBe('image/*');
+
+    const photo = new File(['img'], 'photo.jpg', { type: 'image/jpeg' });
+    fixture.componentInstance.onFileSelected({
+      target: { files: [photo], value: '' },
+    } as unknown as Event);
+
+    expect(fixture.componentInstance.selectedFiles.map((item) => item.file)).toEqual([photo]);
+  });
+
   it('should keep supported files and report unsupported files in a mixed selection', () => {
     const file = new File(['receipt'], 'receipt.pdf', { type: 'application/pdf' });
     const unsupported = new File(['document'], 'document.exe', {
