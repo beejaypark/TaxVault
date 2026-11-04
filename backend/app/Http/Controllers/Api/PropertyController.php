@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Application\Properties\CreateProperty;
 use App\Application\Properties\CreatePropertyPeriod;
 use App\Domain\Properties\Models\Property;
+use App\Domain\Investments\Models\Investment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Properties\StorePropertyPeriodRequest;
 use App\Http\Requests\Properties\StorePropertyRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PropertyController extends Controller
 {
@@ -45,6 +47,48 @@ class PropertyController extends Controller
         return response()->json([
             'data' => $property,
         ], 201);
+    }
+
+    public function update(StorePropertyRequest $request, string $property): JsonResponse
+    {
+        $model = $this->findOwned($request, $property);
+
+        $model->update($request->safe()->only([
+            'reference_code',
+            'address_line_1',
+            'address_line_2',
+            'suburb',
+            'state',
+            'postcode',
+        ]));
+
+        return response()->json(['data' => $model->refresh()->load('periods')]);
+    }
+
+    public function destroy(Request $request, string $property): JsonResponse
+    {
+        $model = $this->findOwned($request, $property);
+
+        if (Investment::query()->where('property_id', $model->getKey())->exists()) {
+            return response()->json([
+                'message' => 'This property is linked to an investment. Delete or unlink the investment first.',
+            ], 409);
+        }
+
+        DB::transaction(function () use ($model): void {
+            $model->periods()->delete();
+            $model->delete();
+        });
+
+        return response()->json(['message' => 'Property deleted.']);
+    }
+
+    private function findOwned(Request $request, string $property): Property
+    {
+        return Property::query()
+            ->whereKey($property)
+            ->where('user_id', $request->user()->getKey())
+            ->firstOrFail();
     }
 
     public function show(

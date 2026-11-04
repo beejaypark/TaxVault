@@ -8,7 +8,7 @@
       <p class="refresh-indicator">Records update automatically every 5 seconds.</p>
     </div>
     @if (auth.canEdit) {
-    <button class="primary-button" type="button" (click)="showForm = !showForm">
+    <button class="primary-button" type="button" (click)="showForm ? closeForm() : startCreate()">
       @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
     </button>
     }
@@ -20,7 +20,7 @@
   @if (showForm) {
     <form class="transaction-form" (ngSubmit)="saveTransaction()">
       <div class="form-heading">
-        <div><h2>Transaction details</h2><p>Records are assigned to a financial year using the transaction date.</p></div>
+        <div><h2>{{ editingId ? 'Edit transaction' : 'Transaction details' }}</h2><p>Records are assigned to a financial year using the transaction date.</p></div>
       </div>
       <div class="form-grid">
         <label>Description <input name="description" [(ngModel)]="form.description" maxlength="1000" required placeholder="e.g. Interest from savings account" /></label>
@@ -34,7 +34,7 @@
         <label>Amount (AUD) <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
       </div>
       <div class="form-actions">
-        <button type="button" class="secondary-button" (click)="showForm = false">Cancel</button>
+        <button type="button" class="secondary-button" (click)="closeForm()">Cancel</button>
         <button type="submit" class="primary-button" [disabled]="isSaving || !form.transaction_date || !form.description.trim() || form.amount <= 0">
           {{ isSaving ? 'Saving…' : 'Save transaction' }}
         </button>
@@ -72,12 +72,12 @@
       <div class="empty-state">
         <h3>No transactions found</h3>
         <p>Add income and expenses manually. Bank imports and receipt matching are planned follow-up features.</p>
-        @if (auth.canEdit) {<button class="secondary-button" type="button" (click)="showForm = true">Add a transaction</button>}
+        @if (auth.canEdit) {<button class="secondary-button" type="button" (click)="startCreate()">Add a transaction</button>}
       </div>
     } @else {
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th></tr></thead>
+          <thead><tr><th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th>@if (auth.canEdit) {<th class="actions-col">Actions</th>}</tr></thead>
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
               <tr>
@@ -88,6 +88,14 @@
                 <td class="amount" [class.income-amount]="transaction.direction === 'income'">
                   {{ transaction.direction === 'income' ? '+' : '−' }}{{ formatCurrency(transaction.amount) }}
                 </td>
+                @if (auth.canEdit) {
+                  <td class="actions-col">
+                    <div class="row-actions">
+                      <button type="button" class="row-action" (click)="startEdit(transaction)"><tv-icon name="edit" /> Edit</button>
+                      <button type="button" class="row-action danger" (click)="deleteTransaction(transaction)"><tv-icon name="delete" /> Delete</button>
+                    </div>
+                  </td>
+                }
               </tr>
             }
           </tbody>

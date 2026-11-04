@@ -100,6 +100,16 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
+  updateProperty(id: string, property: CreatePropertyRequest): Observable<PropertyDto> {
+    return this.http
+      .put<ApiItem<PropertyDto>>(`/api/properties/${id}`, property)
+      .pipe(map((response) => response.data));
+  }
+
+  deleteProperty(id: string): Observable<unknown> {
+    return this.http.delete(`/api/properties/${id}`);
+  }
+
   listInvestments(): Observable<InvestmentDto[]> {
     return this.http
       .get<ApiList<InvestmentDto>>('/api/investments')
@@ -110,6 +120,16 @@ export class TaxWorkspaceApiService {
     return this.http
       .post<ApiItem<InvestmentDto>>('/api/investments', investment)
       .pipe(map((response) => response.data));
+  }
+
+  updateInvestment(id: string, investment: CreateInvestmentRequest): Observable<InvestmentDto> {
+    return this.http
+      .put<ApiItem<InvestmentDto>>(`/api/investments/${id}`, investment)
+      .pipe(map((response) => response.data));
+  }
+
+  deleteInvestment(id: string): Observable<unknown> {
+    return this.http.delete(`/api/investments/${id}`);
   }
 
   createExport(financialYearId: string): Observable<ExportDto> {
@@ -137,5 +157,15 @@ export class TaxWorkspaceApiService {
     return this.http
       .post<ApiItem<TransactionDto>>('/api/transactions', transaction)
       .pipe(map((response) => response.data));
+  }
+
+  updateTransaction(id: string, transaction: CreateTransactionRequest): Observable<TransactionDto> {
+    return this.http
+      .put<ApiItem<TransactionDto>>(`/api/transactions/${id}`, transaction)
+      .pipe(map((response) => response.data));
+  }
+
+  deleteTransaction(id: string): Observable<unknown> {
+    return this.http.delete(`/api/transactions/${id}`);
   }
 }

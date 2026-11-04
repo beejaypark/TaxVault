@@ -113,6 +113,33 @@ export class DocumentApiService {
       );
   }
 
+  updateFinancialYear(
+    id: string,
+    changes: { year_code?: string; status?: string },
+  ): Observable<FinancialYearDto> {
+    return this.http
+      .patch<ApiItem<FinancialYearDto>>(`/api/financial-years/${id}`, changes)
+      .pipe(
+        map((response) => response.data),
+        tap((year) => {
+          this.financialYears.update((years) => years
+            .map((existing) => (existing.id === year.id ? year : existing))
+            .sort((a, b) => b.start_date.localeCompare(a.start_date)));
+        }),
+      );
+  }
+
+  deleteFinancialYear(id: string): Observable<unknown> {
+    return this.http.delete(`/api/financial-years/${id}`).pipe(
+      tap(() => {
+        this.financialYears.update((years) => years.filter((year) => year.id !== id));
+        if (this.selectedFinancialYearId() === id) {
+          this.selectedFinancialYearId.set(null);
+        }
+      }),
+    );
+  }
+
   assignDocumentFinancialYear(
     documentId: string,
     financialYearCode: string,

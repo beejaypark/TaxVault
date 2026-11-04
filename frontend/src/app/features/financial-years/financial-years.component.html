@@ -7,7 +7,7 @@
       <p>Manage the Australian financial years used to organise your tax records.</p>
     </div>
     @if (auth.canEdit) {
-    <button class="primary-button" type="button" (click)="showForm = !showForm">
+    <button class="primary-button" type="button"     (click)="showForm ? closeForm() : startCreate()">
       @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add financial year }
     </button>
     }
@@ -18,15 +18,22 @@
 
   @if (showForm) {
     <form class="editor-card" (ngSubmit)="createFinancialYear()">
-      <h2>Add an Australian financial year</h2>
-      <p>Use the format YYYY - YY. Tax years run from 1 July to 30 June.</p>
+      <h2>{{ editingId ? 'Edit financial year' : 'Add an Australian financial year' }}</h2>
+      <p>Use the format YYYY - YY. Tax years run from 1 July to 30 June. The year can only change while it has no records.</p>
       <label for="year-code">Financial year</label>
       <input id="year-code" name="yearCode" [(ngModel)]="yearCode" placeholder="2025 - 26" maxlength="9" required />
       @if (yearCode && !isValidYearCode) {
         <span class="field-error" role="alert">Enter a year such as 2025 - 26.</span>
       }
+      @if (editingId) {
+        <label for="year-status">Status</label>
+        <select id="year-status" name="status" [(ngModel)]="status">
+          <option value="active">active</option>
+          <option value="inactive">inactive</option>
+        </select>
+      }
       <div class="form-actions">
-        <button type="button" class="secondary-button" (click)="showForm = false">Cancel</button>
+        <button type="button" class="secondary-button" (click)="closeForm()">Cancel</button>
         <button type="submit" class="primary-button" [disabled]="isSaving || !isValidYearCode">
           {{ isSaving ? 'Saving…' : 'Save financial year' }}
         </button>
@@ -45,7 +52,7 @@
       <div class="empty-state">
         <h3>No financial years yet</h3>
         <p>Add a financial year to start uploading tax documents and recording transactions.</p>
-        @if (auth.canEdit) {<button type="button" class="secondary-button" (click)="showForm = true">Add your first financial year</button>}
+        @if (auth.canEdit) {<button type="button" class="secondary-button" (click)="startCreate()">Add your first financial year</button>}
       </div>
     } @else {
       <div class="year-list">
@@ -57,7 +64,12 @@
               <p>{{ formatDate(year.start_date) }} – {{ formatDate(year.end_date) }}</p>
             </div>
             <span class="year-status" [class.inactive]="year.status !== 'active'">{{ year.status }}</span>
-          </article>
+                        @if (auth.canEdit) {
+                          <div class="row-actions">
+                            <button type="button" class="row-action" (click)="startEdit(year)"><tv-icon name="edit" /> Edit</button>
+                            <button type="button" class="row-action danger" (click)="deleteFinancialYear(year)"><tv-icon name="delete" /> Delete</button>
+                          </div>
+                        }          </article>
         }
       </div>
     }

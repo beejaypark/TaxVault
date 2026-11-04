@@ -69,4 +69,38 @@ final class InvestmentController extends Controller
             'data' => $investment,
         ]);
     }
+
+    public function update(StoreInvestmentRequest $request, string $id): JsonResponse
+    {
+        $investment = $this->findOwned($request, $id);
+
+        $investment->update($request->safe()->only([
+            'property_id',
+            'investment_type',
+            'acquisition_date',
+            'disposal_date',
+            'quantity',
+            'ownership_percentage',
+            'cost_base',
+            'incidental_costs',
+            'proceeds',
+        ]));
+
+        return response()->json(['data' => $investment->refresh()]);
+    }
+
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $this->findOwned($request, $id)->delete();
+
+        return response()->json(['message' => 'Investment deleted.']);
+    }
+
+    private function findOwned(Request $request, string $id): Investment
+    {
+        return Investment::query()
+            ->whereKey($id)
+            ->where('user_id', $request->user()->getKey())
+            ->firstOrFail();
+    }
 }

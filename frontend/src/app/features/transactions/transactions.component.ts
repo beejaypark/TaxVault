@@ -45,6 +45,7 @@ export class TransactionsComponent implements OnInit {
   isLoading = true;
   isSaving = false;
   showForm = false;
+  editingId: string | null = null;
   errorMessage = '';
   successMessage = '';
 
@@ -139,23 +140,75 @@ export class TransactionsComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.api.createTransaction({
-      ...this.form,
-      description: this.form.description.trim(),
-    }).subscribe({
+    const payload = { ...this.form, description: this.form.description.trim() };
+    const editing = this.editingId;
+    const request$ = editing
+      ? this.api.updateTransaction(editing, payload)
+      : this.api.createTransaction(payload);
+
+    request$.subscribe({
       next: (transaction) => {
-        this.transactions = [transaction, ...this.transactions];
-        this.form = this.emptyForm();
-        this.showForm = false;
-        this.successMessage = 'Transaction saved to your tax records.';
+        this.transactions = editing
+          ? this.transactions.map((item) => (item.id === transaction.id ? transaction : item))
+          : [transaction, ...this.transactions];
+        this.closeForm();
+        this.successMessage = editing
+          ? 'Transaction updated.'
+          : 'Transaction saved to your tax records.';
         this.isSaving = false;
         this.cdr.markForCheck();
       },
       error: (error: { status?: number }) => {
-        this.errorMessage = error.status === 404
+        this.errorMessage = error.status === 404 || error.status === 422
           ? 'No financial year matches this transaction date. Add the relevant financial year first.'
           : 'Unable to save this transaction. Check the details and try again.';
         this.isSaving = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  startCreate(): void {
+    this.closeForm();
+    this.showForm = true;
+  }
+
+  startEdit(transaction: TransactionDto): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.editingId = transaction.id;
+    this.form = {
+      transaction_date: transaction.transaction_date.slice(0, 10),
+      direction: transaction.direction as 'income' | 'expense',
+      amount: Number(transaction.amount),
+      description: transaction.description,
+      currency: transaction.currency ?? 'AUD',
+    };
+    this.showForm = true;
+  }
+
+  closeForm(): void {
+    this.showForm = false;
+    this.editingId = null;
+    this.form = this.emptyForm();
+  }
+
+  deleteTransaction(transaction: TransactionDto): void {
+    if (!confirm(`Delete "${transaction.description}"? This cannot be undone.`)) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.api.deleteTransaction(transaction.id).subscribe({
+      next: () => {
+        this.transactions = this.transactions.filter((item) => item.id !== transaction.id);
+        this.successMessage = 'Transaction deleted.';
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Unable to delete this transaction.';
         this.cdr.markForCheck();
       },
     });

@@ -46,6 +46,8 @@ export class AssetsComponent implements OnInit {
   isSaving = false;
   showPropertyForm = false;
   showInvestmentForm = false;
+  editingPropertyId: string | null = null;
+  editingInvestmentId: string | null = null;
   errorMessage = '';
   successMessage = '';
 
@@ -86,20 +88,28 @@ export class AssetsComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.api.createProperty({
+    const editing = this.editingPropertyId;
+    const trimmed = (value: string) => value.trim();
+    const payload = {
       ...this.propertyForm,
-      reference_code: this.optional(this.propertyForm.reference_code),
-      address_line_1: this.propertyForm.address_line_1.trim(),
-      address_line_2: this.optional(this.propertyForm.address_line_2),
-      suburb: this.optional(this.propertyForm.suburb),
-      state: this.optional(this.propertyForm.state),
-      postcode: this.optional(this.propertyForm.postcode),
-    }).subscribe({
+      reference_code: editing ? trimmed(this.propertyForm.reference_code) : this.optional(this.propertyForm.reference_code),
+      address_line_1: trimmed(this.propertyForm.address_line_1),
+      address_line_2: editing ? trimmed(this.propertyForm.address_line_2) : this.optional(this.propertyForm.address_line_2),
+      suburb: editing ? trimmed(this.propertyForm.suburb) : this.optional(this.propertyForm.suburb),
+      state: editing ? trimmed(this.propertyForm.state) : this.optional(this.propertyForm.state),
+      postcode: editing ? trimmed(this.propertyForm.postcode) : this.optional(this.propertyForm.postcode),
+    };
+    const request$ = editing
+      ? this.api.updateProperty(editing, payload)
+      : this.api.createProperty(payload);
+
+    request$.subscribe({
       next: (property) => {
-        this.properties = [property, ...this.properties];
-        this.propertyForm = this.emptyPropertyForm();
-        this.showPropertyForm = false;
-        this.successMessage = 'Property added.';
+        this.properties = editing
+          ? this.properties.map((item) => (item.id === property.id ? property : item))
+          : [property, ...this.properties];
+        this.closePropertyForm();
+        this.successMessage = editing ? 'Property updated.' : 'Property added.';
         this.isSaving = false;
         this.cdr.markForCheck();
       },
@@ -116,8 +126,9 @@ export class AssetsComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.api.createInvestment({
-      property_id: this.optional(this.investmentForm.property_id),
+    const editing = this.editingInvestmentId;
+    const payload = {
+      property_id: this.optional(this.investmentForm.property_id) ?? null,
       investment_type: this.investmentForm.investment_type,
       acquisition_date: this.investmentForm.acquisition_date,
       cost_base: this.investmentForm.cost_base,
@@ -125,16 +136,123 @@ export class AssetsComponent implements OnInit {
       proceeds: this.investmentForm.proceeds,
       quantity: this.investmentForm.quantity,
       ownership_percentage: this.investmentForm.ownership_percentage,
-    }).subscribe({
+    };
+    const request$ = editing
+      ? this.api.updateInvestment(editing, payload)
+      : this.api.createInvestment(payload);
+
+    request$.subscribe({
       next: (investment) => {
-        this.investments = [investment, ...this.investments];
-        this.investmentForm = this.emptyInvestmentForm();
-        this.showInvestmentForm = false;
-        this.successMessage = 'Investment added.';
+        this.investments = editing
+          ? this.investments.map((item) => (item.id === investment.id ? investment : item))
+          : [investment, ...this.investments];
+        this.closeInvestmentForm();
+        this.successMessage = editing ? 'Investment updated.' : 'Investment added.';
         this.isSaving = false;
         this.cdr.markForCheck();
       },
       error: () => this.handleSaveError(),
+    });
+  }
+
+  startAddProperty(): void {
+    this.closePropertyForm();
+    this.showPropertyForm = true;
+  }
+
+  startEditProperty(property: PropertyDto): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.editingPropertyId = property.id;
+    this.propertyForm = {
+      reference_code: property.reference_code ?? '',
+      address_line_1: property.address_line_1 ?? '',
+      address_line_2: property.address_line_2 ?? '',
+      suburb: property.suburb ?? '',
+      state: property.state ?? '',
+      postcode: property.postcode ?? '',
+      country_code: property.country_code,
+    };
+    this.showPropertyForm = true;
+  }
+
+  closePropertyForm(): void {
+    this.showPropertyForm = false;
+    this.editingPropertyId = null;
+    this.propertyForm = this.emptyPropertyForm();
+  }
+
+  deleteProperty(property: PropertyDto): void {
+    const name = property.reference_code || property.address_line_1 || 'this property';
+
+    if (!confirm(`Delete ${name}? This cannot be undone.`)) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.api.deleteProperty(property.id).subscribe({
+      next: () => {
+        this.properties = this.properties.filter((item) => item.id !== property.id);
+        this.successMessage = 'Property deleted.';
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.errorMessage = error.error?.message ?? 'Unable to delete this property.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  startAddInvestment(): void {
+    this.closeInvestmentForm();
+    this.showInvestmentForm = true;
+  }
+
+  startEditInvestment(investment: InvestmentDto): void {
+    const num = (value: string | number | null) => (value === null ? null : Number(value));
+
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.editingInvestmentId = investment.id;
+    this.investmentForm = {
+      property_id: investment.property_id ?? '',
+      investment_type: investment.investment_type,
+      acquisition_date: investment.acquisition_date.slice(0, 10),
+      cost_base: num(investment.cost_base),
+      incidental_costs: num(investment.incidental_costs),
+      proceeds: num(investment.proceeds),
+      quantity: num(investment.quantity),
+      ownership_percentage: num(investment.ownership_percentage),
+    };
+    this.showInvestmentForm = true;
+  }
+
+  closeInvestmentForm(): void {
+    this.showInvestmentForm = false;
+    this.editingInvestmentId = null;
+    this.investmentForm = this.emptyInvestmentForm();
+  }
+
+  deleteInvestment(investment: InvestmentDto): void {
+    if (!confirm('Delete this investment? This cannot be undone.')) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.api.deleteInvestment(investment.id).subscribe({
+      next: () => {
+        this.investments = this.investments.filter((item) => item.id !== investment.id);
+        this.successMessage = 'Investment deleted.';
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Unable to delete this investment.';
+        this.cdr.markForCheck();
+      },
     });
   }
 

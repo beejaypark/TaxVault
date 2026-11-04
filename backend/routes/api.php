@@ -41,10 +41,14 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/inbound-email', [InboundEmailController::class, 'show']);
     Route::get('/financial-years', [FinancialYearController::class, 'index']);
     Route::post('/financial-years', [FinancialYearController::class, 'store']);
+    Route::patch('/financial-years/{id}', [FinancialYearController::class, 'update'])->middleware('audit:financial_year.update,financial_year');
+    Route::delete('/financial-years/{id}', [FinancialYearController::class, 'destroy'])->middleware('audit:financial_year.delete,financial_year');
 
     Route::get('/properties', [PropertyController::class, 'index']);
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::get('/properties/{property}', [PropertyController::class, 'show']);
+    Route::put('/properties/{property}', [PropertyController::class, 'update'])->middleware('audit:property.update,property');
+    Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->middleware('audit:property.delete,property');
     Route::post(
         '/properties/{property}/periods',
         [PropertyController::class, 'storePeriod']
@@ -57,9 +61,13 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/investments', [InvestmentController::class, 'index']);
     Route::post('/investments', [InvestmentController::class, 'store']);
     Route::get('/investments/{id}', [InvestmentController::class, 'show']);
+    Route::put('/investments/{id}', [InvestmentController::class, 'update'])->middleware('audit:investment.update,investment');
+    Route::delete('/investments/{id}', [InvestmentController::class, 'destroy'])->middleware('audit:investment.delete,investment');
 
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions', [TransactionController::class, 'store']);
+    Route::put('/transactions/{id}', [TransactionController::class, 'update'])->middleware('audit:transaction.update,transaction');
+    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->middleware('audit:transaction.delete,transaction');
 
     Route::get('/document-types', [DocumentTypeController::class, 'index']);
 
