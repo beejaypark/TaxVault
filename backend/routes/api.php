@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
@@ -30,7 +31,13 @@ Route::middleware('web')->group(function (): void {
 });
 Route::post('/inbound-email/webhook', [InboundEmailController::class, 'webhook']);
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'acting'])->group(function (): void {
+    Route::get('/accountants', [AccountantController::class, 'index']);
+    Route::post('/accountants', [AccountantController::class, 'store'])->middleware('audit:accountant.invite,accountant');
+    Route::patch('/accountants/{id}', [AccountantController::class, 'update'])->middleware('audit:accountant.update,accountant');
+    Route::delete('/accountants/{id}', [AccountantController::class, 'destroy'])->middleware('audit:accountant.revoke,accountant');
+    Route::post('/accountants/{id}/reset-password', [AccountantController::class, 'resetPassword'])->middleware('audit:accountant.reset_password,accountant');
+    Route::post('/accountants/{id}/send-pack', [AccountantController::class, 'sendPack'])->middleware('audit:accountant.send_pack,accountant');
     Route::get('/inbound-email', [InboundEmailController::class, 'show']);
     Route::get('/financial-years', [FinancialYearController::class, 'index']);
     Route::post('/financial-years', [FinancialYearController::class, 'store']);

@@ -25,6 +25,8 @@ import {
   ReviewService,
 } from '../../../../shared/services/reviews/review.service';
 
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+
 @Component({
   imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent],
   selector: 'app-review-detail',
@@ -40,6 +42,7 @@ export class ReviewDetailComponent
   private readonly reviewService =
     inject(ReviewService);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly Object = Object;
@@ -220,6 +223,10 @@ export class ReviewDetailComponent
   }
 
   get canEditCorrections(): boolean {
+    if (!this.auth.canEdit) {
+      return false;
+    }
+
     return this.review?.status === 'pending'
       || (
         this.review?.status === 'completed'

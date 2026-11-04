@@ -56,6 +56,8 @@ class Document extends UuidModel
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new \App\Support\FinancialYearVisibilityScope);
+
         static::updating(function (self $document): void {
             $immutableAttributes = [
                 'user_id',

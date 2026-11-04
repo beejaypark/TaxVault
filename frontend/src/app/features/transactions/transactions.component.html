@@ -7,9 +7,11 @@
       <p>{{ financialYearLabel }} · Record and review the transactions that support your tax position.</p>
       <p class="refresh-indicator">Records update automatically every 5 seconds.</p>
     </div>
+    @if (auth.canEdit) {
     <button class="primary-button" type="button" (click)="showForm = !showForm">
       @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
     </button>
+    }
   </header>
 
   @if (errorMessage) { <p class="notice error" role="alert">{{ errorMessage }}</p> }
@@ -70,7 +72,7 @@
       <div class="empty-state">
         <h3>No transactions found</h3>
         <p>Add income and expenses manually. Bank imports and receipt matching are planned follow-up features.</p>
-        <button class="secondary-button" type="button" (click)="showForm = true">Add a transaction</button>
+        @if (auth.canEdit) {<button class="secondary-button" type="button" (click)="showForm = true">Add a transaction</button>}
       </div>
     } @else {
       <div class="table-wrap">

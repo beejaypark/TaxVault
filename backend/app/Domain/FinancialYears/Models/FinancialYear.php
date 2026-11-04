@@ -37,6 +37,8 @@ class FinancialYear extends UuidModel
 
     protected static function booted(): void
     {
+        static::addGlobalScope(new \App\Support\FinancialYearVisibilityScope('id'));
+
         static::saving(function (self $financialYear): void {
             self::assertCanonicalAustralianPeriod(
                 $financialYear->year_code,

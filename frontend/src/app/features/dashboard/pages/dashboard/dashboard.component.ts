@@ -24,6 +24,7 @@ import {
   TransactionDto,
 } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewService } from '../../../../shared/services/reviews/review.service';
+import { AuthService } from '../../../../shared/services/auth/auth.service';
 
 interface MonthlyTransactionSummary {
   key: string;
@@ -47,6 +48,7 @@ export class DashboardComponent implements OnInit {
   private readonly reviewService = inject(ReviewService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  readonly auth = inject(AuthService);
   private readonly refreshErrors = new Map<string, string>();
 
   documents: DocumentDto[] = [];

@@ -75,14 +75,7 @@ class AuthController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return response()->json([
-            'data' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'identity_provider' => $user->identity_provider,
-            ],
-        ]);
+        return response()->json(['data' => $this->present($user)]);
     }
 
     public function oidcRedirect(Request $request): RedirectResponse
@@ -239,14 +232,37 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
-        return response()->json([
-            'data' => [
-                'id' => $user->id,
-                'email' => $user->email,
-                'display_name' => $user->display_name,
-                'identity_provider' => $user->identity_provider,
-            ],
-        ]);
+        return response()->json(['data' => $this->present($user)]);
+    }
+
+    /** @return array<string, mixed> */
+    private function present(User $user): array
+    {
+        $data = [
+            'id' => $user->id,
+            'email' => $user->email,
+            'display_name' => $user->display_name,
+            'identity_provider' => $user->identity_provider,
+            'role' => $user->role,
+            'clients' => [],
+        ];
+
+        if ($user->isAccountant()) {
+            $data['clients'] = $user->accountantGrants()
+                ->with('owner')
+                ->where('status', 'active')
+                ->get()
+                ->map(fn ($grant) => [
+                    'owner_id' => $grant->owner_id,
+                    'owner_name' => $grant->owner?->display_name ?? $grant->owner?->email,
+                    'sections' => $grant->sections,
+                    'financial_year_ids' => $grant->financial_year_ids,
+                ])
+                ->values()
+                ->all();
+        }
+
+        return $data;
     }
 
     private function safeReturnUrl(mixed $value): string

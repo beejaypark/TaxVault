@@ -30,6 +30,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Transaction extends UuidModel
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new \App\Support\FinancialYearVisibilityScope);
+    }
+
     protected $fillable = [
         'user_id',
         'financial_year_id',

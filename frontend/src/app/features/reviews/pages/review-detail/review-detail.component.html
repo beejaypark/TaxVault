@@ -236,7 +236,7 @@
           </dl>
         </section>
 
-        @if (review.status === 'pending') {
+        @if (review.status === 'pending' && auth.canEdit) {
           <section class="detail-card decision-card" aria-label="Review decision">
             <div class="decision-heading">
               <div>
@@ -314,7 +314,7 @@
             @if (review.decision) {
               <p>Decision recorded: <strong>{{ review.decision }}</strong></p>
             }
-            @if (review.status === 'completed' && review.extraction) {
+            @if (review.status === 'completed' && review.extraction && auth.canEdit) {
               <button
                 type="button"
                 class="secondary-button"

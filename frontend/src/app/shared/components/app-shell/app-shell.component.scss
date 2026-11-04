@@ -21,6 +21,16 @@
   flex: 1;
 }
 
+.viewer-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .menu-toggle {
   display: none;
   width: 40px;

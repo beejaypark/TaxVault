@@ -7,6 +7,11 @@
 
     <div class="topbar-spacer"></div>
 
+    @if (auth.isAccountant) {
+      <span class="viewer-badge" title="Accountant access is read-only">
+        Read-only view{{ auth.viewingOwnerName ? ' · ' + auth.viewingOwnerName : '' }}
+      </span>
+    }
     <div class="fy-picker">
       <label class="fy-label" for="active-financial-year">Financial year</label>
       <select
@@ -58,36 +63,53 @@
         <span class="nav-icon"><tv-icon name="dashboard" /></span><span>Dashboard</span>
       </a>
       <div class="nav-section-label">Tax workspace</div>
-      <a routerLink="/documents" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/documents')">
-        <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
-      </a>
+      @if (auth.can('documents')) {
+        <a routerLink="/documents" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/documents')">
+          <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
+        </a>
+      }
       <a routerLink="/financial-years" routerLinkActive="active" class="nav-item"
          (click)="navigationHistory.clearForPrimaryNavigation('/financial-years')">
         <span class="nav-icon"><tv-icon name="financialYear" /></span><span>Financial years</span>
       </a>
-      <a routerLink="/reviews" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/reviews')">
-        <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
-      </a>
-      <a routerLink="/transactions" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/transactions')">
-        <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
-      </a>
-      <div class="nav-section-label">Assets</div>
-      <a routerLink="/properties" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/properties')">
-        <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
-      </a>
-      <a routerLink="/investments" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/investments')">
-        <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
-      </a>
+      @if (auth.can('reviews')) {
+        <a routerLink="/reviews" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/reviews')">
+          <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
+        </a>
+      }
+      @if (auth.can('transactions')) {
+        <a routerLink="/transactions" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/transactions')">
+          <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
+        </a>
+      }
+      @if (auth.can('assets')) {
+        <div class="nav-section-label">Assets</div>
+        <a routerLink="/properties" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/properties')">
+          <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
+        </a>
+        <a routerLink="/investments" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/investments')">
+          <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
+        </a>
+      }
       <div class="nav-section-label">Reports</div>
-      <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
-         (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">
-        <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Accountant pack</span>
-      </a>
+      @if (auth.can('transactions')) {
+        <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">
+          <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Accountant pack</span>
+        </a>
+      }
+      @if (auth.canEdit) {
+        <div class="nav-section-label">Manage</div>
+        <a routerLink="/accountants" routerLinkActive="active" class="nav-item"
+           (click)="navigationHistory.clearForPrimaryNavigation('/accountants')">
+          <span class="nav-icon"><tv-icon name="accountant" /></span><span>Accountants</span>
+        </a>
+      }
     </nav>
   </aside>
 

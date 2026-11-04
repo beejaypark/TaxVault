@@ -21,6 +21,8 @@ import {
   FinancialYearDto,
 } from '../../../../shared/services/documents/document-api.service';
 
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+
 @Component({
   selector: 'app-document-list',
   imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent],
@@ -31,6 +33,7 @@ import {
 export class DocumentListComponent implements OnInit {
   private readonly api = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   documents: DocumentDto[] = [];

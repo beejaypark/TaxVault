@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->scoped(\App\Support\ViewerContext::class);
         $this->app->bind(
             OcrProvider::class,
             function () {

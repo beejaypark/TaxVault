@@ -60,3 +60,13 @@ Restore (`scripts\restore.ps1 -BackupDir backups\<timestamp>`):
   manifest counts, runs `php artisan documents:verify`, then cleans up.
 - `-Force` replaces live data. It stops the worker, Keycloak and nginx, restores both databases, moves the
   current documents directory aside as `documents.before-restore-<ts>`, then restarts and verifies.
+
+## Accountant access
+
+Owners can register accountants under **Manage accountants** (/accountants). Each accountant is a Keycloak user created by the backend (KeycloakAdmin) with a temporary password that is shown to the owner once and must be changed at first sign-in.
+
+- Accountants have a read-only role: the \cting\ middleware (\ActAsGrantedOwner\) rejects every non-GET request (and owner-only routes such as \/accountants\) with 403.
+- Each grant limits the sections (documents, transactions, reviews, assets) and, optionally, the financial years the accountant can see. Financial-year limits are enforced by global model scopes.
+- Revoking the last grant disables the user and deletes the Keycloak account.
+- Pack and invitation emails contain a link only, never a password. Without SMTP (`MAIL_MAILER=log`) emails are written to the Laravel log, so share the temporary password and link manually.
+- Production: set `KEYCLOAK_ADMIN_CLIENT_ID` / `KEYCLOAK_ADMIN_CLIENT_SECRET` (service account with user-management rights) instead of the master admin password variables.

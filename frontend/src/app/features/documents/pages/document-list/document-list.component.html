@@ -8,10 +8,12 @@
       <p class="refresh-indicator">Processing and review statuses update automatically every 5 seconds.</p>
     </div>
 
-    <a routerLink="/documents/upload" class="primary-button">
-      <tv-icon name="plus" />
-      Upload receipt
-    </a>
+    @if (auth.canEdit) {
+      <a routerLink="/documents/upload" class="primary-button">
+        <tv-icon name="plus" />
+        Upload receipt
+      </a>
+    }
   </header>
 
   <section class="documents-card">
@@ -41,9 +43,11 @@
         <p>{{ hasSelectedFinancialYear
           ? 'Choose another year or upload a receipt or tax document.'
           : 'Upload a receipt or tax document to see it listed here.' }}</p>
-        <a routerLink="/documents/upload" class="empty-state-link">
-          Upload your first document
-        </a>
+        @if (auth.canEdit) {
+          <a routerLink="/documents/upload" class="empty-state-link">
+            Upload your first document
+          </a>
+        }
       </div>
     } @else {
       <div class="document-table">
@@ -156,6 +160,7 @@
               } @else if (document.payment_status !== 'paid' && !document.financial_year_id) {
                 <span class="payment-note">Assign a financial year before recording payment.</span>
               }
+              @if (auth.canEdit) {
               <div class="document-actions">
                 <button
                   type="button"
@@ -168,6 +173,7 @@
                   {{ deletingDocumentId === document.id ? 'Deleting…' : 'Delete' }}
                 </button>
               </div>
+              }
               @if (failedDeletionDocumentId === document.id) {
                 <span class="processing-error" role="alert">{{ deleteErrorMessage }}</span>
               }

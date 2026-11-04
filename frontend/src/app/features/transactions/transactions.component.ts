@@ -22,6 +22,8 @@ import {
   TransactionDto,
 } from '../../shared/services/tax-workspace-api.service';
 
+import { AuthService } from '../../shared/services/auth/auth.service';
+
 @Component({
   selector: 'app-transactions',
   imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
@@ -33,6 +35,7 @@ export class TransactionsComponent implements OnInit {
   private readonly api = inject(TaxWorkspaceApiService);
   private readonly documentsApi = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   transactions: TransactionDto[] = [];

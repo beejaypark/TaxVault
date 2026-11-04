@@ -1,7 +1,8 @@
 ﻿import { Routes } from '@angular/router';
 
 import { AppShellComponent } from './shared/components/app-shell/app-shell.component';
-import { authGuard } from './shared/guards/auth.guard';
+import { authGuard, ownerGuard } from './shared/guards/auth.guard';
+import { AccountantsComponent } from './features/accountants/accountants.component';
 import { LoginComponent } from './features/auth/pages/login/login.component';
 import { DashboardComponent } from './features/dashboard/pages/dashboard/dashboard.component';
 import { DocumentListComponent } from './features/documents/pages/document-list/document-list.component';
@@ -29,7 +30,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'documents', component: DocumentListComponent },
-      { path: 'documents/upload', component: UploadDocumentComponent },
+      { path: 'documents/upload', component: UploadDocumentComponent, canActivate: [ownerGuard] },
       { path: 'properties', component: AssetsComponent },
       { path: 'investments', component: AssetsComponent },
       { path: 'transactions', component: TransactionsComponent },
@@ -49,6 +50,7 @@ export const routes: Routes = [
           ),
       },
       { path: 'tax-return', component: TaxReturnComponent },
+      { path: 'accountants', component: AccountantsComponent, canActivate: [ownerGuard] },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

@@ -131,6 +131,7 @@
             <span>{{ review.status === 'pending' ? 'Review item' : 'View details' }}</span>
             <tv-icon name="arrowRight" />
           </a>
+          @if (auth.canEdit) {
           <button
             type="button"
             class="delete-review"
@@ -141,6 +142,7 @@
             <tv-icon name="delete" />
             {{ deletingReviewId === review.id ? 'Deleting…' : 'Delete' }}
           </button>
+          }
         </article>
       }
     </section>

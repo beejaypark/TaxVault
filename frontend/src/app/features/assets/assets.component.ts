@@ -17,6 +17,8 @@ import {
   TaxWorkspaceApiService,
 } from '../../shared/services/tax-workspace-api.service';
 
+import { AuthService } from '../../shared/services/auth/auth.service';
+
 @Component({
   selector: 'app-assets',
   imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent],
@@ -28,6 +30,7 @@ export class AssetsComponent implements OnInit {
   private readonly api = inject(TaxWorkspaceApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
 
   readonly states = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
   readonly investmentTypes = [

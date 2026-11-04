@@ -19,6 +19,8 @@ import {
   faHouse,
   faPenToSquare,
   faPlus,
+  faPaperPlane,
+  faUserTie,
   faReceipt,
   faRightLeft,
   faTags,
@@ -52,7 +54,9 @@ export type TaxIconName =
   | 'classification'
   | 'extraction'
   | 'delete'
-  | 'close';
+  | 'close'
+  | 'accountant'
+  | 'send';
 
 const ICONS: Record<TaxIconName, IconDefinition> = {
   arrowLeft: faArrowLeft,
@@ -79,6 +83,8 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   extraction: faWandMagicSparkles,
   delete: faTrashCan,
   close: faXmark,
+  accountant: faUserTie,
+  send: faPaperPlane,
 };
 
 @Component({

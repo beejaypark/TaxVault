@@ -13,11 +13,22 @@ import {
   throwError,
 } from 'rxjs';
 
+export type AccessSection = 'documents' | 'transactions' | 'reviews' | 'assets';
+
+export interface AccountantClient {
+  owner_id: string;
+  owner_name: string | null;
+  sections: AccessSection[];
+  financial_year_ids: string[] | null;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
   display_name: string;
   identity_provider: string;
+  role?: 'owner' | 'accountant';
+  clients?: AccountantClient[];
 }
 
 interface ApiResponse<T> {
@@ -39,6 +50,27 @@ export class AuthService {
 
   get currentUser(): AuthUser | null {
     return this.user();
+  }
+
+  /** Accountants are invited read-only viewers of someone else's records. */
+  get isAccountant(): boolean {
+    return this.user()?.role === 'accountant';
+  }
+
+  get canEdit(): boolean {
+    return !this.isAccountant;
+  }
+
+  get viewingOwnerName(): string | null {
+    return this.user()?.clients?.[0]?.owner_name ?? null;
+  }
+
+  can(section: AccessSection): boolean {
+    if (!this.isAccountant) {
+      return true;
+    }
+
+    return this.user()?.clients?.[0]?.sections.includes(section) ?? false;
   }
 
   initialize(): Observable<AuthUser | null> {

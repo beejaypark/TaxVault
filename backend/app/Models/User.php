@@ -26,8 +26,19 @@ class User extends Authenticatable
         'email',
         'display_name',
         'status',
+        'role',
         'deactivated_at',
     ];
+
+    public function isAccountant(): bool
+    {
+        return $this->role === 'accountant';
+    }
+
+    public function accountantGrants(): HasMany
+    {
+        return $this->hasMany(AccountantGrant::class, 'accountant_user_id');
+    }
 
     protected function casts(): array
     {

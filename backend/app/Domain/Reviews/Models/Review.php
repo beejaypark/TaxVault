@@ -28,6 +28,11 @@ class Review extends UuidModel
         'completed_at',
     ];
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new \App\Support\ReviewVisibilityScope);
+    }
+
     protected function casts(): array
     {
         return [

@@ -30,6 +30,8 @@ import {
 } from '../../../../shared/services/reviews/review.service';
 import { DocumentApiService } from '../../../../shared/services/documents/document-api.service';
 
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+
 @Component({
   selector: 'app-review-list',
   standalone: true,
@@ -45,6 +47,7 @@ export class ReviewListComponent implements OnInit {
     inject(DocumentApiService);
   private readonly injector = inject(Injector);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   reviews: Review[] = [];

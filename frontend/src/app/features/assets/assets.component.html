@@ -6,7 +6,8 @@
       <h1>Assets</h1>
       <p>Asset records are maintained across years. The financial-year selector filters documents, transactions, and reviews, not these property and investment details.</p>
     </div>
-    @if (activeTab === 'properties') {
+    @if (!auth.canEdit) {
+    } @else if (activeTab === 'properties') {
       <button class="primary-button" type="button" (click)="showPropertyForm = !showPropertyForm">
         @if (showPropertyForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add property }
       </button>

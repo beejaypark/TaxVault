@@ -47,6 +47,32 @@ describe('AuthService', () => {
     expect(service.currentUser).toEqual(user);
   });
 
+  it('limits an accountant to read-only access within the granted sections', () => {
+    service.initialize().subscribe();
+    http.expectOne('/api/auth/user').flush({
+      data: {
+        ...user,
+        role: 'accountant',
+        clients: [
+          { owner_id: 'o1', owner_name: 'Owner', sections: ['documents'], financial_year_ids: null },
+        ],
+      },
+    });
+
+    expect(service.isAccountant).toBe(true);
+    expect(service.canEdit).toBe(false);
+    expect(service.can('documents')).toBe(true);
+    expect(service.can('transactions')).toBe(false);
+  });
+
+  it('treats an owner as able to edit everything', () => {
+    service.initialize().subscribe();
+    http.expectOne('/api/auth/user').flush({ data: user });
+
+    expect(service.canEdit).toBe(true);
+    expect(service.can('assets')).toBe(true);
+  });
+
   it('treats an unauthenticated session as signed out', () => {
     let result: AuthUser | null | undefined;
 

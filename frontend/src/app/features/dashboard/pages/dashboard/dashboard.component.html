@@ -7,10 +7,12 @@
       <p class="refresh-indicator">Statuses update automatically every 5 seconds.</p>
     </div>
 
+    @if (auth.canEdit) {
     <a routerLink="/documents/upload" class="primary-button">
       <tv-icon name="plus" />
       Upload document
     </a>
+    }
   </header>
 
   @if (errorMessage) {
@@ -217,7 +219,9 @@
             <strong>Start with your tax documents</strong>
             <p>Upload receipts and statements to keep your evidence together.</p>
           </div>
-          <a routerLink="/documents/upload" class="text-link">Upload a document</a>
+          @if (auth.canEdit) {
+            <a routerLink="/documents/upload" class="text-link">Upload a document</a>
+          }
         </div>
       } @else {
         <div class="document-list">
@@ -245,9 +249,9 @@
         <div><h2>Shortcuts</h2></div>
       </div>
       <nav class="quick-actions">
-        <a routerLink="/transactions"><span><tv-icon name="transactions" /></span><div><strong>Income & expenses</strong><small>Record and review your transactions</small></div></a>
-        <a routerLink="/properties"><span><tv-icon name="property" /></span><div><strong>Properties</strong><small>Manage rental property records</small></div></a>
-        <a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>Investments</strong><small>Track acquisition and disposal details</small></div></a>
+        @if (auth.can('transactions')) {<a routerLink="/transactions"><span><tv-icon name="transactions" /></span><div><strong>Income & expenses</strong><small>Record and review your transactions</small></div></a>}
+        @if (auth.can('assets')) {<a routerLink="/properties"><span><tv-icon name="property" /></span><div><strong>Properties</strong><small>Manage rental property records</small></div></a>}
+        @if (auth.can('assets')) {<a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>Investments</strong><small>Track acquisition and disposal details</small></div></a>}
         <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><div><strong>Accountant pack</strong><small>Evidence package for your accountant</small></div></a>
       </nav>
     </section>

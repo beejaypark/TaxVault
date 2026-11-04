@@ -53,6 +53,10 @@ describe('AppShellComponent', () => {
           provide: AuthService,
           useValue: {
             currentUser: null,
+            isAccountant: false,
+            canEdit: true,
+            viewingOwnerName: null,
+            can: () => true,
             logout: () => of(null),
           },
         },

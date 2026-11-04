@@ -6,9 +6,11 @@
       <h1>Financial years</h1>
       <p>Manage the Australian financial years used to organise your tax records.</p>
     </div>
+    @if (auth.canEdit) {
     <button class="primary-button" type="button" (click)="showForm = !showForm">
       @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add financial year }
     </button>
+    }
   </header>
 
   @if (errorMessage) { <p class="notice error" role="alert">{{ errorMessage }}</p> }
@@ -43,7 +45,7 @@
       <div class="empty-state">
         <h3>No financial years yet</h3>
         <p>Add a financial year to start uploading tax documents and recording transactions.</p>
-        <button type="button" class="secondary-button" (click)="showForm = true">Add your first financial year</button>
+        @if (auth.canEdit) {<button type="button" class="secondary-button" (click)="showForm = true">Add your first financial year</button>}
       </div>
     } @else {
       <div class="year-list">

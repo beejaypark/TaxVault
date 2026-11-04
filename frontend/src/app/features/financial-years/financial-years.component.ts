@@ -18,6 +18,8 @@ import {
   FinancialYearDto,
 } from '../../shared/services/documents/document-api.service';
 
+import { AuthService } from '../../shared/services/auth/auth.service';
+
 @Component({
   selector: 'app-financial-years',
   imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
@@ -28,6 +30,7 @@ import {
 export class FinancialYearsComponent implements OnInit {
   private readonly api = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly auth = inject(AuthService);
 
   financialYears: FinancialYearDto[] = [];
   yearCode = '';

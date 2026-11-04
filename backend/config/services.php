@@ -46,6 +46,10 @@ return [
         'realms' => env('KEYCLOAK_REALM', 'taxvault'),
         'client_id' => env('KEYCLOAK_CLIENT_ID', 'taxvault-web'),
         'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
+        'admin_user' => env('KEYCLOAK_ADMIN'),
+        'admin_password' => env('KEYCLOAK_ADMIN_PASSWORD'),
+        'admin_client_id' => env('KEYCLOAK_ADMIN_CLIENT_ID'),
+        'admin_client_secret' => env('KEYCLOAK_ADMIN_CLIENT_SECRET'),
         'redirect' => env(
             'KEYCLOAK_REDIRECT_URI',
             'http://localhost:8080/api/auth/oidc/callback',

@@ -32,13 +32,14 @@ class AuditRequest
         }
 
         $this->audit->record(
-            $request->user(),
+            $request->attributes->get('actor') ?? $request->user(),
             $event,
             $targetType,
             is_string($targetId) ? $targetId : null,
             array_filter([
                 'financial_year_id' => $request->input('financial_year_id'),
                 'status' => $response->getStatusCode(),
+                'acting_for' => $request->attributes->has('actor') ? $request->user()->getKey() : null,
             ]),
         );
 
