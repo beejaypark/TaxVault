@@ -43,6 +43,8 @@
       </a>
     </section>
 
+    <div class="dashboard-columns">
+    <div class="dashboard-main">
     <section class="analysis-section" aria-labelledby="financial-analysis-heading">
       <div class="section-heading">
         <div>
@@ -161,7 +163,9 @@
         }
       }
     </section>
+    </div>
 
+    <aside class="dashboard-side" aria-label="Tasks and shortcuts">
     <section class="dashboard-section">
       <div class="section-heading">
         <div>
@@ -190,7 +194,7 @@
                   <span>{{ review.type }} · {{ review.status.replace('_', ' ') }}</span>
                 </div>
               </div>
-              <span class="status review">Review now</span>
+              <span class="row-action">Review</span>
             </a>
           }
         </div>
@@ -236,11 +240,18 @@
       }
     </section>
 
-    <section class="quick-actions" aria-label="Tax workspace">
-      <a routerLink="/transactions"><span><tv-icon name="transactions" /></span><strong>Income & expenses</strong><small>Record and review your transactions</small></a>
-      <a routerLink="/properties"><span><tv-icon name="property" /></span><strong>Properties</strong><small>Manage rental property records</small></a>
-      <a routerLink="/investments"><span><tv-icon name="investment" /></span><strong>Investments</strong><small>Track acquisition and disposal details</small></a>
-      <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><strong>Accountant pack</strong><small>Evidence package for your accountant</small></a>
+    <section class="dashboard-section" aria-label="Tax workspace">
+      <div class="section-heading">
+        <div><h2>Shortcuts</h2></div>
+      </div>
+      <nav class="quick-actions">
+        <a routerLink="/transactions"><span><tv-icon name="transactions" /></span><div><strong>Income & expenses</strong><small>Record and review your transactions</small></div></a>
+        <a routerLink="/properties"><span><tv-icon name="property" /></span><div><strong>Properties</strong><small>Manage rental property records</small></div></a>
+        <a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>Investments</strong><small>Track acquisition and disposal details</small></div></a>
+        <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><div><strong>Accountant pack</strong><small>Evidence package for your accountant</small></div></a>
+      </nav>
     </section>
+    </aside>
+    </div>
   }
 </div>

@@ -42,6 +42,8 @@ h1 { font-size: 30px; letter-spacing: -.025em; }
 .meta-separator { color: var(--tv-color-border); }
 .open-review { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 8px; min-height: 38px; padding: 0 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); color: var(--tv-color-primary); font-size: 12px; font-weight: 650; text-decoration: none; }
 .open-review:hover { border-color: var(--tv-color-primary); background: var(--tv-color-primary-soft); }
+.review-card.needs-attention .open-review { border-color: var(--tv-color-accent); background: var(--tv-color-accent); color: #fff; }
+.review-card.needs-attention .open-review:hover { border-color: var(--tv-color-primary); background: var(--tv-color-primary); }
 .pagination { align-items: center; gap: 16px; margin-top: 18px; color: var(--tv-color-text-secondary); font-size: 12px; }
 .pagination-actions { gap: 8px; }
 .secondary-button { min-height: 36px; padding: 0 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: var(--tv-color-surface); color: var(--tv-color-text); font-size: 12px; font-weight: 600; cursor: pointer; }
