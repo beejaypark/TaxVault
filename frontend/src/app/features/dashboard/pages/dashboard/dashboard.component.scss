@@ -1,7 +1,7 @@
 ﻿.dashboard-page {
-  width: min(100% - 48px, var(--tv-content-max-width));
+  width: min(100%, var(--tv-content-max-width));
   margin: 0 auto;
-  padding: 40px 0 64px;
+  padding: 40px 40px 64px;
 }
 
 .page-header {
@@ -695,8 +695,7 @@ h1 {
 
 @media (max-width: 800px) {
   .dashboard-page {
-    width: min(100% - 32px, var(--tv-content-max-width));
-    padding-top: 28px;
+    padding: 28px 16px 48px;
   }
 
   .page-header {

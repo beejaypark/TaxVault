@@ -163,7 +163,7 @@ interface AccountantForm {
     </section>
   `,
   styles: `
-    .page { display: grid; gap: 16px; padding: 24px; }
+    .page { display: grid; gap: 16px; width: min(100%, var(--tv-content-max-width)); margin: 0 auto; padding: 40px 40px 64px; }
     .primary-button { padding: 9px 16px; border: 0; border-radius: 4px; background: #1b2f4e; color: #fff; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .primary-button:disabled { opacity: 0.6; }
     .row-actions button, .actions button:not(.primary-button), .notice button { padding: 5px 10px; border: 1px solid #c3cddb; background: #fff; border-radius: 4px; cursor: pointer; }
@@ -190,6 +190,7 @@ interface AccountantForm {
     .notice.password { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #fff7e0; }
     .notice code { font-size: 15px; padding: 2px 8px; background: #fff; border-radius: 4px; }
     @media (max-width: 900px) { table { display: block; overflow-x: auto; } }
+    @media (max-width: 700px) { .page { padding: 28px 16px 48px; } }
   `,
 })
 export class AccountantsComponent implements OnInit {

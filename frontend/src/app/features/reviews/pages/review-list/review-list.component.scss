@@ -1,5 +1,5 @@
 :host { display: block; }
-.reviews-page { width: min(100% - 48px, var(--tv-content-max-width)); margin: 0 auto; padding: 40px 0 64px; }
+.reviews-page { width: min(100%, var(--tv-content-max-width)); margin: 0 auto; padding: 40px 40px 64px; }
 .page-header, .queue-toolbar, .filter-heading, .review-card, .review-card-main, .review-card-heading, .pagination, .pagination-actions { display: flex; }
 .page-header, .queue-toolbar, .filter-heading, .pagination { justify-content: space-between; }
 .page-header { align-items: flex-end; gap: 24px; margin-bottom: 28px; }
@@ -60,7 +60,7 @@ h1 { font-size: 30px; letter-spacing: -.025em; }
 .error-state h2, .error-state p { color: var(--tv-color-danger); }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 700px) {
-  .reviews-page { width: min(100% - 32px, var(--tv-content-max-width)); padding: 28px 0 48px; }
+  .reviews-page { padding: 28px 16px 48px; }
   .queue-toolbar { align-items: stretch; flex-direction: column; }
   .filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters select { min-width: 0; width: 100%; }
