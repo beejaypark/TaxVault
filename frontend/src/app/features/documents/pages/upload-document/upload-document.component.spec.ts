@@ -15,6 +15,7 @@ describe('UploadDocumentComponent', () => {
   let documentApi: {
     listFinancialYears: () => ReturnType<DocumentApiService['listFinancialYears']>;
     listDocumentTypes: () => ReturnType<DocumentApiService['listDocumentTypes']>;
+    getInboundEmailAddress: () => ReturnType<DocumentApiService['getInboundEmailAddress']>;
     selectedFinancialYearId: ReturnType<typeof signal<string | null>>;
     selectFinancialYear: (financialYearId: string | null) => void;
     uploadDocument: ReturnType<typeof vi.fn>;
@@ -47,6 +48,7 @@ describe('UploadDocumentComponent', () => {
         name: 'Receipt',
         status: 'active',
       }]),
+      getInboundEmailAddress: () => of('abc123@inbox.test'),
       selectedFinancialYearId,
       selectFinancialYear: (financialYearId) =>
         selectedFinancialYearId.set(financialYearId),
@@ -191,6 +193,10 @@ describe('UploadDocumentComponent', () => {
     } as unknown as Event);
 
     expect(fixture.componentInstance.selectedFiles.map((item) => item.file)).toEqual([photo]);
+  });
+
+  it('should show the email forwarding address', () => {
+    expect(fixture.nativeElement.textContent).toContain('abc123@inbox.test');
   });
 
   it('should keep supported files and report unsupported files in a mixed selection', () => {

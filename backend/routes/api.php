@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FinancialYearController;
+use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\ReviewController;
@@ -27,7 +28,10 @@ Route::middleware('web')->group(function (): void {
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('auth');
 });
+Route::post('/inbound-email/webhook', [InboundEmailController::class, 'webhook']);
+
 Route::middleware('auth')->group(function (): void {
+    Route::get('/inbound-email', [InboundEmailController::class, 'show']);
     Route::get('/financial-years', [FinancialYearController::class, 'index']);
     Route::post('/financial-years', [FinancialYearController::class, 'store']);
 

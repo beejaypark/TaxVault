@@ -35,6 +35,11 @@ return [
         ],
     ],
 
+    'inbound_email' => [
+        'domain' => env('INBOUND_EMAIL_DOMAIN', 'inbox.taxvault.local'),
+        'secret' => env('INBOUND_EMAIL_SECRET'),
+    ],
+
     'keycloak' => [
         'base_url' => env('KEYCLOAK_URL', 'http://keycloak:8080/auth'),
         'public_url' => env('KEYCLOAK_PUBLIC_URL', 'http://localhost:8080/auth'),

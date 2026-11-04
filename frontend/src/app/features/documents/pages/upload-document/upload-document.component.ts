@@ -42,6 +42,8 @@ export class UploadDocumentComponent implements OnInit {
   isLoadingDocumentTypes = true;
   isUploading = false;
   errorMessage = '';
+  inboundEmail = '';
+  copied = false;
 
   readonly acceptedTypes = [
     'application/pdf',
@@ -87,6 +89,13 @@ export class UploadDocumentComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.api.getInboundEmailAddress().subscribe({
+      next: (address) => {
+        this.inboundEmail = address;
+        this.cdr.markForCheck();
+      },
+    });
+
     this.api.listFinancialYears().subscribe({
       next: (years) => {
         this.financialYears = years;
@@ -133,6 +142,12 @@ export class UploadDocumentComponent implements OnInit {
   onDocumentTypeChange(event: Event): void {
     this.selectedDocumentTypeId =
       (event.target as HTMLSelectElement).value;
+  }
+
+  async copyInboundEmail(): Promise<void> {
+    await navigator.clipboard?.writeText(this.inboundEmail);
+    this.copied = true;
+    this.cdr.markForCheck();
   }
 
   onFileSelected(event: Event): void {

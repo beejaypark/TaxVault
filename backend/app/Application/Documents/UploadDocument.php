@@ -25,6 +25,7 @@ final class UploadDocument
         ?string $financialYearId,
         string $documentTypeId,
         UploadedFile $file,
+        array $provenance = ['source' => 'web_upload'],
     ): Document {
         $extension = strtolower(
             $file->guessExtension() ?: $file->getClientOriginalExtension()
@@ -52,6 +53,7 @@ final class UploadDocument
                 $extension,
                 $sha256,
                 $disk,
+                $provenance,
                 &$storedPath,
             ): Document {
                 User::query()
@@ -117,7 +119,7 @@ final class UploadDocument
                     mimeType: $file->getMimeType(),
                     sizeBytes: $file->getSize(),
                     uploadedAt: now()->toISOString(),
-                    provenance: ['source' => 'web_upload'],
+                    provenance: $provenance,
                     status: 'processing',
                 );
             });

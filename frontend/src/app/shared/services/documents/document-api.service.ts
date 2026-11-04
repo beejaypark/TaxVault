@@ -135,6 +135,12 @@ export class DocumentApiService {
       .pipe(map((response) => response.data));
   }
 
+  getInboundEmailAddress(): Observable<string> {
+    return this.http
+      .get<{ data: { address: string } }>('/api/inbound-email')
+      .pipe(map((response) => response.data.address));
+  }
+
   listDocumentTypes(): Observable<DocumentTypeDto[]> {
     return this.http
       .get<ApiList<DocumentTypeDto>>('/api/document-types')
