@@ -12,6 +12,11 @@
       </div>
     </div>
 
+    <p class="lens"><b>Analysis lens:</b> liquidity and timing. Compare money in and out each month; the running balance shows whether cash is building up or draining over the year.</p>
+    @if (cashFlowTakeaway()) {
+      <p class="takeaway"><b>Takeaway:</b> {{ cashFlowTakeaway() }}</p>
+    }
+
     <svg class="chart" [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" [attr.aria-label]="chartDescription()">
       @for (line of gridLines(); track $index) {
         <line [attr.x1]="52" [attr.x2]="width - 12" [attr.y1]="line.y" [attr.y2]="line.y" class="grid" />
@@ -34,7 +39,7 @@
     </p>
   </section>
 
-  @if (forecast(); as plan) {
+  @if (showForecast() && forecast(); as plan) {
     <section class="card no-print-controls" aria-labelledby="forecast-heading">
       <div class="heading">
         <div>
@@ -46,6 +51,9 @@
           </p>
         </div>
       </div>
+
+      <p class="lens"><b>Analysis lens:</b> run-rate projection. Assumes recent monthly averages continue, adjusted by the growth rates you set. It is a planning aid, not a budget or advice.</p>
+      <p class="takeaway"><b>Takeaway:</b> {{ forecastTakeaway() }}</p>
 
       <div class="forecast-controls no-print">
         <label>
@@ -109,6 +117,10 @@
         <p>Largest payees by total, grouped by transaction description.</p>
       </div>
     </div>
+    <p class="lens"><b>Analysis lens:</b> concentration. Shows which payees drive the totals, so you can see where a change would matter most.</p>
+    @if (spendingTakeaway()) {
+      <p class="takeaway"><b>Takeaway:</b> {{ spendingTakeaway() }}</p>
+    }
     <div class="payee-columns">
       <div>
         <h4>Top expenses</h4>
@@ -144,6 +156,7 @@
         <p>Observations from your records. These are prompts to discuss with your accountant, not financial advice.</p>
       </div>
     </div>
+    <p class="lens"><b>Analysis lens:</b> rules-based screening. Flags deficits, single-payee concentration, recurring costs, monthly spikes and irregular or single-source income.</p>
     <ul class="insights">
       @for (insight of analysis().insights; track insight.title) {
         <li [class]="'insight ' + insight.kind">
@@ -157,5 +170,15 @@
         <li class="muted">Add transactions to see observations.</li>
       }
     </ul>
+  </section>
+} @else {
+  <section class="card" aria-labelledby="cash-flow-heading">
+    <div class="heading">
+      <div>
+        <h3 id="cash-flow-heading">Cash flow</h3>
+        <p>No transactions are recorded{{ label() ? ' for FY ' + label() : '' }} yet, so there is nothing to chart.</p>
+      </div>
+    </div>
+    <p class="muted">Add transactions or approve reviews for this year, or choose another financial year in the sidebar.</p>
   </section>
 }

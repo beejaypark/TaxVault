@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
 import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
+import { CashFlowAnalysisComponent } from '../../shared/components/cash-flow-analysis/cash-flow-analysis.component';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
 import {
   DocumentApiService,
@@ -22,7 +23,7 @@ import {
 
 @Component({
   selector: 'app-tax-return',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,10 +51,20 @@ export class TaxReturnComponent implements OnInit {
     return yearCode ? formatFinancialYear(yearCode) : 'Tax year';
   }
 
+  private yearCache: { source: TransactionDto[]; yearId: string; result: TransactionDto[] } | null = null;
+
   get yearTransactions(): TransactionDto[] {
-    return this.transactions
+    if (this.yearCache?.source === this.transactions && this.yearCache.yearId === this.selectedFinancialYearId) {
+      return this.yearCache.result;
+    }
+
+    const result = this.transactions
       .filter((item) => item.financial_year_id === this.selectedFinancialYearId)
       .sort((a, b) => a.transaction_date.localeCompare(b.transaction_date));
+
+    this.yearCache = { source: this.transactions, yearId: this.selectedFinancialYearId, result };
+
+    return result;
   }
 
   get totalIncome(): number {
@@ -62,6 +73,10 @@ export class TaxReturnComponent implements OnInit {
 
   get totalExpenses(): number {
     return this.sumDirection('expense');
+  }
+
+  get selectedYear(): FinancialYearDto | null {
+    return this.financialYears.find((year) => year.id === this.selectedFinancialYearId) ?? null;
   }
 
   get selectedYearLabel(): string {

@@ -90,6 +90,16 @@
         </table>
       }
     </section>
+
+    @if (selectedYear; as year) {
+      <tv-cash-flow-analysis
+        [transactions]="yearTransactions"
+        [startDate]="year.start_date"
+        [endDate]="year.end_date"
+        [label]="selectedYearLabel"
+        [showForecast]="false"
+      />
+    }
   }
 
   @if (latestExport) {

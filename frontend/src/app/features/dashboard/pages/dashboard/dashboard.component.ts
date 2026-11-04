@@ -64,12 +64,22 @@ export class DashboardComponent implements OnInit {
     return this.financialYears.find((year) => year.id === selectedYearId) ?? null;
   }
 
+  private filteredCache: { source: TransactionDto[]; yearId: string | null; result: TransactionDto[] } | null = null;
+
   get filteredTransactions(): TransactionDto[] {
     const yearId = this.documentsApi.selectedFinancialYearId();
 
-    return yearId
+    if (this.filteredCache?.source === this.transactions && this.filteredCache.yearId === yearId) {
+      return this.filteredCache.result;
+    }
+
+    const result = yearId
       ? this.transactions.filter((transaction) => transaction.financial_year_id === yearId)
       : [];
+
+    this.filteredCache = { source: this.transactions, yearId, result };
+
+    return result;
   }
 
   get totalIncome(): number {

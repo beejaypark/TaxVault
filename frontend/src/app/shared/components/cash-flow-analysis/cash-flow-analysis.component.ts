@@ -21,6 +21,8 @@ export class CashFlowAnalysisComponent {
 
   readonly width = WIDTH;
   readonly Math = Math;
+  readonly showForecast = input(true);
+  readonly label = input('');
   readonly height = HEIGHT;
   readonly horizonOptions = [1, 2, 3, 5, 10];
 
@@ -123,6 +125,57 @@ export class CashFlowAnalysisComponent {
   readonly chartDescription = computed(
     () => `Monthly income, expenses and running balance. Year-end balance ${this.format(this.finalBalance())}.`,
   );
+
+  readonly cashFlowTakeaway = computed(() => {
+    const active = this.analysis().months.filter((month) => month.income > 0 || month.expenses > 0);
+
+    if (active.length === 0) {
+      return '';
+    }
+
+    const sorted = [...active].sort((a, b) => b.net - a.net);
+    const best = sorted[0];
+    const worst = sorted[sorted.length - 1];
+    const negative = active.filter((month) => month.net < 0).length;
+    const parts = [`Strongest month: ${best.label} (${this.format(best.net)}).`];
+
+    if (worst.key !== best.key) {
+      parts.push(`Weakest: ${worst.label} (${this.format(worst.net)}).`);
+    }
+
+    parts.push(`${negative} of ${active.length} active month${active.length === 1 ? '' : 's'} had negative net cash flow.`);
+
+    return parts.join(' ');
+  });
+
+  readonly spendingTakeaway = computed(() => {
+    const { topExpenses, topIncome } = this.analysis();
+    const parts: string[] = [];
+
+    if (topExpenses.length > 0) {
+      const share = topExpenses.slice(0, 3).reduce((sum, payee) => sum + payee.share, 0);
+      parts.push(`The top ${Math.min(3, topExpenses.length)} expense payee${topExpenses.length === 1 ? '' : 's'} make up ${this.percent(share)} of spending.`);
+    }
+
+    if (topIncome.length > 0) {
+      parts.push(`${topIncome[0].name} is the largest income source (${this.percent(topIncome[0].share)}).`);
+    }
+
+    return parts.join(' ');
+  });
+
+  readonly forecastTakeaway = computed(() => {
+    const plan = this.forecast();
+
+    if (!plan || plan.years.length === 0) {
+      return '';
+    }
+
+    const monthlyNet = plan.monthlyIncome - plan.monthlyExpenses;
+    const last = plan.years[plan.years.length - 1];
+
+    return `At the current pace you net about ${this.format(monthlyNet)} per month. By FY ${last.label} the projected balance is ${this.format(last.closingBalance)}.`;
+  });
 
   setHorizon(value: string): void {
     this.horizon.set(Number(value));
