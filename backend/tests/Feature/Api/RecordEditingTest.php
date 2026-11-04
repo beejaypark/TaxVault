@@ -106,11 +106,47 @@ class RecordEditingTest extends TestCase
 
         $this->createTransaction();
 
-        $this->actingAs($this->owner)->deleteJson("/api/financial-years/{$this->year->id}")->assertStatus(409);
         $this->actingAs($this->owner)->patchJson("/api/financial-years/{$this->year->id}", ['year_code' => '2024-25'])
             ->assertUnprocessable();
         $this->actingAs($this->owner)->patchJson("/api/financial-years/{$this->year->id}", ['status' => 'inactive'])
             ->assertOk()->assertJsonPath('data.status', 'inactive');
+    }
+
+    public function test_deleting_a_financial_year_removes_all_of_its_records_but_not_other_years(): void
+    {
+        $other = $this->makeYear('2026-27', '2026-07-01', '2027-06-30');
+        $this->createTransaction();
+        $keep = $this->actingAs($this->owner)->postJson('/api/transactions', [
+            'transaction_date' => '2026-09-01',
+            'direction' => 'expense',
+            'amount' => '10.00',
+            'description' => 'Kept',
+        ])->assertCreated()->json('data.id');
+
+        $this->actingAs($this->owner)->deleteJson("/api/financial-years/{$this->year->id}")->assertOk();
+
+        $this->assertNull(FinancialYear::query()->find($this->year->id));
+        $this->assertSame(0, DB::table('transactions')->where('financial_year_id', $this->year->id)->count());
+        $this->assertSame(0, DB::table('income')->where('financial_year_id', $this->year->id)->count());
+        $this->assertNotNull(Transaction::query()->find($keep));
+        $this->assertNotNull(FinancialYear::query()->find($other->id));
+    }
+
+    public function test_deleting_a_financial_year_removes_it_from_accountant_grants(): void
+    {
+        $other = $this->makeYear('2026-27', '2026-07-01', '2027-06-30');
+        $grant = \App\Models\AccountantGrant::query()->create([
+            'owner_id' => $this->owner->id,
+            'accountant_user_id' => User::factory()->create()->id,
+            'name' => 'Acc',
+            'email' => 'acc@example.test',
+            'sections' => ['documents'],
+            'financial_year_ids' => [$this->year->id, $other->id],
+        ]);
+
+        $this->actingAs($this->owner)->deleteJson("/api/financial-years/{$this->year->id}")->assertOk();
+
+        $this->assertSame([$other->id], $grant->refresh()->financial_year_ids);
     }
 
     public function test_property_and_investment_can_be_edited_and_deleted(): void

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Application\Documents\DocumentDeletionConflict;
 use App\Application\FinancialYears\CreateFinancialYear;
+use App\Application\FinancialYears\DeleteFinancialYear;
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FinancialYears\StoreFinancialYearRequest;
@@ -101,19 +103,17 @@ class FinancialYearController extends Controller
         return response()->json(['data' => $financialYear->refresh()]);
     }
 
-    public function destroy(Request $request, string $id): JsonResponse
+    public function destroy(Request $request, string $id, DeleteFinancialYear $deleteFinancialYear): JsonResponse
     {
         $financialYear = $this->findOwned($request, $id);
 
-        if ($this->hasRecords($financialYear)) {
-            return response()->json([
-                'message' => 'This financial year has documents or transactions. Remove them first, or set the year to inactive.',
-            ], 409);
+        try {
+            $deleteFinancialYear->execute($request->user(), $financialYear);
+        } catch (DocumentDeletionConflict $exception) {
+            return response()->json(['message' => $exception->getMessage()], 409);
         }
 
-        $financialYear->delete();
-
-        return response()->json(['message' => 'Financial year deleted.']);
+        return response()->json(['message' => 'Financial year and all of its records deleted.']);
     }
 
     private function findOwned(Request $request, string $id): FinancialYear

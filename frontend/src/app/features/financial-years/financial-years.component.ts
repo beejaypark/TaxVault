@@ -145,7 +145,13 @@ export class FinancialYearsComponent implements OnInit {
   }
 
   deleteFinancialYear(year: FinancialYearDto): void {
-    if (!confirm(`Delete FY ${formatFinancialYear(year.year_code)}? This cannot be undone.`)) {
+    const label = `FY ${formatFinancialYear(year.year_code)}`;
+
+    if (!confirm(`Delete ${label}?\n\nAll documents, reviews, income, expenses and exports in this financial year will be permanently deleted.`)) {
+      return;
+    }
+
+    if (!confirm(`Final confirmation: permanently delete ${label} and ALL of its data? This cannot be undone.`)) {
       return;
     }
 
@@ -155,7 +161,7 @@ export class FinancialYearsComponent implements OnInit {
     this.api.deleteFinancialYear(year.id).subscribe({
       next: () => {
         this.financialYears = this.financialYears.filter((existing) => existing.id !== year.id);
-        this.successMessage = `FY ${formatFinancialYear(year.year_code)} deleted.`;
+        this.successMessage = `${label} and all of its records were deleted.`;
         this.cdr.markForCheck();
       },
       error: (error: { error?: { message?: string } }) => this.fail(
