@@ -104,4 +104,6 @@ before exposing the services to a network.
 
 ## Architecture Documentation
 
+Security, encryption, audit and data deletion policies are in [docs/security.md](docs/security.md).
+
 The authoritative architecture and product decisions are maintained in the TaxVault Notion project documentation.
