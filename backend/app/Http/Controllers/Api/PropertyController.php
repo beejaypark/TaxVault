@@ -19,7 +19,7 @@ class PropertyController extends Controller
     {
         $properties = Property::query()
             ->where('user_id', $request->user()->getKey())
-            ->with('periods')
+            ->with('periods', 'mortgages')
             ->orderBy('id')
             ->get();
 
@@ -60,9 +60,11 @@ class PropertyController extends Controller
             'suburb',
             'state',
             'postcode',
+            'current_value',
+            'current_value_date',
         ]));
 
-        return response()->json(['data' => $model->refresh()->load('periods')]);
+        return response()->json(['data' => $model->refresh()->load('periods', 'mortgages')]);
     }
 
     public function destroy(Request $request, string $property): JsonResponse
@@ -76,6 +78,10 @@ class PropertyController extends Controller
         }
 
         DB::transaction(function () use ($model): void {
+            foreach ($model->mortgages as $mortgage) {
+                $mortgage->interestEntries()->delete();
+                $mortgage->delete();
+            }
             $model->periods()->delete();
             $model->delete();
         });
@@ -98,7 +104,7 @@ class PropertyController extends Controller
         $model = Property::query()
             ->whereKey($property)
             ->where('user_id', $request->user()->getKey())
-            ->with('periods')
+            ->with('periods', 'mortgages')
             ->firstOrFail();
 
         return response()->json([

@@ -21,6 +21,8 @@ class Property extends UuidModel
         'postcode',
         'country_code',
         'location_metadata',
+        'current_value',
+        'current_value_date',
     ];
 
     protected function casts(): array
@@ -28,6 +30,11 @@ class Property extends UuidModel
         return [
             'location_metadata' => 'array',
         ];
+    }
+
+    public function mortgages(): HasMany
+    {
+        return $this->hasMany(Mortgage::class)->with('interestEntries')->orderBy('created_at');
     }
 
     public function user(): BelongsTo

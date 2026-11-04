@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FinancialYearController;
 use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvestmentController;
+use App\Http\Controllers\Api\MortgageController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TransactionController;
@@ -49,6 +50,11 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/properties/{property}', [PropertyController::class, 'show']);
     Route::put('/properties/{property}', [PropertyController::class, 'update'])->middleware('audit:property.update,property');
     Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->middleware('audit:property.delete,property');
+    Route::post('/properties/{property}/mortgages', [MortgageController::class, 'store'])->middleware('audit:mortgage.create,property');
+    Route::put('/mortgages/{id}', [MortgageController::class, 'update'])->middleware('audit:mortgage.update,mortgage');
+    Route::delete('/mortgages/{id}', [MortgageController::class, 'destroy'])->middleware('audit:mortgage.delete,mortgage');
+    Route::put('/mortgages/{id}/interest', [MortgageController::class, 'saveInterest'])->middleware('audit:mortgage.interest,mortgage');
+    Route::delete('/mortgages/{id}/interest/{entry}', [MortgageController::class, 'destroyInterest'])->middleware('audit:mortgage.interest_delete,mortgage');
     Route::post(
         '/properties/{property}/periods',
         [PropertyController::class, 'storePeriod']

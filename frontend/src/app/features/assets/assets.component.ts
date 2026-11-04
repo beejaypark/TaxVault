@@ -18,10 +18,11 @@ import {
 } from '../../shared/services/tax-workspace-api.service';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { PropertyMortgagesComponent } from './property-mortgages.component';
 
 @Component({
   selector: 'app-assets',
-  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent],
+  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,6 +99,10 @@ export class AssetsComponent implements OnInit {
       suburb: editing ? trimmed(this.propertyForm.suburb) : this.optional(this.propertyForm.suburb),
       state: editing ? trimmed(this.propertyForm.state) : this.optional(this.propertyForm.state),
       postcode: editing ? trimmed(this.propertyForm.postcode) : this.optional(this.propertyForm.postcode),
+      current_value: this.propertyForm.current_value,
+      current_value_date: this.propertyForm.current_value === null
+        ? null
+        : (this.propertyForm.current_value_date || null),
     };
     const request$ = editing
       ? this.api.updateProperty(editing, payload)
@@ -172,6 +177,10 @@ export class AssetsComponent implements OnInit {
       state: property.state ?? '',
       postcode: property.postcode ?? '',
       country_code: property.country_code,
+      current_value: property.current_value === null || property.current_value === undefined
+        ? null
+        : Number(property.current_value),
+      current_value_date: property.current_value_date ? property.current_value_date.slice(0, 10) : '',
     };
     this.showPropertyForm = true;
   }
@@ -309,6 +318,8 @@ export class AssetsComponent implements OnInit {
       state: '',
       postcode: '',
       country_code: 'AU',
+      current_value: null as number | null,
+      current_value_date: '',
     };
   }
 

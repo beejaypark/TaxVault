@@ -49,6 +49,8 @@
             </select>
           </label>
           <label>Postcode <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
+          <label>Current value (AUD) <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" placeholder="From property.com.au" /></label>
+          <label>Value as of <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" /></label>
         </div>
         <div class="form-actions">
           <button type="button" class="secondary-button" (click)="closePropertyForm()">Cancel</button>
@@ -82,6 +84,22 @@
                 <button type="button" class="row-action danger" (click)="deleteProperty(property)"><tv-icon name="delete" /> Delete</button>
               </div>
             }
+            <div class="property-value">
+              <div>
+                <span>Current value</span>
+                @if (property.current_value !== null && property.current_value !== undefined) {
+                  <strong>{{ formatCurrency(property.current_value) }}</strong>
+                  <small>as of {{ formatDate(property.current_value_date ?? '') }}</small>
+                } @else {
+                  <strong>Not set</strong>
+                  <small>Look it up on property.com.au, then enter it with Edit.</small>
+                }
+              </div>
+              <a class="row-action" href="https://www.property.com.au/" target="_blank" rel="noopener noreferrer">
+                <tv-icon name="arrowRight" /> Check on property.com.au
+              </a>
+            </div>
+            <app-property-mortgages [property]="property" (mortgagesChange)="property.mortgages = $event" />
           </article>
         }
       </section>

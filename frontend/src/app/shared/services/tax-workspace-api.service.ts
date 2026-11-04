@@ -10,6 +10,31 @@ interface ApiItem<T> {
   data: T;
 }
 
+export interface MortgageInterestEntryDto {
+  id: string;
+  month: string;
+  interest_amount: string | number;
+}
+
+export interface MortgageDto {
+  id: string;
+  property_id: string;
+  bank_name: string;
+  loan_type: string;
+  loan_amount: string | number;
+  interest_rate: string | number | null;
+  start_date: string | null;
+  interest_entries: MortgageInterestEntryDto[];
+}
+
+export interface MortgageRequest {
+  bank_name: string;
+  loan_type: string;
+  loan_amount: number;
+  interest_rate: number | null;
+  start_date: string | null;
+}
+
 export interface PropertyDto {
   id: string;
   reference_code: string | null;
@@ -19,6 +44,9 @@ export interface PropertyDto {
   state: string | null;
   postcode: string | null;
   country_code: string;
+  current_value?: string | number | null;
+  current_value_date?: string | null;
+  mortgages?: MortgageDto[];
 }
 
 export interface CreatePropertyRequest {
@@ -29,6 +57,8 @@ export interface CreatePropertyRequest {
   state?: string;
   postcode?: string;
   country_code: string;
+  current_value?: number | null;
+  current_value_date?: string | null;
 }
 
 export interface InvestmentDto {
@@ -108,6 +138,37 @@ export class TaxWorkspaceApiService {
 
   deleteProperty(id: string): Observable<unknown> {
     return this.http.delete(`/api/properties/${id}`);
+  }
+
+  createMortgage(propertyId: string, mortgage: MortgageRequest): Observable<MortgageDto> {
+    return this.http
+      .post<ApiItem<MortgageDto>>(`/api/properties/${propertyId}/mortgages`, mortgage)
+      .pipe(map((response) => response.data));
+  }
+
+  updateMortgage(id: string, mortgage: MortgageRequest): Observable<MortgageDto> {
+    return this.http
+      .put<ApiItem<MortgageDto>>(`/api/mortgages/${id}`, mortgage)
+      .pipe(map((response) => response.data));
+  }
+
+  deleteMortgage(id: string): Observable<unknown> {
+    return this.http.delete(`/api/mortgages/${id}`);
+  }
+
+  saveMortgageInterest(id: string, month: string, interestAmount: number): Observable<MortgageDto> {
+    return this.http
+      .put<ApiItem<MortgageDto>>(`/api/mortgages/${id}/interest`, {
+        month,
+        interest_amount: interestAmount,
+      })
+      .pipe(map((response) => response.data));
+  }
+
+  deleteMortgageInterest(id: string, entryId: string): Observable<MortgageDto> {
+    return this.http
+      .delete<ApiItem<MortgageDto>>(`/api/mortgages/${id}/interest/${entryId}`)
+      .pipe(map((response) => response.data));
   }
 
   listInvestments(): Observable<InvestmentDto[]> {

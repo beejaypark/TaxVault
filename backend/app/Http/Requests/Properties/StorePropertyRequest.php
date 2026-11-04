@@ -22,6 +22,8 @@ class StorePropertyRequest extends FormRequest
             'postcode' => ['nullable', 'string', 'max:20'],
             'country_code' => ['nullable', 'string', 'size:2'],
             'location_metadata' => ['nullable', 'array'],
+            'current_value' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'current_value_date' => ['nullable', 'date'],
         ];
     }
 }

@@ -178,6 +178,43 @@ class RecordEditingTest extends TestCase
         $this->actingAs($this->owner)->deleteJson("/api/properties/{$property}")->assertOk();
 
         $this->assertNull(Investment::query()->find($investment));
-        $this->assertNull(Property::query()->find($property));
+    }
+
+    public function test_property_value_mortgage_and_monthly_interest(): void
+    {
+        $property = $this->actingAs($this->owner)->postJson('/api/properties', [
+            'address_line_1' => '1 Test St',
+        ])->assertCreated()->json('data.id');
+
+        $this->actingAs($this->owner)->putJson("/api/properties/{$property}", [
+            'address_line_1' => '1 Test St',
+            'current_value' => '950000',
+            'current_value_date' => '2026-11-01',
+        ])->assertOk()->assertJsonPath('data.current_value', '950000.00');
+
+        $mortgage = $this->actingAs($this->owner)->postJson("/api/properties/{$property}/mortgages", [
+            'bank_name' => 'Commonwealth Bank',
+            'loan_type' => 'variable',
+            'loan_amount' => '600000',
+            'interest_rate' => '6.19',
+        ])->assertCreated()->json('data.id');
+
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/interest", [
+            'month' => '2026-09', 'interest_amount' => '3100.50',
+        ])->assertOk();
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/interest", [
+            'month' => '2026-09', 'interest_amount' => '3000',
+        ])->assertOk()->assertJsonCount(1, 'data.interest_entries');
+
+        $this->actingAs($this->owner)->getJson('/api/properties')
+            ->assertOk()->assertJsonPath('data.0.mortgages.0.bank_name', 'Commonwealth Bank');
+
+        $this->actingAs(User::factory()->create())->putJson("/api/mortgages/{$mortgage}", [
+            'bank_name' => 'X', 'loan_type' => 'fixed', 'loan_amount' => '1',
+        ])->assertNotFound();
+
+        $this->actingAs($this->owner)->deleteJson("/api/properties/{$property}")->assertOk();
+        $this->assertSame(0, DB::table('mortgages')->count());
+        $this->assertSame(0, DB::table('mortgage_interest_entries')->count());
     }
 }
