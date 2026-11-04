@@ -2,6 +2,7 @@
 
 namespace App\Application\Documents;
 
+use App\Application\Audit\AuditLogger;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Documents\Models\DocumentType;
 use App\Domain\FinancialYears\Models\FinancialYear;
@@ -132,6 +133,11 @@ final class UploadDocument
         }
 
         ProcessUploadedDocument::dispatch($document->getKey())->afterCommit();
+
+        app(AuditLogger::class)->record($user, 'document.upload', 'document', $document->getKey(), [
+            'source' => $provenance['source'] ?? 'web_upload',
+            'size_bytes' => $document->size_bytes,
+        ]);
 
         return $document;
     }

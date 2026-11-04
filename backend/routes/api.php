@@ -43,8 +43,8 @@ Route::middleware('auth')->group(function (): void {
         [PropertyController::class, 'storePeriod']
     );
 
-    Route::post('/exports', [ExportController::class, 'store']);
-    Route::get('/exports/transactions.csv', [ExportController::class, 'transactionsCsv']);
+    Route::post('/exports', [ExportController::class, 'store'])->middleware('audit:export.create,financial_year_export');
+    Route::get('/exports/transactions.csv', [ExportController::class, 'transactionsCsv'])->middleware('audit:export.transactions_csv,financial_year');
     Route::get('/exports/{id}', [ExportController::class, 'show']);
 
     Route::get('/investments', [InvestmentController::class, 'index']);
@@ -59,24 +59,24 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store']);
     Route::get('/documents/{id}', [DocumentController::class, 'show']);
-    Route::post('/documents/{id}/payment', [DocumentController::class, 'confirmPayment']);
-    Route::delete('/documents/{id}', [DocumentController::class, 'destroy']);
+    Route::post('/documents/{id}/payment', [DocumentController::class, 'confirmPayment'])->middleware('audit:document.payment_confirmed,document');
+    Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->middleware('audit:document.delete,document');
     Route::post(
         '/documents/{id}/financial-year',
         [DocumentController::class, 'assignFinancialYear']
-    );
-    Route::get('/documents/{id}/content', [DocumentController::class, 'content']);
-    Route::post('/documents/{id}/retry', [DocumentController::class, 'retry']);
+    )->middleware('audit:document.assign_financial_year,document');
+    Route::get('/documents/{id}/content', [DocumentController::class, 'content'])->middleware('audit:document.download,document');
+    Route::post('/documents/{id}/retry', [DocumentController::class, 'retry'])->middleware('audit:document.retry,document');
 
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/{id}', [ReviewController::class, 'show']);
-    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->middleware('audit:review.delete,review');
     Route::post(
         '/reviews/{id}/decision',
         [ReviewController::class, 'decision']
-    );
+    )->middleware('audit:review.decision,review');
     Route::post(
         '/reviews/{id}/correction',
         [ReviewController::class, 'correction']
-    );
+    )->middleware('audit:review.correction,review');
 });

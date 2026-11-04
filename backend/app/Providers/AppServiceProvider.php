@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Application\Audit\AuditLogger;
 use App\Application\OCR\Contracts\OcrProvider;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use App\Infrastructure\OCR\Providers\HttpOcrProvider;
 use App\Infrastructure\OCR\Providers\LocalOcrProvider;
 use App\Infrastructure\OCR\Providers\TestOcrProvider;
@@ -43,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event): void {
             $event->extendSocialite('keycloak', KeycloakProvider::class);
+        });
+
+        Event::listen(Login::class, function (Login $event): void {
+            app(AuditLogger::class)->record($event->user, 'auth.login', 'user', (string) $event->user->getAuthIdentifier());
+        });
+        Event::listen(Logout::class, function (Logout $event): void {
+            if ($event->user !== null) {
+                app(AuditLogger::class)->record($event->user, 'auth.logout', 'user', (string) $event->user->getAuthIdentifier());
+            }
         });
     }
 }

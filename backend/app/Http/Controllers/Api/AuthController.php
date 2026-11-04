@@ -55,6 +55,14 @@ class AuthController extends Controller
             ! $credential
             || ! Hash::check($credentials['password'], $credential->password_hash)
         ) {
+            app(\App\Application\Audit\AuditLogger::class)->record(
+                $credential?->user,
+                'auth.login_failed',
+                null,
+                null,
+                ['login' => substr(strtolower(trim($credentials['login'])), 0, 100)],
+            );
+
             return response()->json(['message' => 'The supplied credentials are invalid.'], 422);
         }
 
