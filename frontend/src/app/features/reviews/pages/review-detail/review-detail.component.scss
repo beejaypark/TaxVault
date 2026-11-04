@@ -101,6 +101,13 @@ h2 { font-size: 15px; font-weight: 650; }
 .primary-button { padding: 0 15px; }
 .state-spinner { width: 19px; height: 19px; border: 2px solid var(--tv-color-border); border-top-color: var(--tv-color-primary); border-radius: 50%; animation: spin 700ms linear infinite; }
 .error-state { border-color: #f1c7c2; background: var(--tv-color-danger-soft); }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+@media print {
+  .review-detail-page { width: 100%; padding: 0; }
+  .detail-layout { display: block; }
+  .detail-card { break-inside: avoid; box-shadow: none; }
+  .correction-editor, .decision-card, .refresh-indicator, .source-file-copy a { display: none !important; }
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 900px) { .detail-layout { grid-template-columns: minmax(0, 1fr) 270px; } }
 @media (max-width: 760px) {

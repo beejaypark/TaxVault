@@ -39,6 +39,7 @@ export interface DocumentDto {
   payment_date?: string | null;
   payment_method?: string | null;
   payment_amount?: number | string | null;
+  payment_suggestion?: { date: string | null; amount: string | null } | null;
   latest_extraction?: {
     id: string;
     status: string;

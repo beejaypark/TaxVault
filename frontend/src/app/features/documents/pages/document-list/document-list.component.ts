@@ -249,8 +249,8 @@ export class DocumentListComponent implements OnInit {
     }
 
     this.confirmingPaymentDocumentId = document.id;
-    this.paymentDate = this.today();
-    this.paymentAmount = '';
+    this.paymentDate = document.payment_suggestion?.date ?? this.today();
+    this.paymentAmount = document.payment_suggestion?.amount ?? '';
     this.paymentMethod = 'bpay';
     this.failedPaymentDocumentId = null;
     this.paymentErrorMessage = '';

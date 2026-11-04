@@ -1,2 +1,13 @@
 ﻿/* TaxVault global design system */
 @use './app/shared/styles/design-system';
+
+@media print {
+  .no-print,
+  tv-back-navigation {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+}

@@ -321,6 +321,26 @@ describe('DocumentListComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('BPAY');
   });
 
+  it('prefills the payment dialog with the reviewed date and amount when available', () => {
+    component.openPaymentConfirmation({
+      ...document,
+      payment_suggestion: { date: '2026-08-14', amount: '548.80' },
+    });
+
+    expect(component.paymentDate).toBe('2026-08-14');
+    expect(component.paymentAmount).toBe('548.80');
+  });
+
+  it('keeps default payment values when no date or amount was detected', () => {
+    component.openPaymentConfirmation({
+      ...document,
+      payment_suggestion: { date: null, amount: null },
+    });
+
+    expect(component.paymentDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(component.paymentAmount).toBe('');
+  });
+
   it('does not open payment confirmation until a financial year is assigned', () => {
     const unassignedDocument = { ...document, financial_year_id: null };
 

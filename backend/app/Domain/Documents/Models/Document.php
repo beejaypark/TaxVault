@@ -2,6 +2,7 @@
 
 namespace App\Domain\Documents\Models;
 
+use App\Domain\Documents\Services\DocumentPaymentSuggestion;
 use App\Domain\Evidence\Models\TaxEvidence;
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Shared\Models\UuidModel;
@@ -32,6 +33,14 @@ class Document extends UuidModel
         'payment_method',
         'payment_amount',
     ];
+
+    protected $appends = ['payment_suggestion'];
+
+    /** @return array{date: string|null, amount: string|null} */
+    protected function getPaymentSuggestionAttribute(): array
+    {
+        return app(DocumentPaymentSuggestion::class)->forDocument($this);
+    }
 
     protected function casts(): array
     {

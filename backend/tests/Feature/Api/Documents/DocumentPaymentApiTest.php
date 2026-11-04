@@ -52,6 +52,34 @@ class DocumentPaymentApiTest extends TestCase
         ]);
     }
 
+    public function test_payment_confirmation_creates_a_missing_financial_year_for_the_payment_date(): void
+    {
+        [$user, $documentFinancialYear, $documentType] = $this->createDocumentContext(2025);
+        $document = $this->createDocument($user, $documentFinancialYear, $documentType);
+
+        $this->actingAs($user)
+            ->postJson('/api/documents/'.$document->id.'/payment', [
+                'payment_date' => '2026-11-03',
+                'payment_method' => 'bpay',
+                'amount' => '548.80',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.payment_status', 'paid');
+
+        $paymentFinancialYear = FinancialYear::query()
+            ->where('user_id', $user->id)
+            ->where('year_code', '2026-27')
+            ->firstOrFail();
+
+        $this->assertNotSame($documentFinancialYear->id, $paymentFinancialYear->id);
+        $this->assertDatabaseHas('transactions', [
+            'document_id' => $document->id,
+            'financial_year_id' => $paymentFinancialYear->id,
+            'transaction_date' => '2026-11-03',
+            'amount' => '548.80',
+        ]);
+    }
+
     public function test_repeated_confirmation_does_not_create_a_duplicate_expense(): void
     {
         [$user, $financialYear, $documentType] = $this->createDocumentContext();
@@ -216,7 +244,65 @@ class DocumentPaymentApiTest extends TestCase
         $this->assertDatabaseCount('expenses', 0);
     }
 
-    private function createDocumentContext(): array
+    public function test_document_exposes_detected_and_corrected_values_as_payment_suggestion(): void
+    {
+        [$user, $financialYear, $documentType] = $this->createDocumentContext();
+        $document = $this->createDocument($user, $financialYear, $documentType);
+
+        $this->actingAs($user)
+            ->getJson('/api/documents/'.$document->id)
+            ->assertOk()
+            ->assertJsonPath('data.payment_suggestion.date', null)
+            ->assertJsonPath('data.payment_suggestion.amount', null);
+
+        $extractionId = (string) Str::uuid();
+        DB::table('document_extractions')->insert([
+            'id' => $extractionId,
+            'document_id' => $document->id,
+            'provider' => 'test',
+            'extraction_version' => 'test-v1',
+            'status' => 'completed',
+            'output' => json_encode(['normalized' => ['fields' => [
+                'invoice_date' => ['value' => '2026-08-14'],
+                'total_amount' => ['value' => '1,234.5'],
+            ]]]),
+            'quality_metadata' => json_encode([]),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/documents/'.$document->id)
+            ->assertOk()
+            ->assertJsonPath('data.payment_suggestion.date', '2026-08-14')
+            ->assertJsonPath('data.payment_suggestion.amount', '1234.50');
+
+        DB::table('tax_evidences')->insert([
+            'id' => (string) Str::uuid(),
+            'user_id' => $user->id,
+            'financial_year_id' => $financialYear->id,
+            'document_id' => $document->id,
+            'extraction_id' => $extractionId,
+            'evidence_type' => 'review_correction',
+            'source_type' => 'document_extraction',
+            'source_id' => $extractionId,
+            'field_path' => 'total_amount',
+            'extracted_value' => json_encode(['value' => '548.80', 'source' => 'reviewer']),
+            'status' => 'active',
+            'verification_status' => 'verified',
+            'confidence' => 100,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/documents/'.$document->id)
+            ->assertOk()
+            ->assertJsonPath('data.payment_suggestion.date', '2026-08-14')
+            ->assertJsonPath('data.payment_suggestion.amount', '548.80');
+    }
+
+    private function createDocumentContext(int $financialYearStartYear = 2026): array
     {
         $user = User::factory()->create([
             'identity_provider' => 'test',
@@ -228,9 +314,13 @@ class DocumentPaymentApiTest extends TestCase
 
         $financialYear = FinancialYear::query()->create([
             'user_id' => $user->id,
-            'year_code' => '2026-27',
-            'start_date' => '2026-07-01',
-            'end_date' => '2027-06-30',
+            'year_code' => sprintf(
+                '%04d-%02d',
+                $financialYearStartYear,
+                ($financialYearStartYear + 1) % 100,
+            ),
+            'start_date' => sprintf('%04d-07-01', $financialYearStartYear),
+            'end_date' => sprintf('%04d-06-30', $financialYearStartYear + 1),
             'status' => 'active',
         ]);
 

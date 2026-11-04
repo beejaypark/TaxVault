@@ -5,8 +5,10 @@ namespace App\Application\Documents;
 use App\Application\Expenses\CreateExpense;
 use App\Application\Transactions\CreateTransaction;
 use App\Domain\Documents\Models\Document;
+use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Transactions\Models\Transaction;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -78,6 +80,8 @@ final class ConfirmDocumentPayment
             ];
 
             if ($existingTransactions->isEmpty()) {
+                $this->ensureFinancialYearExists($user, $paymentDate);
+
                 $transaction = $this->createTransaction->execute(
                     user: $user,
                     transactionDate: $paymentDate,
@@ -125,5 +129,24 @@ final class ConfirmDocumentPayment
 
             return $document->fresh('latestExtraction');
         });
+    }
+
+    private function ensureFinancialYearExists(User $user, string $paymentDate): void
+    {
+        $date = CarbonImmutable::parse($paymentDate);
+        $startYear = $date->month >= 7 ? $date->year : $date->year - 1;
+        $yearCode = sprintf('%04d-%02d', $startYear, ($startYear + 1) % 100);
+
+        FinancialYear::query()->firstOrCreate(
+            [
+                'user_id' => $user->getKey(),
+                'year_code' => $yearCode,
+            ],
+            [
+                'start_date' => sprintf('%04d-07-01', $startYear),
+                'end_date' => sprintf('%04d-06-30', $startYear + 1),
+                'status' => 'active',
+            ],
+        );
     }
 }

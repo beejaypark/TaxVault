@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Reporting\Models\FinancialYearExportArchive;
 use App\Domain\Reporting\Services\FinancialYearExportService;
+use App\Domain\Reporting\Services\TransactionCsvExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Reporting\CreateFinancialYearExportRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ExportController extends Controller
 {
@@ -40,6 +43,33 @@ final class ExportController extends Controller
                 'payload' => $archive->payload,
             ],
         ], 201);
+    }
+
+    public function transactionsCsv(
+        Request $request,
+        TransactionCsvExport $csvExport,
+    ): StreamedResponse {
+        $validated = $request->validate([
+            'financial_year_id' => ['required', 'uuid'],
+        ]);
+
+        $financialYear = FinancialYear::query()
+            ->whereKey($validated['financial_year_id'])
+            ->where('user_id', $request->user()->getKey())
+            ->first();
+
+        if ($financialYear === null) {
+            throw (new ModelNotFoundException)->setModel(
+                FinancialYear::class,
+                [$validated['financial_year_id']],
+            );
+        }
+
+        return response()->streamDownload(
+            fn () => $csvExport->write($request->user(), $financialYear),
+            sprintf('taxvault-%s-transactions.csv', $financialYear->year_code),
+            ['Content-Type' => 'text/csv; charset=UTF-8'],
+        );
     }
 
     public function show(

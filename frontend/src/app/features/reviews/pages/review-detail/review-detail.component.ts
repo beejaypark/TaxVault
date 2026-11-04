@@ -101,6 +101,10 @@ export class ReviewDetailComponent
       });
   }
 
+  printReview(): void {
+    window.print();
+  }
+
   retryLoad(): void {
     const id = this.route.snapshot.paramMap.get('id');
 

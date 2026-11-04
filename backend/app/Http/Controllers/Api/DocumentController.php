@@ -132,7 +132,11 @@ final class DocumentController extends Controller
                 echo Storage::disk($document->storage_disk)->get($document->object_key);
             },
             $document->original_filename ?? 'tax-document',
-            ['Content-Type' => $document->mime_type ?? 'application/octet-stream'],
+            [
+                'Content-Type' => $document->mime_type ?? 'application/octet-stream',
+                'X-Content-Type-Options' => 'nosniff',
+            ],
+            $request->boolean('inline') ? 'inline' : 'attachment',
         );
     }
 

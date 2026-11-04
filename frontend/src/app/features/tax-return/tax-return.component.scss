@@ -207,6 +207,39 @@ select {
   grid-column: 1 / -1;
 }
 
+.summary-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.summary-table th,
+.summary-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--tv-color-border);
+  text-align: left;
+}
+
+.summary-table .amount {
+  text-align: right;
+}
+
+.export-card .secondary-button {
+  margin: 12px 0 0 10px;
+}
+
+@media print {
+  .export-layout,
+  .notice {
+    display: none;
+  }
+
+  .result-card {
+    box-shadow: none;
+  }
+}
+
 .notice {
   margin-bottom: 16px;
   padding: 12px 14px;

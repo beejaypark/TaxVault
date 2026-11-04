@@ -40,6 +40,9 @@
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
           {{ isExporting ? 'Preparing pack…' : 'Generate tax return pack' }}
         </button>
+        <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
+          <tv-icon name="download" /> {{ isDownloadingCsv ? 'Preparing CSV…' : 'Download transactions CSV' }}
+        </button>
       }
     </article>
 
@@ -55,6 +58,39 @@
       <p class="disclaimer">This is an evidence export, not a lodged tax return or tax advice.</p>
     </article>
   </section>
+
+  @if (!isLoading && selectedFinancialYearId) {
+    <section class="result-card summary-card" aria-label="Financial year summary">
+      <div class="result-heading">
+        <div>
+          <div class="eyebrow">Summary</div>
+          <h2>FY {{ selectedYearLabel }} transactions</h2>
+        </div>
+        <button type="button" class="secondary-button no-print" (click)="printSummary()">Print summary</button>
+      </div>
+      <dl>
+        <div><dt>Income</dt><dd>{{ formatMoney(totalIncome) }}</dd></div>
+        <div><dt>Expenses</dt><dd>{{ formatMoney(totalExpenses) }}</dd></div>
+        <div><dt>Net</dt><dd>{{ formatMoney(totalIncome - totalExpenses) }}</dd></div>
+        <div><dt>Transactions</dt><dd>{{ yearTransactions.length }}</dd></div>
+      </dl>
+      @if (yearTransactions.length > 0) {
+        <table class="summary-table">
+          <thead><tr><th>Date</th><th>Description</th><th>Type</th><th class="amount">Amount</th></tr></thead>
+          <tbody>
+            @for (item of yearTransactions; track item.id) {
+              <tr>
+                <td>{{ item.transaction_date }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.direction }}</td>
+                <td class="amount">{{ formatMoney(item.amount) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
 
   @if (latestExport) {
     <section class="result-card" aria-label="Generated tax return pack">

@@ -17,6 +17,7 @@ import {
 import {
   ExportDto,
   TaxWorkspaceApiService,
+  TransactionDto,
 } from '../../shared/services/tax-workspace-api.service';
 
 @Component({
@@ -36,6 +37,8 @@ export class TaxReturnComponent implements OnInit {
   latestExport: ExportDto | null = null;
   isLoading = true;
   isExporting = false;
+  isDownloadingCsv = false;
+  transactions: TransactionDto[] = [];
   errorMessage = '';
   successMessage = '';
 
@@ -45,6 +48,73 @@ export class TaxReturnComponent implements OnInit {
     )?.year_code;
 
     return yearCode ? formatFinancialYear(yearCode) : 'Tax year';
+  }
+
+  get yearTransactions(): TransactionDto[] {
+    return this.transactions
+      .filter((item) => item.financial_year_id === this.selectedFinancialYearId)
+      .sort((a, b) => a.transaction_date.localeCompare(b.transaction_date));
+  }
+
+  get totalIncome(): number {
+    return this.sumDirection('income');
+  }
+
+  get totalExpenses(): number {
+    return this.sumDirection('expense');
+  }
+
+  get selectedYearLabel(): string {
+    const code = this.financialYears.find(
+      (year) => year.id === this.selectedFinancialYearId,
+    )?.year_code;
+
+    return code ? formatFinancialYear(code) : '';
+  }
+
+  formatMoney(value: number | string): string {
+    return new Intl.NumberFormat('en-AU', {
+      style: 'currency',
+      currency: 'AUD',
+    }).format(Number(value));
+  }
+
+  printSummary(): void {
+    window.print();
+  }
+
+  downloadCsv(): void {
+    if (this.isDownloadingCsv || !this.selectedFinancialYearId) {
+      return;
+    }
+
+    this.isDownloadingCsv = true;
+    this.errorMessage = '';
+
+    this.workspaceApi.downloadTransactionsCsv(this.selectedFinancialYearId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = `taxvault-${this.selectedYearLabel || 'tax-year'}-transactions.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.isDownloadingCsv = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Unable to download the CSV. Please try again.';
+        this.isDownloadingCsv = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private sumDirection(direction: 'income' | 'expense'): number {
+    return this.yearTransactions
+      .filter((item) => item.direction === direction)
+      .reduce((total, item) => total + Number(item.amount), 0);
   }
 
   formatYearCode(yearCode: string): string {
@@ -66,6 +136,12 @@ export class TaxReturnComponent implements OnInit {
         );
         this.isLoading = false;
         this.cdr.markForCheck();
+        this.workspaceApi.listTransactions().subscribe({
+          next: (transactions) => {
+            this.transactions = transactions;
+            this.cdr.markForCheck();
+          },
+        });
       },
       error: () => {
         this.errorMessage = 'Unable to load financial years. Please try again.';

@@ -120,6 +120,13 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
+  downloadTransactionsCsv(financialYearId: string): Observable<Blob> {
+    return this.http.get('/api/exports/transactions.csv', {
+      params: { financial_year_id: financialYearId },
+      responseType: 'blob',
+    });
+  }
+
   listTransactions(): Observable<TransactionDto[]> {
     return this.http
       .get<ApiList<TransactionDto>>('/api/transactions')

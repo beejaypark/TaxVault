@@ -31,9 +31,12 @@
         <p class="detail-subtitle">Review the source and extracted information before making a decision.</p>
         <p class="refresh-indicator">Review status updates automatically every 5 seconds.</p>
       </div>
-      @if (review.status === 'pending') {
-        <span class="attention-label"><tv-icon name="warning" /> Action required</span>
-      }
+      <div class="header-actions no-print">
+        @if (review.status === 'pending') {
+          <span class="attention-label"><tv-icon name="warning" /> Action required</span>
+        }
+        <button type="button" class="secondary-button" (click)="printReview()">Print review</button>
+      </div>
     </header>
 
     @if (decisionSuccess) {
@@ -76,8 +79,11 @@
                     {{ review.document.sizeBytes | number }} bytes
                   }
                 </span>
-                <a [href]="'/api/documents/' + review.document.id + '/content'" target="_blank" rel="noopener">
+                <a [href]="'/api/documents/' + review.document.id + '/content'" target="_blank" rel="noopener" class="no-print">
                   Download original document
+                </a>
+                <a [href]="'/api/documents/' + review.document.id + '/content?inline=1'" target="_blank" rel="noopener" class="no-print">
+                  Open original to print
                 </a>
               </div>
             </div>

@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function (): void {
     );
 
     Route::post('/exports', [ExportController::class, 'store']);
+    Route::get('/exports/transactions.csv', [ExportController::class, 'transactionsCsv']);
     Route::get('/exports/{id}', [ExportController::class, 'show']);
 
     Route::get('/investments', [InvestmentController::class, 'index']);
