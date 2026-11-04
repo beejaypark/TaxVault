@@ -37,3 +37,6 @@ Thumbs.db
 # Local TLS certificates (mkcert)
 infrastructure/certs/*.pem
 infrastructure/certs/*.key
+
+# Encrypted backups
+backups/

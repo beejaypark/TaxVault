@@ -39,3 +39,24 @@ php artisan documents:encrypt-existing [--dry-run]
 - Files with no document row (failed uploads, interrupted deletes) are removed
   with `php artisan documents:purge-orphans --force` (dry run without
   `--force`; files newer than `--min-age-hours`, default 24, are skipped).
+
+## Backup and restore
+
+`scripts\backup.ps1` writes an encrypted snapshot to `backups\<timestamp>\`: the app and Keycloak
+Postgres dumps, the document files (already encrypted per file) and a `manifest.json` with row counts
+and sha256 checksums. Dumps are piped container to container and encrypted with AES-256
+(`openssl enc -pbkdf2`) using `BACKUP_PASSPHRASE` from `.env`; no plaintext dump touches the host.
+
+    powershell -ExecutionPolicy Bypass -File scripts\backup.ps1 [-RetentionDays 30] [-CopyTo D:\offsite]
+
+- Store `BACKUP_PASSPHRASE` and `DOCUMENT_ENCRYPTION_KEY` (or `APP_KEY` if no explicit key is set)
+  separately from the backups. Without them a backup cannot be restored or read.
+- `-RetentionDays` prunes old snapshots; `-CopyTo` copies the new snapshot to another location.
+- Schedule it (e.g. Windows Task Scheduler, daily) and test restores regularly.
+
+Restore (`scripts\restore.ps1 -BackupDir backups\<timestamp>`):
+
+- `-Verify` is non-destructive: restores into scratch databases and a scratch directory, checks the
+  manifest counts, runs `php artisan documents:verify`, then cleans up.
+- `-Force` replaces live data. It stops the worker, Keycloak and nginx, restores both databases, moves the
+  current documents directory aside as `documents.before-restore-<ts>`, then restarts and verifies.
