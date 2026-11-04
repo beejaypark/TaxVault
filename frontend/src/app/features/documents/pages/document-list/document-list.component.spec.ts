@@ -348,4 +348,83 @@ describe('DocumentListComponent', () => {
 
     expect(component.confirmingPaymentDocumentId).toBeNull();
   });
+
+  describe('filters', () => {
+    const extracted = (date: string, supplier: string) => ({
+      id: 'e', status: 'completed', provider: 'x',
+      output: { normalized: { fields: { invoice_date: { value: date }, supplier_name: { value: supplier } } } },
+    });
+    const other = {
+      ...document,
+      id: 'doc-2',
+      document_type_id: 'other-type',
+      original_filename: 'water-bill.pdf',
+      status: 'review_required',
+      payment_status: 'paid' as const,
+      latest_extraction: extracted('2025-12-15', 'Sydney Water'),
+    };
+
+    beforeEach(() => {
+      component.documents = [
+        { ...document, latest_extraction: extracted('2026-03-01', 'Officeworks') },
+        other,
+      ];
+    });
+
+    const names = () => component.filteredDocuments.map((item) => item.original_filename);
+
+    it('returns everything when no filter is set', () => {
+      expect(names().length).toBe(2);
+      expect(component.hasActiveFilters).toBe(false);
+    });
+
+    it('filters by keyword across file name and extracted values', () => {
+      component.keyword = 'sydney water';
+      expect(names()).toEqual(['water-bill.pdf']);
+
+      component.keyword = 'office';
+      expect(names()).toEqual(['office-receipt.pdf']);
+    });
+
+    it('filters by document type, status and payment', () => {
+      component.typeFilter = 'other-type';
+      expect(names()).toEqual(['water-bill.pdf']);
+
+      component.typeFilter = '';
+      component.statusFilter = 'active';
+      expect(names()).toEqual(['office-receipt.pdf']);
+
+      component.statusFilter = '';
+      component.paymentFilter = 'paid';
+      expect(names()).toEqual(['water-bill.pdf']);
+      component.paymentFilter = 'unpaid';
+      expect(names()).toEqual(['office-receipt.pdf']);
+    });
+
+    it('filters by issue date range using the extracted invoice date', () => {
+      component.dateFrom = '2026-01-01';
+      expect(names()).toEqual(['office-receipt.pdf']);
+
+      component.dateFrom = '';
+      component.dateTo = '2025-12-31';
+      expect(names()).toEqual(['water-bill.pdf']);
+    });
+
+    it('falls back to the upload date when no invoice date was extracted', () => {
+      component.documents = [{ ...document }];
+      component.dateFrom = '2026-10-01';
+      component.dateTo = '2026-10-31';
+
+      expect(names()).toEqual(['office-receipt.pdf']);
+    });
+
+    it('clears all filters', () => {
+      component.keyword = 'x';
+      component.dateFrom = '2026-01-01';
+      component.clearFilters();
+
+      expect(component.hasActiveFilters).toBe(false);
+      expect(names().length).toBe(2);
+    });
+  });
 });

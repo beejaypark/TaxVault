@@ -41,6 +41,12 @@ export class DocumentListComponent implements OnInit {
   documentTypes: DocumentTypeDto[] = [];
 
   isLoading = true;
+  keyword = '';
+  typeFilter = '';
+  statusFilter = '';
+  paymentFilter = '';
+  dateFrom = '';
+  dateTo = '';
   errorMessage = '';
   optionsErrorMessage = '';
   assigningFinancialYearDocumentId: string | null = null;
@@ -84,11 +90,93 @@ export class DocumentListComponent implements OnInit {
   get filteredDocuments(): DocumentDto[] {
     const selectedYearId = this.api.selectedFinancialYearId();
 
-    return selectedYearId
+    const byYear = selectedYearId
       ? this.documents.filter(
           (document) => document.financial_year_id === selectedYearId,
         ).concat(this.documents.filter((document) => document.financial_year_id === null))
       : this.documents;
+
+    return byYear.filter((document) => this.matchesFilters(document));
+  }
+
+  get statusOptions(): string[] {
+    return [...new Set(this.documents.map((document) => document.status))].sort();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(
+      this.keyword.trim()
+      || this.typeFilter
+      || this.statusFilter
+      || this.paymentFilter
+      || this.dateFrom
+      || this.dateTo
+    );
+  }
+
+  clearFilters(): void {
+    this.keyword = '';
+    this.typeFilter = '';
+    this.statusFilter = '';
+    this.paymentFilter = '';
+    this.dateFrom = '';
+    this.dateTo = '';
+  }
+
+  // Issue date is the extracted invoice date, falling back to the upload date.
+  issueDate(document: DocumentDto): string {
+    const extracted = document.latest_extraction?.output?.normalized?.fields?.[
+      'invoice_date'
+    ]?.value;
+
+    return typeof extracted === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(extracted)
+      ? extracted
+      : (document.uploaded_at ?? '').slice(0, 10);
+  }
+
+  private matchesFilters(document: DocumentDto): boolean {
+    if (this.typeFilter && document.document_type_id !== this.typeFilter) {
+      return false;
+    }
+
+    if (this.statusFilter && document.status !== this.statusFilter) {
+      return false;
+    }
+
+    if (this.paymentFilter) {
+      const paid = document.payment_status === 'paid';
+
+      if ((this.paymentFilter === 'paid') !== paid) {
+        return false;
+      }
+    }
+
+    const issued = this.issueDate(document);
+
+    if (this.dateFrom && (!issued || issued < this.dateFrom)) {
+      return false;
+    }
+
+    if (this.dateTo && (!issued || issued > this.dateTo)) {
+      return false;
+    }
+
+    const keyword = this.keyword.trim().toLowerCase();
+
+    if (!keyword) {
+      return true;
+    }
+
+    const extractedValues = Object.values(
+      document.latest_extraction?.output?.normalized?.fields ?? {},
+    ).map((field) => (field?.value === null || field?.value === undefined ? '' : String(field.value)));
+    const haystack = [
+      document.original_filename,
+      this.getDocumentTypeName(document),
+      ...extractedValues,
+    ].join(' ').toLowerCase();
+
+    return keyword.split(/\s+/).every((part) => haystack.includes(part));
   }
 
   get hasSelectedFinancialYear(): boolean {

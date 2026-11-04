@@ -31,6 +31,46 @@
       <p class="options-notice" role="status">{{ optionsErrorMessage }}</p>
     }
 
+    <div class="filter-bar" role="search" aria-label="Filter documents">
+      <label class="filter-keyword">
+        <span>Keyword</span>
+        <input type="search" name="keyword" [(ngModel)]="keyword" placeholder="File name, supplier, text…" />
+      </label>
+      <label>
+        <span>Document type</span>
+        <select name="typeFilter" [(ngModel)]="typeFilter">
+          <option value="">All types</option>
+          @for (type of documentTypes; track type.id) { <option [value]="type.id">{{ type.name }}</option> }
+        </select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select name="statusFilter" [(ngModel)]="statusFilter">
+          <option value="">All statuses</option>
+          @for (status of statusOptions; track status) { <option [value]="status">{{ getStatusLabel(status) }}</option> }
+        </select>
+      </label>
+      <label>
+        <span>Payment</span>
+        <select name="paymentFilter" [(ngModel)]="paymentFilter">
+          <option value="">Any</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Not confirmed</option>
+        </select>
+      </label>
+      <label>
+        <span>Issue date from</span>
+        <input type="date" name="dateFrom" [(ngModel)]="dateFrom" />
+      </label>
+      <label>
+        <span>Issue date to</span>
+        <input type="date" name="dateTo" [(ngModel)]="dateTo" />
+      </label>
+      @if (hasActiveFilters) {
+        <button type="button" class="filter-clear" (click)="clearFilters()">Clear filters</button>
+      }
+    </div>
+
     @if (isLoading) {
       <div class="empty-state" role="status">Loading documents...</div>
     } @else if (errorMessage) {
@@ -39,11 +79,15 @@
       </div>
     } @else if (filteredDocuments.length === 0) {
       <div class="empty-state">
-        <h3>{{ hasSelectedFinancialYear ? 'No documents for this financial year' : 'No documents yet' }}</h3>
-        <p>{{ hasSelectedFinancialYear
+        <h3>{{ hasActiveFilters ? 'No documents match your filters' : (hasSelectedFinancialYear ? 'No documents for this financial year' : 'No documents yet') }}</h3>
+        <p>{{ hasActiveFilters
+          ? 'Try removing a filter or searching with different keywords.'
+          : (hasSelectedFinancialYear
           ? 'Choose another year or upload a receipt or tax document.'
-          : 'Upload a receipt or tax document to see it listed here.' }}</p>
-        @if (auth.canEdit) {
+          : 'Upload a receipt or tax document to see it listed here.') }}</p>
+        @if (hasActiveFilters) {
+          <button type="button" class="filter-clear" (click)="clearFilters()">Clear filters</button>
+        } @else if (auth.canEdit) {
           <a routerLink="/documents/upload" class="empty-state-link">
             Upload your first document
           </a>
