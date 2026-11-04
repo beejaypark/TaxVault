@@ -64,13 +64,13 @@ h1 {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
 }
 
 .analysis-section {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .analysis-metrics {
@@ -111,7 +111,7 @@ h1 {
 
 .analysis-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
   gap: 14px;
 }
 
@@ -127,12 +127,14 @@ h1 {
   justify-content: space-between;
   gap: 14px;
   margin: 0 -20px 16px;
+  min-height: 76px;
   padding: 14px 20px;
   background: var(--tv-color-navy);
   color: #fff;
 }
 
 .analysis-card-heading h3 {
+  white-space: nowrap;
   margin: 0;
   font-family: var(--tv-font-heading);
   font-size: 13px;
@@ -302,8 +304,8 @@ h1 {
 .summary-card {
   display: flex;
   flex-direction: column;
-  min-height: 148px;
-  padding: 24px;
+  min-height: 108px;
+  padding: 18px 20px;
   border: 1px solid var(--tv-color-border);
   border-radius: var(--tv-radius-lg);
   background: var(--tv-color-surface);
@@ -357,6 +359,8 @@ h1 {
 }
 
 .analysis-card-heading .text-link {
+  flex-shrink: 0;
+  white-space: nowrap;
   color: #fff;
   text-decoration: underline;
 }
@@ -677,8 +681,14 @@ h1 {
   background: var(--tv-color-primary);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
   .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1100px) {
+  .analysis-grid {
     grid-template-columns: 1fr;
   }
 }
