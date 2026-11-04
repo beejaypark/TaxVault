@@ -124,8 +124,8 @@ export function forecastCashFlow(
 }
 
 export function monthKeys(startDate: string, endDate: string): string[] {
-  const start = new Date(`${startDate}T00:00:00`);
-  const end = new Date(`${endDate}T00:00:00`);
+  const start = new Date(`${startDate.slice(0, 10)}T00:00:00`);
+  const end = new Date(`${endDate.slice(0, 10)}T00:00:00`);
   const keys: string[] = [];
 
   for (

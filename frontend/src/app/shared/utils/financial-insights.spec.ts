@@ -18,6 +18,18 @@ function tx(date: string, direction: 'income' | 'expense', amount: number, descr
 describe('analyseFinancialYear', () => {
   const now = new Date(2027, 5, 30);
 
+  it('accepts ISO datetime financial year bounds as returned by the API', () => {
+    const result = analyseFinancialYear(
+      [tx('2026-07-10', 'income', 1000, 'Rent')],
+      '2026-07-01T00:00:00.000000Z',
+      '2027-06-30T00:00:00.000000Z',
+      now,
+    );
+
+    expect(result.months).toHaveLength(12);
+    expect(result.months[0].income).toBe(1000);
+  });
+
   it('builds monthly cash flow with a running balance', () => {
     const result = analyseFinancialYear(
       [tx('2026-07-10', 'income', 1000, 'Rent'), tx('2026-08-05', 'expense', 400, 'Plumber')],

@@ -105,8 +105,8 @@ export class DashboardComponent implements OnInit {
       return [];
     }
 
-    const start = new Date(`${year.start_date}T00:00:00`);
-    const end = new Date(`${year.end_date}T00:00:00`);
+    const start = new Date(`${year.start_date.slice(0, 10)}T00:00:00`);
+    const end = new Date(`${year.end_date.slice(0, 10)}T00:00:00`);
     const months = new Map<string, MonthlyTransactionSummary>();
 
     for (

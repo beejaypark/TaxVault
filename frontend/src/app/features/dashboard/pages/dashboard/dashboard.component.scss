@@ -356,6 +356,15 @@ h1 {
   font-size: 13px;
 }
 
+.analysis-card-heading .text-link {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.analysis-card-heading .chart-legend i {
+  outline: 1px solid rgba(255, 255, 255, 0.85);
+}
+
 .text-link {
   color: var(--tv-color-primary);
   font-size: 13px;
