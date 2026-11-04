@@ -3,6 +3,12 @@
 namespace App\Providers;
 
 use App\Application\Audit\AuditLogger;
+use App\Infrastructure\Storage\EncryptingAdapter;
+use App\Infrastructure\Storage\FileCipher;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use App\Application\OCR\Contracts\OcrProvider;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -44,6 +50,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Storage::extend('encrypted-local', function ($app, array $config) {
+            $adapter = new EncryptingAdapter(
+                new LocalFilesystemAdapter($config['root']),
+                FileCipher::fromConfig(),
+            );
+
+            return new FilesystemAdapter(new Filesystem($adapter, $config), $adapter, $config);
+        });
+
         Event::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event): void {
             $event->extendSocialite('keycloak', KeycloakProvider::class);
         });

@@ -2,6 +2,9 @@
 
 return [
 
+    // Base64 of 32 random bytes. When empty, a key is derived from APP_KEY.
+    'document_encryption_key' => env('DOCUMENT_ENCRYPTION_KEY'),
+
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     'disks' => [
@@ -15,7 +18,7 @@ return [
         ],
 
         'documents' => [
-            'driver' => 'local',
+            'driver' => 'encrypted-local',
             'root' => storage_path('app/private/documents'),
             'throw' => true,
             'report' => false,
