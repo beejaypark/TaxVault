@@ -150,6 +150,14 @@
             }
           </section>
         </div>
+
+        @if (selectedFinancialYear; as year) {
+          <tv-cash-flow-analysis
+            [transactions]="filteredTransactions"
+            [startDate]="year.start_date"
+            [endDate]="year.end_date"
+          />
+        }
       }
     </section>
 
@@ -231,7 +239,7 @@
       <a routerLink="/transactions"><span><tv-icon name="transactions" /></span><strong>Income & expenses</strong><small>Record and review your transactions</small></a>
       <a routerLink="/properties"><span><tv-icon name="property" /></span><strong>Properties</strong><small>Manage rental property records</small></a>
       <a routerLink="/investments"><span><tv-icon name="investment" /></span><strong>Investments</strong><small>Track acquisition and disposal details</small></a>
-      <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><strong>Tax return pack</strong><small>Prepare a financial-year export</small></a>
+      <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><strong>Accountant pack</strong><small>Evidence package for your accountant</small></a>
     </section>
   }
 </div>

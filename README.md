@@ -1,18 +1,18 @@
 # TaxVault
 
-TaxVault is an Australian Financial Year-centric tax document, evidence and tax record management platform.
+TaxVault is an Australian Financial Year-centric evidence and record management tool. It is not a tax-return or lodgement app: it automatically assembles an evidence package for your accountant.
 
-The current UI provides a live dashboard, document upload and review, financial
-year management, manual income/expense entry, property and investment records,
-and a downloadable financial-year evidence export. Automatic bank feeds and
-reconciliation, complete tax calculations, ATO lodgement, and accountant
-collaboration are planned follow-up work. The evidence export is not a lodged
-return.
+The current UI provides a live dashboard with cash-flow charts, a multi-year
+forecast and spending observations, document upload (web, mobile camera, email
+forwarding) and review, financial year management, manual income/expense entry,
+property and investment records, and an accountant pack (JSON evidence export,
+transactions CSV, printable summary and review). Automatic bank feeds and
+reconciliation, tax calculations and ATO lodgement are out of scope.
 
 The shared financial-year selector scopes the dashboard, documents,
 transactions, and review queue. Financial-year management and property and
 investment asset records remain unfiltered because they are maintained across
-years; a tax return pack still requires an explicit export year. Financial-year
+years; an accountant pack still requires an explicit export year. Financial-year
 labels are displayed consistently as `YYYY - YY` (for example, `2025 - 26`);
 stored and API financial-year codes remain `YYYY-YY`.
 

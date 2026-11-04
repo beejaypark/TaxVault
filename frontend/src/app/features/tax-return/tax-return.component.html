@@ -3,8 +3,8 @@
   <header class="page-header">
     <div>
       <div class="eyebrow">Tax workspace</div>
-      <h1>Tax return pack</h1>
-      <p>Prepare a structured financial-year record for your own files or tax agent.</p>
+      <h1>Accountant pack</h1>
+      <p>Hand your accountant a complete, verifiable evidence package for the financial year: reviewed records, source documents and a transaction ledger.</p>
     </div>
   </header>
 
@@ -38,7 +38,7 @@
         </select>
 
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
-          {{ isExporting ? 'Preparing pack…' : 'Generate tax return pack' }}
+          {{ isExporting ? 'Preparing pack…' : 'Generate accountant pack' }}
         </button>
         <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
           <tv-icon name="download" /> {{ isDownloadingCsv ? 'Preparing CSV…' : 'Download transactions CSV' }}
@@ -55,7 +55,7 @@
         <li><span><tv-icon name="check" /></span> Data integrity hash for the generated snapshot</li>
         <li><span><tv-icon name="check" /></span> A downloadable JSON record</li>
       </ul>
-      <p class="disclaimer">This is an evidence export, not a lodged tax return or tax advice.</p>
+      <p class="disclaimer">TaxVault organises evidence for your accountant. It does not prepare or lodge tax returns and does not give tax advice.</p>
     </article>
   </section>
 
@@ -93,7 +93,7 @@
   }
 
   @if (latestExport) {
-    <section class="result-card" aria-label="Generated tax return pack">
+    <section class="result-card" aria-label="Generated accountant pack">
       <div class="result-heading">
         <div>
           <div class="eyebrow">Export ready</div>

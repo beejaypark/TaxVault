@@ -168,14 +168,14 @@ export class TaxReturnComponent implements OnInit {
     this.workspaceApi.createExport(this.selectedFinancialYearId).subscribe({
       next: (result) => {
         this.latestExport = result;
-        this.successMessage = 'Tax return pack generated and saved.';
+        this.successMessage = 'Accountant pack generated and saved.';
         this.isExporting = false;
         this.cdr.markForCheck();
       },
       error: (error: { status?: number }) => {
         this.errorMessage = error.status === 422
           ? 'This financial year cannot be exported yet. Check the year and required records.'
-          : 'Unable to generate the tax return pack. Please try again.';
+          : 'Unable to generate the accountant pack. Please try again.';
         this.isExporting = false;
         this.cdr.markForCheck();
       },

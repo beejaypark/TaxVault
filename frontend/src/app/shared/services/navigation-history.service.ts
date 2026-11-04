@@ -99,7 +99,7 @@ export class NavigationHistoryService {
       '/investments': 'Investments',
       '/transactions': 'Income & expenses',
       '/reviews': 'Reviews',
-      '/tax-return': 'Tax return pack',
+      '/tax-return': 'Accountant pack',
     };
 
     return labels[path] ?? 'previous page';

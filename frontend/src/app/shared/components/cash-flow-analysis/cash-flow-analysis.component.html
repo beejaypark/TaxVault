@@ -1,0 +1,161 @@
+@if (hasData()) {
+  <section class="card" aria-labelledby="cash-flow-heading">
+    <div class="heading">
+      <div>
+        <h3 id="cash-flow-heading">Cash flow</h3>
+        <p>Monthly income and expenses with the running balance for the year.</p>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="income"></i>Income</span>
+        <span><i class="expense"></i>Expenses</span>
+        <span><i class="balance"></i>Running balance</span>
+      </div>
+    </div>
+
+    <svg class="chart" [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" [attr.aria-label]="chartDescription()">
+      @for (line of gridLines(); track $index) {
+        <line [attr.x1]="52" [attr.x2]="width - 12" [attr.y1]="line.y" [attr.y2]="line.y" class="grid" />
+        <text x="46" [attr.y]="line.y + 3" text-anchor="end" class="axis">{{ line.label }}</text>
+      }
+      <line [attr.x1]="52" [attr.x2]="width - 12" [attr.y1]="zeroY()" [attr.y2]="zeroY()" class="zero" />
+      @for (bar of bars(); track bar.label + $index) {
+        <g>
+          <title>{{ bar.title }}</title>
+          <rect [attr.x]="bar.incomeX" [attr.y]="bar.incomeY" [attr.width]="bar.barWidth" [attr.height]="bar.incomeHeight" class="income" />
+          <rect [attr.x]="bar.expenseX" [attr.y]="bar.expenseY" [attr.width]="bar.barWidth" [attr.height]="bar.expenseHeight" class="expense" />
+        </g>
+        <text [attr.x]="bar.centre" [attr.y]="height - 8" text-anchor="middle" class="axis">{{ bar.label }}</text>
+      }
+      <polyline [attr.points]="linePoints()" class="balance-line" />
+    </svg>
+
+    <p class="balance-note" [class.negative]="finalBalance() < 0">
+      Year-end running balance: <strong>{{ format(finalBalance()) }}</strong>
+    </p>
+  </section>
+
+  @if (forecast(); as plan) {
+    <section class="card no-print-controls" aria-labelledby="forecast-heading">
+      <div class="heading">
+        <div>
+          <h3 id="forecast-heading">Cash flow forecast</h3>
+          <p>
+            Projects the last {{ plan.monthsObserved }} month{{ plan.monthsObserved === 1 ? '' : 's' }} of activity
+            ({{ format(plan.monthlyIncome) }} income and {{ format(plan.monthlyExpenses) }} expenses per month) forward.
+            An estimate only, based on your uploaded records.
+          </p>
+        </div>
+      </div>
+
+      <div class="forecast-controls no-print">
+        <label>
+          Forecast period
+          <select [value]="horizon()" (change)="setHorizon($any($event.target).value)">
+            @for (option of horizonOptions; track option) {
+              <option [value]="option" [selected]="option === horizon()">{{ option }} year{{ option === 1 ? '' : 's' }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Income growth per year (%)
+          <input type="number" min="-50" max="50" step="0.5" [value]="incomeGrowth()"
+            (input)="setIncomeGrowth($any($event.target).value)" />
+        </label>
+        <label>
+          Expense growth per year (%)
+          <input type="number" min="-50" max="50" step="0.5" [value]="expenseGrowth()"
+            (input)="setExpenseGrowth($any($event.target).value)" />
+        </label>
+      </div>
+
+      @if (plan.firstNegativeYear) {
+        <p class="forecast-warning" role="status">
+          At this rate the balance turns negative in FY {{ plan.firstNegativeYear }}.
+        </p>
+      }
+
+      <table class="forecast-table">
+        <thead>
+          <tr><th>Financial year</th><th>Income</th><th>Expenses</th><th>Net</th><th>Closing balance</th></tr>
+        </thead>
+        <tbody>
+          <tr class="opening">
+            <td>Start of forecast</td><td></td><td></td><td></td>
+            <td>{{ format(plan.openingBalance) }}</td>
+          </tr>
+          @for (year of plan.years; track year.label) {
+            <tr>
+              <td>FY {{ year.label }}</td>
+              <td>{{ format(year.income) }}</td>
+              <td>{{ format(year.expenses) }}</td>
+              <td [class.negative]="year.net < 0">{{ format(year.net) }}</td>
+              <td>
+                <div class="balance-cell" [class.negative]="year.closingBalance < 0">
+                  <span class="balance-fill" [style.width.%]="(Math.abs(year.closingBalance) / forecastScale()) * 100"></span>
+                  <strong>{{ format(year.closingBalance) }}</strong>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  <section class="card" aria-labelledby="spending-heading">
+    <div class="heading">
+      <div>
+        <h3 id="spending-heading">Where the money goes</h3>
+        <p>Largest payees by total, grouped by transaction description.</p>
+      </div>
+    </div>
+    <div class="payee-columns">
+      <div>
+        <h4>Top expenses</h4>
+        @for (payee of analysis().topExpenses; track payee.name) {
+          <div class="payee">
+            <div class="payee-line"><span>{{ payee.name }}</span><strong>{{ format(payee.total) }}</strong></div>
+            <div class="bar"><span class="fill expense" [style.width.%]="payee.share * 100"></span></div>
+            <small>{{ percent(payee.share) }} · {{ payee.count }} transaction{{ payee.count === 1 ? '' : 's' }}</small>
+          </div>
+        } @empty {
+          <p class="muted">No expenses recorded.</p>
+        }
+      </div>
+      <div>
+        <h4>Top income</h4>
+        @for (payee of analysis().topIncome; track payee.name) {
+          <div class="payee">
+            <div class="payee-line"><span>{{ payee.name }}</span><strong>{{ format(payee.total) }}</strong></div>
+            <div class="bar"><span class="fill income" [style.width.%]="payee.share * 100"></span></div>
+            <small>{{ percent(payee.share) }} · {{ payee.count }} transaction{{ payee.count === 1 ? '' : 's' }}</small>
+          </div>
+        } @empty {
+          <p class="muted">No income recorded.</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="insights-heading">
+    <div class="heading">
+      <div>
+        <h3 id="insights-heading">Where to cut or grow</h3>
+        <p>Observations from your records. These are prompts to discuss with your accountant, not financial advice.</p>
+      </div>
+    </div>
+    <ul class="insights">
+      @for (insight of analysis().insights; track insight.title) {
+        <li [class]="'insight ' + insight.kind">
+          <span class="tag">{{ insight.kind === 'reduce' ? 'Reduce' : insight.kind === 'grow' ? 'Grow' : insight.kind === 'watch' ? 'Watch' : 'OK' }}</span>
+          <div>
+            <strong>{{ insight.title }}</strong>
+            <p>{{ insight.detail }}</p>
+          </div>
+        </li>
+      } @empty {
+        <li class="muted">Add transactions to see observations.</li>
+      }
+    </ul>
+  </section>
+}
