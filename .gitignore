@@ -33,3 +33,7 @@ Thumbs.db
 
 # Editor/manual backups
 *.bak
+
+# Local TLS certificates (mkcert)
+infrastructure/certs/*.pem
+infrastructure/certs/*.key

@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        // TLS is terminated by nginx on the private docker network.
+        $middleware->trustProxies(at: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
         $middleware->alias(['audit' => \App\Http\Middleware\AuditRequest::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

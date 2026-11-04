@@ -73,7 +73,7 @@ class KeycloakOidcAuthTest extends TestCase
         parse_str((string) parse_url($logoutUrl, PHP_URL_QUERY), $logoutParameters);
         $this->assertSame($idToken, $logoutParameters['id_token_hint']);
         $this->assertSame(
-            'http://localhost:8080/login',
+            rtrim((string) config('app.url'), '/').'/login',
             $logoutParameters['post_logout_redirect_uri'],
         );
         $this->assertGuest('web');

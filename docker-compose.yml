@@ -9,9 +9,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-taxvault}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-taxvault_dev}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/10-create-keycloak-db.sh:/docker-entrypoint-initdb.d/10-create-keycloak-db.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taxvault} -d ${POSTGRES_DB:-taxvault}"]
       interval: 10s
@@ -42,21 +43,27 @@ services:
     container_name: taxvault-keycloak
     restart: unless-stopped
     command:
-      - start-dev
+      - start
       - --http-port=8080
       - --import-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_DB:-keycloak}
+      KC_DB_USERNAME: ${POSTGRES_USER:-taxvault}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-taxvault_dev}
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_RELATIVE_PATH: /auth
-      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8080/auth}
+      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-https://localhost:8443/auth}
+      # TLS is terminated by nginx; Keycloak is only reachable on the internal network.
+      KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: xforwarded
-    ports:
-      - "8081:8080"
     volumes:
-      - keycloak_data:/opt/keycloak/data
       - ./infrastructure/keycloak/realm:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -80,7 +87,8 @@ services:
       APP_NAME: ${APP_NAME:-TaxVault}
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_URL: http://localhost:8080
+      APP_URL: ${APP_URL:-https://localhost:8443}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
       APP_KEY: ${APP_KEY:-}
       DB_CONNECTION: pgsql
       DB_HOST: postgres
@@ -100,13 +108,13 @@ services:
       DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASSWORD:-admin_dev_password}}
       FILESYSTEM_DISK: local
       KEYCLOAK_URL: ${KEYCLOAK_URL:-http://keycloak:8080/auth}
-      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8080/auth}
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL:-https://localhost:8443/auth}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-taxvault}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-taxvault-web}
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
-      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-http://localhost:8080/api/auth/oidc/callback}
+      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-https://localhost:8443/api/auth/oidc/callback}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
@@ -126,7 +134,7 @@ services:
     container_name: taxvault-frontend
     restart: unless-stopped
     ports:
-      - "4200:4200"
+      - "127.0.0.1:4200:4200"
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
@@ -146,7 +154,8 @@ services:
       APP_NAME: ${APP_NAME:-TaxVault}
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_URL: http://localhost:8080
+      APP_URL: ${APP_URL:-https://localhost:8443}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
       APP_KEY: ${APP_KEY:-}
       DB_CONNECTION: pgsql
       DB_HOST: postgres
@@ -178,8 +187,10 @@ services:
     restart: unless-stopped
     ports:
       - "8080:80"
+      - "8443:443"
     volumes:
       - ./infrastructure/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infrastructure/certs:/etc/nginx/certs:ro
     depends_on:
       - frontend
       - backend
@@ -195,7 +206,6 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  keycloak_data:
   backend_vendor:
   backend_storage:
   frontend_node_modules:

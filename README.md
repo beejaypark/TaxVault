@@ -42,7 +42,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-Open the app at <http://localhost:8080>. On first startup, the backend creates
+Open the app at <https://localhost:8443> (`http://localhost:8080` redirects there). On first startup, the backend creates
 an application key and runs the database migrations. The key, database, and
 uploaded files are kept in Docker volumes. Local development uses the backend's
 persistent local file storage.
@@ -72,12 +72,12 @@ seconds while their pages are open.
 
 When using the Angular development server directly at <http://localhost:4200>,
 the Keycloak sign-in link starts authentication through the same-origin
-backend at <http://localhost:8080> so the callback can use the correct session
+backend at <https://localhost:8443> so the callback can use the correct session
 cookie.
 
-Keycloak imports the local `taxvault` realm and its public OIDC client on
+Keycloak runs in production mode (`start`) with its data in the `keycloak` PostgreSQL database, behind nginx which terminates TLS. It imports the local `taxvault` realm and its public OIDC client on
 startup. Create application users in that realm using the Keycloak admin
-console at <http://localhost:8080/auth>; the admin username and password are
+console at <https://localhost:8443/auth>; the admin username and password are
 the `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` values in `.env`. The realm
 uses Authorization Code with PKCE and redirects through the same-origin
 `/api/auth/oidc/callback` endpoint. The import does not overwrite an existing
@@ -102,6 +102,23 @@ The Compose file includes PostgreSQL, Redis, and Keycloak for local development.
 Its default credentials in `.env.example` are for local use only; change them
 before exposing the services to a network.
 
+### HTTPS (local, mkcert)
+
+nginx serves the app over TLS on port 8443 using a locally trusted certificate:
+
+```powershell
+winget install FiloSottile.mkcert
+mkcert -install
+mkcert -cert-file infrastructure/certs/localhost.pem -key-file infrastructure/certs/localhost-key.pem localhost 127.0.0.1 ::1
+docker compose up -d
+```
+
+The certificate files are git-ignored. Session cookies are `Secure`, and
+PostgreSQL, the backend and the dev server are published on `127.0.0.1` only.
+On a real domain, replace the certificate, set `APP_URL`,
+`KEYCLOAK_PUBLIC_URL` and `KEYCLOAK_REDIRECT_URI` to the public https URLs, set
+strong `KEYCLOAK_ADMIN_PASSWORD`/`POSTGRES_PASSWORD` values, and enable the HSTS
+header in `infrastructure/docker/nginx/default.conf`.
 ## Architecture Documentation
 
 Security, encryption, audit and data deletion policies are in [docs/security.md](docs/security.md).

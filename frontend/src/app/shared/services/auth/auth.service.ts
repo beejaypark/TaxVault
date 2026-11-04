@@ -1,4 +1,4 @@
-﻿import { Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -91,7 +91,7 @@ export class AuthService {
 
   oidcLoginUrl(returnUrl: string): string {
     const backendOrigin =
-      window.location.port === '4200' ? 'http://localhost:8080' : '';
+      window.location.port === '4200' ? 'https://localhost:8443' : '';
 
     return `${backendOrigin}/api/auth/oidc/redirect?returnUrl=${encodeURIComponent(returnUrl)}`;
   }

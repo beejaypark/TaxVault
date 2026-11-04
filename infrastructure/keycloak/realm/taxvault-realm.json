@@ -2,7 +2,7 @@
   "realm": "taxvault",
   "enabled": true,
   "displayName": "TaxVault Local",
-  "sslRequired": "none",
+  "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
@@ -19,14 +19,14 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "redirectUris": [
-        "http://localhost:8080/api/auth/oidc/callback"
+        "https://localhost:8443/api/auth/oidc/callback"
       ],
       "webOrigins": [
-        "http://localhost:8080"
+        "https://localhost:8443"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:8080/login"
+        "post.logout.redirect.uris": "https://localhost:8443/login"
       },
       "defaultClientScopes": [
         "profile",
