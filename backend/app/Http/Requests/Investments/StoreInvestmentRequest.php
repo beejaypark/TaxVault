@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Investments;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreInvestmentRequest extends FormRequest
 {
@@ -17,6 +18,8 @@ class StoreInvestmentRequest extends FormRequest
             'property_id' => [
                 'nullable',
                 'uuid',
+                Rule::exists('properties', 'id')
+                    ->where('user_id', $this->user()?->getKey()),
             ],
             'investment_type' => [
                 'required',

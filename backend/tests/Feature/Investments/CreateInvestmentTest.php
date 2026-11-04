@@ -99,7 +99,7 @@ class CreateInvestmentTest extends TestCase
                 'investment_type' => 'property',
                 'acquisition_date' => '2025-07-01',
             ])
-            ->assertStatus(500);
+            ->assertStatus(422);
 
         $this->assertDatabaseMissing('investments', [
             'user_id' => $user->id,
