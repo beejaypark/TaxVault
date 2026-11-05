@@ -184,6 +184,8 @@ export interface DeadlineDto {
   label: string;
   date: string;
   days_left: number;
+  financial_year_end: string | null;
+  days_to_year_end: number | null;
   completed: boolean;
   financial_year_id: string | null;
   uncategorised_transactions: number;

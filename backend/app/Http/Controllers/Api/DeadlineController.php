@@ -19,7 +19,7 @@ class DeadlineController extends Controller
         $user = $request->user();
         $userId = $user->getKey();
         $today = CarbonImmutable::now(config('notifications.timezone'))->startOfDay();
-        $years = FinancialYear::query()->where('user_id', $userId)->pluck('id', 'year_code');
+        $years = FinancialYear::query()->where('user_id', $userId)->get()->keyBy('year_code');
 
         $items = [];
         foreach ($sender->deadlines($user) as $label => $deadline) {
@@ -29,13 +29,17 @@ class DeadlineController extends Controller
                 continue;
             }
 
-            $yearId = str_starts_with($label, 'FY ') ? ($years[substr($label, 3)] ?? null) : null;
+            $year = str_starts_with($label, 'FY ') ? $years->get(substr($label, 3)) : null;
+            $yearId = $year?->id;
+            $yearEnd = $year ? CarbonImmutable::parse($year->end_date)->startOfDay() : null;
             $scope = fn ($query) => $yearId ? $query->where('financial_year_id', $yearId) : $query;
 
             $items[] = [
                 'label' => $label === 'chosen' ? 'Your' : $label,
                 'date' => $deadline->toDateString(),
                 'days_left' => $daysLeft,
+                'financial_year_end' => $yearEnd?->toDateString(),
+                'days_to_year_end' => $yearEnd ? max(0, (int) $today->diffInDays($yearEnd, false)) : null,
                 'completed' => $sender->isCompleted($user, $deadline),
                 'financial_year_id' => $yearId,
                 'uncategorised_transactions' => $scope(Transaction::query()->where('user_id', $userId)->whereNull('ato_category'))->count(),

@@ -17,6 +17,12 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
         </div>
         <div class="body">
           <h2>{{ deadline.label }} lodgement date: {{ formatDate(deadline.date) }}</h2>
+          @if (deadline.financial_year_end) {
+            <p class="note">
+              @if (deadline.days_to_year_end) { This financial year ends {{ formatDate(deadline.financial_year_end) }} ({{ deadline.days_to_year_end }} days from now). }
+              @else { This financial year ended {{ formatDate(deadline.financial_year_end) }}. }
+            </p>
+          }
           @if (deadline.completed) {
             <p>Marked as done. No more reminders for this date.</p>
           } @else {

@@ -13,6 +13,8 @@ describe('DeadlineCardComponent', () => {
     label: 'FY 2025-26',
     date: '2026-10-31',
     days_left: 12,
+    financial_year_end: '2026-06-30',
+    days_to_year_end: 0,
     completed: false,
     financial_year_id: 'fy1',
     uncategorised_transactions: 4,

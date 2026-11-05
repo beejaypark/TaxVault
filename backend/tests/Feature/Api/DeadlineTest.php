@@ -59,6 +59,8 @@ class DeadlineTest extends TestCase
         $this->assertSame('FY 2025-26', $data[0]['label']);
         $this->assertSame('2026-10-31', $data[0]['date']);
         $this->assertSame(31, $data[0]['days_left']);
+        $this->assertSame('2026-06-30', $data[0]['financial_year_end']);
+        $this->assertSame(0, $data[0]['days_to_year_end']);
         $this->assertSame(1, $data[0]['uncategorised_transactions']);
         $this->assertFalse($data[0]['completed']);
     }
