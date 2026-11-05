@@ -18,11 +18,13 @@ class CreateDevelopmentAdmin extends Command
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->error('This command is only available in local/testing environments.');
+
             return self::FAILURE;
         }
 
         if (! (bool) config('dev_admin.enabled', false)) {
             $this->error('Set DEV_ADMIN_LOGIN_ENABLED=true in the local .env first.');
+
             return self::FAILURE;
         }
 
@@ -36,21 +38,25 @@ class CreateDevelopmentAdmin extends Command
             || ! preg_match('/^[a-z0-9._-]+$/', $login)
         ) {
             $this->error('Login must be 3-100 characters: letters, numbers, dot, underscore or hyphen.');
+
             return self::FAILURE;
         }
 
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->error('Enter a valid email address.');
+
             return self::FAILURE;
         }
 
         if ($displayName === '') {
             $this->error('Display name cannot be empty.');
+
             return self::FAILURE;
         }
 
         if (DevelopmentAdminCredential::query()->where('login_name', $login)->exists()) {
             $this->error('That login name already exists.');
+
             return self::FAILURE;
         }
 
@@ -59,6 +65,7 @@ class CreateDevelopmentAdmin extends Command
 
         if (strlen($password) < 12 || ! hash_equals($password, $confirmation)) {
             $this->error('Password confirmation failed or the password is too short.');
+
             return self::FAILURE;
         }
 
@@ -80,6 +87,7 @@ class CreateDevelopmentAdmin extends Command
         });
 
         $this->info('Development admin created. The password was stored as a hash.');
+
         return self::SUCCESS;
     }
 }

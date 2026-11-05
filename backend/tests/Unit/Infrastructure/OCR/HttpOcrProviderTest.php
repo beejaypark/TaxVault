@@ -187,8 +187,7 @@ class HttpOcrProviderTest extends TestCase
         ]);
 
         Http::fake([
-            'https://ocr.example.test/v1/extract' =>
-                Http::response([], 500),
+            'https://ocr.example.test/v1/extract' => Http::response([], 500),
         ]);
 
         $request = new OcrRequest(
@@ -225,10 +224,9 @@ class HttpOcrProviderTest extends TestCase
         ]);
 
         Http::fake([
-            'https://ocr.example.test/v1/extract' =>
-                Http::response([
-                    'provider' => 'generic-http',
-                ], 200),
+            'https://ocr.example.test/v1/extract' => Http::response([
+                'provider' => 'generic-http',
+            ], 200),
         ]);
 
         $request = new OcrRequest(

@@ -37,7 +37,7 @@ class ReviewApiTest extends TestCase
         );
 
         $documentType = DocumentType::query()->create([
-            'code' => 'invoice-' . Str::lower(Str::random(6)),
+            'code' => 'invoice-'.Str::lower(Str::random(6)),
             'name' => 'Invoice',
             'description' => 'Invoice document',
             'metadata' => [],
@@ -49,7 +49,7 @@ class ReviewApiTest extends TestCase
             'financial_year_id' => $financialYear->getKey(),
             'document_type_id' => $documentType->getKey(),
             'storage_disk' => 'documents',
-            'object_key' => $yearCode . '/' . Str::uuid() . '.pdf',
+            'object_key' => $yearCode.'/'.Str::uuid().'.pdf',
             'content_sha256' => hash('sha256', (string) Str::uuid()),
             'original_filename' => 'review.pdf',
             'mime_type' => 'application/pdf',
@@ -115,7 +115,6 @@ class ReviewApiTest extends TestCase
         $response
             ->assertOk();
 
-
         $response
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $review->id)
@@ -136,12 +135,11 @@ class ReviewApiTest extends TestCase
         $response
             ->assertOk();
 
-
         $response
             ->assertJsonCount(0, 'data');
 
         $this->actingAs($otherUser)
-            ->getJson('/api/reviews/' . $review->id)
+            ->getJson('/api/reviews/'.$review->id)
             ->assertNotFound();
     }
 
@@ -204,14 +202,14 @@ class ReviewApiTest extends TestCase
         $this->getJson('/api/reviews')
             ->assertUnauthorized();
 
-        $this->getJson('/api/reviews/' . Str::uuid())
+        $this->getJson('/api/reviews/'.Str::uuid())
             ->assertUnauthorized();
 
-        $this->postJson('/api/reviews/' . Str::uuid() . '/decision', [
+        $this->postJson('/api/reviews/'.Str::uuid().'/decision', [
             'decision' => 'approve',
         ])->assertUnauthorized();
 
-        $this->postJson('/api/reviews/' . Str::uuid() . '/correction', [
+        $this->postJson('/api/reviews/'.Str::uuid().'/correction', [
             'field_path' => 'amount',
             'value' => 100,
         ])->assertUnauthorized();
@@ -223,13 +221,11 @@ class ReviewApiTest extends TestCase
 
         $review = $this->createReview($user);
 
-
         $response = $this->actingAs($user)
-            ->getJson('/api/reviews/' . $review->id);
+            ->getJson('/api/reviews/'.$review->id);
 
         $response
             ->assertOk();
-
 
         $response
             ->assertJsonPath('data.id', $review->id)
@@ -247,7 +243,7 @@ class ReviewApiTest extends TestCase
         $review = $this->createReview($user, reviewType: 'classification');
 
         $response = $this->actingAs($user)
-            ->postJson('/api/reviews/' . $review->id . '/decision', [
+            ->postJson('/api/reviews/'.$review->id.'/decision', [
                 'decision' => 'approve',
                 'reviewer_notes' => 'Verified against the original council notice.',
                 'expense' => [
@@ -336,11 +332,10 @@ class ReviewApiTest extends TestCase
         );
 
         $response = $this->actingAs($user)
-            ->getJson('/api/reviews/' . $review->id);
+            ->getJson('/api/reviews/'.$review->id);
 
         $response
             ->assertOk();
-
 
         $response
             ->assertJsonPath(
@@ -376,6 +371,7 @@ class ReviewApiTest extends TestCase
                 'verified'
             );
     }
+
     public function test_authenticated_user_can_complete_pending_review(): void
     {
         $user = User::factory()->create();
@@ -383,14 +379,13 @@ class ReviewApiTest extends TestCase
         $review = $this->createReview($user);
 
         $response = $this->actingAs($user)
-            ->postJson('/api/reviews/' . $review->id . '/decision', [
+            ->postJson('/api/reviews/'.$review->id.'/decision', [
                 'decision' => 'approve',
                 'reviewer_notes' => 'Reviewed and approved.',
             ]);
 
         $response
             ->assertOk();
-
 
         $response
             ->assertJsonPath('data.id', $review->id)
@@ -422,7 +417,7 @@ class ReviewApiTest extends TestCase
         $review = $this->createReview($owner);
 
         $this->actingAs($otherUser)
-            ->postJson('/api/reviews/' . $review->id . '/decision', [
+            ->postJson('/api/reviews/'.$review->id.'/decision', [
                 'decision' => 'approve',
             ])
             ->assertNotFound();
@@ -444,7 +439,7 @@ class ReviewApiTest extends TestCase
         );
 
         $this->actingAs($user)
-            ->postJson('/api/reviews/' . $review->id . '/decision', [
+            ->postJson('/api/reviews/'.$review->id.'/decision', [
                 'decision' => 'reject',
             ])
             ->assertStatus(409)
@@ -466,7 +461,7 @@ class ReviewApiTest extends TestCase
         $review = $this->createReview($user);
 
         $this->actingAs($user)
-            ->postJson('/api/reviews/' . $review->id . '/decision', [])
+            ->postJson('/api/reviews/'.$review->id.'/decision', [])
             ->assertStatus(422)
             ->assertJsonValidationErrors([
                 'decision',
@@ -495,7 +490,6 @@ class ReviewApiTest extends TestCase
         $response
             ->assertOk();
 
-
         $response
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $pending->id)
@@ -522,7 +516,6 @@ class ReviewApiTest extends TestCase
         $response
             ->assertOk();
 
-
         $response
             ->assertJsonCount(1, 'data')
             ->assertJsonPath(
@@ -547,7 +540,7 @@ class ReviewApiTest extends TestCase
         $priorYearReview = $this->createReview($user, yearCode: '2025-26');
 
         $response = $this->actingAs($user)
-            ->getJson('/api/reviews?financial_year_id=' . $currentYearReview->document->financial_year_id);
+            ->getJson('/api/reviews?financial_year_id='.$currentYearReview->document->financial_year_id);
 
         $response
             ->assertOk()
@@ -576,7 +569,7 @@ class ReviewApiTest extends TestCase
 
         $response = $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 150.75,
@@ -585,7 +578,6 @@ class ReviewApiTest extends TestCase
 
         $response
             ->assertOk();
-
 
         $response
             ->assertJsonPath(
@@ -661,7 +653,7 @@ class ReviewApiTest extends TestCase
 
         $this->actingAs($otherUser)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 150.75,
@@ -691,7 +683,7 @@ class ReviewApiTest extends TestCase
 
         $response = $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 150.75,
@@ -730,7 +722,7 @@ class ReviewApiTest extends TestCase
 
         $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'invoice_number',
                     'value' => 'INV-001',
@@ -760,7 +752,7 @@ class ReviewApiTest extends TestCase
 
         $firstResponse = $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 150.75,
@@ -774,7 +766,7 @@ class ReviewApiTest extends TestCase
 
         $secondResponse = $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 175.25,
@@ -841,7 +833,7 @@ class ReviewApiTest extends TestCase
 
         $this->actingAs($user)
             ->postJson(
-                '/api/reviews/' . $review->id . '/correction',
+                '/api/reviews/'.$review->id.'/correction',
                 [
                     'field_path' => 'amount',
                     'value' => 150.75,

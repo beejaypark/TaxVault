@@ -34,10 +34,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement("
+        DB::statement('
             ALTER TABLE tax_evidences
             DROP CONSTRAINT IF EXISTS tax_evidences_document_source_check
-        ");
+        ');
 
         Schema::table('tax_evidences', function (Blueprint $table) {
             $table->dropForeign(['document_id']);

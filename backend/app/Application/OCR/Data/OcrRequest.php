@@ -12,6 +12,5 @@ final readonly class OcrRequest
         public ?string $originalFilename,
         public string $contentSha256,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 }

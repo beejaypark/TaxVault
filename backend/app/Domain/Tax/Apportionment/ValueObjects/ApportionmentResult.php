@@ -2,8 +2,6 @@
 
 namespace App\Domain\Tax\Apportionment\ValueObjects;
 
-use InvalidArgumentException;
-
 final readonly class ApportionmentResult
 {
     public function __construct(

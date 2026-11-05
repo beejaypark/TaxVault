@@ -3,11 +3,11 @@
 namespace App\Domain\Evidence\Models;
 
 use App\Domain\Documents\Models\Document;
-use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Documents\Models\DocumentExtraction;
+use App\Domain\FinancialYears\Models\FinancialYear;
+use App\Domain\Shared\Models\UuidModel;
 use App\Domain\Taxonomy\Models\TaxCategory;
 use App\Domain\Taxonomy\Models\TaxSubcategory;
-use App\Domain\Shared\Models\UuidModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

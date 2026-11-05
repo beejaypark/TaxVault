@@ -27,6 +27,7 @@ use UnexpectedValueException;
 class AuthController extends Controller
 {
     private const PENDING_ID_TOKEN_SESSION_KEY = 'keycloak.oidc.pending_id_token';
+
     private const ID_TOKEN_SESSION_KEY = 'keycloak.oidc.id_token';
 
     private function developmentLoginEnabled(): bool
@@ -155,11 +156,11 @@ class AuthController extends Controller
             }
         } catch (
             ConnectionException
-            | DomainException
-            | GuzzleException
-            | InvalidArgumentException
-            | RequestException
-            | UnexpectedValueException $exception
+            |DomainException
+            |GuzzleException
+            |InvalidArgumentException
+            |RequestException
+            |UnexpectedValueException $exception
         ) {
             report($exception);
             $this->clearOidcSession($request);
@@ -295,7 +296,7 @@ class AuthController extends Controller
             throw new DomainException('Keycloak returned an invalid signing key set.');
         }
 
-        $headers = new \stdClass();
+        $headers = new \stdClass;
         $claims = JWT::decode(
             $idToken,
             JWK::parseKeySet($jwks, 'RS256'),

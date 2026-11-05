@@ -55,13 +55,13 @@ final class CreateAuthoritativeCorrection
             []
         );
 
-        if (!is_array($normalizedFields)) {
+        if (! is_array($normalizedFields)) {
             throw ValidationException::withMessages([
                 'field_path' => 'The normalized extraction fields are invalid.',
             ]);
         }
 
-        if (!array_key_exists($fieldPath, $normalizedFields)) {
+        if (! array_key_exists($fieldPath, $normalizedFields)) {
             throw ValidationException::withMessages([
                 'field_path' => 'The specified extraction field does not exist.',
             ]);
@@ -107,15 +107,12 @@ final class CreateAuthoritativeCorrection
 
             return TaxEvidence::query()->create([
                 'user_id' => $review->reviewer_id,
-                'financial_year_id' =>
-                    $review->document->financial_year_id,
+                'financial_year_id' => $review->document->financial_year_id,
                 'document_id' => $review->document_id,
-                'extraction_id' =>
-                    $review->document_extraction_id,
+                'extraction_id' => $review->document_extraction_id,
                 'evidence_type' => 'review_correction',
                 'source_type' => 'document_extraction',
-                'source_id' =>
-                    $review->document_extraction_id,
+                'source_id' => $review->document_extraction_id,
                 'field_path' => $fieldPath,
                 'extracted_value' => [
                     'value' => $value,

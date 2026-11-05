@@ -15,7 +15,7 @@ class GoldenTaxScenarioTest extends TestCase
 {
     public function test_golden_business_expense_is_fully_deductible(): void
     {
-        $result = (new DeductibilityEvaluator())->evaluate(
+        $result = (new DeductibilityEvaluator)->evaluate(
             new DeductibilityFacts(
                 businessPurpose: true,
             ),
@@ -37,7 +37,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_private_expense_is_not_deductible(): void
     {
-        $result = (new DeductibilityEvaluator())->evaluate(
+        $result = (new DeductibilityEvaluator)->evaluate(
             new DeductibilityFacts(
                 businessPurpose: false,
                 privatePurpose: true,
@@ -54,7 +54,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_mixed_use_expense_is_partially_deductible(): void
     {
-        $result = (new DeductibilityEvaluator())->evaluate(
+        $result = (new DeductibilityEvaluator)->evaluate(
             new DeductibilityFacts(
                 businessPurpose: true,
                 businessUsePercentage: '33.33',
@@ -71,7 +71,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_capital_asset_is_capital_treatment(): void
     {
-        $result = (new DeductibilityEvaluator())->evaluate(
+        $result = (new DeductibilityEvaluator)->evaluate(
             new DeductibilityFacts(
                 businessPurpose: true,
                 capitalAsset: true,
@@ -89,7 +89,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_taxable_gst_is_ten_percent(): void
     {
-        $result = (new GstCalculator())->fromExclusive(
+        $result = (new GstCalculator)->fromExclusive(
             '100.00',
             GstTreatment::Taxable,
         );
@@ -101,7 +101,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_gst_free_amount_has_zero_gst(): void
     {
-        $result = (new GstCalculator())->fromExclusive(
+        $result = (new GstCalculator)->fromExclusive(
             '100.00',
             GstTreatment::GstFree,
         );
@@ -113,7 +113,7 @@ class GoldenTaxScenarioTest extends TestCase
 
     public function test_golden_apportionment_is_deterministic(): void
     {
-        $calculator = new ApportionmentCalculator();
+        $calculator = new ApportionmentCalculator;
 
         $first = $calculator->calculate('123.45', '33.33');
         $second = $calculator->calculate('123.45', '33.33');

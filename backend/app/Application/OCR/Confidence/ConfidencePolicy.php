@@ -8,8 +8,7 @@ final readonly class ConfidencePolicy
         public float $defaultThreshold = 90.0,
         public float $criticalThreshold = 90.0,
         public array $criticalFields = [],
-    ) {
-    }
+    ) {}
 
     public function thresholdFor(string $fieldPath): float
     {

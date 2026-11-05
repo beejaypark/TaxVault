@@ -11,14 +11,13 @@ final readonly class ConfidenceEvaluationResult
      *     critical: bool,
      *     status: string
      * }> $fields
-     * @param list<string> $reviewFields
+     * @param  list<string>  $reviewFields
      */
     public function __construct(
         public string $status,
         public array $fields,
         public array $reviewFields,
-    ) {
-    }
+    ) {}
 
     public function requiresReview(): bool
     {

@@ -20,7 +20,7 @@ final class TaxClassificationService
     ) {}
 
     /**
-     * @param array<string, mixed> $extractedFacts
+     * @param  array<string, mixed>  $extractedFacts
      */
     public function classify(
         array $extractedFacts,
@@ -71,8 +71,8 @@ final class TaxClassificationService
     }
 
     /**
-     * @param array<string, mixed> $facts
-     * @param array<string, scalar|array|null> $requirements
+     * @param  array<string, mixed>  $facts
+     * @param  array<string, scalar|array|null>  $requirements
      */
     private function matchesFacts(
         array $facts,

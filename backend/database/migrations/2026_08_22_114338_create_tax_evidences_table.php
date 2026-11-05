@@ -58,11 +58,11 @@ return new class extends Migration
 
         });
 
-        DB::statement("
+        DB::statement('
             ALTER TABLE tax_evidences
             ADD CONSTRAINT tax_evidences_confidence_check
             CHECK (confidence >= 0 AND confidence <= 100)
-        ");
+        ');
     }
 
     public function down(): void
