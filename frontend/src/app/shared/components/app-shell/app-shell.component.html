@@ -7,6 +7,8 @@
 
     <div class="topbar-spacer"></div>
 
+    <app-global-search />
+
     @if (auth.isAccountant) {
       <span class="viewer-badge" title="Accountant access is read-only">
         Read-only view{{ auth.viewingOwnerName ? ' · ' + auth.viewingOwnerName : '' }}
@@ -32,6 +34,9 @@
         }
       </select>
     </div>
+
+    <app-notifications />
+    <a routerLink="/settings" class="icon-link" aria-label="Settings" title="Settings"><tv-icon name="settings" /></a>
 
     <div class="user-menu">
       <button type="button" class="user-button" aria-haspopup="menu"

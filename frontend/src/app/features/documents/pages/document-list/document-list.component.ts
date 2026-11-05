@@ -7,7 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
 import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
@@ -35,15 +35,16 @@ export class DocumentListComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute, { optional: true });
 
   documents: DocumentDto[] = [];
   financialYears: FinancialYearDto[] = [];
   documentTypes: DocumentTypeDto[] = [];
 
   isLoading = true;
-  keyword = '';
+  keyword = this.route?.snapshot.queryParamMap.get('q') ?? '';
   typeFilter = '';
-  statusFilter = '';
+  statusFilter = this.route?.snapshot.queryParamMap.get('status') ?? '';
   paymentFilter = '';
   dateFrom = '';
   dateTo = '';
@@ -272,6 +273,11 @@ export class DocumentListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.keyword = params.get('q') ?? this.keyword;
+      this.statusFilter = params.get('status') ?? this.statusFilter;
+      this.cdr.markForCheck();
+    });
     this.api.listDocuments().subscribe({
       next: (documents) => {
         this.documents = documents;

@@ -7,6 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
@@ -47,12 +48,13 @@ export class TransactionsComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute, { optional: true });
 
   transactions: TransactionDto[] = [];
   properties: PropertyDto[] = [];
   financialYears: FinancialYearDto[] = [];
   selectedDirection: 'all' | 'income' | 'expense' = 'all';
-  searchText = '';
+  searchText = this.route?.snapshot.queryParamMap.get('q') ?? '';
   isLoading = true;
   isSaving = false;
   showForm = false;
@@ -258,6 +260,10 @@ export class TransactionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.searchText = params.get('q') ?? this.searchText;
+      this.cdr.markForCheck();
+    });
     this.api.listProperties().subscribe({
       next: (properties) => {
         this.properties = properties;

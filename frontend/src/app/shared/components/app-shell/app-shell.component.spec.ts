@@ -9,6 +9,7 @@ import {
   FinancialYearDto,
 } from '../../services/documents/document-api.service';
 import { AppShellComponent } from './app-shell.component';
+import { TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 
 describe('AppShellComponent', () => {
   let fixture: ComponentFixture<AppShellComponent>;
@@ -39,6 +40,14 @@ describe('AppShellComponent', () => {
     selectedFinancialYearId,
     selectFinancialYear: (id: string) => selectedFinancialYearId.set(id),
     defaultFinancialYearId: (years: { id: string }[]) => years[0]?.id ?? null,
+    listDocuments: () => of([]),
+    listDocumentTypes: () => of([]),
+    listAllFinancialYears: () => of([]),
+  };
+  const workspaceApi = {
+    listTransactions: () => of([]),
+    listProperties: () => of([]),
+    listInvestments: () => of([]),
   };
 
   beforeEach(async () => {
@@ -61,6 +70,7 @@ describe('AppShellComponent', () => {
           },
         },
         { provide: DocumentApiService, useValue: documentApi },
+        { provide: TaxWorkspaceApiService, useValue: workspaceApi },
       ],
     }).compileComponents();
 

@@ -16,7 +16,10 @@ import {
   faFileInvoiceDollar,
   faFileLines,
   faGauge,
+  faGear,
   faHouse,
+  faMagnifyingGlass,
+  faBell,
   faPenToSquare,
   faPlus,
   faPaperPlane,
@@ -56,7 +59,10 @@ export type TaxIconName =
   | 'delete'
   | 'close'
   | 'accountant'
-  | 'send';
+  | 'send'
+  | 'search'
+  | 'bell'
+  | 'settings';
 
 const ICONS: Record<TaxIconName, IconDefinition> = {
   arrowLeft: faArrowLeft,
@@ -85,6 +91,9 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   close: faXmark,
   accountant: faUserTie,
   send: faPaperPlane,
+  search: faMagnifyingGlass,
+  bell: faBell,
+  settings: faGear,
 };
 
 @Component({

@@ -1,0 +1,33 @@
+<button
+  type="button"
+  class="bell-button"
+  aria-haspopup="true"
+  [attr.aria-expanded]="isOpen"
+  [attr.aria-label]="notifications.length ? 'Notifications, ' + notifications.length + ' items' : 'Notifications'"
+  (click)="toggle()"
+>
+  <tv-icon name="bell" />
+  @if (notifications.length > 0) {
+    <span class="bell-badge" aria-hidden="true">{{ notifications.length }}</span>
+  }
+</button>
+
+@if (isOpen) {
+  <div class="notification-panel" role="region" aria-label="Notifications">
+    <div class="panel-title">Notifications</div>
+    @if (notifications.length === 0) {
+      <p class="panel-empty"><tv-icon name="check" /> You're all caught up.</p>
+    } @else {
+      @for (item of notifications; track item.id) {
+        <button type="button" class="notification-item" (click)="open(item)">
+          <span class="item-icon" [class.warning]="item.severity === 'warning'"><tv-icon [name]="item.severity === 'warning' ? 'warning' : 'review'" /></span>
+          <span class="item-text">
+            <strong>{{ item.title }}</strong>
+            <small>{{ item.detail }}</small>
+          </span>
+        </button>
+      }
+    }
+    <a class="panel-link" routerLink="/settings" (click)="isOpen = false">Notification settings</a>
+  </div>
+}

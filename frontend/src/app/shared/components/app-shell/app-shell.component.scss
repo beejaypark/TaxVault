@@ -33,6 +33,7 @@
 
 .menu-toggle {
   display: none;
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
   padding: 0;
@@ -90,6 +91,26 @@
 
 .user-menu {
   position: relative;
+}
+
+.icon-link {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--tv-color-text-secondary);
+  font-size: 16px;
+}
+
+.icon-link:hover {
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+}
+
+.icon-link:focus-visible {
+  outline: 2px solid var(--tv-color-accent);
+  outline-offset: 2px;
 }
 
 .user-button {
@@ -305,6 +326,12 @@
   .topbar {
     inset: 0;
     padding: 0 12px;
+    gap: 8px;
+  }
+
+  .financial-year {
+    min-width: 0;
+    max-width: 118px;
   }
 
   .menu-toggle {

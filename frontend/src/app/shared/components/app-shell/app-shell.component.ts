@@ -10,6 +10,9 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
 import { TaxIconComponent } from '../tax-icon/tax-icon.component';
 import { BrandLogoComponent } from '../brand-logo/brand-logo.component';
+import { GlobalSearchComponent } from '../global-search/global-search.component';
+import { NotificationsComponent } from '../notifications/notifications.component';
+import { UserPreferencesService } from '../../services/user-preferences.service';
 import { formatFinancialYear } from '../../utils/financial-year';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationHistoryService } from '../../services/navigation-history.service';
@@ -20,7 +23,7 @@ import {
 
 @Component({
   selector: 'app-shell',
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent, BrandLogoComponent],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent, BrandLogoComponent, GlobalSearchComponent, NotificationsComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +32,7 @@ export class AppShellComponent implements OnInit {
   private readonly documentsApi = inject(DocumentApiService);
   readonly navigationHistory = inject(NavigationHistoryService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly preferences = inject(UserPreferencesService);
 
   logoutError = false;
   menuOpen = false;
@@ -72,11 +76,12 @@ export class AppShellComponent implements OnInit {
     this.documentsApi.listFinancialYears().subscribe({
       next: (years) => {
         const selectedYearId = this.documentsApi.selectedFinancialYearId();
+        const prefersAll = this.preferences.preferences().defaultFinancialYear === 'all';
         this.selectedFinancialYearId = years.some(
           (year) => year.id === selectedYearId,
         )
           ? years.find((year) => year.id === selectedYearId)?.id ?? ''
-          : this.documentsApi.defaultFinancialYearId(years) ?? '';
+          : prefersAll ? '' : this.documentsApi.defaultFinancialYearId(years) ?? '';
         this.documentsApi.selectFinancialYear(
           this.selectedFinancialYearId || null,
         );

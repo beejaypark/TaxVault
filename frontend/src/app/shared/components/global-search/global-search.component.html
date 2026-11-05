@@ -1,0 +1,52 @@
+<button type="button" class="search-trigger" aria-label="Search" (click)="open()">
+  <tv-icon name="search" />
+  <span class="search-text">Search</span>
+  <kbd class="search-kbd">{{ isMac ? '⌘K' : 'Ctrl+K' }}</kbd>
+</button>
+
+@if (isOpen) {
+  <div class="search-backdrop" (click)="close()"></div>
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Global search">
+    <div class="search-input-row">
+      <tv-icon name="search" />
+      <input
+        #searchInput
+        type="search"
+        name="globalSearch"
+        autocomplete="off"
+        placeholder="Search documents, transactions, properties, pages…"
+        aria-label="Search"
+        [(ngModel)]="query"
+        (ngModelChange)="onQueryChange()"
+        (keydown)="onInputKeydown($event)"
+      />
+      <kbd>Esc</kbd>
+    </div>
+
+    <div class="search-results" role="listbox">
+      @if (!query.trim()) {
+        <p class="search-hint">Type to search across your tax records.@if (isLoading) { Loading…}</p>
+      } @else if (results.length === 0) {
+        <p class="search-hint">{{ isLoading ? 'Searching…' : 'No results for "' + query.trim() + '".' }}</p>
+      } @else {
+        @for (result of results; track $index) {
+          <button
+            type="button"
+            role="option"
+            class="search-result"
+            [class.active]="$index === activeIndex"
+            [attr.aria-selected]="$index === activeIndex"
+            (mouseenter)="activeIndex = $index"
+            (click)="select(result)"
+          >
+            <span class="result-kind">{{ result.kind }}</span>
+            <span class="result-text">
+              <strong>{{ result.title }}</strong>
+              <small>{{ result.subtitle }}</small>
+            </span>
+          </button>
+        }
+      }
+    </div>
+  </div>
+}
