@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Investments\Models\Investment;
 use App\Domain\Properties\Models\Mortgage;
 use App\Domain\Properties\Models\Property;
@@ -20,6 +21,15 @@ final class WealthController extends Controller
     {
         $userId = (string) $request->user()->getKey();
         $today = CarbonImmutable::today();
+        $year = $request->filled('financial_year_id')
+            ? FinancialYear::query()->where('user_id', $userId)->find($request->input('financial_year_id'))
+            : null;
+        $yearEnd = $year ? CarbonImmutable::parse($year->end_date) : null;
+        // Past years are valued as at their end date; the current year uses today's values.
+        $asOf = $yearEnd !== null && $yearEnd->lessThan($today) ? $yearEnd : $today;
+        $historical = $asOf->lessThan($today);
+        $latestAt = fn (string $kind, string $id): ?AssetValuation => AssetValuation::query()
+            ->where($kind, $id)->where('as_of', '<=', $asOf->toDateString())->orderByDesc('as_of')->first();
 
         $properties = Property::query()->where('user_id', $userId)->get();
         $investments = Investment::query()->where('user_id', $userId)->whereNull('disposal_date')->get();
@@ -31,18 +41,20 @@ final class WealthController extends Controller
                 'kind' => 'property',
                 'id' => $property->getKey(),
                 'label' => trim($property->address_line_1.' '.$property->suburb),
-                'value' => $property->current_value !== null ? (float) $property->current_value : null,
-                'as_of' => $property->current_value_date,
+                'value' => $historical ? ($v = $latestAt('property_id', $property->getKey())) ? (float) $v->value : null : ($property->current_value !== null ? (float) $property->current_value : null),
+                'as_of' => $historical ? $latestAt('property_id', $property->getKey())?->as_of->toDateString() : $property->current_value_date,
             ];
         }
         foreach ($investments as $investment) {
-            $hasValue = $investment->current_value !== null;
+            $past = $historical ? $latestAt('investment_id', $investment->getKey()) : null;
+            $hasValue = $historical ? $past !== null : $investment->current_value !== null;
+            $current = $historical ? ($past?->value) : $investment->current_value;
             $assets[] = [
                 'kind' => 'investment',
                 'id' => $investment->getKey(),
                 'label' => $investment->investment_type,
-                'value' => $hasValue ? (float) $investment->current_value : ($investment->cost_base !== null ? (float) $investment->cost_base : null),
-                'as_of' => $hasValue ? $investment->current_value_date : null,
+                'value' => $hasValue ? (float) $current : ($investment->cost_base !== null ? (float) $investment->cost_base : null),
+                'as_of' => $hasValue ? ($historical ? $past->as_of->toDateString() : $investment->current_value_date) : null,
                 'is_cost_base' => ! $hasValue,
             ];
         }
@@ -59,8 +71,8 @@ final class WealthController extends Controller
             'total_liabilities' => round($liabilities, 2),
             'net_worth' => round($totalAssets - $liabilities, 2),
             'average_interest_rate' => round($weightedRate, 2),
-            'history' => $this->history($userId, $today, $liabilities),
-            'cash_flow' => $this->cashFlow($userId, $today),
+            'history' => $this->history($userId, $asOf, $liabilities),
+            'cash_flow' => $this->cashFlow($userId, $year ? CarbonImmutable::parse($year->start_date)->startOfMonth() : $today->subMonthsNoOverflow(self::MONTHS - 1)->startOfMonth()),
         ]]);
     }
 
@@ -99,12 +111,11 @@ final class WealthController extends Controller
     }
 
     /** @return list<array{month: string, income: float, expenses: float}> */
-    private function cashFlow(string $userId, CarbonImmutable $today): array
+    private function cashFlow(string $userId, CarbonImmutable $start): array
     {
-        $start = $today->subMonthsNoOverflow(self::MONTHS - 1)->startOfMonth();
         $rows = Transaction::query()
             ->where('user_id', $userId)
-            ->whereBetween('transaction_date', [$start->toDateString(), $today->endOfMonth()->toDateString()])
+            ->whereBetween('transaction_date', [$start->toDateString(), $start->addMonthsNoOverflow(self::MONTHS - 1)->endOfMonth()->toDateString()])
             ->get(['transaction_date', 'direction', 'amount']);
 
         $months = [];

@@ -79,6 +79,22 @@ class WealthTest extends TestCase
         $this->assertEquals(2000.0, $september['expenses']);
     }
 
+    public function test_a_past_financial_year_is_valued_as_at_its_end_with_its_own_cash_flow(): void
+    {
+        $property = $this->property();
+        $property->update(['current_value' => 900000, 'current_value_date' => '2026-09-01']);
+        AssetValuation::record($this->user->id, 'property_id', $property->id, 700000, '2025-06-30');
+        AssetValuation::record($this->user->id, 'property_id', $property->id, 900000, '2026-09-01');
+        $old = FinancialYear::query()->create(['user_id' => $this->user->id, 'year_code' => '2024-25', 'start_date' => '2024-07-01', 'end_date' => '2025-06-30', 'status' => 'active']);
+        Transaction::query()->create(['user_id' => $this->user->id, 'financial_year_id' => $old->id, 'transaction_date' => '2024-10-05', 'direction' => 'income', 'amount' => '1000.00', 'description' => 'x', 'source_system' => 'manual']);
+
+        $data = $this->actingAs($this->user)->getJson('/api/wealth?financial_year_id='.$old->id)->assertOk()->json('data');
+
+        $this->assertEquals(700000, $data['total_assets']);
+        $this->assertSame('2024-07', $data['cash_flow'][0]['month']);
+        $this->assertEquals(1000, collect($data['cash_flow'])->firstWhere('month', '2024-10')['income']);
+    }
+
     public function test_summary_is_scoped_to_the_current_user(): void
     {
         $other = User::factory()->create();

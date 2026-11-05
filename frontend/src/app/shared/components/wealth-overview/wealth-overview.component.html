@@ -1,7 +1,7 @@
 @if (summary(); as s) {
   <section class="wealth" aria-labelledby="wealth-heading">
     <div class="heading">
-      <h3 id="wealth-heading">My assets</h3>
+      <h3 id="wealth-heading">My assets{{ yearLabel() ? ' - ' + yearLabel() : '' }}</h3>
       <a routerLink="/properties">Update values</a>
     </div>
 
@@ -9,7 +9,7 @@
       <div><span>Net worth</span><strong data-test="net-worth">{{ money(s.net_worth) }}</strong></div>
       <div><span>Assets</span><strong>{{ money(s.total_assets) }}</strong></div>
       <div><span>Loans</span><strong>{{ money(s.total_liabilities) }}</strong></div>
-      <div><span>Savings rate (12 mo)</span><strong>{{ percent(totals().savingsRate) }}</strong></div>
+      <div><span>Savings rate</span><strong>{{ percent(totals().savingsRate) }}</strong></div>
     </div>
 
     @if (!hasAssets()) {
@@ -18,7 +18,7 @@
 
     <div class="grid">
       <section class="panel">
-        <h4>Cash flow, last 12 months</h4>
+        <h4>Cash flow, 12 months</h4>
         <p class="sub">Income {{ money(totals().income) }} - expenses {{ money(totals().expenses) }} = <b [class.neg]="totals().net < 0">{{ money(totals().net) }}</b></p>
         <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Monthly income and expenses for the last 12 months">
           @for (a of cashAxis(); track $index) {

@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { DocumentApiService } from '../../services/documents/document-api.service';
 import { TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 import {
   ProjectionAssumptions,
@@ -24,8 +25,9 @@ const SCENARIOS: ScenarioName[] = ['conservative', 'base', 'optimistic'];
   templateUrl: './wealth-overview.component.html',
   styleUrl: './wealth-overview.component.scss',
 })
-export class WealthOverviewComponent implements OnInit {
+export class WealthOverviewComponent {
   private readonly api = inject(TaxWorkspaceApiService);
+  private readonly documents = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly width = W;
@@ -37,6 +39,12 @@ export class WealthOverviewComponent implements OnInit {
   readonly failed = signal(false);
   readonly horizon = signal(10);
   readonly assumptions = signal<ProjectionAssumptions>({ incomeGrowth: 3, expenseGrowth: 3, assetGrowth: 4, interestRate: 6 });
+
+  readonly yearLabel = computed(() => {
+    const id = this.documents.selectedFinancialYearId();
+
+    return this.documents.financialYears().find((y) => y.id === id)?.year_code ?? '';
+  });
 
   readonly totals = computed(() => cashFlowTotals(this.summary()?.cash_flow ?? []));
   readonly insights = computed(() => {
@@ -99,8 +107,12 @@ export class WealthOverviewComponent implements OnInit {
     };
   });
 
-  ngOnInit(): void {
-    this.api.getWealth().subscribe({
+  constructor() {
+    effect(() => this.load(this.documents.selectedFinancialYearId()));
+  }
+
+  private load(yearId: string | null): void {
+    this.api.getWealth(yearId).subscribe({
       next: (summary) => {
         this.summary.set(summary);
         this.assumptions.update((a) => ({ ...a, interestRate: summary.average_interest_rate || a.interestRate }));

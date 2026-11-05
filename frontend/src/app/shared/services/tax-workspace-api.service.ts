@@ -367,8 +367,10 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
-  getWealth(): Observable<WealthSummary> {
-    return this.http.get<ApiItem<WealthSummary>>('/api/wealth').pipe(map((response) => response.data));
+  getWealth(financialYearId?: string | null): Observable<WealthSummary> {
+    const params = financialYearId ? { financial_year_id: financialYearId } : undefined;
+
+    return this.http.get<ApiItem<WealthSummary>>('/api/wealth', { params }).pipe(map((response) => response.data));
   }
 
   getDeadlines(): Observable<DeadlineDto[]> {

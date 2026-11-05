@@ -1,7 +1,9 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
+import { DocumentApiService } from '../../services/documents/document-api.service';
 import { TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 import { WealthSummary } from '../../utils/wealth';
 import { WealthOverviewComponent } from './wealth-overview.component';
@@ -22,7 +24,8 @@ const summary: WealthSummary = {
 describe('WealthOverviewComponent', () => {
   function render(data: WealthSummary) {
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: TaxWorkspaceApiService, useValue: { getWealth: () => of(data) } }],
+      providers: [provideRouter([]), { provide: TaxWorkspaceApiService, useValue: { getWealth: () => of(data) } },
+        { provide: DocumentApiService, useValue: { selectedFinancialYearId: signal<string | null>(null), financialYears: signal([]) } }],
     });
     const fixture = TestBed.createComponent(WealthOverviewComponent);
     fixture.detectChanges();

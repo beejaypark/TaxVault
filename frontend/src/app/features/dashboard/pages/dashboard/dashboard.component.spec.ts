@@ -21,6 +21,7 @@ describe('DashboardComponent', () => {
     listDocuments: ReturnType<typeof vi.fn>;
     listFinancialYears: ReturnType<typeof vi.fn>;
     selectedFinancialYearId: ReturnType<typeof signal<string | null>>;
+  financialYears: ReturnType<typeof signal<unknown[]>>;
   };
   let reviewService: {
     listReviews: ReturnType<typeof vi.fn>;
@@ -111,6 +112,7 @@ describe('DashboardComponent', () => {
     documentsApi = {
       listDocuments: vi.fn().mockReturnValue(of(documents)),
       selectedFinancialYearId: signal<string | null>('year-1'),
+      financialYears: signal([]),
       listFinancialYears: vi.fn().mockReturnValue(of([{
         id: 'year-1',
         year_code: '2025-26',
