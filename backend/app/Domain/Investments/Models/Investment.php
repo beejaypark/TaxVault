@@ -22,6 +22,8 @@ class Investment extends UuidModel
         'cost_base',
         'incidental_costs',
         'proceeds',
+        'current_value',
+        'current_value_date',
         'source_system',
         'external_id',
         'metadata',
@@ -37,6 +39,7 @@ class Investment extends UuidModel
             'cost_base' => 'decimal:2',
             'incidental_costs' => 'decimal:2',
             'proceeds' => 'decimal:2',
+            'current_value' => 'decimal:2',
             'metadata' => 'array',
         ];
     }

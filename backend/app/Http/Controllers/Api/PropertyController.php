@@ -6,6 +6,7 @@ use App\Application\Properties\CreateProperty;
 use App\Application\Properties\CreatePropertyPeriod;
 use App\Domain\Properties\Models\Property;
 use App\Domain\Investments\Models\Investment;
+use App\Domain\Wealth\Models\AssetValuation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Properties\StorePropertyPeriodRequest;
 use App\Http\Requests\Properties\StorePropertyRequest;
@@ -63,6 +64,16 @@ class PropertyController extends Controller
             'current_value',
             'current_value_date',
         ]));
+
+        if ($request->filled('current_value')) {
+            AssetValuation::record(
+                (string) $request->user()->getKey(),
+                'property_id',
+                (string) $model->getKey(),
+                $request->input('current_value'),
+                $request->input('current_value_date'),
+            );
+        }
 
         return response()->json(['data' => $model->refresh()->load('periods', 'mortgages')]);
     }

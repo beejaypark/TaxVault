@@ -142,6 +142,8 @@ export class AssetsComponent implements OnInit {
       proceeds: this.investmentForm.proceeds,
       quantity: this.investmentForm.quantity,
       ownership_percentage: this.investmentForm.ownership_percentage,
+      current_value: this.investmentForm.current_value,
+      current_value_date: this.investmentForm.current_value === null ? null : (this.investmentForm.current_value_date || null),
     };
     const request$ = editing
       ? this.api.updateInvestment(editing, payload)
@@ -235,6 +237,8 @@ export class AssetsComponent implements OnInit {
       proceeds: num(investment.proceeds),
       quantity: num(investment.quantity),
       ownership_percentage: num(investment.ownership_percentage),
+      current_value: num(investment.current_value ?? null),
+      current_value_date: investment.current_value_date ? investment.current_value_date.slice(0, 10) : '',
     };
     this.showInvestmentForm = true;
   }
@@ -334,6 +338,8 @@ export class AssetsComponent implements OnInit {
       proceeds: null as number | null,
       quantity: null as number | null,
       ownership_percentage: null as number | null,
+      current_value: null as number | null,
+      current_value_date: '',
     };
   }
 }

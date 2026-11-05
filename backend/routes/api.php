@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
 use App\Http\Controllers\Api\DeadlineController;
+use App\Http\Controllers\Api\WealthController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
 use App\Http\Controllers\Api\ExportController;
@@ -93,6 +94,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::post('/transactions/bulk-categorise', [TransactionBulkController::class, 'categorise'])->middleware('audit:transaction.bulk_categorise,transaction');
     Route::post('/transactions/import', [TransactionBulkController::class, 'import'])->middleware('audit:transaction.import,transaction');
     Route::get('/bank/status', [BankConnectionController::class, 'status']);
+    Route::get('/wealth', [WealthController::class, 'index']);
     Route::get('/deadlines', [DeadlineController::class, 'index']);
     Route::put('/deadlines/{date}/complete', [DeadlineController::class, 'complete']);
     Route::delete('/deadlines/{date}/complete', [DeadlineController::class, 'reopen']);

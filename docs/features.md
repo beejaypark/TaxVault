@@ -44,6 +44,17 @@ TaxVault organises evidence for your accountant. It does not prepare or lodge ta
 - Sending: the `scheduler` container runs `notifications:send-emails` daily at 08:00 (`NOTIFICATION_TIMEZONE`, default Australia/Sydney). Each email is sent once (tracked in `email_notification_logs`).
 - Mail server: development uses Mailpit (inbox at http://localhost:8025). For Gmail set `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME`, an App Password in `MAIL_PASSWORD`, and `MAIL_FROM_ADDRESS` equal to the Gmail address in the root `.env`. Real Gmail sending has not been tested.
 
+## My assets
+
+The dashboard opens with a "My assets" overview.
+
+- **Values:** enter a current value (and date) on a property or investment. Each save adds a dated entry to the valuation history. Investments without a value fall back to their cost base.
+- **Net worth:** assets minus loans. Loans use the original loan amount (repayments are not tracked).
+- **Cash flow:** income, expenses and savings rate for the last 12 months, from transactions.
+- **Trend:** net worth over time, built from the recorded valuation history.
+- **Projection:** 5, 10 and 20 years in conservative, base and optimistic scenarios, with sliders for income growth, expense growth, asset growth and loan interest. Loans are treated as interest-only. These are estimates, not financial or tax advice.
+- **Strengths and improvements:** rule-based notes on savings rate, gearing, concentration, interest-rate sensitivity and stale values.
+
 ## Known limits
 
 - Live bank feed (optional): set `BASIQ_API_KEY` in the root `.env` and restart. The Import panel then shows "Connect bank" and "Sync now". You approve read-only access with your bank through Basiq; synced rows arrive uncategorised and are de-duplicated by Basiq transaction id. Without a key the feature is hidden. It was verified against the live Basiq API for token, user creation, consent URL and transaction listing (the probe user had no connected bank, so no real rows were imported); the import path is covered by mocked tests.

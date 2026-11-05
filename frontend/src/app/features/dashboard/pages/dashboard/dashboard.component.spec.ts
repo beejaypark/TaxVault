@@ -28,6 +28,7 @@ describe('DashboardComponent', () => {
   let workspaceApi: {
     listTransactions: ReturnType<typeof vi.fn>;
     getDeadlines: ReturnType<typeof vi.fn>;
+  getWealth: ReturnType<typeof vi.fn>;
   };
 
   const documents: DocumentDto[] = [
@@ -124,6 +125,7 @@ describe('DashboardComponent', () => {
     workspaceApi = {
       listTransactions: vi.fn().mockReturnValue(of(transactions)),
       getDeadlines: vi.fn().mockReturnValue(of([])),
+      getWealth: vi.fn().mockReturnValue(of({ assets: [], total_assets: 0, total_liabilities: 0, net_worth: 0, average_interest_rate: 0, history: [], cash_flow: [] })),
     };
 
     await TestBed.configureTestingModule({

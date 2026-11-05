@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Application\Investments\CreateInvestment;
 use App\Domain\Investments\Models\Investment;
+use App\Domain\Wealth\Models\AssetValuation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Investments\StoreInvestmentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -43,6 +44,18 @@ final class InvestmentController extends Controller
             externalId: $request->input('external_id'),
             metadata: $request->input('metadata'),
         );
+
+        if ($request->filled('current_value')) {
+            $investment->update($request->safe()->only(['current_value', 'current_value_date']));
+            AssetValuation::record(
+                (string) $request->user()->getKey(),
+                'investment_id',
+                (string) $investment->getKey(),
+                $request->input('current_value'),
+                $request->input('current_value_date'),
+            );
+            $investment->refresh();
+        }
 
         return response()->json([
             'data' => $investment,
@@ -84,7 +97,19 @@ final class InvestmentController extends Controller
             'cost_base',
             'incidental_costs',
             'proceeds',
+            'current_value',
+            'current_value_date',
         ]));
+
+        if ($request->filled('current_value')) {
+            AssetValuation::record(
+                (string) $request->user()->getKey(),
+                'investment_id',
+                (string) $investment->getKey(),
+                $request->input('current_value'),
+                $request->input('current_value_date'),
+            );
+        }
 
         return response()->json(['data' => $investment->refresh()]);
     }

@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
 import { CashFlowAnalysisComponent } from '../../../../shared/components/cash-flow-analysis/cash-flow-analysis.component';
+import { WealthOverviewComponent } from '../../../../shared/components/wealth-overview/wealth-overview.component';
 import { DeadlineCardComponent } from '../../../../shared/components/deadline-card/deadline-card.component';
 import { formatFinancialYear } from '../../../../shared/utils/financial-year';
 import { refreshEvery } from '../../../../shared/utils/status-refresh';
@@ -38,7 +39,7 @@ interface MonthlyTransactionSummary {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent],
+  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent, WealthOverviewComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

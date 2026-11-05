@@ -1,0 +1,115 @@
+@if (summary(); as s) {
+  <section class="wealth" aria-labelledby="wealth-heading">
+    <div class="heading">
+      <h3 id="wealth-heading">My assets</h3>
+      <a routerLink="/properties">Update values</a>
+    </div>
+
+    <div class="stats">
+      <div><span>Net worth</span><strong data-test="net-worth">{{ money(s.net_worth) }}</strong></div>
+      <div><span>Assets</span><strong>{{ money(s.total_assets) }}</strong></div>
+      <div><span>Loans</span><strong>{{ money(s.total_liabilities) }}</strong></div>
+      <div><span>Savings rate (12 mo)</span><strong>{{ percent(totals().savingsRate) }}</strong></div>
+    </div>
+
+    @if (!hasAssets()) {
+      <p class="empty">Add your <a routerLink="/properties">properties</a> and <a routerLink="/investments">investments</a>, with their current values, to see net worth and projections.</p>
+    }
+
+    <div class="grid">
+      <section class="panel">
+        <h4>Cash flow, last 12 months</h4>
+        <p class="sub">Income {{ money(totals().income) }} - expenses {{ money(totals().expenses) }} = <b [class.neg]="totals().net < 0">{{ money(totals().net) }}</b></p>
+        <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Monthly income and expenses for the last 12 months">
+          @for (a of cashAxis(); track $index) {
+            <line [attr.x1]="56" [attr.x2]="width - 12" [attr.y1]="a.y" [attr.y2]="a.y" class="grid-line" />
+            <text x="50" [attr.y]="a.y + 3" text-anchor="end" class="axis">{{ a.label }}</text>
+          }
+          @for (b of cashBars(); track b.label + $index) {
+            <g>
+              <title>{{ b.title }}</title>
+              <rect [attr.x]="b.x" [attr.y]="b.base - b.incomeHeight" [attr.width]="b.width" [attr.height]="b.incomeHeight" class="income" />
+              <rect [attr.x]="b.x + b.width" [attr.y]="b.base - b.expenseHeight" [attr.width]="b.width" [attr.height]="b.expenseHeight" class="expense" />
+            </g>
+            <text [attr.x]="b.x + b.width" [attr.y]="height - 8" text-anchor="middle" class="axis">{{ b.label }}</text>
+          }
+        </svg>
+        <p class="legend"><i class="income"></i>Income <i class="expense"></i>Expenses</p>
+      </section>
+
+      <section class="panel">
+        <h4>Net worth trend</h4>
+        @if (trend(); as t) {
+          <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Net worth over time">
+            @for (a of t.axis; track $index) {
+              <line [attr.x1]="56" [attr.x2]="width - 12" [attr.y1]="a.y" [attr.y2]="a.y" class="grid-line" />
+              <text x="50" [attr.y]="a.y + 3" text-anchor="end" class="axis">{{ a.label }}</text>
+            }
+            <polyline [attr.points]="t.points" class="trend" />
+          </svg>
+          <p class="sub">Built from the dated values you record. Loans are held at their original amount.</p>
+        } @else {
+          <p class="empty">Record a value on two or more dates to see the trend. Each time you save a current value it is added to the history.</p>
+        }
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="proj-head">
+        <h4>Long-term projection</h4>
+        <div class="tabs" role="tablist">
+          @for (h of horizons; track h) {
+            <button type="button" role="tab" [attr.aria-selected]="horizon() === h" [class.on]="horizon() === h" (click)="horizon.set(h)">{{ h }} years</button>
+          }
+        </div>
+      </div>
+
+      <div class="sliders">
+        <label>Income growth {{ assumptions().incomeGrowth }}%/yr
+          <input type="range" min="0" max="10" step="0.5" [value]="assumptions().incomeGrowth" (input)="setAssumption('incomeGrowth', $event)" /></label>
+        <label>Expense growth {{ assumptions().expenseGrowth }}%/yr
+          <input type="range" min="0" max="10" step="0.5" [value]="assumptions().expenseGrowth" (input)="setAssumption('expenseGrowth', $event)" /></label>
+        <label>Asset growth {{ assumptions().assetGrowth }}%/yr
+          <input type="range" min="-2" max="12" step="0.5" [value]="assumptions().assetGrowth" (input)="setAssumption('assetGrowth', $event)" /></label>
+        <label>Loan interest {{ assumptions().interestRate }}%
+          <input type="range" min="0" max="12" step="0.25" [value]="assumptions().interestRate" (input)="setAssumption('interestRate', $event)" /></label>
+      </div>
+
+      <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Projected net worth for three scenarios">
+        @for (a of projection().axis; track $index) {
+          <line [attr.x1]="56" [attr.x2]="width - 12" [attr.y1]="a.y" [attr.y2]="a.y" class="grid-line" />
+          <text x="50" [attr.y]="a.y + 3" text-anchor="end" class="axis">{{ a.label }}</text>
+        }
+        @for (l of projection().lines; track l.name) {
+          <polyline [attr.points]="l.points" [class]="'proj ' + l.name" />
+        }
+      </svg>
+
+      <table>
+        <thead><tr><th>Net worth in</th>@for (n of scenarios; track n) {<th class="cap">{{ n }}</th>}</tr></thead>
+        <tbody>
+          @for (h of horizons; track h) {
+            <tr><td>{{ h }} years</td>@for (n of scenarios; track n) {<td>{{ money(yearsAt(n, h)) }}</td>}</tr>
+          }
+        </tbody>
+      </table>
+      <p class="disclaimer">Estimates based on the last 12 months of cash flow and the assumptions above. Loans are treated as interest-only. This is not financial or tax advice.</p>
+    </section>
+
+    <section class="panel insights">
+      <h4>Strengths and things to improve</h4>
+      <div class="cols">
+        <ul class="strengths">
+          @for (i of insights(); track $index) {
+            @if (i.tone === 'strength') {<li>{{ i.text }}</li>}
+          }
+        </ul>
+        <ul class="improve">
+          @for (i of insights(); track $index) {
+            @if (i.tone === 'improve') {<li>{{ i.text }}</li>}
+          }
+        </ul>
+      </div>
+    </section>
+  </section>
+}

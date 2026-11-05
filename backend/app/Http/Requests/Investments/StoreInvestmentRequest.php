@@ -59,6 +59,8 @@ class StoreInvestmentRequest extends FormRequest
                 'numeric',
                 'min:0',
             ],
+            'current_value' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'current_value_date' => ['nullable', 'date'],
             'source_system' => [
                 'nullable',
                 'string',

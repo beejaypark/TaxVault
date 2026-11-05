@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
+import { WealthSummary } from '../utils/wealth';
+
 interface ApiList<T> {
   data: T[];
 }
@@ -72,6 +74,8 @@ export interface InvestmentDto {
   cost_base: string | number | null;
   incidental_costs: string | number | null;
   proceeds: string | number | null;
+  current_value?: string | number | null;
+  current_value_date?: string | null;
 }
 
 export interface CreateInvestmentRequest {
@@ -83,6 +87,8 @@ export interface CreateInvestmentRequest {
   proceeds?: number | null;
   quantity?: number | null;
   ownership_percentage?: number | null;
+  current_value?: number | null;
+  current_value_date?: string | null;
 }
 
 export interface ExportDto {
@@ -359,6 +365,10 @@ export class TaxWorkspaceApiService {
     return this.http
       .post<ApiItem<ImportResult>>('/api/transactions/import', { rows })
       .pipe(map((response) => response.data));
+  }
+
+  getWealth(): Observable<WealthSummary> {
+    return this.http.get<ApiItem<WealthSummary>>('/api/wealth').pipe(map((response) => response.data));
   }
 
   getDeadlines(): Observable<DeadlineDto[]> {
