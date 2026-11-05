@@ -20,6 +20,23 @@ class Mortgage extends UuidModel
         'start_date',
     ];
 
+    protected $with = ['interestEntries', 'rateChanges'];
+
+    public function rateChanges(): HasMany
+    {
+        return $this->hasMany(MortgageRateChange::class)->orderBy('effective_date');
+    }
+
+    /** Keeps the headline rate equal to the latest dated change that has already taken effect. */
+    public function syncCurrentRate(): void
+    {
+        $current = $this->rateChanges()->where('effective_date', '<=', now()->toDateString())->reorder('effective_date', 'desc')->first();
+
+        if ($current !== null) {
+            $this->update(['interest_rate' => $current->rate]);
+        }
+    }
+
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);

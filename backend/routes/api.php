@@ -73,6 +73,8 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::delete('/mortgages/{id}', [MortgageController::class, 'destroy'])->middleware('audit:mortgage.delete,mortgage');
     Route::put('/mortgages/{id}/interest', [MortgageController::class, 'saveInterest'])->middleware('audit:mortgage.interest,mortgage');
     Route::delete('/mortgages/{id}/interest/{entry}', [MortgageController::class, 'destroyInterest'])->middleware('audit:mortgage.interest_delete,mortgage');
+    Route::put('/mortgages/{id}/rates', [MortgageController::class, 'saveRate'])->middleware('audit:mortgage.rate,mortgage');
+    Route::delete('/mortgages/{id}/rates/{entry}', [MortgageController::class, 'destroyRate'])->middleware('audit:mortgage.rate_delete,mortgage');
     Route::post(
         '/properties/{property}/periods',
         [PropertyController::class, 'storePeriod']

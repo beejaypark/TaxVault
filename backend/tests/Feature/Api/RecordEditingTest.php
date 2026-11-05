@@ -218,6 +218,37 @@ class RecordEditingTest extends TestCase
         $this->assertSame(0, DB::table('mortgage_interest_entries')->count());
     }
 
+    public function test_mortgage_rate_history_is_tracked_and_keeps_current_rate_in_sync(): void
+    {
+        $property = $this->actingAs($this->owner)->postJson('/api/properties', ['address_line_1' => '1 Test St'])
+            ->assertCreated()->json('data.id');
+        $mortgage = $this->actingAs($this->owner)->postJson("/api/properties/{$property}/mortgages", [
+            'bank_name' => 'ANZ', 'loan_type' => 'variable', 'loan_amount' => '600000',
+            'interest_rate' => '5.50', 'start_date' => '2024-01-01',
+        ])->assertCreated()->assertJsonCount(1, 'data.rate_changes')->json('data.id');
+
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/rates", ['effective_date' => '2025-03-01', 'rate' => '6.25'])
+            ->assertOk()->assertJsonCount(2, 'data.rate_changes')->assertJsonPath('data.interest_rate', '6.250');
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/rates", ['effective_date' => '2025-03-01', 'rate' => '6.30'])
+            ->assertOk()->assertJsonCount(2, 'data.rate_changes');
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/rates", ['effective_date' => '2999-01-01', 'rate' => '1'])
+            ->assertOk()->assertJsonPath('data.interest_rate', '6.300');
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/rates", ['effective_date' => '2025-03-01', 'rate' => '101'])
+            ->assertUnprocessable();
+
+        $latest = $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}", [
+            'bank_name' => 'ANZ', 'loan_type' => 'variable', 'loan_amount' => '600000', 'interest_rate' => '6.00',
+        ])->assertOk()->assertJsonPath('data.interest_rate', '6.000')->assertJsonCount(4, 'data.rate_changes');
+
+        $entry = $latest->json('data.rate_changes.0.id');
+        $this->actingAs(User::factory()->create())->deleteJson("/api/mortgages/{$mortgage}/rates/{$entry}")->assertNotFound();
+        $this->actingAs($this->owner)->deleteJson("/api/mortgages/{$mortgage}/rates/{$entry}")
+            ->assertOk()->assertJsonCount(3, 'data.rate_changes');
+
+        $this->actingAs($this->owner)->deleteJson("/api/properties/{$property}")->assertOk();
+        $this->assertSame(0, DB::table('mortgage_rate_changes')->count());
+    }
+
     public function test_rental_items_roll_up_into_property_summary(): void
     {
         $property = $this->actingAs($this->owner)->postJson('/api/properties', [

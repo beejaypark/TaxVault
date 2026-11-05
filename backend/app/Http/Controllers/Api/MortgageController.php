@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Domain\Properties\Models\Mortgage;
 use App\Domain\Properties\Models\MortgageInterestEntry;
+use App\Domain\Properties\Models\MortgageRateChange;
 use App\Domain\Properties\Models\Property;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -25,15 +26,24 @@ class MortgageController extends Controller
             'property_id' => $model->getKey(),
         ]);
 
-        return response()->json(['data' => $mortgage->load('interestEntries')], 201);
+        if ($mortgage->interest_rate !== null) {
+            $this->recordRate($mortgage, substr((string) ($mortgage->start_date ?? now()->toDateString()), 0, 10), $mortgage->interest_rate);
+        }
+
+        return response()->json(['data' => $mortgage->fresh()], 201);
     }
 
     public function update(Request $request, string $id): JsonResponse
     {
         $mortgage = $this->findOwned($request, $id);
+        $before = $mortgage->interest_rate;
         $mortgage->update($this->validated($request));
 
-        return response()->json(['data' => $mortgage->refresh()->load('interestEntries')]);
+        if ($mortgage->interest_rate !== null && (float) $mortgage->interest_rate !== (float) $before) {
+            $this->recordRate($mortgage, now()->toDateString(), $mortgage->interest_rate);
+        }
+
+        return response()->json(['data' => $mortgage->refresh()]);
     }
 
     public function destroy(Request $request, string $id): JsonResponse
@@ -61,7 +71,30 @@ class MortgageController extends Controller
             ['interest_amount' => $data['interest_amount']],
         );
 
-        return response()->json(['data' => $mortgage->refresh()->load('interestEntries')]);
+        return response()->json(['data' => $mortgage->refresh()->refresh()]);
+    }
+
+    public function saveRate(Request $request, string $id): JsonResponse
+    {
+        $mortgage = $this->findOwned($request, $id);
+        $data = $request->validate([
+            'effective_date' => ['required', 'date'],
+            'rate' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $this->recordRate($mortgage, $data['effective_date'], $data['rate']);
+
+        return response()->json(['data' => $mortgage->refresh()]);
+    }
+
+    public function destroyRate(Request $request, string $id, string $entry): JsonResponse
+    {
+        $mortgage = $this->findOwned($request, $id);
+
+        $mortgage->rateChanges()->whereKey($entry)->delete();
+        $mortgage->syncCurrentRate();
+
+        return response()->json(['data' => $mortgage->refresh()]);
     }
 
     public function destroyInterest(Request $request, string $id, string $entry): JsonResponse
@@ -70,7 +103,16 @@ class MortgageController extends Controller
 
         $mortgage->interestEntries()->whereKey($entry)->delete();
 
-        return response()->json(['data' => $mortgage->refresh()->load('interestEntries')]);
+        return response()->json(['data' => $mortgage->refresh()->refresh()]);
+    }
+
+    private function recordRate(Mortgage $mortgage, string $date, $rate): void
+    {
+        MortgageRateChange::query()->updateOrCreate(
+            ['mortgage_id' => $mortgage->getKey(), 'effective_date' => $date],
+            ['rate' => $rate],
+        );
+        $mortgage->syncCurrentRate();
     }
 
     private function findOwned(Request $request, string $id): Mortgage

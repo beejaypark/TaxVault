@@ -25,6 +25,15 @@ interface ChartPoint {
 }
 
 const CHART = { width: 640, height: 240, left: 64, right: 20, top: 20, bottom: 36 };
+const SERIES_COLORS = ['#1f5fbf', '#d9822b', '#2e9d6a', '#8a4fbf'];
+
+interface RateSeries {
+  id: string;
+  name: string;
+  color: string;
+  path: string;
+  points: ChartPoint[];
+}
 
 @Component({
   selector: 'app-property-mortgages',
@@ -97,6 +106,28 @@ const CHART = { width: 640, height: 240, left: 64, right: 20, top: 20, bottom: 3
             </form>
           }
 
+          @if (auth.canEdit) {
+            <form class="interest-form" (ngSubmit)="saveRate(mortgage)">
+              <label>Rate effective from <input type="date" name="rate-date-{{ mortgage.id }}" [(ngModel)]="rateDate" required /></label>
+              <label>New rate (% p.a.) <input type="number" min="0" max="100" step="0.001" name="rate-value-{{ mortgage.id }}" [(ngModel)]="rateValue" required /></label>
+              <button type="submit" class="row-action" [disabled]="!rateDate || rateValue === null">Save rate change</button>
+            </form>
+          }
+
+          @if (mortgage.rate_changes.length > 0) {
+            <ul class="interest-list" aria-label="Interest rate history">
+              @for (change of mortgage.rate_changes; track change.id) {
+                <li>
+                  <span>{{ dateLabel(change.effective_date) }}</span>
+                  <strong>{{ change.rate }}%</strong>
+                  @if (auth.canEdit) {
+                    <button type="button" class="row-action danger" (click)="removeRate(mortgage, change.id)" aria-label="Delete rate change"><tv-icon name="delete" /></button>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
           @if (mortgage.interest_entries.length > 0) {
             <ul class="interest-list">
               @for (entry of mortgage.interest_entries; track entry.id) {
@@ -111,6 +142,34 @@ const CHART = { width: 640, height: 240, left: 64, right: 20, top: 20, bottom: 3
             </ul>
           }
         </article>
+      }
+
+      @if (rateSeries.length > 0) {
+        <figure class="interest-chart">
+          <figcaption>Interest rate history (% p.a.)</figcaption>
+          <svg [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height" role="img" aria-label="Mortgage interest rate history">
+            @for (tick of rateTicks; track tick.value) {
+              <line [attr.x1]="chart.left" [attr.x2]="chart.width - chart.right" [attr.y1]="tick.y" [attr.y2]="tick.y" class="grid" />
+              <text [attr.x]="chart.left - 8" [attr.y]="tick.y + 4" text-anchor="end">{{ tick.value.toFixed(2) }}%</text>
+            }
+            @for (axis of rateAxis; track axis.label) {
+              <text [attr.x]="axis.x" [attr.y]="chart.height - 12" text-anchor="middle">{{ axis.label }}</text>
+            }
+            @for (series of rateSeries; track series.id) {
+              <path [attr.d]="series.path" class="line" [style.stroke]="series.color" />
+              @for (point of series.points; track point.label) {
+                <circle [attr.cx]="point.x" [attr.cy]="point.y" r="4" [attr.fill]="series.color"><title>{{ series.name }} · {{ point.label }}: {{ point.value }}%</title></circle>
+              }
+            }
+          </svg>
+          @if (rateSeries.length > 1) {
+            <p class="legend">
+              @for (series of rateSeries; track series.id) {
+                <span><i [style.background]="series.color"></i>{{ series.name }}</span>
+              }
+            </p>
+          }
+        </figure>
       }
 
       @if (chartPoints.length > 0) {
@@ -157,6 +216,9 @@ const CHART = { width: 640, height: 240, left: 64, right: 20, top: 20, bottom: 3
     .line { fill: none; stroke: var(--tv-color-primary); stroke-width: 2.5; }
     .area { fill: var(--tv-color-primary-soft); opacity: .7; }
     .dot { fill: var(--tv-color-primary); }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 6px 0 0; font-size: 12px; color: var(--tv-color-text-secondary); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
   `],
 })
 export class PropertyMortgagesComponent implements OnInit {
@@ -191,6 +253,12 @@ export class PropertyMortgagesComponent implements OnInit {
   form = this.emptyForm();
   interestMonth = '';
   interestAmount: number | null = null;
+  rateDate = '';
+  rateValue: number | null = null;
+
+  rateSeries: RateSeries[] = [];
+  rateTicks: { value: number; y: number }[] = [];
+  rateAxis: { label: string; x: number }[] = [];
 
   chartPoints: ChartPoint[] = [];
   yTicks: { value: number; y: number }[] = [];
@@ -301,6 +369,40 @@ export class PropertyMortgagesComponent implements OnInit {
     });
   }
 
+  saveRate(mortgage: MortgageDto): void {
+    if (!this.rateDate || this.rateValue === null) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.api.saveMortgageRate(mortgage.id, this.rateDate, Number(this.rateValue)).subscribe({
+      next: (updated) => {
+        this.apply(this.mortgages.map((item) => (item.id === updated.id ? updated : item)));
+        this.rateValue = null;
+        this.cdr.markForCheck();
+      },
+      error: () => this.fail('Unable to save this rate change.'),
+    });
+  }
+
+  removeRate(mortgage: MortgageDto, entryId: string): void {
+    this.api.deleteMortgageRate(mortgage.id, entryId).subscribe({
+      next: (updated) => {
+        this.apply(this.mortgages.map((item) => (item.id === updated.id ? updated : item)));
+        this.cdr.markForCheck();
+      },
+      error: () => this.fail('Unable to delete this rate change.'),
+    });
+  }
+
+  dateLabel(value: string): string {
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? value
+      : new Intl.DateTimeFormat('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date);
+  }
+
   removeInterest(mortgage: MortgageDto, entryId: string): void {
     this.api.deleteMortgageInterest(mortgage.id, entryId).subscribe({
       next: (updated) => {
@@ -343,7 +445,64 @@ export class PropertyMortgagesComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  private rebuildRateChart(): void {
+    const withHistory = this.mortgages.filter((mortgage) => (mortgage.rate_changes ?? []).length > 0);
+    const all = withHistory.flatMap((mortgage) => mortgage.rate_changes);
+
+    if (all.length === 0) {
+      this.rateSeries = [];
+      this.rateTicks = [];
+      this.rateAxis = [];
+
+      return;
+    }
+
+    const day = (value: string) => new Date(value.slice(0, 10)).getTime();
+    const times = all.map((change) => day(change.effective_date));
+    const start = Math.min(...times);
+    const end = Math.max(Math.max(...times), Date.now());
+    const span = Math.max(end - start, 1);
+    const rates = all.map((change) => Number(change.rate));
+    const low = Math.max(0, Math.min(...rates) - 0.5);
+    const high = Math.max(...rates) + 0.5;
+    const plotWidth = CHART.width - CHART.left - CHART.right;
+    const plotHeight = CHART.height - CHART.top - CHART.bottom;
+    const baseline = CHART.top + plotHeight;
+    const xOf = (time: number) => CHART.left + (plotWidth * (time - start)) / span;
+    const yOf = (rate: number) => baseline - ((rate - low) / (high - low)) * plotHeight;
+
+    this.rateSeries = withHistory.map((mortgage, index) => {
+      const points = mortgage.rate_changes.map((change) => ({
+        x: xOf(day(change.effective_date)),
+        y: yOf(Number(change.rate)),
+        label: this.dateLabel(change.effective_date),
+        value: Number(change.rate),
+      }));
+      const steps = points.map((point, i) => (i === 0
+        ? `M${point.x.toFixed(1)},${point.y.toFixed(1)}`
+        : `H${point.x.toFixed(1)} V${point.y.toFixed(1)}`));
+      steps.push(`H${xOf(end).toFixed(1)}`);
+
+      return {
+        id: mortgage.id,
+        name: mortgage.bank_name,
+        color: SERIES_COLORS[index % SERIES_COLORS.length],
+        path: steps.join(' '),
+        points,
+      };
+    });
+    this.rateTicks = [0, 0.5, 1].map((ratio) => ({
+      value: low + (high - low) * ratio,
+      y: baseline - ratio * plotHeight,
+    }));
+    this.rateAxis = [0, 1].map((ratio) => ({
+      label: this.dateLabel(new Date(start + span * ratio).toISOString()),
+      x: CHART.left + plotWidth * ratio,
+    }));
+  }
+
   private rebuildChart(): void {
+    this.rebuildRateChart();
     const totals = new Map<string, number>();
 
     for (const mortgage of this.mortgages) {

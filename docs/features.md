@@ -73,3 +73,11 @@ The dashboard opens with a "My assets" overview.
 - Records linked to it, and its loan interest, are left out of the accountant pack, the CSV export, the rental summary and the "needs a tax return item" counts.
 - It still counts in My assets (value, loan, net worth).
 
+
+## Mortgage rate history
+
+- Each mortgage keeps a dated history of its interest rate. Use "Rate effective from" + "New rate" when the bank changes the rate (future dates are allowed).
+- Changing the rate on the mortgage edit form also records a change dated today. Existing mortgages start with one point from their current rate.
+- The headline rate always follows the latest change that has taken effect; it feeds My assets.
+- A step chart under the mortgages shows the rate over time (one line per mortgage), next to the monthly interest chart.
+

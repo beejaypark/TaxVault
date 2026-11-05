@@ -18,6 +18,12 @@ export interface MortgageInterestEntryDto {
   interest_amount: string | number;
 }
 
+export interface MortgageRateChangeDto {
+  id: string;
+  effective_date: string;
+  rate: string | number;
+}
+
 export interface MortgageDto {
   id: string;
   property_id: string;
@@ -27,6 +33,7 @@ export interface MortgageDto {
   interest_rate: string | number | null;
   start_date: string | null;
   interest_entries: MortgageInterestEntryDto[];
+  rate_changes: MortgageRateChangeDto[];
 }
 
 export interface MortgageRequest {
@@ -281,6 +288,18 @@ export class TaxWorkspaceApiService {
         month,
         interest_amount: interestAmount,
       })
+      .pipe(map((response) => response.data));
+  }
+
+  saveMortgageRate(id: string, effectiveDate: string, rate: number): Observable<MortgageDto> {
+    return this.http
+      .put<ApiItem<MortgageDto>>(`/api/mortgages/${id}/rates`, { effective_date: effectiveDate, rate })
+      .pipe(map((response) => response.data));
+  }
+
+  deleteMortgageRate(id: string, entryId: string): Observable<MortgageDto> {
+    return this.http
+      .delete<ApiItem<MortgageDto>>(`/api/mortgages/${id}/rates/${entryId}`)
       .pipe(map((response) => response.data));
   }
 
