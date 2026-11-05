@@ -123,28 +123,52 @@
 
 .user-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  min-width: 220px;
+  z-index: 40;
+  min-width: 260px;
   display: grid;
-  gap: 6px;
-  padding: 14px;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid var(--tv-color-border);
   border-radius: var(--tv-radius-md);
   background: var(--tv-color-surface);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--tv-color-border);
+}
+
+.avatar-large {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.user-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .user-label {
   color: var(--tv-color-text-muted);
   font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .user-name {
   overflow-wrap: anywhere;
   color: var(--tv-color-text);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .logout-error {
@@ -153,17 +177,39 @@
 }
 
 .logout-button {
-  min-height: 36px;
-  margin-top: 4px;
+  min-height: 38px;
   border: 1px solid var(--tv-color-border);
   border-radius: var(--tv-radius-sm);
   background: var(--tv-color-surface);
   color: var(--tv-color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
 }
 
-.logout-button:hover {
+.logout-button:hover,
+.logout-button:focus-visible {
+  border-color: var(--tv-color-primary);
   background: var(--tv-color-primary-soft);
   color: var(--tv-color-primary);
+}
+
+.user-button {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.user-button:hover {
+  background: var(--tv-color-primary-soft);
+}
+
+.user-button[aria-expanded='true'] .caret {
+  transform: rotate(180deg);
+  margin-top: -4px;
 }
 
 .sidebar {

@@ -41,8 +41,13 @@
       </button>
       @if (userMenuOpen) {
         <div class="user-dropdown" role="menu">
-          <span class="user-label">Signed in as</span>
-          <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
+          <div class="user-info">
+            <span class="avatar avatar-large" aria-hidden="true">{{ userInitial }}</span>
+            <div class="user-text">
+              <span class="user-label">Signed in as</span>
+              <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
+            </div>
+          </div>
           @if (logoutError) {
             <span class="logout-error" role="alert">Unable to sign out. Please try again.</span>
           }
