@@ -7,9 +7,11 @@ import {
   output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
 import {
+  BankStatus,
   ImportResult,
   PropertyDto,
   TaxWorkspaceApiService,
@@ -46,6 +48,27 @@ const MAX_ROWS = 1000;
         </div>
         <button type="button" class="btn" (click)="closed.emit()"><tv-icon name="close" /> Close</button>
       </div>
+
+      @if (bank && bank.enabled) {
+        <div class="bank">
+          <div>
+            <strong>Bank connection</strong>
+            <p>
+              @if (bank.connected) {
+                Connected through our bank data provider{{ bank.last_synced_at ? ', last synced ' + lastSynced : '' }}. Synced transactions arrive uncategorised; use bulk categorise afterwards.
+              } @else {
+                Connect your bank read-only to bring in transactions automatically. You approve access with the bank, and can revoke it there at any time.
+              }
+            </p>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn" [disabled]="bankBusy" (click)="connectBank()">{{ bank.connected ? 'Add another bank' : 'Connect bank' }}</button>
+            @if (bank.connected) {
+              <button type="button" class="btn primary" [disabled]="bankBusy" (click)="syncBank()">{{ bankBusy ? 'Working…' : 'Sync now' }}</button>
+            }
+          </div>
+        </div>
+      }
 
       <label class="file">Bank file (.csv, .ofx, .qfx)
         <input type="file" accept=".csv,.ofx,.qfx,text/csv" (change)="onFile($event)" />
@@ -115,6 +138,8 @@ const MAX_ROWS = 1000;
     .amount { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
     .credit { color: var(--tv-color-success); }
     select { max-width: 260px; min-height: 32px; border: 1px solid var(--tv-color-border); border-radius: 6px; font-size: 12px; margin-right: 6px; }
+    .bank { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; }
+    .bank .actions { gap: 8px; }
     .actions { display: flex; justify-content: flex-end; }
     .btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1px solid var(--tv-color-border); border-radius: 6px; background: white; font-size: 13px; cursor: pointer; }
     .btn.primary { background: var(--tv-color-primary); border-color: var(--tv-color-primary); color: white; }
@@ -134,7 +159,59 @@ export class TransactionImportComponent {
   errorMessage = '';
   result: ImportResult | null = null;
   isImporting = false;
+  bank: BankStatus | null = null;
+  bankBusy = false;
 
+  constructor() {
+    this.api.getBankStatus().subscribe({
+      next: (status) => {
+        this.bank = status;
+        this.cdr.markForCheck();
+      },
+      error: () => undefined,
+    });
+  }
+
+  get lastSynced(): string {
+    return this.bank?.last_synced_at ? new Date(this.bank.last_synced_at).toLocaleString('en-AU') : '';
+  }
+
+  connectBank(): void {
+    this.runBank(this.api.connectBank(), (url) => {
+      window.open(url, '_blank', 'noopener');
+      this.errorMessage = '';
+      if (this.bank) {
+        this.bank = { ...this.bank, connected: true };
+      }
+    });
+  }
+
+  syncBank(): void {
+    this.runBank(this.api.syncBank(), (result) => {
+      this.result = result;
+      if (this.bank) {
+        this.bank = { ...this.bank, last_synced_at: result.last_synced_at };
+      }
+      this.imported.emit();
+    });
+  }
+
+  private runBank<T>(request: Observable<T>, done: (value: T) => void): void {
+    this.bankBusy = true;
+    this.errorMessage = '';
+    request.subscribe({
+      next: (value) => {
+        done(value);
+        this.bankBusy = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'The bank provider could not be reached. Try again shortly.';
+        this.bankBusy = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
   get selectedCount(): number {
     return this.rows.filter((row) => row.selected).length;
   }

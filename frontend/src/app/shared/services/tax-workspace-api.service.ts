@@ -180,6 +180,12 @@ export interface ImportRow {
   property_id?: string | null;
 }
 
+export interface BankStatus {
+  enabled: boolean;
+  connected: boolean;
+  last_synced_at: string | null;
+}
+
 export interface ImportResult {
   imported: number;
   duplicates: number;
@@ -340,6 +346,22 @@ export class TaxWorkspaceApiService {
   importTransactions(rows: ImportRow[]): Observable<ImportResult> {
     return this.http
       .post<ApiItem<ImportResult>>('/api/transactions/import', { rows })
+      .pipe(map((response) => response.data));
+  }
+
+  getBankStatus(): Observable<BankStatus> {
+    return this.http.get<ApiItem<BankStatus>>('/api/bank/status').pipe(map((response) => response.data));
+  }
+
+  connectBank(): Observable<string> {
+    return this.http
+      .post<ApiItem<{ url: string }>>('/api/bank/connect', {})
+      .pipe(map((response) => response.data.url));
+  }
+
+  syncBank(): Observable<ImportResult & { last_synced_at: string | null }> {
+    return this.http
+      .post<ApiItem<ImportResult & { last_synced_at: string | null }>>('/api/bank/sync', {})
       .pipe(map((response) => response.data));
   }
 

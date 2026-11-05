@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BankConnectionController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
 use App\Http\Controllers\Api\ExportController;
@@ -90,6 +91,9 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::put('/transactions/{id}', [TransactionController::class, 'update'])->middleware('audit:transaction.update,transaction');
     Route::post('/transactions/bulk-categorise', [TransactionBulkController::class, 'categorise'])->middleware('audit:transaction.bulk_categorise,transaction');
     Route::post('/transactions/import', [TransactionBulkController::class, 'import'])->middleware('audit:transaction.import,transaction');
+    Route::get('/bank/status', [BankConnectionController::class, 'status']);
+    Route::post('/bank/connect', [BankConnectionController::class, 'connect'])->middleware(['throttle:10,1', 'audit:bank.connect,bank']);
+    Route::post('/bank/sync', [BankConnectionController::class, 'sync'])->middleware(['throttle:10,1', 'audit:bank.sync,bank']);
     Route::get('/financial-years/{id}/return-summary', [ReturnSummaryController::class, 'show']);
     Route::put('/financial-years/{id}/wfh-rate', [WorkFromHomeController::class, 'updateRate'])->middleware('audit:work_from_home.rate,financial_year');
     Route::get('/work-from-home', [WorkFromHomeController::class, 'index']);
