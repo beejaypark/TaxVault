@@ -28,6 +28,11 @@ export interface AuthUser {
   display_name: string;
   identity_provider: string;
   role?: 'owner' | 'accountant';
+  preferences?: {
+    notifyDocuments?: boolean;
+    notifyUncategorised?: boolean;
+    defaultFinancialYear?: 'current' | 'all';
+  } | null;
   clients?: AccountantClient[];
 }
 

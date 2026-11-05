@@ -29,7 +29,8 @@ TaxVault organises evidence for your accountant. It does not prepare or lodge ta
 ## Settings
 
 - Profile (read-only), the financial year selected at sign-in, and notification toggles.
-- Preferences are stored in this browser only (`localStorage`), not on the server.
+- Preferences are saved to your account and follow you across browsers; a copy is kept in the browser as a fallback.
+- Preferences saved in a browser before this existed are uploaded to your account the first time you sign in.
 
 ## Known limits
 

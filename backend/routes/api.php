@@ -33,6 +33,9 @@ Route::middleware('web')->group(function (): void {
     Route::get('/auth/user', [AuthController::class, 'user'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('auth');
+    Route::put('/auth/preferences', [AuthController::class, 'updatePreferences'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->middleware('auth');
 });
 Route::post('/inbound-email/webhook', [InboundEmailController::class, 'webhook']);
 

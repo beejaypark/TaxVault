@@ -235,6 +235,25 @@ class AuthController extends Controller
         return response()->json(['data' => $this->present($user)]);
     }
 
+    public function updatePreferences(Request $request): JsonResponse
+    {
+        $user = Auth::guard('web')->user();
+
+        if (! $user || $user->status !== 'active' || $user->deactivated_at !== null) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $preferences = $request->validate([
+            'notifyDocuments' => ['required', 'boolean'],
+            'notifyUncategorised' => ['required', 'boolean'],
+            'defaultFinancialYear' => ['required', 'in:current,all'],
+        ]);
+
+        $user->forceFill(['preferences' => $preferences])->save();
+
+        return response()->json(['data' => $preferences]);
+    }
+
     /** @return array<string, mixed> */
     private function present(User $user): array
     {
@@ -244,6 +263,7 @@ class AuthController extends Controller
             'display_name' => $user->display_name,
             'identity_provider' => $user->identity_provider,
             'role' => $user->role,
+            'preferences' => $user->preferences,
             'clients' => [],
         ];
 

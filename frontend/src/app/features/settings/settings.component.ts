@@ -14,7 +14,7 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
       <header>
         <div class="eyebrow">Account</div>
         <h1>Settings</h1>
-        <p>Your profile and how TaxVault works for you. Preferences are saved in this browser.</p>
+        <p>Your profile and how TaxVault works for you. Preferences are saved to your account.</p>
       </header>
 
       <section class="card" aria-labelledby="profile-heading">
