@@ -44,6 +44,6 @@ TaxVault organises evidence for your accountant. It does not prepare or lodge ta
 
 ## Known limits
 
-- Live bank feed (optional): set `BASIQ_API_KEY` in the root `.env` and restart. The Import panel then shows "Connect bank" and "Sync now". You approve read-only access with your bank through Basiq; synced rows arrive uncategorised and are de-duplicated by Basiq transaction id. Without a key the feature is hidden. It was built against Basiq's documented v3 API and tested with mocked responses only; verify it against a Basiq sandbox before relying on it.
+- Live bank feed (optional): set `BASIQ_API_KEY` in the root `.env` and restart. The Import panel then shows "Connect bank" and "Sync now". You approve read-only access with your bank through Basiq; synced rows arrive uncategorised and are de-duplicated by Basiq transaction id. Without a key the feature is hidden. It was verified against the live Basiq API for token, user creation, consent URL and transaction listing (the probe user had no connected bank, so no real rows were imported); the import path is covered by mocked tests.
 - File import (CSV/OFX) remains available.
 - Bank data is imported from files; there is no live bank connection.
