@@ -29,13 +29,10 @@
           <span>Add a financial year before generating an export.</span>
         </div>
       } @else {
-        <label for="financial-year">Financial year</label>
-        <select id="financial-year" name="financialYear" [(ngModel)]="selectedFinancialYearId"
-          (ngModelChange)="onFinancialYearChange($event)">
-          @for (year of financialYears; track year.id) {
-            <option [value]="year.id">FY {{ formatYearCode(year.year_code) }} · {{ year.start_date | date: 'd MMM y' : 'UTC' }} to {{ year.end_date | date: 'd MMM y' : 'UTC' }}</option>
-          }
-        </select>
+        @if (selectedYear; as year) {
+          <p class="year-chip"><strong>FY {{ formatYearCode(year.year_code) }}</strong> &middot; {{ year.start_date | date: 'd MMM y' : 'UTC' }} to {{ year.end_date | date: 'd MMM y' : 'UTC' }}</p>
+          <p class="year-hint">To pack a different year, change the Financial year selector at the top of the page.</p>
+        }
 
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
           {{ isExporting ? 'Preparing pack…' : 'Generate accountant pack' }}

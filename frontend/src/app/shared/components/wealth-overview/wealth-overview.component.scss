@@ -46,3 +46,8 @@ th:first-child, td:first-child { text-align: left; }
 .improve { color: #b45309; }
 .strengths li::marker { content: '+ '; }
 .improve li::marker { content: '! '; }
+
+.heading a, .empty a { transition: color 0.15s ease, opacity 0.15s ease; }
+.heading a { padding: 4px 10px; border-radius: 999px; }
+.heading a:hover { background: rgba(255, 255, 255, 0.18); text-decoration: underline; }
+.empty a:hover { color: var(--tv-color-navy); text-decoration: underline; }

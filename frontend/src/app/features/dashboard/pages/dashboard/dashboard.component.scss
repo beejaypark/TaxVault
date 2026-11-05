@@ -1,4 +1,4 @@
-﻿.dashboard-page {
+.dashboard-page {
   width: min(100%, var(--tv-content-max-width));
   margin: 0 auto;
   padding: 40px 40px 64px;
@@ -487,6 +487,8 @@ h1 {
 }
 
 .summary-card:hover {
+  border-color: var(--tv-color-primary);
+  background: var(--tv-color-primary-soft);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgb(15 23 42 / 8%);
 }
@@ -747,3 +749,13 @@ h1 {
     margin-left: 54px;
   }
 }
+
+.document-row { transition: background-color 0.15s ease; }
+a.document-row:hover { background: var(--tv-color-primary-soft); }
+
+.text-link,
+.chart-empty a,
+.empty-panel a { transition: color 0.15s ease; }
+.text-link:hover,
+.chart-empty a:hover,
+.empty-panel a:hover { color: var(--tv-color-navy); text-decoration: underline; }

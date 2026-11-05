@@ -56,7 +56,7 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
   `,
   styles: [`
     :host { display: contents; }
-    .deadline { display: flex; align-items: center; gap: 20px; padding: 18px 24px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
+    .deadline { display: flex; align-items: center; gap: 20px; margin-bottom: 18px; padding: 18px 24px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
     .deadline.soon { border-color: var(--tv-color-primary); }
     .deadline.late { border-color: var(--tv-color-danger); }
     .deadline.late .when { color: var(--tv-color-danger); }
@@ -68,7 +68,9 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
     h2 { margin: 0 0 6px; font-size: 16px; }
     ul { margin: 0 0 6px; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13px; }
     li.ok { color: var(--tv-color-success); }
-    a { color: var(--tv-color-primary); font-weight: 600; }
+    a { color: var(--tv-color-primary); font-weight: 600; transition: color 0.15s ease; }
+    a:hover { color: var(--tv-color-navy); text-decoration: underline; }
+    .btn:hover:not(:disabled) { background: var(--tv-color-primary-soft); border-color: var(--tv-color-primary); }
     .note { margin: 0; color: var(--tv-color-text-secondary); font-size: 12px; }
     .btn { min-height: 36px; padding: 0 14px; border: 1px solid var(--tv-color-border); border-radius: 6px; background: var(--tv-color-surface); font-size: 13px; cursor: pointer; white-space: nowrap; }
     .btn:disabled { opacity: .55; cursor: not-allowed; }

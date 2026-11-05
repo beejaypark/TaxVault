@@ -3,10 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  effect,
   inject,
+  untracked,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
 import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
@@ -25,7 +26,7 @@ import {
 
 @Component({
   selector: 'app-tax-return',
-  imports: [DatePipe, FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
+  imports: [DatePipe, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -138,6 +139,27 @@ export class TaxReturnComponent implements OnInit {
     return formatFinancialYear(yearCode);
   }
 
+  constructor() {
+    // The header selector is the single source of truth for the financial year.
+    effect(() => {
+      const globalId = this.documentsApi.selectedFinancialYearId();
+
+      untracked(() => {
+        if (this.financialYears.length === 0) {
+          return;
+        }
+        const valid = this.financialYears.some((year) => year.id === globalId);
+        const next = valid ? globalId ?? '' : this.documentsApi.defaultFinancialYearId(this.financialYears) ?? '';
+
+        if (!valid) {
+          this.documentsApi.selectFinancialYear(next || null);
+        }
+        this.selectedFinancialYearId = next;
+        this.cdr.markForCheck();
+      });
+    });
+  }
+
   ngOnInit(): void {
     this.documentsApi.listAllFinancialYears().subscribe({
       next: (years) => {
@@ -166,11 +188,6 @@ export class TaxReturnComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
-  }
-
-  onFinancialYearChange(financialYearId: string): void {
-    this.selectedFinancialYearId = financialYearId;
-    this.documentsApi.selectFinancialYear(financialYearId || null);
   }
 
   generateExport(): void {

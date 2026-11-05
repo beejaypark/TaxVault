@@ -286,3 +286,6 @@ select {
     grid-column: auto;
   }
 }
+
+.year-chip { margin: 0 0 4px; padding: 12px 14px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: var(--tv-color-background); }
+.year-hint { margin: 0 0 14px; font-size: 12px; color: var(--tv-color-text-secondary); }
