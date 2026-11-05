@@ -49,6 +49,8 @@ class Transaction extends UuidModel
         'external_transaction_id',
         'provenance',
         'tax_category_id',
+        'ato_category',
+        'property_id',
     ];
 
     protected function casts(): array

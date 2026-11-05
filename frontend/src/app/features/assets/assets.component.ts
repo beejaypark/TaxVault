@@ -19,10 +19,11 @@ import {
 
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { PropertyMortgagesComponent } from './property-mortgages.component';
+import { PropertyRentalSummaryComponent } from './property-rental-summary.component';
 
 @Component({
   selector: 'app-assets',
-  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent],
+  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent, PropertyRentalSummaryComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -104,6 +104,8 @@ export interface TransactionDto {
   amount: string | number;
   currency: string;
   source_system: string | null;
+  ato_category?: string | null;
+  property_id?: string | null;
 }
 
 export interface CreateTransactionRequest {
@@ -112,6 +114,29 @@ export interface CreateTransactionRequest {
   amount: number;
   description: string;
   currency: string;
+  ato_category?: string | null;
+  property_id?: string | null;
+}
+
+export interface RentalSummaryLine {
+  category: string;
+  label: string;
+  amount: number;
+  records: number;
+  source?: 'mortgage_records';
+}
+
+export interface RentalSummaryDto {
+  property_id: string;
+  financial_year_id: string;
+  income: RentalSummaryLine[];
+  expenses: RentalSummaryLine[];
+  total_income: number;
+  total_expenses: number;
+  net_rental_result: number;
+  interest_from_mortgage_records: number;
+  interest_from_transactions: number;
+  interest_mismatch: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -138,6 +163,14 @@ export class TaxWorkspaceApiService {
 
   deleteProperty(id: string): Observable<unknown> {
     return this.http.delete(`/api/properties/${id}`);
+  }
+
+  getRentalSummary(propertyId: string, financialYearId: string): Observable<RentalSummaryDto> {
+    return this.http
+      .get<ApiItem<RentalSummaryDto>>(`/api/properties/${propertyId}/rental-summary`, {
+        params: { financial_year_id: financialYearId },
+      })
+      .pipe(map((response) => response.data));
   }
 
   createMortgage(propertyId: string, mortgage: MortgageRequest): Observable<MortgageDto> {

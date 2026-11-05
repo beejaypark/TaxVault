@@ -53,6 +53,11 @@ final class TransactionController extends Controller
                 sourceSystem: 'manual',
             );
 
+            $transaction->update([
+                'ato_category' => $request->input('ato_category'),
+                'property_id' => $request->input('property_id'),
+            ]);
+
             if ($transaction->direction === 'income') {
                 $createIncome->execute(
                     user: $request->user(),
@@ -104,6 +109,8 @@ final class TransactionController extends Controller
                 'direction' => $request->string('direction')->toString(),
                 'amount' => $request->string('amount')->toString(),
                 'description' => $request->string('description')->toString(),
+                'ato_category' => $request->input('ato_category'),
+                'property_id' => $request->input('property_id'),
             ]);
 
             DB::table('income')->where('transaction_id', $transaction->getKey())->delete();

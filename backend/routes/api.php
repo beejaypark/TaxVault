@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\MortgageController;
 use App\Http\Controllers\Api\PropertyController;
+use App\Http\Controllers\Api\RentalSummaryController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/properties', [PropertyController::class, 'index']);
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::get('/properties/{property}', [PropertyController::class, 'show']);
+    Route::get('/properties/{property}/rental-summary', [RentalSummaryController::class, 'show']);
     Route::put('/properties/{property}', [PropertyController::class, 'update'])->middleware('audit:property.update,property');
     Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->middleware('audit:property.delete,property');
     Route::post('/properties/{property}/mortgages', [MortgageController::class, 'store'])->middleware('audit:mortgage.create,property');

@@ -25,17 +25,35 @@
       <div class="form-grid">
         <label>Description <input name="description" [(ngModel)]="form.description" maxlength="1000" required placeholder="e.g. Interest from savings account" /></label>
         <label>Type
-          <select name="direction" [(ngModel)]="form.direction">
+          <select name="direction" [(ngModel)]="form.direction" (ngModelChange)="onDirectionChange()">
             <option value="income">Income</option>
             <option value="expense">Expense</option>
           </select>
         </label>
         <label>Date <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
         <label>Amount (AUD) <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
+        <label>Tax return item
+          <select name="atoCategory" [(ngModel)]="form.ato_category" (ngModelChange)="onCategoryChange()">
+            <option value="">Not categorised</option>
+            @for (category of categoryOptions; track category.code) {
+              <option [value]="category.code">{{ category.group }} · {{ category.label }} ({{ category.ref }})</option>
+            }
+          </select>
+        </label>
+        @if (needsProperty) {
+          <label>Rental property
+            <select name="propertyId" [(ngModel)]="form.property_id" required>
+              <option value="">Select property</option>
+              @for (property of properties; track property.id) {
+                <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option>
+              }
+            </select>
+          </label>
+        }
       </div>
       <div class="form-actions">
         <button type="button" class="secondary-button" (click)="closeForm()">Cancel</button>
-        <button type="submit" class="primary-button" [disabled]="isSaving || !form.transaction_date || !form.description.trim() || form.amount <= 0">
+        <button type="submit" class="primary-button" [disabled]="isSaving || !isFormValid">
           {{ isSaving ? 'Saving…' : 'Save transaction' }}
         </button>
       </div>
@@ -81,7 +99,12 @@
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
               <tr>
-                <td><strong>{{ transaction.description }}</strong></td>
+                <td>
+                  <strong>{{ transaction.description }}</strong>
+                  @if (transaction.ato_category) {
+                    <small class="tax-item">{{ categoryLabel(transaction.ato_category) }}@if (transaction.property_id) { · {{ propertyName(transaction.property_id) }} }</small>
+                  }
+                </td>
                 <td>{{ formatDate(transaction.transaction_date) }}</td>
                 <td><span class="type-badge" [class.income]="transaction.direction === 'income'">{{ transaction.direction }}</span></td>
                 <td>{{ financialYearFor(transaction.financial_year_id) }}</td>

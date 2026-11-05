@@ -217,4 +217,56 @@ class RecordEditingTest extends TestCase
         $this->assertSame(0, DB::table('mortgages')->count());
         $this->assertSame(0, DB::table('mortgage_interest_entries')->count());
     }
+
+    public function test_rental_items_roll_up_into_property_summary(): void
+    {
+        $property = $this->actingAs($this->owner)->postJson('/api/properties', [
+            'address_line_1' => '1 Test St',
+        ])->assertCreated()->json('data.id');
+
+        $post = fn (array $extra) => $this->actingAs($this->owner)->postJson('/api/transactions', [
+            'transaction_date' => '2025-09-01',
+            'amount' => '100.00',
+            'description' => 'Item',
+            ...$extra,
+        ]);
+
+        $post(['direction' => 'income', 'amount' => '2000', 'ato_category' => 'rental_income', 'property_id' => $property])->assertCreated();
+        $post(['direction' => 'expense', 'amount' => '300', 'ato_category' => 'rental_council_rates', 'property_id' => $property])->assertCreated();
+        $post(['direction' => 'expense', 'amount' => '50', 'ato_category' => 'rental_council_rates', 'property_id' => $property])->assertCreated();
+        $post(['direction' => 'expense', 'amount' => '70', 'ato_category' => 'work_other'])->assertCreated();
+
+        $post(['direction' => 'expense', 'ato_category' => 'rental_water'])->assertUnprocessable();
+        $post(['direction' => 'income', 'ato_category' => 'rental_water', 'property_id' => $property])->assertUnprocessable();
+        $post(['direction' => 'expense', 'ato_category' => 'bogus'])->assertUnprocessable();
+        $post(['direction' => 'expense', 'ato_category' => 'rental_water', 'property_id' => '00000000-0000-0000-0000-000000000000'])->assertUnprocessable();
+
+        $mortgage = $this->actingAs($this->owner)->postJson("/api/properties/{$property}/mortgages", [
+            'bank_name' => 'ANZ', 'loan_type' => 'variable', 'loan_amount' => '500000',
+        ])->assertCreated()->json('data.id');
+        foreach (['2025-09' => '1000', '2026-02' => '1500', '2026-08' => '999'] as $month => $amount) {
+            $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/interest", [
+                'month' => $month, 'interest_amount' => $amount,
+            ])->assertOk();
+        }
+
+        $summary = $this->actingAs($this->owner)
+            ->getJson("/api/properties/{$property}/rental-summary?financial_year_id={$this->year->id}")
+            ->assertOk()
+            ->assertJsonPath('data.total_income', 2000)
+            ->assertJsonPath('data.total_expenses', 2850)
+            ->assertJsonPath('data.net_rental_result', -850)
+            ->assertJsonPath('data.interest_from_mortgage_records', 2500);
+
+        $council = collect($summary->json('data.expenses'))->firstWhere('category', 'rental_council_rates');
+        $this->assertSame(350, (int) $council['amount']);
+        $this->assertSame(2, $council['records']);
+
+        $this->actingAs(User::factory()->create())
+            ->getJson("/api/properties/{$property}/rental-summary?financial_year_id={$this->year->id}")
+            ->assertNotFound();
+
+        $this->actingAs($this->owner)->deleteJson("/api/properties/{$property}")->assertOk();
+        $this->assertSame(4, DB::table('transactions')->count());
+    }
 }

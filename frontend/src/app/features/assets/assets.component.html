@@ -4,7 +4,7 @@
     <div>
       <div class="eyebrow">Tax workspace</div>
       <h1>Assets</h1>
-      <p>Asset records are maintained across years. The financial-year selector filters documents, transactions, and reviews, not these property and investment details.</p>
+      <p>Property and investment details are maintained across years. The financial-year selector filters documents, transactions and reviews, and the rental summary on each property.</p>
     </div>
     @if (!auth.canEdit) {
     } @else if (activeTab === 'properties') {
@@ -100,6 +100,7 @@
               </a>
             </div>
             <app-property-mortgages [property]="property" (mortgagesChange)="property.mortgages = $event" />
+            <app-property-rental-summary [property]="property" />
           </article>
         }
       </section>

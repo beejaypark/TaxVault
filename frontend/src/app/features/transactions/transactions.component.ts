@@ -19,8 +19,15 @@ import {
 } from '../../shared/services/documents/document-api.service';
 import {
   TaxWorkspaceApiService,
+  PropertyDto,
   TransactionDto,
 } from '../../shared/services/tax-workspace-api.service';
+import {
+  AtoCategoryOption,
+  atoCategoriesFor,
+  atoCategoryLabel,
+  isRentalCategory,
+} from '../../shared/utils/ato-categories';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
 
@@ -39,6 +46,7 @@ export class TransactionsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   transactions: TransactionDto[] = [];
+  properties: PropertyDto[] = [];
   financialYears: FinancialYearDto[] = [];
   selectedDirection: 'all' | 'income' | 'expense' = 'all';
   searchText = '';
@@ -86,7 +94,56 @@ export class TransactionsComponent implements OnInit {
       .reduce((total, transaction) => total + Number(transaction.amount), 0);
   }
 
+  get categoryOptions(): AtoCategoryOption[] {
+    return atoCategoriesFor(this.form.direction);
+  }
+
+  get needsProperty(): boolean {
+    return isRentalCategory(this.form.ato_category);
+  }
+
+  get isFormValid(): boolean {
+    return !!this.form.transaction_date
+      && !!this.form.description.trim()
+      && this.form.amount > 0
+      && (!this.needsProperty || !!this.form.property_id);
+  }
+
+  onDirectionChange(): void {
+    const valid = this.categoryOptions.some((item) => item.code === this.form.ato_category);
+
+    if (!valid) {
+      this.form.ato_category = '';
+      this.form.property_id = '';
+    }
+  }
+
+  onCategoryChange(): void {
+    if (!this.needsProperty) {
+      this.form.property_id = '';
+    } else if (!this.form.property_id && this.properties.length === 1) {
+      this.form.property_id = this.properties[0].id;
+    }
+  }
+
+  categoryLabel(code: string | null | undefined): string {
+    return atoCategoryLabel(code);
+  }
+
+  propertyName(id: string | null | undefined): string {
+    const property = this.properties.find((item) => item.id === id);
+
+    return property ? property.reference_code || property.address_line_1 || 'Property' : '';
+  }
+
   ngOnInit(): void {
+    this.api.listProperties().subscribe({
+      next: (properties) => {
+        this.properties = properties;
+        this.cdr.markForCheck();
+      },
+    });
+
     this.documentsApi.listAllFinancialYears().subscribe({
       next: (years) => {
         this.financialYears = years;
@@ -127,12 +184,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   saveTransaction(): void {
-    if (
-      this.isSaving
-      || !this.form.transaction_date
-      || !this.form.description.trim()
-      || this.form.amount <= 0
-    ) {
+    if (this.isSaving || !this.isFormValid) {
       return;
     }
 
@@ -140,7 +192,12 @@ export class TransactionsComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const payload = { ...this.form, description: this.form.description.trim() };
+    const payload = {
+      ...this.form,
+      description: this.form.description.trim(),
+      ato_category: this.form.ato_category || null,
+      property_id: this.needsProperty ? this.form.property_id || null : null,
+    };
     const editing = this.editingId;
     const request$ = editing
       ? this.api.updateTransaction(editing, payload)
@@ -183,6 +240,8 @@ export class TransactionsComponent implements OnInit {
       amount: Number(transaction.amount),
       description: transaction.description,
       currency: transaction.currency ?? 'AUD',
+      ato_category: transaction.ato_category ?? '',
+      property_id: transaction.property_id ?? '',
     };
     this.showForm = true;
   }
@@ -246,6 +305,8 @@ export class TransactionsComponent implements OnInit {
       amount: 0,
       description: '',
       currency: 'AUD',
+      ato_category: '',
+      property_id: '',
     };
   }
 }
