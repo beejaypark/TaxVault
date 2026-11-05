@@ -112,7 +112,7 @@ export class TransactionsComponent implements OnInit {
   suggestForSelected(): void {
     const groups = new Map<string, string[]>();
 
-    for (const item of this.transactions.filter((t) => this.selectedIds.has(t.id))) {
+    for (const item of this.filteredTransactions.filter((t) => this.selectedIds.has(t.id))) {
       const code = suggestAtoCategory(item.description, item.direction as 'income' | 'expense');
 
       if (code && !isRentalCategory(code)) {
@@ -121,7 +121,7 @@ export class TransactionsComponent implements OnInit {
     }
 
     if (groups.size === 0) {
-      this.errorMessage = 'No suggestions for the selected rows. Pick an item manually.';
+      this.errorMessage = 'No suggestions for the selected rows shown in the list. Pick an item manually.';
       this.cdr.markForCheck();
       return;
     }

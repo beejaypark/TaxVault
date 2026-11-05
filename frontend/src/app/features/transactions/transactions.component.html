@@ -111,7 +111,7 @@
           </select>
         }
         <button type="button" class="primary-button" [disabled]="isBulkSaving || (bulkNeedsProperty && !bulkProperty)" (click)="applyBulk()">Apply</button>
-        <button type="button" class="secondary-button" [disabled]="isBulkSaving" (click)="suggestForSelected()">Suggest from description</button>
+        <button type="button" class="secondary-button" [disabled]="isBulkSaving" (click)="suggestForSelected()" title="Applies only to selected rows currently shown in the list">Suggest from description</button>
         <button type="button" class="secondary-button" (click)="selectedIds.clear()">Clear selection</button>
       </div>
     }
