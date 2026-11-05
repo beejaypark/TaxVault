@@ -362,3 +362,7 @@ tbody tr:last-child td {
     width: 100%;
   }
 }
+
+.header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bulk-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; background: var(--tv-color-background); }
+.bulk-bar select { max-width: 280px; min-height: 36px; border: 1px solid var(--tv-color-border); border-radius: 6px; }

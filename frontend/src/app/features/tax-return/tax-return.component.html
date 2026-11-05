@@ -91,6 +91,8 @@
       }
     </section>
 
+    <app-return-summary [financialYearId]="selectedFinancialYearId" [years]="financialYears" />
+
     @if (selectedYear; as year) {
       <tv-cash-flow-analysis
         [transactions]="yearTransactions"

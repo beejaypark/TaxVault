@@ -67,6 +67,9 @@ class ActAsGrantedOwner
             return false;
         }
 
+        if (preg_match('#^financial-years/[^/]+/return-summary$#', $path)) {
+            return $grant->allows('transactions');
+        }
         return match ($segment) {
             'financial-years', 'document-types' => true,
             'documents' => $grant->allows('documents'),

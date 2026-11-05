@@ -269,4 +269,85 @@ class RecordEditingTest extends TestCase
         $this->actingAs($this->owner)->deleteJson("/api/properties/{$property}")->assertOk();
         $this->assertSame(4, DB::table('transactions')->count());
     }
+
+    public function test_bulk_categorise_and_csv_import_with_deduplication(): void
+    {
+        $property = $this->actingAs($this->owner)->postJson('/api/properties', [
+            'address_line_1' => '1 Test St',
+        ])->assertCreated()->json('data.id');
+        $a = $this->createTransaction();
+        $b = $this->createTransaction();
+
+        $this->actingAs($this->owner)->postJson('/api/transactions/bulk-categorise', [
+            'ids' => [$a, $b], 'ato_category' => 'bank_interest',
+        ])->assertOk()->assertJsonPath('data.updated', 2);
+        $this->assertSame(2, DB::table('transactions')->where('ato_category', 'bank_interest')->count());
+
+        $this->actingAs($this->owner)->postJson('/api/transactions/bulk-categorise', [
+            'ids' => [$a], 'ato_category' => 'work_other',
+        ])->assertOk()->assertJsonPath('data.updated', 0)->assertJsonPath('data.skipped', 1);
+
+        $this->actingAs($this->owner)->postJson('/api/transactions/bulk-categorise', [
+            'ids' => [$a], 'ato_category' => 'rental_income',
+        ])->assertUnprocessable();
+
+        $this->actingAs(User::factory()->create())->postJson('/api/transactions/bulk-categorise', [
+            'ids' => [$a], 'ato_category' => 'bank_interest',
+        ])->assertOk()->assertJsonPath('data.updated', 0);
+
+        $rows = [
+            ['date' => '2025-10-01', 'description' => 'Coffee', 'amount' => -4.5],
+            ['date' => '2025-10-01', 'description' => 'Coffee', 'amount' => -4.5],
+            ['date' => '2025-10-02', 'description' => 'Rent in', 'amount' => 500, 'ato_category' => 'rental_income', 'property_id' => $property],
+            ['date' => '2025-10-03', 'description' => 'Water', 'amount' => -30, 'ato_category' => 'rental_water'],
+            ['date' => '2020-01-01', 'description' => 'Too old', 'amount' => -1],
+        ];
+
+        $this->actingAs($this->owner)->postJson('/api/transactions/import', ['rows' => $rows])
+            ->assertOk()
+            ->assertJsonPath('data.imported', 4)
+            ->assertJsonPath('data.outside_financial_years', 1);
+        $this->assertSame(1, DB::table('transactions')->where('ato_category', 'rental_income')->count());
+        $this->assertSame(0, DB::table('transactions')->where('description', 'Water')->whereNotNull('ato_category')->count());
+
+        $this->actingAs($this->owner)->postJson('/api/transactions/import', ['rows' => $rows])
+            ->assertOk()
+            ->assertJsonPath('data.imported', 0)
+            ->assertJsonPath('data.duplicates', 4);
+    }
+
+    public function test_work_from_home_log_and_return_summary(): void
+    {
+        $this->actingAs($this->owner)->postJson('/api/work-from-home', ['work_date' => '2025-09-01', 'hours' => 8])->assertCreated();
+        $this->actingAs($this->owner)->postJson('/api/work-from-home', ['work_date' => '2025-09-01', 'hours' => 6])->assertCreated();
+        $this->actingAs($this->owner)->postJson('/api/work-from-home', ['work_date' => '2025-09-02', 'hours' => 4])->assertCreated();
+        $this->actingAs($this->owner)->postJson('/api/work-from-home', ['work_date' => '2019-09-02', 'hours' => 4])->assertUnprocessable();
+
+        $this->actingAs($this->owner)->getJson("/api/work-from-home?financial_year_id={$this->year->id}")
+            ->assertOk()
+            ->assertJsonPath('data.summary.hours', 10)
+            ->assertJsonPath('data.summary.days', 2)
+            ->assertJsonPath('data.summary.amount', 7)
+            ->assertJsonCount(2, 'data.logs');
+
+        $this->actingAs($this->owner)->putJson("/api/financial-years/{$this->year->id}/wfh-rate", ['rate' => 0.5])
+            ->assertOk()->assertJsonPath('data.amount', 5);
+
+        $this->actingAs($this->owner)->postJson('/api/transactions', [
+            'transaction_date' => '2025-09-01', 'direction' => 'expense', 'amount' => '100', 'description' => 'Desk',
+            'ato_category' => 'work_other',
+        ])->assertCreated();
+        $this->createTransaction();
+
+        $summary = $this->actingAs($this->owner)->getJson("/api/financial-years/{$this->year->id}/return-summary")
+            ->assertOk()
+            ->assertJsonPath('data.totals.deductions', 105)
+            ->assertJsonPath('data.uncategorised.income.records', 1);
+        $this->assertSame(['work_other', 'work_from_home'], collect($summary->json('data.lines'))->pluck('category')->all());
+
+        $this->actingAs(User::factory()->create())->getJson("/api/financial-years/{$this->year->id}/return-summary")->assertNotFound();
+
+        $this->actingAs($this->owner)->deleteJson("/api/financial-years/{$this->year->id}")->assertOk();
+        $this->assertSame(0, DB::table('work_from_home_logs')->count());
+    }
 }

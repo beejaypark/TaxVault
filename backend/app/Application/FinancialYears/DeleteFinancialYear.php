@@ -65,6 +65,10 @@ final class DeleteFinancialYear
             DB::table('financial_year_export_archives')
                 ->where('financial_year_id', $yearId)
                 ->delete();
+            DB::table('work_from_home_logs')
+                ->where('user_id', $user->getKey())
+                ->whereBetween('work_date', [$financialYear->start_date->toDateString(), $financialYear->end_date->toDateString()])
+                ->delete();
 
             // An emptied list means "no years", never "all years".
             AccountantGrant::query()

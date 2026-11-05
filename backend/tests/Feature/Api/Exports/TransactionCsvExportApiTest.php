@@ -39,7 +39,7 @@ class TransactionCsvExportApiTest extends TestCase
         $lines = array_values(array_filter(explode("\n", trim(substr($csv, 3)))));
 
         $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
-        $this->assertSame('Date,Type,Description,Amount,Currency,Document,"Payment status","Payment method",Source', trim($lines[0]));
+        $this->assertSame('Date,Type,Description,Amount,Currency,Document,"Payment status","Payment method",Source,"Tax return item",Property', trim($lines[0]));
         $this->assertCount(3, $lines);
         $this->assertStringStartsWith('2026-08-01,income,', $lines[1]);
         $this->assertStringContainsString("'=HYPERLINK", $lines[1]);

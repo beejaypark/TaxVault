@@ -60,3 +60,26 @@ export function atoCategoryLabel(code: string | null | undefined): string {
 export function isRentalCategory(code: string | null | undefined): boolean {
   return !!code && code.startsWith('rental_');
 }
+
+// Keyword hints only; the user confirms every suggestion before it is saved.
+const HINTS: [RegExp, string, 'income' | 'expense'][] = [
+  [/\binterest\b/i, 'bank_interest', 'income'],
+  [/\bsalary\b|\bwages?\b|\bpayroll\b/i, 'salary', 'income'],
+  [/\bdividend\b/i, 'dividends', 'income'],
+  [/\brent(al)?\b|\bproperty manager\b/i, 'rental_income', 'income'],
+  [/\bbody corp|\bstrata\b|\bowners corp/i, 'rental_body_corporate', 'expense'],
+  [/\bcouncil\b|\brates\b/i, 'rental_council_rates', 'expense'],
+  [/\bland tax\b/i, 'rental_land_tax', 'expense'],
+  [/\bwater\b/i, 'rental_water', 'expense'],
+  [/\blandlord insurance\b|\bbuilding insurance\b/i, 'rental_insurance', 'expense'],
+  [/\bagent\b|\bmanagement fee\b|\bpm fee\b/i, 'rental_agent_fees', 'expense'],
+  [/\bplumb|\belectric|\brepair|\bmaintenance\b/i, 'rental_repairs', 'expense'],
+  [/\bdonation\b|\bred cross\b|\bsalvation\b|\bunicef\b/i, 'donations', 'expense'],
+  [/\btax agent\b|\baccountant\b|\btax return\b/i, 'tax_affairs', 'expense'],
+  [/\bcourse\b|\btuition\b|\buniversity\b/i, 'work_self_education', 'expense'],
+];
+
+export function suggestAtoCategory(description: string, direction: 'income' | 'expense'): string {
+  return HINTS.find(([pattern, , hintDirection]) =>
+    hintDirection === direction && pattern.test(description))?.[1] ?? '';
+}

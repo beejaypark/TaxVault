@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\MortgageController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\RentalSummaryController;
+use App\Http\Controllers\Api\ReturnSummaryController;
+use App\Http\Controllers\Api\TransactionBulkController;
+use App\Http\Controllers\Api\WorkFromHomeController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +78,13 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions', [TransactionController::class, 'store']);
     Route::put('/transactions/{id}', [TransactionController::class, 'update'])->middleware('audit:transaction.update,transaction');
+    Route::post('/transactions/bulk-categorise', [TransactionBulkController::class, 'categorise'])->middleware('audit:transaction.bulk_categorise,transaction');
+    Route::post('/transactions/import', [TransactionBulkController::class, 'import'])->middleware('audit:transaction.import,transaction');
+    Route::get('/financial-years/{id}/return-summary', [ReturnSummaryController::class, 'show']);
+    Route::put('/financial-years/{id}/wfh-rate', [WorkFromHomeController::class, 'updateRate'])->middleware('audit:work_from_home.rate,financial_year');
+    Route::get('/work-from-home', [WorkFromHomeController::class, 'index']);
+    Route::post('/work-from-home', [WorkFromHomeController::class, 'store'])->middleware('audit:work_from_home.save,work_from_home');
+    Route::delete('/work-from-home/{id}', [WorkFromHomeController::class, 'destroy'])->middleware('audit:work_from_home.delete,work_from_home');
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->middleware('audit:transaction.delete,transaction');
 
     Route::get('/document-types', [DocumentTypeController::class, 'index']);

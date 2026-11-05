@@ -126,6 +126,66 @@ export interface RentalSummaryLine {
   source?: 'mortgage_records';
 }
 
+export interface ReturnSummaryLine {
+  category: string;
+  label: string;
+  group: 'Income' | 'Rental property' | 'Deductions';
+  ato_ref: string;
+  direction: 'income' | 'expense';
+  amount: number;
+  records: number;
+  property_id: string | null;
+  property_name: string;
+  source: 'wfh_log' | null;
+}
+
+export interface WorkFromHomeSummary {
+  hours: number;
+  days: number;
+  rate: number;
+  amount: number;
+  rate_is_default: boolean;
+}
+
+export interface ReturnSummaryDto {
+  financial_year_id: string;
+  year_code: string;
+  start_date: string;
+  lines: ReturnSummaryLine[];
+  rental: {
+    property_id: string;
+    property_name: string;
+    income: number;
+    expenses: number;
+    interest_from_mortgage_records: number;
+    net_result: number;
+  }[];
+  work_from_home: WorkFromHomeSummary;
+  uncategorised: Record<'income' | 'expense', { amount: number; records: number }>;
+  totals: { income: number; deductions: number; net_rental_result: number };
+}
+
+export interface WorkFromHomeLogDto {
+  id: string;
+  work_date: string;
+  hours: string | number;
+  note: string | null;
+}
+
+export interface ImportRow {
+  date: string;
+  description: string;
+  amount: number;
+  ato_category?: string | null;
+  property_id?: string | null;
+}
+
+export interface ImportResult {
+  imported: number;
+  duplicates: number;
+  outside_financial_years: number;
+}
+
 export interface RentalSummaryDto {
   property_id: string;
   financial_year_id: string;
@@ -261,5 +321,62 @@ export class TaxWorkspaceApiService {
 
   deleteTransaction(id: string): Observable<unknown> {
     return this.http.delete(`/api/transactions/${id}`);
+  }
+
+  bulkCategorise(
+    ids: string[],
+    atoCategory: string | null,
+    propertyId: string | null,
+  ): Observable<{ updated: number; skipped: number }> {
+    return this.http
+      .post<ApiItem<{ updated: number; skipped: number }>>('/api/transactions/bulk-categorise', {
+        ids,
+        ato_category: atoCategory,
+        property_id: propertyId,
+      })
+      .pipe(map((response) => response.data));
+  }
+
+  importTransactions(rows: ImportRow[]): Observable<ImportResult> {
+    return this.http
+      .post<ApiItem<ImportResult>>('/api/transactions/import', { rows })
+      .pipe(map((response) => response.data));
+  }
+
+  getReturnSummary(financialYearId: string): Observable<ReturnSummaryDto> {
+    return this.http
+      .get<ApiItem<ReturnSummaryDto>>(`/api/financial-years/${financialYearId}/return-summary`)
+      .pipe(map((response) => response.data));
+  }
+
+  getWorkFromHome(
+    financialYearId: string,
+  ): Observable<{ summary: WorkFromHomeSummary; logs: WorkFromHomeLogDto[] }> {
+    return this.http
+      .get<ApiItem<{ summary: WorkFromHomeSummary; logs: WorkFromHomeLogDto[] }>>(
+        '/api/work-from-home',
+        { params: { financial_year_id: financialYearId } },
+      )
+      .pipe(map((response) => response.data));
+  }
+
+  saveWorkFromHome(workDate: string, hours: number, note: string): Observable<WorkFromHomeLogDto> {
+    return this.http
+      .post<ApiItem<WorkFromHomeLogDto>>('/api/work-from-home', {
+        work_date: workDate,
+        hours,
+        note: note || null,
+      })
+      .pipe(map((response) => response.data));
+  }
+
+  deleteWorkFromHome(id: string): Observable<unknown> {
+    return this.http.delete(`/api/work-from-home/${id}`);
+  }
+
+  saveWorkFromHomeRate(financialYearId: string, rate: number): Observable<WorkFromHomeSummary> {
+    return this.http
+      .put<ApiItem<WorkFromHomeSummary>>(`/api/financial-years/${financialYearId}/wfh-rate`, { rate })
+      .pipe(map((response) => response.data));
   }
 }

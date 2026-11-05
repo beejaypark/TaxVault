@@ -8,14 +8,25 @@
       <p class="refresh-indicator">Records update automatically every 5 seconds.</p>
     </div>
     @if (auth.canEdit) {
-    <button class="primary-button" type="button" (click)="showForm ? closeForm() : startCreate()">
-      @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
-    </button>
+    <div class="header-actions">
+      <button class="secondary-button" type="button" (click)="showWfh = !showWfh"><tv-icon name="chart" /> Working from home</button>
+      <button class="secondary-button" type="button" (click)="showImport = !showImport"><tv-icon name="upload" /> Import bank file</button>
+      <button class="primary-button" type="button" (click)="showForm ? closeForm() : startCreate()">
+        @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
+      </button>
+    </div>
     }
   </header>
 
   @if (errorMessage) { <p class="notice error" role="alert">{{ errorMessage }}</p> }
   @if (successMessage) { <p class="notice success" role="status">{{ successMessage }}</p> }
+
+  @if (showImport && auth.canEdit) {
+    <app-transaction-import [properties]="properties" (closed)="showImport = false" (imported)="loadTransactions()" />
+  }
+  @if (showWfh && auth.canEdit) {
+    <app-work-from-home />
+  }
 
   @if (showForm) {
     <form class="transaction-form" (ngSubmit)="saveTransaction()">
@@ -84,6 +95,27 @@
       </div>
     </div>
 
+    @if (auth.canEdit && selectedIds.size > 0) {
+      <div class="bulk-bar" role="region" aria-label="Bulk categorise">
+        <strong>{{ selectedIds.size }} selected</strong>
+        <select name="bulkCategory" [(ngModel)]="bulkCategory" (ngModelChange)="onBulkCategoryChange()" aria-label="Tax return item">
+          <option value="">Clear tax return item</option>
+          @for (category of bulkOptions; track category.code) {
+            <option [value]="category.code">{{ category.group }} · {{ category.label }} ({{ category.ref }})</option>
+          }
+        </select>
+        @if (bulkNeedsProperty) {
+          <select name="bulkProperty" [(ngModel)]="bulkProperty" aria-label="Rental property">
+            <option value="">Select property</option>
+            @for (property of properties; track property.id) { <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option> }
+          </select>
+        }
+        <button type="button" class="primary-button" [disabled]="isBulkSaving || (bulkNeedsProperty && !bulkProperty)" (click)="applyBulk()">Apply</button>
+        <button type="button" class="secondary-button" [disabled]="isBulkSaving" (click)="suggestForSelected()">Suggest from description</button>
+        <button type="button" class="secondary-button" (click)="selectedIds.clear()">Clear selection</button>
+      </div>
+    }
+
     @if (isLoading) {
       <p class="empty-state" role="status">Loading transactions...</p>
     } @else if (filteredTransactions.length === 0) {
@@ -95,10 +127,13 @@
     } @else {
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th>@if (auth.canEdit) {<th class="actions-col">Actions</th>}</tr></thead>
+          <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" aria-label="Select all" /></th>}<th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th>@if (auth.canEdit) {<th class="actions-col">Actions</th>}</tr></thead>
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
               <tr>
+                @if (auth.canEdit) {
+                  <td><input type="checkbox" [checked]="selectedIds.has(transaction.id)" (change)="toggleOne(transaction.id, $any($event.target).checked)" [attr.aria-label]="'Select ' + transaction.description" /></td>
+                }
                 <td>
                   <strong>{{ transaction.description }}</strong>
                   @if (transaction.ato_category) {

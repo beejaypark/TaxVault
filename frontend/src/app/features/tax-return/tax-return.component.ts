@@ -11,6 +11,7 @@ import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.comp
 import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
 import { CashFlowAnalysisComponent } from '../../shared/components/cash-flow-analysis/cash-flow-analysis.component';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
+import { ReturnSummaryComponent } from './return-summary.component';
 import {
   DocumentApiService,
   FinancialYearDto,
@@ -23,7 +24,7 @@ import {
 
 @Component({
   selector: 'app-tax-return',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

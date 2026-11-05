@@ -27,13 +27,16 @@ import {
   atoCategoriesFor,
   atoCategoryLabel,
   isRentalCategory,
+  suggestAtoCategory,
 } from '../../shared/utils/ato-categories';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { TransactionImportComponent } from './transaction-import.component';
+import { WorkFromHomeComponent } from './work-from-home.component';
 
 @Component({
   selector: 'app-transactions',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TransactionImportComponent, WorkFromHomeComponent],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,8 +59,126 @@ export class TransactionsComponent implements OnInit {
   editingId: string | null = null;
   errorMessage = '';
   successMessage = '';
+  showImport = false;
+  showWfh = false;
+  selectedIds = new Set<string>();
+  bulkCategory = '';
+  bulkProperty = '';
+  isBulkSaving = false;
 
   form = this.emptyForm();
+
+  get bulkOptions(): AtoCategoryOption[] {
+    return [...atoCategoriesFor('income'), ...atoCategoriesFor('expense')];
+  }
+
+  get bulkNeedsProperty(): boolean {
+    return isRentalCategory(this.bulkCategory);
+  }
+
+  get allVisibleSelected(): boolean {
+    const visible = this.filteredTransactions;
+
+    return visible.length > 0 && visible.every((item) => this.selectedIds.has(item.id));
+  }
+
+  toggleAll(checked: boolean): void {
+    for (const item of this.filteredTransactions) {
+      if (checked) {
+        this.selectedIds.add(item.id);
+      } else {
+        this.selectedIds.delete(item.id);
+      }
+    }
+  }
+
+  toggleOne(id: string, checked: boolean): void {
+    if (checked) {
+      this.selectedIds.add(id);
+    } else {
+      this.selectedIds.delete(id);
+    }
+  }
+
+  onBulkCategoryChange(): void {
+    if (!this.bulkNeedsProperty) {
+      this.bulkProperty = '';
+    } else if (!this.bulkProperty && this.properties.length === 1) {
+      this.bulkProperty = this.properties[0].id;
+    }
+  }
+
+  // Groups selected rows by their suggested category and applies each group.
+  suggestForSelected(): void {
+    const groups = new Map<string, string[]>();
+
+    for (const item of this.transactions.filter((t) => this.selectedIds.has(t.id))) {
+      const code = suggestAtoCategory(item.description, item.direction as 'income' | 'expense');
+
+      if (code && !isRentalCategory(code)) {
+        groups.set(code, [...(groups.get(code) ?? []), item.id]);
+      }
+    }
+
+    if (groups.size === 0) {
+      this.errorMessage = 'No suggestions for the selected rows. Pick an item manually.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.errorMessage = '';
+    let remaining = groups.size;
+    let updated = 0;
+
+    for (const [code, ids] of groups) {
+      this.api.bulkCategorise(ids, code, null).subscribe({
+        next: (result) => {
+          updated += result.updated;
+          if (--remaining === 0) {
+            this.finishBulk(`Suggested items applied to ${updated} transactions. Rental items need a property and were left for you.`);
+          }
+        },
+        error: () => {
+          if (--remaining === 0) {
+            this.finishBulk(`Applied to ${updated} transactions; some groups failed.`);
+          }
+        },
+      });
+    }
+  }
+
+  applyBulk(): void {
+    if (this.isBulkSaving || this.selectedIds.size === 0 || (this.bulkNeedsProperty && !this.bulkProperty)) {
+      return;
+    }
+
+    this.isBulkSaving = true;
+    this.errorMessage = '';
+
+    this.api
+      .bulkCategorise([...this.selectedIds], this.bulkCategory || null, this.bulkProperty || null)
+      .subscribe({
+        next: (result) => {
+          this.finishBulk(
+            `Updated ${result.updated} transactions.${result.skipped ? ` ${result.skipped} skipped because the item does not match income/expense.` : ''}`,
+          );
+        },
+        error: () => {
+          this.errorMessage = 'Unable to update the selected transactions.';
+          this.isBulkSaving = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private finishBulk(message: string): void {
+    this.isBulkSaving = false;
+    this.successMessage = message;
+    this.selectedIds = new Set<string>();
+    this.bulkCategory = '';
+    this.bulkProperty = '';
+    this.loadTransactions();
+  }
 
   get filteredTransactions(): TransactionDto[] {
     const search = this.searchText.trim().toLowerCase();
