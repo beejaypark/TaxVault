@@ -48,6 +48,7 @@ export interface PropertyDto {
   country_code: string;
   current_value?: string | number | null;
   current_value_date?: string | null;
+  is_main_residence?: boolean;
   mortgages?: MortgageDto[];
 }
 
@@ -61,6 +62,7 @@ export interface CreatePropertyRequest {
   country_code: string;
   current_value?: number | null;
   current_value_date?: string | null;
+  is_main_residence?: boolean;
 }
 
 export interface InvestmentDto {

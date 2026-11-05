@@ -51,6 +51,10 @@
           <label>Postcode <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
           <label>Current value (AUD) <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" placeholder="From property.com.au" /></label>
           <label>Value as of <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" /></label>
+          <label class="checkbox-field">
+            <input name="isMainResidence" type="checkbox" [(ngModel)]="propertyForm.is_main_residence" />
+            <span>I live here (main residence). Its costs and loan interest are kept out of the accountant pack.</span>
+          </label>
         </div>
         <div class="form-actions">
           <button type="button" class="secondary-button" (click)="closePropertyForm()">Cancel</button>
@@ -78,6 +82,9 @@
               <p>{{ propertyAddress(property) || 'Address details not provided' }}</p>
             </div>
             <span class="record-meta">{{ property.country_code }}</span>
+            @if (property.is_main_residence) {
+              <span class="record-meta">Main residence · not on tax return</span>
+            }
             @if (auth.canEdit) {
               <div class="row-actions">
                 <button type="button" class="row-action" (click)="startEditProperty(property)"><tv-icon name="edit" /> Edit</button>
@@ -100,7 +107,9 @@
               </a>
             </div>
             <app-property-mortgages [property]="property" (mortgagesChange)="property.mortgages = $event" />
-            <app-property-rental-summary [property]="property" />
+            @if (!property.is_main_residence) {
+              <app-property-rental-summary [property]="property" />
+            }
           </article>
         }
       </section>

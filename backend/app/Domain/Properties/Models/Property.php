@@ -23,11 +23,13 @@ class Property extends UuidModel
         'location_metadata',
         'current_value',
         'current_value_date',
+        'is_main_residence',
     ];
 
     protected function casts(): array
     {
         return [
+            'is_main_residence' => 'boolean',
             'location_metadata' => 'array',
         ];
     }

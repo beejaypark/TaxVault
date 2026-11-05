@@ -104,6 +104,7 @@ export class AssetsComponent implements OnInit {
       current_value_date: this.propertyForm.current_value === null
         ? null
         : (this.propertyForm.current_value_date || null),
+      is_main_residence: this.propertyForm.is_main_residence,
     };
     const request$ = editing
       ? this.api.updateProperty(editing, payload)
@@ -184,6 +185,7 @@ export class AssetsComponent implements OnInit {
         ? null
         : Number(property.current_value),
       current_value_date: property.current_value_date ? property.current_value_date.slice(0, 10) : '',
+      is_main_residence: property.is_main_residence ?? false,
     };
     this.showPropertyForm = true;
   }
@@ -325,6 +327,7 @@ export class AssetsComponent implements OnInit {
       country_code: 'AU',
       current_value: null as number | null,
       current_value_date: '',
+      is_main_residence: false,
     };
   }
 

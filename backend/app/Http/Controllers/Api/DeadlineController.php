@@ -38,7 +38,7 @@ class DeadlineController extends Controller
                 'days_to_year_end' => $yearEnd ? max(0, (int) $today->diffInDays($yearEnd, false)) : null,
                 'completed' => $sender->isCompleted($user, $deadline),
                 'financial_year_id' => $yearId,
-                'uncategorised_transactions' => $scope(Transaction::query()->where('user_id', $userId)->whereNull('ato_category'))->count(),
+                'uncategorised_transactions' => $scope(Transaction::query()->forTaxReturn()->where('user_id', $userId)->whereNull('ato_category'))->count(),
                 'documents_to_review' => $scope(Document::query()->where('user_id', $userId)->whereIn('status', EmailNotificationSender::ATTENTION_STATUSES))->count(),
             ];
         }

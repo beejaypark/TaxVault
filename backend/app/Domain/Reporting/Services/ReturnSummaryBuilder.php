@@ -20,6 +20,7 @@ final class ReturnSummaryBuilder
         $properties = Property::query()->where('user_id', $userId)->get()->keyBy('id');
 
         $rows = Transaction::query()
+            ->forTaxReturn()
             ->where('user_id', $userId)
             ->where('financial_year_id', $year->getKey())
             ->selectRaw('ato_category, property_id, direction, sum(amount) as total, count(*) as records')
@@ -134,6 +135,10 @@ final class ReturnSummaryBuilder
         $result = [];
 
         foreach ($properties as $property) {
+            if ($property->is_main_residence) {
+                continue;
+            }
+
             $own = array_filter($lines, fn ($l) => $l['property_id'] === $property->getKey() && AtoCategory::isRental($l['category']));
             $income = array_sum(array_column(array_filter($own, fn ($l) => $l['direction'] === 'income'), 'amount'));
             $expenses = array_sum(array_column(array_filter($own, fn ($l) => $l['direction'] === 'expense'), 'amount'));

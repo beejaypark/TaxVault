@@ -38,6 +38,7 @@ final class TransactionCsvExport
             ->all();
 
         Transaction::query()
+            ->forTaxReturn()
             ->with('document')
             ->where('user_id', $user->getKey())
             ->where('financial_year_id', $financialYear->getKey())

@@ -7,6 +7,8 @@ use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Shared\Models\UuidModel;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Domain\Properties\Models\Property;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -64,6 +66,14 @@ class Transaction extends UuidModel
     }
 
     /** @return BelongsTo<User, $this> */
+    /** Excludes records linked to a main-residence property, which never go on a tax return. */
+    public function scopeForTaxReturn(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q
+            ->whereNull('property_id')
+            ->orWhereNotIn('property_id', Property::query()->where('is_main_residence', true)->select('id')));
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

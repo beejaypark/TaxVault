@@ -66,3 +66,10 @@ The dashboard opens with a "My assets" overview.
 - When OCR finds no total amount or issue date, the review page shows an "Add missing details" card with an amount and a date field.
 - Saved values are stored as reviewer corrections (amount > 0, real date). Payment suggestions use them automatically.
 
+
+## Main residence
+
+- Tick "I live here (main residence)" on a property (Properties > Edit).
+- Records linked to it, and its loan interest, are left out of the accountant pack, the CSV export, the rental summary and the "needs a tax return item" counts.
+- It still counts in My assets (value, loan, net worth).
+

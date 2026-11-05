@@ -45,6 +45,12 @@ class PropertyController extends Controller
             locationMetadata: $request->input('location_metadata'),
         );
 
+        if ($request->boolean('is_main_residence')) {
+            $property->update(['is_main_residence' => true]);
+        }
+
+        $property->refresh();
+
         return response()->json([
             'data' => $property,
         ], 201);
@@ -63,6 +69,7 @@ class PropertyController extends Controller
             'postcode',
             'current_value',
             'current_value_date',
+            'is_main_residence',
         ]));
 
         if ($request->filled('current_value')) {

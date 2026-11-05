@@ -24,6 +24,7 @@ class StorePropertyRequest extends FormRequest
             'location_metadata' => ['nullable', 'array'],
             'current_value' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
             'current_value_date' => ['nullable', 'date'],
+            'is_main_residence' => ['sometimes', 'boolean'],
         ];
     }
 }

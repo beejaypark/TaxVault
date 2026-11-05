@@ -270,6 +270,42 @@ class RecordEditingTest extends TestCase
         $this->assertSame(4, DB::table('transactions')->count());
     }
 
+    public function test_main_residence_records_are_left_out_of_the_tax_return(): void
+    {
+        $home = $this->actingAs($this->owner)->postJson('/api/properties', [
+            'address_line_1' => '1 Home St', 'is_main_residence' => true,
+        ])->assertCreated()->assertJsonPath('data.is_main_residence', true)->json('data.id');
+        $rental = $this->actingAs($this->owner)->postJson('/api/properties', ['address_line_1' => '2 Rental St'])
+            ->assertCreated()->assertJsonPath('data.is_main_residence', false)->json('data.id');
+
+        $post = fn (array $extra) => $this->actingAs($this->owner)->postJson('/api/transactions', [
+            'transaction_date' => '2025-09-01', 'direction' => 'expense', 'amount' => '100', 'description' => 'Item', ...$extra,
+        ])->assertCreated();
+
+        $post(['property_id' => $home]);
+        $post(['property_id' => $home, 'ato_category' => 'work_other']);
+        $post(['property_id' => $rental, 'ato_category' => 'rental_water']);
+
+        $mortgage = $this->actingAs($this->owner)->postJson("/api/properties/{$home}/mortgages", [
+            'bank_name' => 'ANZ', 'loan_type' => 'variable', 'loan_amount' => '500000',
+        ])->assertCreated()->json('data.id');
+        $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/interest", [
+            'month' => '2025-09', 'interest_amount' => '1000',
+        ])->assertOk();
+
+        $summary = $this->actingAs($this->owner)
+            ->getJson("/api/financial-years/{$this->year->id}/return-summary")->assertOk();
+
+        $this->assertCount(1, $summary->json('data.lines'));
+        $this->assertSame(0, $summary->json('data.uncategorised.expense.records'));
+        $this->assertSame([$rental], array_column($summary->json('data.rental'), 'property_id'));
+
+        $this->actingAs($this->owner)->putJson("/api/properties/{$home}", ['is_main_residence' => false])
+            ->assertOk()->assertJsonPath('data.is_main_residence', false);
+        $this->actingAs($this->owner)->getJson("/api/financial-years/{$this->year->id}/return-summary")
+            ->assertOk()->assertJsonPath('data.uncategorised.expense.records', 1);
+    }
+
     public function test_bulk_categorise_and_csv_import_with_deduplication(): void
     {
         $property = $this->actingAs($this->owner)->postJson('/api/properties', [
