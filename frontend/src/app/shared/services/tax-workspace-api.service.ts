@@ -180,6 +180,16 @@ export interface ImportRow {
   property_id?: string | null;
 }
 
+export interface DeadlineDto {
+  label: string;
+  date: string;
+  days_left: number;
+  completed: boolean;
+  financial_year_id: string | null;
+  uncategorised_transactions: number;
+  documents_to_review: number;
+}
+
 export interface BankStatus {
   enabled: boolean;
   connected: boolean;
@@ -347,6 +357,16 @@ export class TaxWorkspaceApiService {
     return this.http
       .post<ApiItem<ImportResult>>('/api/transactions/import', { rows })
       .pipe(map((response) => response.data));
+  }
+
+  getDeadlines(): Observable<DeadlineDto[]> {
+    return this.http.get<ApiItem<DeadlineDto[]>>('/api/deadlines').pipe(map((response) => response.data));
+  }
+
+  setDeadlineCompleted(date: string, completed: boolean): Observable<unknown> {
+    const url = `/api/deadlines/${date}/complete`;
+
+    return completed ? this.http.put(url, {}) : this.http.delete(url);
   }
 
   getBankStatus(): Observable<BankStatus> {

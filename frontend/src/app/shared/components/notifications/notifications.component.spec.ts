@@ -28,6 +28,8 @@ describe('NotificationsComponent', () => {
     { id: 't3', ato_category: 'D5', financial_year_id: 'fy1' },
   ];
 
+  let deadlines: unknown[] = [];
+
   async function create(yearId: string | null) {
     await TestBed.configureTestingModule({
       imports: [NotificationsComponent],
@@ -37,7 +39,7 @@ describe('NotificationsComponent', () => {
           provide: DocumentApiService,
           useValue: { selectedFinancialYearId: signal(yearId), listDocuments: () => of(documents) },
         },
-        { provide: TaxWorkspaceApiService, useValue: { listTransactions: () => of(transactions) } },
+        { provide: TaxWorkspaceApiService, useValue: { listTransactions: () => of(transactions), getDeadlines: () => of(deadlines) } },
         { provide: UserPreferencesService, useValue: { preferences } },
       ],
     }).compileComponents();
@@ -46,7 +48,31 @@ describe('NotificationsComponent', () => {
     fixture.detectChanges();
   }
 
-  beforeEach(() => preferences.set({ ...preferences(), notifyDocuments: true, notifyUncategorised: true }));
+  beforeEach(() => {
+    deadlines = [];
+    preferences.set({ ...preferences(), notifyDocuments: true, notifyUncategorised: true });
+  });
+
+  it('warns when a lodgement date is within 30 days and not done', async () => {
+    deadlines = [{ label: 'FY 2025-26', date: '2026-10-31', days_left: 5, completed: false }];
+    await create(null);
+
+    expect(fixture.componentInstance.notifications[0]).toMatchObject({
+      id: 'deadline',
+      severity: 'warning',
+      title: 'FY 2025-26 lodgement date in 5 days',
+    });
+  });
+
+  it('ignores deadlines that are far away or marked done', async () => {
+    deadlines = [
+      { label: 'FY 2025-26', date: '2026-10-31', days_left: 5, completed: true },
+      { label: 'FY 2026-27', date: '2027-10-31', days_left: 300, completed: false },
+    ];
+    await create(null);
+
+    expect(fixture.componentInstance.notifications.some((item) => item.id === 'deadline')).toBe(false);
+  });
 
   it('summarises documents and uncategorised transactions for the selected year', async () => {
     await create('fy1');

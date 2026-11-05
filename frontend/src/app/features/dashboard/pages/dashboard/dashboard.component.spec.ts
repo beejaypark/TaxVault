@@ -27,6 +27,7 @@ describe('DashboardComponent', () => {
   };
   let workspaceApi: {
     listTransactions: ReturnType<typeof vi.fn>;
+    getDeadlines: ReturnType<typeof vi.fn>;
   };
 
   const documents: DocumentDto[] = [
@@ -122,6 +123,7 @@ describe('DashboardComponent', () => {
     };
     workspaceApi = {
       listTransactions: vi.fn().mockReturnValue(of(transactions)),
+      getDeadlines: vi.fn().mockReturnValue(of([])),
     };
 
     await TestBed.configureTestingModule({

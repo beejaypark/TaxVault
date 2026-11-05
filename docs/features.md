@@ -39,6 +39,8 @@ TaxVault organises evidence for your accountant. It does not prepare or lodge ta
 - Lodgement reminders: 30, 7 and 1 day before the deadline. The default is 31 October after each financial year ends; you can set your own date. These are reminders only, so confirm the real date with the ATO or a tax agent.
 - "Send test email" checks the mail setup; "Add to calendar (.ics)" downloads an all-day event with 7-day and 1-day alerts.
 - Every email has an unsubscribe link that turns both email settings off.
+- Dashboard shows the next lodgement date as a countdown card with a checklist (documents waiting for review, transactions without a tax return item). Past dates are hidden. "Mark as done" stops emails and bell alerts for that date; "Reopen" undoes it.
+- The bell shows a lodgement-date notice when the date is 30 days or less away and not marked done.
 - Sending: the `scheduler` container runs `notifications:send-emails` daily at 08:00 (`NOTIFICATION_TIMEZONE`, default Australia/Sydney). Each email is sent once (tracked in `email_notification_logs`).
 - Mail server: development uses Mailpit (inbox at http://localhost:8025). For Gmail set `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME`, an App Password in `MAIL_PASSWORD`, and `MAIL_FROM_ADDRESS` equal to the Gmail address in the root `.env`. Real Gmail sending has not been tested.
 

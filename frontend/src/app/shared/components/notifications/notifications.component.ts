@@ -14,7 +14,7 @@ import { catchError, forkJoin, interval, of } from 'rxjs';
 
 import { TaxIconComponent } from '../tax-icon/tax-icon.component';
 import { DocumentApiService } from '../../services/documents/document-api.service';
-import { TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
+import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 
 export interface AppNotification {
@@ -27,6 +27,7 @@ export interface AppNotification {
 }
 
 const REFRESH_MS = 60_000;
+const DEADLINE_WARNING_DAYS = 30;
 
 @Component({
   selector: 'app-notifications',
@@ -98,10 +99,22 @@ export class NotificationsComponent {
       transactions: prefs.notifyUncategorised
         ? this.api.listTransactions().pipe(catchError(() => of([])))
         : of([]),
-    }).subscribe(({ documents, transactions }) => {
+      deadlines: this.api.getDeadlines().pipe(catchError(() => of([] as DeadlineDto[]))),
+    }).subscribe(({ documents, transactions, deadlines }) => {
       const items: AppNotification[] = [];
       const count = (status: string) => documents.filter((document) => document.status === status).length;
       const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+      const due = deadlines.find((deadline) => !deadline.completed && deadline.days_left <= DEADLINE_WARNING_DAYS);
+      if (due) {
+        items.push({
+          id: 'deadline',
+          severity: due.days_left <= 7 ? 'warning' : 'info',
+          title: `${due.label} lodgement date in ${plural(due.days_left, 'day')}`,
+          detail: 'Check your documents and transactions, then mark it as done on the dashboard.',
+          link: '/dashboard',
+        });
+      }
 
       const review = count('review_required');
       if (review > 0) {

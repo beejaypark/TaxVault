@@ -48,6 +48,7 @@ describe('AppShellComponent', () => {
   };
   const workspaceApi = {
     listTransactions: () => of([]),
+    getDeadlines: () => of([]),
     listProperties: () => of([]),
     listInvestments: () => of([]),
   };

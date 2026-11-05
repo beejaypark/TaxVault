@@ -90,7 +90,7 @@ class EmailNotificationSender
         foreach ($this->deadlines($user) as $label => $deadline) {
             $daysLeft = (int) $today->diffInDays($deadline, false);
 
-            if (! in_array($daysLeft, self::REMINDER_DAYS, true)) {
+            if (! in_array($daysLeft, self::REMINDER_DAYS, true) || $this->isCompleted($user, $deadline)) {
                 continue;
             }
 
@@ -140,6 +140,14 @@ class EmailNotificationSender
         });
 
         return $deadlines;
+    }
+
+    /** Deadlines the user marked as done (stored by date) get no further reminders. */
+    public function isCompleted(User $user, CarbonImmutable $deadline): bool
+    {
+        $done = $user->preference('completedDeadlines');
+
+        return is_array($done) && in_array($deadline->toDateString(), $done, true);
     }
 
     /** Records the send so the same reminder is never sent twice, even if the command runs again. */
