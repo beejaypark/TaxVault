@@ -1,4 +1,24 @@
+x-mail-env: &mail-env
+  MAIL_MAILER: ${MAIL_MAILER:-smtp}
+  MAIL_HOST: ${MAIL_HOST:-mailpit}
+  MAIL_PORT: ${MAIL_PORT:-1025}
+  MAIL_SCHEME: ${MAIL_SCHEME:-}
+  MAIL_USERNAME: ${MAIL_USERNAME:-}
+  MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-taxvault@localhost}
+  MAIL_FROM_NAME: ${MAIL_FROM_NAME:-TaxVault}
+  NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-Australia/Sydney}
+
 services:
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: taxvault-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+    networks:
+      - taxvault
 
   postgres:
     image: postgres:16-alpine
@@ -113,6 +133,7 @@ services:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-taxvault-web}
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
       KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-https://localhost:8443/api/auth/oidc/callback}
+      <<: *mail-env
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -169,6 +190,7 @@ services:
       QUEUE_CONNECTION: database
       OCR_PROVIDER: ${OCR_PROVIDER:-local}
       FILESYSTEM_DISK: local
+      <<: *mail-env
     volumes:
       - ./backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
@@ -177,6 +199,37 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+    networks:
+      - taxvault
+
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/backend/Dockerfile
+    container_name: taxvault-scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      APP_NAME: ${APP_NAME:-TaxVault}
+      APP_ENV: local
+      APP_URL: ${APP_URL:-https://localhost:8443}
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-taxvault}
+      DB_USERNAME: ${POSTGRES_USER:-taxvault}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-taxvault_dev}
+      QUEUE_CONNECTION: database
+      <<: *mail-env
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+      - backend_storage:/var/www/html/storage
+    depends_on:
+      postgres:
         condition: service_healthy
     networks:
       - taxvault

@@ -32,6 +32,9 @@ export interface AuthUser {
     notifyDocuments?: boolean;
     notifyUncategorised?: boolean;
     defaultFinancialYear?: 'current' | 'all';
+    emailReviewDigest?: boolean;
+    emailDeadlineReminders?: boolean;
+    lodgementDeadline?: string | null;
   } | null;
   clients?: AccountantClient[];
 }

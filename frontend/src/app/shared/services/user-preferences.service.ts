@@ -7,6 +7,9 @@ export interface UserPreferences {
   notifyDocuments: boolean;
   notifyUncategorised: boolean;
   defaultFinancialYear: 'current' | 'all';
+  emailReviewDigest: boolean;
+  emailDeadlineReminders: boolean;
+  lodgementDeadline: string | null;
 }
 
 const STORAGE_KEY = 'taxvault.preferences';
@@ -14,6 +17,9 @@ const DEFAULTS: UserPreferences = {
   notifyDocuments: true,
   notifyUncategorised: true,
   defaultFinancialYear: 'current',
+  emailReviewDigest: false,
+  emailDeadlineReminders: false,
+  lodgementDeadline: null,
 };
 
 function normalise(stored: Partial<UserPreferences> | null | undefined): UserPreferences {
@@ -21,6 +27,9 @@ function normalise(stored: Partial<UserPreferences> | null | undefined): UserPre
     notifyDocuments: stored?.notifyDocuments ?? DEFAULTS.notifyDocuments,
     notifyUncategorised: stored?.notifyUncategorised ?? DEFAULTS.notifyUncategorised,
     defaultFinancialYear: stored?.defaultFinancialYear === 'all' ? 'all' : 'current',
+    emailReviewDigest: stored?.emailReviewDigest ?? DEFAULTS.emailReviewDigest,
+    emailDeadlineReminders: stored?.emailDeadlineReminders ?? DEFAULTS.emailDeadlineReminders,
+    lodgementDeadline: stored?.lodgementDeadline || null,
   };
 }
 

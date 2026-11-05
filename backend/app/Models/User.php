@@ -36,6 +36,11 @@ class User extends Authenticatable
         return $this->role === 'accountant';
     }
 
+    public function preference(string $key): mixed
+    {
+        return ($this->preferences ?? [])[$key] ?? null;
+    }
+
     public function accountantGrants(): HasMany
     {
         return $this->hasMany(AccountantGrant::class, 'accountant_user_id');

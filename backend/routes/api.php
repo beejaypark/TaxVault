@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FinancialYearController;
 use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\MortgageController;
+use App\Http\Controllers\Api\NotificationEmailController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\RentalSummaryController;
 use App\Http\Controllers\Api\ReturnSummaryController;
@@ -36,7 +37,13 @@ Route::middleware('web')->group(function (): void {
     Route::put('/auth/preferences', [AuthController::class, 'updatePreferences'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('auth');
+    Route::post('/auth/preferences/test-email', [NotificationEmailController::class, 'sendTest'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->middleware(['auth', 'throttle:5,1']);
 });
+Route::get('/email/unsubscribe/{user}', [NotificationEmailController::class, 'unsubscribe'])
+    ->name('email.unsubscribe')
+    ->middleware('signed');
 Route::post('/inbound-email/webhook', [InboundEmailController::class, 'webhook']);
 
 Route::middleware(['auth', 'acting'])->group(function (): void {

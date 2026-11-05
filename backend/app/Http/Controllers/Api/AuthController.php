@@ -247,7 +247,12 @@ class AuthController extends Controller
             'notifyDocuments' => ['required', 'boolean'],
             'notifyUncategorised' => ['required', 'boolean'],
             'defaultFinancialYear' => ['required', 'in:current,all'],
+            'emailReviewDigest' => ['sometimes', 'boolean'],
+            'emailDeadlineReminders' => ['sometimes', 'boolean'],
+            'lodgementDeadline' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
         ]);
+
+        $preferences = array_merge($user->preferences ?? [], $preferences);
 
         $user->forceFill(['preferences' => $preferences])->save();
 

@@ -32,6 +32,9 @@ describe('UserPreferencesService', () => {
       notifyDocuments: true,
       notifyUncategorised: true,
       defaultFinancialYear: 'current',
+      emailReviewDigest: false,
+      emailDeadlineReminders: false,
+      lodgementDeadline: null,
     });
   });
 
@@ -54,6 +57,9 @@ describe('UserPreferencesService', () => {
       notifyDocuments: false,
       notifyUncategorised: true,
       defaultFinancialYear: 'all',
+      emailReviewDigest: false,
+      emailDeadlineReminders: false,
+      lodgementDeadline: null,
     });
   });
 

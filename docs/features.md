@@ -32,7 +32,16 @@ TaxVault organises evidence for your accountant. It does not prepare or lodge ta
 - Preferences are saved to your account and follow you across browsers; a copy is kept in the browser as a fallback.
 - Preferences saved in a browser before this existed are uploaded to your account the first time you sign in.
 
+## Email reminders
+
+- Opt-in under Settings > Email reminders (off by default; not shown to accountants).
+- Weekly review digest: at most one email a week, only when documents need review, failed processing or need a financial year.
+- Lodgement reminders: 30, 7 and 1 day before the deadline. The default is 31 October after each financial year ends; you can set your own date. These are reminders only, so confirm the real date with the ATO or a tax agent.
+- "Send test email" checks the mail setup; "Add to calendar (.ics)" downloads an all-day event with 7-day and 1-day alerts.
+- Every email has an unsubscribe link that turns both email settings off.
+- Sending: the `scheduler` container runs `notifications:send-emails` daily at 08:00 (`NOTIFICATION_TIMEZONE`, default Australia/Sydney). Each email is sent once (tracked in `email_notification_logs`).
+- Mail server: development uses Mailpit (inbox at http://localhost:8025). For Gmail set `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME`, an App Password in `MAIL_PASSWORD`, and `MAIL_FROM_ADDRESS` equal to the Gmail address in the root `.env`. Real Gmail sending has not been tested.
+
 ## Known limits
 
-- Email notifications are written to the log only.
 - Bank data is imported from files; there is no live bank connection.

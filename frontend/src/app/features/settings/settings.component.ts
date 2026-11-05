@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { buildReminderIcs } from '../../shared/utils/calendar';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 
 @Component({
@@ -52,6 +54,31 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
       </section>
 
       @if (!auth.isAccountant) {
+        <section class="card" aria-labelledby="email-heading">
+          <h2 id="email-heading">Email reminders</h2>
+          <p class="hint">Optional emails to your sign-in address. Each email has an unsubscribe link.</p>
+          <label class="toggle">
+            <input type="checkbox" name="emailReviewDigest" [ngModel]="prefs().emailReviewDigest" (ngModelChange)="update({ emailReviewDigest: $event })" />
+            <span><strong>Weekly review digest</strong><small>At most one email a week when documents need your review.</small></span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" name="emailDeadlineReminders" [ngModel]="prefs().emailDeadlineReminders" (ngModelChange)="update({ emailDeadlineReminders: $event })" />
+            <span><strong>Lodgement deadline reminders</strong><small>30 days, 7 days and 1 day before the deadline.</small></span>
+          </label>
+          <label class="field">
+            <span>Your lodgement date (optional)</span>
+            <input type="date" name="lodgementDeadline" [ngModel]="prefs().lodgementDeadline" (ngModelChange)="update({ lodgementDeadline: $event || null })" />
+          </label>
+          <p class="hint">Without a date we use 31 October after each financial year ends. Please confirm your actual date with the ATO or a tax agent.</p>
+          <div class="actions">
+            <button type="button" class="link-button" (click)="sendTest()" [disabled]="sending()">{{ sending() ? 'Sending…' : 'Send test email' }}</button>
+            <button type="button" class="link-button" (click)="downloadIcs()">Add to calendar (.ics)</button>
+          </div>
+          @if (testMessage()) {
+            <p class="hint" role="status">{{ testMessage() }}</p>
+          }
+        </section>
+
         <section class="card" aria-labelledby="access-heading">
           <h2 id="access-heading">Access</h2>
           <p class="hint">Invite your accountant to view your records, or remove their access.</p>
@@ -79,6 +106,9 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
     .toggle input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--tv-color-primary); }
     .toggle span { display: grid; gap: 2px; }
     .toggle small { color: var(--tv-color-text-secondary); font-size: 12px; }
+    input[type=date] { min-height: 42px; padding: 0 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); background: var(--tv-color-surface); font-size: 14px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    button.link-button { background: var(--tv-color-surface); cursor: pointer; }
     .link-button { justify-self: start; padding: 9px 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); color: var(--tv-color-primary); font-size: 13px; font-weight: 600; }
   `],
 })
@@ -86,7 +116,43 @@ export class SettingsComponent {
   readonly auth = inject(AuthService);
   private readonly preferences = inject(UserPreferencesService);
 
+  private readonly http = inject(HttpClient);
+
   readonly prefs = this.preferences.preferences;
+  readonly sending = signal(false);
+  readonly testMessage = signal('');
+
+  sendTest(): void {
+    this.sending.set(true);
+    this.testMessage.set('');
+    this.http.post('/api/auth/preferences/test-email', {}).subscribe({
+      next: () => {
+        this.sending.set(false);
+        this.testMessage.set('Test email sent. Check your inbox.');
+      },
+      error: () => {
+        this.sending.set(false);
+        this.testMessage.set('Could not send the test email. Check the mail settings on the server.');
+      },
+    });
+  }
+
+  downloadIcs(): void {
+    const chosen = this.prefs().lodgementDeadline;
+    const today = new Date();
+    let date = chosen;
+    if (!date) {
+      const year = today.getMonth() > 9 || (today.getMonth() === 9 && today.getDate() > 31) ? today.getFullYear() + 1 : today.getFullYear();
+      date = `${year}-10-31`;
+    }
+    const ics = buildReminderIcs(date, 'Tax return due (reminder)', 'Gather your records in TaxVault. Confirm the real due date with the ATO or a tax agent.');
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'taxvault-lodgement-reminder.ics';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   update(changes: Parameters<UserPreferencesService['update']>[0]): void {
     this.preferences.update(changes);
