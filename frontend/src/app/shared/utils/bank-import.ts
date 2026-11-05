@@ -170,7 +170,9 @@ function parseBankCsv(text: string): ParsedBankFile {
 
   if (hasHeader) {
     dateCol = find(/date/);
-    descCol = find(/desc|narrat|detail|memo|particular|payee|reference|transaction/);
+    descCol = [/desc|narrat|detail|particular|payee|memo/, /reference/, /transaction/]
+      .map((pattern) => find(pattern))
+      .find((index) => index >= 0) ?? -1;
     debitCol = find(/debit|withdraw|paid out/);
     creditCol = find(/credit|deposit|paid in/);
     amountCol = find(/^amount|^value|amount \(/);

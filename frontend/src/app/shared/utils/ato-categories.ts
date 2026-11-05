@@ -73,7 +73,7 @@ const HINTS: [RegExp, string, 'income' | 'expense'][] = [
   [/\bwater\b/i, 'rental_water', 'expense'],
   [/\blandlord insurance\b|\bbuilding insurance\b/i, 'rental_insurance', 'expense'],
   [/\bagent\b|\bmanagement fee\b|\bpm fee\b/i, 'rental_agent_fees', 'expense'],
-  [/\bplumb|\belectric|\brepair|\bmaintenance\b/i, 'rental_repairs', 'expense'],
+  [/\bplumb|\belectrician|\brepair|\bmaintenance\b/i, 'rental_repairs', 'expense'],
   [/\bdonation\b|\bred cross\b|\bsalvation\b|\bunicef\b/i, 'donations', 'expense'],
   [/\btax agent\b|\baccountant\b|\btax return\b/i, 'tax_affairs', 'expense'],
   [/\bcourse\b|\btuition\b|\buniversity\b/i, 'work_self_education', 'expense'],

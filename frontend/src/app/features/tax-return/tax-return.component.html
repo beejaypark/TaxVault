@@ -33,7 +33,7 @@
         <select id="financial-year" name="financialYear" [(ngModel)]="selectedFinancialYearId"
           (ngModelChange)="onFinancialYearChange($event)">
           @for (year of financialYears; track year.id) {
-            <option [value]="year.id">FY {{ formatYearCode(year.year_code) }} · {{ year.start_date }} to {{ year.end_date }}</option>
+            <option [value]="year.id">FY {{ formatYearCode(year.year_code) }} · {{ year.start_date | date: 'd MMM y' : 'UTC' }} to {{ year.end_date | date: 'd MMM y' : 'UTC' }}</option>
           }
         </select>
 
@@ -80,7 +80,7 @@
           <tbody>
             @for (item of yearTransactions; track item.id) {
               <tr>
-                <td>{{ item.transaction_date }}</td>
+                <td>{{ item.transaction_date | date: 'd MMM y' : 'UTC' }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.direction }}</td>
                 <td class="amount">{{ formatMoney(item.amount) }}</td>

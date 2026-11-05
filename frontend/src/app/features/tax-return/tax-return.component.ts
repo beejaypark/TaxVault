@@ -5,6 +5,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
@@ -24,7 +25,7 @@ import {
 
 @Component({
   selector: 'app-tax-return',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
+  imports: [DatePipe, FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

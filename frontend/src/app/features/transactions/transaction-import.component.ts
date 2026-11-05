@@ -54,8 +54,7 @@ const MAX_ROWS = 1000;
       @if (errorMessage) { <p class="note error" role="alert">{{ errorMessage }}</p> }
       @if (result) {
         <p class="note success" role="status">
-          Imported {{ result.imported }}. Skipped {{ result.duplicates }} already imported
-          @if (result.outside_financial_years > 0) { and {{ result.outside_financial_years }} outside your financial years (add the year first) }.
+          Imported {{ result.imported }}. Skipped {{ result.duplicates }} already imported@if (result.outside_financial_years > 0) { and {{ result.outside_financial_years }} outside your financial years (add the year first) }.
         </p>
       }
 
