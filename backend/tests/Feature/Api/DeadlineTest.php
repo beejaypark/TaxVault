@@ -45,7 +45,7 @@ class DeadlineTest extends TestCase
         return $this->actingAs($this->user)->withSession(['_token' => 't'])->withHeader('X-CSRF-TOKEN', 't')->{$method}($uri);
     }
 
-    public function test_lists_only_upcoming_deadlines_with_open_counts(): void
+    public function test_lists_every_year_with_open_counts_and_negative_days_for_past_ones(): void
     {
         $year = FinancialYear::query()->where('year_code', '2025-26')->first();
         Transaction::query()->create([
@@ -53,16 +53,16 @@ class DeadlineTest extends TestCase
             'direction' => 'expense', 'amount' => '10.00', 'description' => 'x', 'source_system' => 'manual',
         ]);
 
-        $data = $this->actingAs($this->user)->getJson('/api/deadlines')->assertOk()->json('data');
+        $data = collect($this->actingAs($this->user)->getJson('/api/deadlines')->assertOk()->json('data'))->keyBy('label');
 
-        $this->assertCount(1, $data);
-        $this->assertSame('FY 2025-26', $data[0]['label']);
-        $this->assertSame('2026-10-31', $data[0]['date']);
-        $this->assertSame(31, $data[0]['days_left']);
-        $this->assertSame('2026-06-30', $data[0]['financial_year_end']);
-        $this->assertSame(0, $data[0]['days_to_year_end']);
-        $this->assertSame(1, $data[0]['uncategorised_transactions']);
-        $this->assertFalse($data[0]['completed']);
+        $this->assertCount(2, $data);
+        $this->assertSame(-333, $data['FY 2024-25']['days_left']);
+        $current = $data['FY 2025-26'];
+        $this->assertSame('2026-10-31', $current['date']);
+        $this->assertSame(31, $current['days_left']);
+        $this->assertSame($year->id, $current['financial_year_id']);
+        $this->assertSame(1, $current['uncategorised_transactions']);
+        $this->assertFalse($current['completed']);
     }
 
     public function test_completed_deadline_can_be_reopened_and_stops_reminders(): void
@@ -70,14 +70,15 @@ class DeadlineTest extends TestCase
         $this->user->forceFill(['preferences' => ['emailDeadlineReminders' => true]])->save();
         $this->write('putJson', '/api/deadlines/2026-10-31/complete')->assertOk();
 
-        $this->assertTrue($this->actingAs($this->user)->getJson('/api/deadlines')->json('data.0.completed'));
+        $completed = fn () => collect($this->actingAs($this->user)->getJson('/api/deadlines')->json('data'))->firstWhere('date', '2026-10-31')['completed'];
+        $this->assertTrue($completed());
 
         Mail::fake();
         $sent = app(EmailNotificationSender::class)->run(CarbonImmutable::parse('2026-10-24'));
         $this->assertSame(0, $sent['deadline']);
 
         $this->write('deleteJson', '/api/deadlines/2026-10-31/complete')->assertOk();
-        $this->assertFalse($this->actingAs($this->user)->getJson('/api/deadlines')->json('data.0.completed'));
+        $this->assertFalse($completed());
     }
 
     public function test_rejects_a_malformed_date(): void

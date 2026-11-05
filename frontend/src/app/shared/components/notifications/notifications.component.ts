@@ -105,7 +105,7 @@ export class NotificationsComponent {
       const count = (status: string) => documents.filter((document) => document.status === status).length;
       const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-      const due = deadlines.find((deadline) => !deadline.completed && deadline.days_left <= DEADLINE_WARNING_DAYS);
+      const due = deadlines.find((deadline) => !deadline.completed && deadline.days_left >= 0 && deadline.days_left <= DEADLINE_WARNING_DAYS);
       if (due) {
         items.push({
           id: 'deadline',

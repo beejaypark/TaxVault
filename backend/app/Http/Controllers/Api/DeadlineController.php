@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class DeadlineController extends Controller
 {
-    /** Upcoming lodgement dates (past ones are hidden) with what is still open for each. */
+    /** Lodgement dates for every financial year (past ones have a negative days_left) with what is still open for each. */
     public function index(Request $request, EmailNotificationSender $sender): JsonResponse
     {
         $user = $request->user();
@@ -24,10 +24,6 @@ class DeadlineController extends Controller
         $items = [];
         foreach ($sender->deadlines($user) as $label => $deadline) {
             $daysLeft = (int) $today->diffInDays($deadline, false);
-
-            if ($daysLeft < 0) {
-                continue;
-            }
 
             $year = str_starts_with($label, 'FY ') ? $years->get(substr($label, 3)) : null;
             $yearId = $year?->id;

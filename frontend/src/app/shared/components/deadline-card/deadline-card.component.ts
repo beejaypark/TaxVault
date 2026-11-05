@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@
 import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../services/auth/auth.service';
+import { DocumentApiService } from '../../services/documents/document-api.service';
 import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 
 @Component({
@@ -9,11 +10,16 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @for (deadline of deadlines; track deadline.date) {
-      <section class="deadline" [class.done]="deadline.completed" [class.soon]="!deadline.completed && deadline.days_left <= 30" aria-label="Lodgement deadline">
+    @if (current; as deadline) {
+      <section class="deadline" [class.done]="deadline.completed" [class.late]="!deadline.completed && deadline.days_left < 0" [class.soon]="!deadline.completed && deadline.days_left >= 0 && deadline.days_left <= 30" aria-label="Lodgement deadline">
         <div class="when">
-          <strong>{{ deadline.completed ? '✓' : deadline.days_left }}</strong>
-          <span>{{ deadline.completed ? 'done' : deadline.days_left === 1 ? 'day left' : 'days left' }}</span>
+          @if (deadline.completed) {
+            <strong>✓</strong><span>done</span>
+          } @else if (deadline.days_left < 0) {
+            <strong>{{ -deadline.days_left }}</strong><span>{{ deadline.days_left === -1 ? 'day overdue' : 'days overdue' }}</span>
+          } @else {
+            <strong>{{ deadline.days_left }}</strong><span>{{ deadline.days_left === 1 ? 'day left' : 'days left' }}</span>
+          }
         </div>
         <div class="body">
           <h2>{{ deadline.label }} lodgement date: {{ formatDate(deadline.date) }}</h2>
@@ -26,6 +32,9 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
           @if (deadline.completed) {
             <p>Marked as done. No more reminders for this date.</p>
           } @else {
+            @if (deadline.days_left < 0) {
+              <p class="note">This lodgement date has passed. If you have not lodged yet, check with the ATO or your tax agent.</p>
+            }
             <ul>
               <li [class.ok]="deadline.documents_to_review === 0">
                 @if (deadline.documents_to_review === 0) { ✓ No documents waiting for review }
@@ -49,6 +58,8 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
     :host { display: contents; }
     .deadline { display: flex; align-items: center; gap: 20px; padding: 18px 24px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
     .deadline.soon { border-color: var(--tv-color-primary); }
+    .deadline.late { border-color: var(--tv-color-danger); }
+    .deadline.late .when { color: var(--tv-color-danger); }
     .deadline.done { opacity: .75; }
     .when { display: grid; justify-items: center; min-width: 72px; color: var(--tv-color-primary); }
     .when strong { font-size: 34px; line-height: 1; }
@@ -66,16 +77,32 @@ import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspac
 })
 export class DeadlineCardComponent {
   private readonly api = inject(TaxWorkspaceApiService);
+  private readonly documentsApi = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
 
   deadlines: DeadlineDto[] = [];
   busy = false;
 
+  /** The selected financial year's date, else a date you chose yourself, else the next upcoming one. */
+  get current(): DeadlineDto | null {
+    const yearId = this.documentsApi.selectedFinancialYearId();
+
+    if (yearId) {
+      return (
+        this.deadlines.find((item) => item.financial_year_id === yearId) ??
+        this.deadlines.find((item) => item.financial_year_id === null) ??
+        null
+      );
+    }
+
+    return this.deadlines.find((item) => item.days_left >= 0) ?? null;
+  }
+
   constructor() {
     this.api.getDeadlines().subscribe({
       next: (items) => {
-        this.deadlines = items.slice(0, 1);
+        this.deadlines = items;
         this.cdr.markForCheck();
       },
       error: () => undefined,

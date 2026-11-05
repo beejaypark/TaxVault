@@ -68,6 +68,7 @@ describe('NotificationsComponent', () => {
     deadlines = [
       { label: 'FY 2025-26', date: '2026-10-31', days_left: 5, completed: true },
       { label: 'FY 2026-27', date: '2027-10-31', days_left: 300, completed: false },
+      { label: 'FY 2024-25', date: '2025-10-31', days_left: -370, completed: false },
     ];
     await create(null);
 

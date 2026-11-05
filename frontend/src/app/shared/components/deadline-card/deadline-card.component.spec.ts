@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { AuthService } from '../../services/auth/auth.service';
+import { DocumentApiService } from '../../services/documents/document-api.service';
 import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 import { DeadlineCardComponent } from './deadline-card.component';
 
@@ -21,6 +22,8 @@ describe('DeadlineCardComponent', () => {
     documents_to_review: 0,
   };
 
+  const selectedYear = signal<string | null>(null);
+
   async function create(deadlines: DeadlineDto[], isAccountant = false): Promise<ComponentFixture<DeadlineCardComponent>> {
     api.getDeadlines.mockReturnValue(of(deadlines));
     await TestBed.configureTestingModule({
@@ -28,6 +31,7 @@ describe('DeadlineCardComponent', () => {
       providers: [
         provideRouter([]),
         { provide: TaxWorkspaceApiService, useValue: api },
+        { provide: DocumentApiService, useValue: { selectedFinancialYearId: selectedYear } },
         { provide: AuthService, useValue: { isAccountant, user: signal(null) } },
       ],
     }).compileComponents();
@@ -42,7 +46,22 @@ describe('DeadlineCardComponent', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    selectedYear.set(null);
     TestBed.resetTestingModule();
+  });
+
+  it('follows the selected financial year, including one whose date has passed', async () => {
+    const past: DeadlineDto = { ...open, label: 'FY 2024-25', date: '2025-10-31', days_left: -370, financial_year_id: 'fy0' };
+    const fixture = await create([past, open]);
+
+    expect(text(fixture)).toContain('FY 2025-26');
+
+    selectedYear.set('fy0');
+    fixture.detectChanges();
+
+    expect(text(fixture)).toContain('FY 2024-25');
+    expect(text(fixture)).toContain('370');
+    expect(text(fixture)).toContain('overdue');
   });
 
   it('shows days left and what is still open', async () => {
