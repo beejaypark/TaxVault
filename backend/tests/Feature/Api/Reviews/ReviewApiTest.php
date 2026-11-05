@@ -744,6 +744,41 @@ class ReviewApiTest extends TestCase
         $this->assertDatabaseCount('tax_evidences', 0);
     }
 
+    public function test_amount_and_date_can_be_entered_by_hand_when_ocr_found_nothing(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user);
+        $this->setNormalizedFields($review, [
+            'document_text' => ['value' => 'Amount $1,991.13', 'confidence' => 90.0, 'source' => 'ocr'],
+        ]);
+
+        $this->actingAs($user)
+            ->postJson('/api/reviews/' . $review->id . '/correction', ['field_path' => 'total_amount', 'value' => '1991.13'])
+            ->assertSuccessful();
+        $this->actingAs($user)
+            ->postJson('/api/reviews/' . $review->id . '/correction', ['field_path' => 'invoice_date', 'value' => '2026-11-05'])
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('tax_evidences', ['field_path' => 'total_amount', 'status' => 'active']);
+        $this->assertDatabaseHas('tax_evidences', ['field_path' => 'invoice_date', 'status' => 'active']);
+    }
+
+    public function test_hand_entered_amount_and_date_are_validated(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user);
+        $this->setNormalizedFields($review, []);
+
+        foreach ([['total_amount', 'abc'], ['total_amount', '-5'], ['invoice_date', '31/12/2026'], ['invoice_date', '2026-02-30']] as [$path, $value]) {
+            $this->actingAs($user)
+                ->postJson('/api/reviews/' . $review->id . '/correction', ['field_path' => $path, 'value' => $value])
+                ->assertStatus(422)
+                ->assertJsonValidationErrors(['value']);
+        }
+
+        $this->assertDatabaseCount('tax_evidences', 0);
+    }
+
     public function test_repeated_correction_supersedes_previous_active_correction(): void
     {
         $user = User::factory()->create();

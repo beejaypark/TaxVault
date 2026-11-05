@@ -9,6 +9,25 @@ use Illuminate\Validation\ValidationException;
 
 final class CreateAuthoritativeCorrection
 {
+    /** Fields a reviewer may enter by hand even when OCR did not find them. */
+    public const MANUAL_FIELDS = ['total_amount', 'invoice_date'];
+
+    private function assertValidManualValue(string $fieldPath, mixed $value): void
+    {
+        $text = is_scalar($value) ? trim((string) $value) : '';
+        $valid = $fieldPath === 'total_amount'
+            ? is_numeric($text) && (float) $text > 0 && (float) $text < 1000000000
+            : preg_match('/^\d{4}-\d{2}-\d{2}$/', $text) === 1 && strtotime($text) !== false && date('Y-m-d', strtotime($text)) === $text;
+
+        if (! $valid) {
+            throw ValidationException::withMessages([
+                'value' => $fieldPath === 'total_amount'
+                    ? 'Enter a positive amount, for example 1991.13.'
+                    : 'Enter a valid date as YYYY-MM-DD.',
+            ]);
+        }
+    }
+
     public function execute(
         Review $review,
         string $fieldPath,
@@ -61,7 +80,9 @@ final class CreateAuthoritativeCorrection
             ]);
         }
 
-        if (!array_key_exists($fieldPath, $normalizedFields)) {
+        if (in_array($fieldPath, self::MANUAL_FIELDS, true)) {
+            $this->assertValidManualValue($fieldPath, $value);
+        } elseif (!array_key_exists($fieldPath, $normalizedFields)) {
             throw ValidationException::withMessages([
                 'field_path' => 'The specified extraction field does not exist.',
             ]);

@@ -1,4 +1,4 @@
-﻿import {
+import {
   DestroyRef,
   ChangeDetectorRef,
   Component,
@@ -222,6 +222,18 @@ export class ReviewDetailComponent
     );
   }
 
+  readonly manualFields = [
+    { path: 'total_amount', alias: 'transaction.total', label: 'Total amount (AUD)', type: 'number' },
+    { path: 'invoice_date', alias: 'transaction.date', label: 'Invoice / issue date', type: 'date' },
+  ];
+
+  /** Amount and date can be typed in when OCR did not find them. */
+  get missingManualFields() {
+    const fields = this.review?.extraction?.fields ?? {};
+
+    return this.manualFields.filter((f) => !(f.path in fields) && !(f.alias in fields));
+  }
+
   get canEditCorrections(): boolean {
     if (!this.auth.canEdit) {
       return false;
@@ -372,11 +384,12 @@ export class ReviewDetailComponent
             fieldPath;
         },
 
-        error: () => {
+        error: (error) => {
           this.correctionSubmittingField =
             null;
           this.correctionError =
-            'Failed to submit review correction.';
+            (error?.error?.errors?.value?.[0] as string | undefined)
+            ?? 'Failed to submit review correction.';
         },
       });
   }

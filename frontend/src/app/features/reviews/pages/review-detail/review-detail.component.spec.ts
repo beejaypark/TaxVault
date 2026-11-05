@@ -383,6 +383,26 @@ describe('ReviewDetailComponent', () => {
     ).toBe('2026-08-31');
   });
 
+  it('should offer manual amount and date entry only for values OCR did not find', () => {
+    component.review = reviewWithExtraction;
+    expect(component.missingManualFields).toEqual([]);
+
+    component.review = {
+      ...reviewWithExtraction,
+      extraction: {
+        ...reviewWithExtraction.extraction!,
+        fields: { 'transaction.total': { value: 10, confidence: 90, source: 'ocr' } },
+      },
+    };
+    expect(component.missingManualFields.map((f) => f.path)).toEqual(['invoice_date']);
+
+    component.review = {
+      ...reviewWithExtraction,
+      extraction: { ...reviewWithExtraction.extraction!, fields: {} },
+    };
+    expect(component.missingManualFields.map((f) => f.path)).toEqual(['total_amount', 'invoice_date']);
+  });
+
   it('should rehydrate persisted authoritative corrections when the review loads', () => {
     const persistedCorrection: ReviewCorrectionEvidence = {
       id: 'evidence-persisted-1',

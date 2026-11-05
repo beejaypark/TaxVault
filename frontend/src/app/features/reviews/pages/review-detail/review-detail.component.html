@@ -126,6 +126,43 @@
               <span>Version: <strong>{{ review.extraction.extractionVersion }}</strong></span>
             </div>
 
+            @if (canEditCorrections && missingManualFields.length > 0) {
+              <section class="extracted-fields missing-fields" aria-label="Add missing details">
+                <h3 class="fields-heading">Add missing details</h3>
+                <p class="field-source">The OCR did not find these values. Enter them from the document so payments and records use the right amount and date.</p>
+                @for (field of missingManualFields; track field.path) {
+                  <article class="field-card">
+                    <section class="correction-editor" [attr.aria-label]="field.label">
+                      <label [attr.for]="'manual-' + field.path">{{ field.label }}</label>
+                      <div class="correction-input-row">
+                        <input
+                          [type]="field.type"
+                          [attr.step]="field.type === 'number' ? '0.01' : null"
+                          [attr.min]="field.type === 'number' ? '0' : null"
+                          [id]="'manual-' + field.path"
+                          [value]="correctionValues[field.path] ?? ''"
+                          [disabled]="correctionSubmittingField !== null"
+                          (input)="setCorrectionValue(field.path, $any($event.target).value)"
+                        />
+                        <button
+                          type="button"
+                          class="secondary-button"
+                          [disabled]="correctionSubmittingField !== null || !correctionValues[field.path]"
+                          (click)="submitCorrection(field.path)"
+                        >
+                          {{ isCorrectionSubmitting(field.path) ? 'Saving...' : 'Save' }}
+                        </button>
+                      </div>
+                      @if (correctionSuccessField === field.path) {
+                        <p class="field-success" role="status">Saved.</p>
+                      } @else if (getCorrectionEvidence(field.path); as saved) {
+                        <p class="field-source">Entered by you: <strong>{{ saved.extractedValue.value }}</strong></p>
+                      }
+                    </section>
+                  </article>
+                }
+              </section>
+            }
             @if ((Object.keys(review.extraction.fields)).length > 0) {
               <section class="extracted-fields" aria-label="Extracted fields">
                 <h3 class="fields-heading">Extracted Fields</h3>

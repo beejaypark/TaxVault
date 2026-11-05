@@ -60,3 +60,9 @@ The dashboard opens with a "My assets" overview.
 - Live bank feed (optional): set `BASIQ_API_KEY` in the root `.env` and restart. The Import panel then shows "Connect bank" and "Sync now". You approve read-only access with your bank through Basiq; synced rows arrive uncategorised and are de-duplicated by Basiq transaction id. Without a key the feature is hidden. It was verified against the live Basiq API for token, user creation, consent URL and transaction listing (the probe user had no connected bank, so no real rows were imported); the import path is covered by mocked tests.
 - File import (CSV/OFX) remains available.
 - Bank data is imported from files; there is no live bank connection.
+
+## Reviews: enter missing details by hand
+
+- When OCR finds no total amount or issue date, the review page shows an "Add missing details" card with an amount and a date field.
+- Saved values are stored as reviewer corrections (amount > 0, real date). Payment suggestions use them automatically.
+
