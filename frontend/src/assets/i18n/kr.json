@@ -351,20 +351,8 @@
     "Revoke": "취소",
     "Empty": "등록된 회계사가 없습니다."
   },
-  "Reviews": {
-    "Title": "검토"
-  },
   "IncomeExpenses": {
     "Title": "수입 및 지출"
-  },
-  "Assets": {
-    "Title": "자산"
-  },
-  "Properties": {
-    "Title": "부동산"
-  },
-  "Investments": {
-    "Title": "투자"
   },
   "Reports": {
     "Title": "보고서"
@@ -374,9 +362,6 @@
   },
   "Manage": {
     "Title": "관리"
-  },
-  "Accountants": {
-    "Title": "회계사"
   },
   "FinancialYears": {
     "Eyebrow": "세금 업무",

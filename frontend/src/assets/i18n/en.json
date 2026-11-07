@@ -399,20 +399,8 @@
     "Revoke": "Revoke",
     "Empty": "No accountants yet."
   },
-  "Reviews": {
-    "Title": "Reviews"
-  },
   "IncomeExpenses": {
     "Title": "Income & expenses"
-  },
-  "Assets": {
-    "Title": "Assets"
-  },
-  "Properties": {
-    "Title": "Properties"
-  },
-  "Investments": {
-    "Title": "Investments"
   },
   "Reports": {
     "Title": "Reports"
@@ -422,9 +410,6 @@
   },
   "Manage": {
     "Title": "Manage"
-  },
-  "Accountants": {
-    "Title": "Accountants"
   },
   "FinancialYears": {
     "Eyebrow": "Tax workspace",
