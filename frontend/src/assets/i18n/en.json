@@ -178,6 +178,12 @@
     "Disposed": "Disposed",
     "Held": "Held"
   },
+  "Properties": {
+    "Title": "Properties"
+  },
+  "Investments": {
+    "Title": "Investments"
+  },
   "Transactions": {
     "Title": "Income & expenses",
     "Description": "Record and review the transactions that support your tax position.",

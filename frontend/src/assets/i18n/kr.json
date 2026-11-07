@@ -178,6 +178,12 @@
     "Disposed": "처분됨",
     "Held": "보유 중"
   },
+  "Properties": {
+    "Title": "부동산"
+  },
+  "Investments": {
+    "Title": "투자"
+  },
   "Transactions": {
     "Title": "수입 및 지출",
     "Description": "세금 내역을 뒷받침하는 거래를 기록하고 검토합니다.",
