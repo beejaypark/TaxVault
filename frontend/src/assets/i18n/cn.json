@@ -1,0 +1,59 @@
+{
+  "Common": {
+    "MainNavigation": "主导航",
+    "ToggleNavigation": "切换导航",
+    "FinancialYear": "财务年度",
+    "AllFinancialYears": "所有财务年度",
+    "LoadingFinancialYears": "正在加载财务年度…",
+    "NoFinancialYears": "没有财务年度",
+    "SignedInAs": "当前登录账号",
+    "SignOut": "退出登录",
+    "ReadOnlyView": "只读视图"
+  },
+  "Overview": {
+    "Title": "概览"
+  },
+  "Dashboard": {
+    "Title": "仪表板"
+  },
+  "TaxWorkspace": {
+    "Title": "税务工作区"
+  },
+  "Documents": {
+    "Title": "文件",
+    "AllDocuments": "所有文件"
+  },
+  "FinancialYears": {
+    "Title": "财务年度"
+  },
+  "Reviews": {
+    "Title": "审核"
+  },
+  "IncomeExpenses": {
+    "Title": "收入与支出"
+  },
+  "Assets": {
+    "Title": "资产"
+  },
+  "Properties": {
+    "Title": "房产"
+  },
+  "Investments": {
+    "Title": "投资"
+  },
+  "Reports": {
+    "Title": "报告"
+  },
+  "AccountantPack": {
+    "Title": "会计师资料包"
+  },
+  "Manage": {
+    "Title": "管理"
+  },
+  "Accountants": {
+    "Title": "会计师"
+  },
+  "Settings": {
+    "Title": "设置"
+  }
+}

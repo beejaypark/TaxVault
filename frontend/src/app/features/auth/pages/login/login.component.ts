@@ -1,28 +1,29 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BrandLogoComponent } from '../../../../shared/components/brand-logo/brand-logo.component';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../../../shared/i18n/translation.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, BrandLogoComponent],
+  imports: [FormsModule, BrandLogoComponent, TranslatePipe],
   template: `
     <main class="login-page">
       <section class="login-card" aria-labelledby="login-title">
         <tv-brand-logo class="brand" [size]="38" />
 
-        <h1 id="login-title">Welcome back</h1>
-        <p class="intro">Sign in to access your tax documents and reviews.</p>
+        <h1 id="login-title">{{ 'Auth.WelcomeBack' | translate }}</h1>
+        <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
 
-        <a class="oidc-button" [href]="keycloakLoginUrl">Continue with Keycloak</a>
-        <div class="separator" aria-hidden="true"><span>or use development login</span></div>
+        <a class="oidc-button" [href]="keycloakLoginUrl">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
+        <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
 
         <div class="notice" role="status">
-          Development login is controlled by the backend environment.
-          If sign-in is unavailable, contact your administrator.
+          {{ 'Auth.DevelopmentNotice' | translate }}
         </div>
 
         @if (errorMessage) {
@@ -30,7 +31,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
         }
 
         <form (ngSubmit)="submit()" #loginForm="ngForm">
-          <label for="login">Login</label>
+          <label for="login">{{ 'Auth.Login' | translate }}</label>
           <input
             id="login"
             name="login"
@@ -41,7 +42,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
             maxlength="100"
           />
 
-          <label for="password">Password</label>
+          <label for="password">{{ 'Auth.Password' | translate }}</label>
           <input
             id="password"
             name="password"
@@ -53,7 +54,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
           />
 
           <button type="submit" [disabled]="loginForm.invalid || loading">
-            {{ loading ? 'Signing in…' : 'Sign in' }}
+            {{ loading ? ('Auth.SigningIn' | translate) : ('Auth.SignIn' | translate) }}
           </button>
         </form>
       </section>
@@ -119,6 +120,8 @@ export class LoginComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
+  private readonly translations = inject(TranslationService);
+
   get keycloakLoginUrl(): string {
     return this.auth.oidcLoginUrl(this.getReturnUrl());
   }
@@ -133,8 +136,8 @@ export class LoginComponent implements OnInit {
     const authError = this.route.snapshot.queryParamMap.get('authError');
     this.errorMessage = authError
       ? authError === 'inactive'
-        ? 'This account is inactive. Contact your administrator.'
-        : 'Keycloak sign-in was not completed. Please try again.'
+        ? this.translations.translate('Auth.InactiveAccount')
+        : this.translations.translate('Auth.OidcIncomplete')
       : '';
 
     this.auth.initialize().subscribe({
@@ -144,7 +147,7 @@ export class LoginComponent implements OnInit {
         }
       },
       error: () => {
-        this.errorMessage = 'Unable to check your sign-in status. Please try again.';
+        this.errorMessage = this.translations.translate('Auth.StatusCheckFailed');
       },
     });
   }
@@ -166,10 +169,10 @@ export class LoginComponent implements OnInit {
         this.loading = false;
         this.errorMessage =
           error.status === 404
-            ? 'Development login is disabled on this backend.'
+            ? this.translations.translate('Auth.DevelopmentLoginDisabled')
             : error.status === 422
-              ? 'The supplied credentials are invalid.'
-              : 'Unable to sign in. Check the server connection and try again.';
+              ? this.translations.translate('Auth.InvalidCredentials')
+              : this.translations.translate('Auth.SignInFailed');
       },
     });
   }

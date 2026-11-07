@@ -16,55 +16,56 @@ import {
   WorkFromHomeSummary,
 } from '../../shared/services/tax-workspace-api.service';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-work-from-home',
-  imports: [FormsModule, TaxIconComponent],
+  imports: [FormsModule, TaxIconComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-label="Working from home log">
+    <section class="panel" [attr.aria-label]="'Transactions.WfhTitle' | translate">
       <div class="head">
         <div>
-          <h2>Working from home{{ yearLabel ? ' · FY ' + yearLabel : '' }}</h2>
-          <p>Record the hours you worked from home each day. Hours × the per-hour rate gives the fixed-rate claim your accountant can use. Keep timesheets, rosters or a diary as proof.</p>
+          <h2>{{ 'Transactions.WfhTitle' | translate }}{{ yearLabel ? ' · FY ' + yearLabel : '' }}</h2>
+          <p>{{ 'Transactions.WfhDescription' | translate }}</p>
         </div>
       </div>
 
       @if (!yearId) {
-        <p class="note">Select a financial year in the header to log working-from-home hours.</p>
+        <p class="note">{{ 'Transactions.SelectYearForWfh' | translate }}</p>
       } @else {
         @if (errorMessage) { <p class="note error" role="alert">{{ errorMessage }}</p> }
 
         @if (summary) {
           <div class="stats">
-            <div><span>Days</span><strong>{{ summary.days }}</strong></div>
-            <div><span>Hours</span><strong>{{ summary.hours }}</strong></div>
-            <div><span>Rate per hour</span><strong>{{ money(summary.rate) }}</strong></div>
-            <div><span>Fixed-rate amount</span><strong>{{ money(summary.amount) }}</strong></div>
+            <div><span>{{ 'Transactions.Days' | translate }}</span><strong>{{ summary.days }}</strong></div>
+            <div><span>{{ 'Transactions.Hours' | translate }}</span><strong>{{ summary.hours }}</strong></div>
+            <div><span>{{ 'Transactions.RatePerHour' | translate }}</span><strong>{{ money(summary.rate) }}</strong></div>
+            <div><span>{{ 'Transactions.FixedRateAmount' | translate }}</span><strong>{{ money(summary.amount) }}</strong></div>
           </div>
         }
 
         @if (auth.canEdit) {
           <form class="row-form" (ngSubmit)="saveRate()">
-            <label>Rate per hour (AUD) <input type="number" name="rate" min="0.01" max="10" step="0.01" [(ngModel)]="rate" /></label>
-            <button type="submit" class="btn" [disabled]="!rate || rate <= 0">Save rate</button>
-            @if (summary?.rate_is_default) { <small>Default rate shown. Confirm the current ATO rate for this year with your accountant.</small> }
+            <label>{{ 'Transactions.RatePerHour' | translate }} (AUD) <input type="number" name="rate" min="0.01" max="10" step="0.01" [(ngModel)]="rate" /></label>
+            <button type="submit" class="btn" [disabled]="!rate || rate <= 0">{{ 'Transactions.SaveRate' | translate }}</button>
+            @if (summary?.rate_is_default) { <small>{{ 'Transactions.DefaultRateHint' | translate }}</small> }
           </form>
 
           <form class="row-form" (ngSubmit)="saveEntry()">
-            <label>Date <input type="date" name="date" [(ngModel)]="date" required /></label>
-            <label>Hours <input type="number" name="hours" min="0.25" max="24" step="0.25" [(ngModel)]="hours" required /></label>
-            <label class="grow">Note <input name="note" maxlength="255" [(ngModel)]="note" placeholder="Optional" /></label>
-            <button type="submit" class="btn primary" [disabled]="isSaving || !date || !hours || hours <= 0"><tv-icon name="plus" /> {{ isSaving ? 'Saving…' : 'Add day' }}</button>
+            <label>{{ 'Transactions.Date' | translate }} <input type="date" name="date" [(ngModel)]="date" required /></label>
+            <label>{{ 'Transactions.Hours' | translate }} <input type="number" name="hours" min="0.25" max="24" step="0.25" [(ngModel)]="hours" required /></label>
+            <label class="grow">{{ 'Transactions.Note' | translate }} <input name="note" maxlength="255" [(ngModel)]="note" [placeholder]="'Transactions.Optional' | translate" /></label>
+            <button type="submit" class="btn primary" [disabled]="isSaving || !date || !hours || hours <= 0"><tv-icon name="plus" /> {{ isSaving ? ('Transactions.Saving' | translate) : ('Transactions.AddDay' | translate) }}</button>
           </form>
-          <p class="note">Entering a date that already has hours replaces them.</p>
+          <p class="note">{{ 'Transactions.ReplaceExisting' | translate }}</p>
         }
 
         @if (logs.length === 0) {
-          <p class="note">No days logged for this year yet.</p>
+          <p class="note">{{ 'Transactions.NoDays' | translate }}</p>
         } @else {
           <table>
-            <thead><tr><th>Date</th><th>Hours</th><th>Note</th>@if (auth.canEdit) {<th></th>}</tr></thead>
+            <thead><tr><th>{{ 'Transactions.Date' | translate }}</th><th>{{ 'Transactions.Hours' | translate }}</th><th>{{ 'Transactions.Note' | translate }}</th>@if (auth.canEdit) {<th></th>}</tr></thead>
             <tbody>
               @for (log of logs; track log.id) {
                 <tr>
@@ -72,7 +73,7 @@ import { formatFinancialYear } from '../../shared/utils/financial-year';
                   <td>{{ log.hours }}</td>
                   <td>{{ log.note }}</td>
                   @if (auth.canEdit) {
-                    <td class="end"><button type="button" class="btn danger" (click)="remove(log)" aria-label="Delete entry"><tv-icon name="delete" /></button></td>
+                    <td class="end"><button type="button" class="btn danger" (click)="remove(log)" [attr.aria-label]="'Transactions.DeleteEntry' | translate"><tv-icon name="delete" /></button></td>
                   }
                 </tr>
               }

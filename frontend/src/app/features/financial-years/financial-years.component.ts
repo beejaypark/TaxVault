@@ -19,10 +19,11 @@ import {
 } from '../../shared/services/documents/document-api.service';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-financial-years',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TranslatePipe],
   templateUrl: './financial-years.component.html',
   styleUrl: './financial-years.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

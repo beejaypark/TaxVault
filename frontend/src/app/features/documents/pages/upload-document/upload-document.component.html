@@ -3,8 +3,8 @@
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYearLabel }}</div>
-      <h1>Upload documents</h1>
-      <p>Add receipts or tax documents to TaxVault.</p>
+      <h1>{{ 'Upload.Title' | translate }}</h1>
+      <p>{{ 'Upload.Description' | translate }}</p>
     </div>
 
   </header>
@@ -12,16 +12,16 @@
   <main class="upload-card">
     <div class="selection-fields">
       <label>
-        <span>Financial year</span>
+        <span>{{ 'Upload.FinancialYear' | translate }}</span>
         <select
           [value]="selectedFinancialYearId"
           (change)="onFinancialYearChange($event)"
           [disabled]="isLoadingFinancialYears || financialYears.length === 0 || isUploading"
         >
           @if (financialYears.length === 0) {
-            <option value="" selected>No financial years yet</option>
+            <option value="" selected>{{ 'Upload.NoYears' | translate }}</option>
           } @else if (!selectedFinancialYearId) {
-            <option value="" selected>Select financial year</option>
+            <option value="" selected>{{ 'Upload.SelectYear' | translate }}</option>
           }
           @for (year of financialYears; track year.id) {
             <option [value]="year.id" [selected]="year.id === selectedFinancialYearId">
@@ -32,14 +32,14 @@
       </label>
 
       <label>
-        <span>Document type</span>
+        <span>{{ 'Upload.DocumentType' | translate }}</span>
         <select
           [value]="selectedDocumentTypeId"
           (change)="onDocumentTypeChange($event)"
           [disabled]="isLoadingDocumentTypes || documentTypes.length === 0 || isUploading"
         >
           @if (!selectedDocumentTypeId) {
-            <option value="" selected>Select document type</option>
+            <option value="" selected>{{ 'Upload.SelectType' | translate }}</option>
           }
           @for (type of documentTypes; track type.id) {
             <option [value]="type.id" [selected]="type.id === selectedDocumentTypeId">
@@ -51,7 +51,7 @@
     </div>
 
     @if (isLoadingOptions) {
-      <p class="file-hint" role="status">Loading upload options…</p>
+      <p class="file-hint" role="status">{{ 'Upload.LoadingOptions' | translate }}</p>
     }
 
     @if (!isLoadingFinancialYears && financialYears.length === 0) {
@@ -76,14 +76,14 @@
         (drop)="onDrop($event)"
       >
         <div class="upload-icon"><tv-icon name="upload" /></div>
-        <h2>Upload documents in bulk</h2>
+        <h2>{{ 'Upload.BulkTitle' | translate }}</h2>
         <p class="drop-description">
           Drag and drop multiple files, choose files, or select a folder. Each file will use the financial year and document type selected above.
         </p>
 
         <div class="browse-actions">
           <label class="browse-button">
-            Choose files
+            {{ 'Upload.ChooseFiles' | translate }}
             <input
               type="file"
               multiple
@@ -92,7 +92,7 @@
             />
           </label>
           <label class="browse-button browse-button-secondary">
-            Choose folder
+            {{ 'Upload.ChooseFolder' | translate }}
             <input
               type="file"
               multiple
@@ -103,7 +103,7 @@
             />
           </label>
           <label class="browse-button browse-button-secondary">
-            Take photo
+            {{ 'Upload.TakePhoto' | translate }}
             <input
               type="file"
               accept="image/*"
@@ -115,7 +115,7 @@
         </div>
 
         <p class="file-hint">
-          PDF, JPG, PNG, WEBP, or TIFF · Maximum 20 MB per file
+          {{ 'Upload.FileTypes' | translate }}
         </p>
       </div>
     } @else {
@@ -126,7 +126,7 @@
         </div>
         <div class="browse-actions compact">
           <label class="browse-button">
-            Add files
+            {{ 'Upload.AddFiles' | translate }}
             <input
               type="file"
               multiple
@@ -136,7 +136,7 @@
             />
           </label>
           <label class="browse-button browse-button-secondary">
-            Add folder
+            {{ 'Upload.AddFolder' | translate }}
             <input
               type="file"
               multiple
@@ -148,7 +148,7 @@
             />
           </label>
           <label class="browse-button browse-button-secondary">
-            Take photo
+            {{ 'Upload.TakePhoto' | translate }}
             <input
               type="file"
               accept="image/*"
@@ -194,7 +194,7 @@
               [disabled]="isUploading"
               (click)="removeFile($index)"
             >
-              Remove
+              {{ 'Upload.Remove' | translate }}
             </button>
           </li>
         }
@@ -205,17 +205,17 @@
           <h2>
             {{
               pendingFileCount > 0
-                ? 'Ready to upload'
+                ? ('Upload.Ready' | translate)
                 : duplicateFileCount > 0
-                  ? 'Duplicate files were skipped'
-                  : 'All files uploaded'
+                  ? ('Upload.DuplicatesSkipped' | translate)
+                  : ('Upload.AllUploaded' | translate)
             }}
           </h2>
           <p>
             {{
               duplicateFileCount > 0 && pendingFileCount === 0
-                ? 'TaxVault kept the previously uploaded document. Review the matching document in your document list.'
-                : 'Files are uploaded one at a time. Each will be stored securely and queued for local text extraction and review.'
+                ? ('Upload.DuplicateNotice' | translate)
+                : ('Upload.UploadNotice' | translate)
             }}
           </p>
         </div>
@@ -232,8 +232,8 @@
               : pendingFileCount > 0
                 ? 'Upload ' + pendingFileCount + ' file' + (pendingFileCount === 1 ? '' : 's')
                 : duplicateFileCount > 0
-                  ? 'View documents'
-                  : 'Uploaded'
+                  ? ('Upload.ViewDocuments' | translate)
+                  : ('Upload.Uploaded' | translate)
           }}
         </button>
       </div>
@@ -249,19 +249,19 @@
 
   @if (inboundEmail) {
     <section class="help-section email-forward">
-      <h2>Forward receipts by email</h2>
-      <p>Send or forward emails with PDF or image attachments to your private address. They appear in Documents for review.</p>
+      <h2>{{ 'Upload.ForwardEmail' | translate }}</h2>
+      <p>{{ 'Upload.EmailDescription' | translate }}</p>
       <p>
         <code>{{ inboundEmail }}</code>
         <button type="button" class="browse-button browse-button-secondary" (click)="copyInboundEmail()">
-          {{ copied ? 'Copied' : 'Copy address' }}
+          {{ copied ? ('Upload.Copied' | translate) : ('Upload.CopyAddress' | translate) }}
         </button>
       </p>
     </section>
   }
 
   <section class="help-section">
-    <h2>What happens next?</h2>
+    <h2>{{ 'Upload.WhatNext' | translate }}</h2>
     <div class="steps">
       <div class="step">
         <div class="step-number">1</div>
@@ -274,7 +274,7 @@
       <div class="step">
         <div class="step-number">2</div>
         <div>
-          <strong>Secure storage</strong>
+          <strong>{{ 'Upload.SecureStorage' | translate }}</strong>
           <p>TaxVault stores the original document and its evidence metadata.</p>
         </div>
       </div>
@@ -282,7 +282,7 @@
       <div class="step">
         <div class="step-number">3</div>
         <div>
-          <strong>Extract and review</strong>
+          <strong>{{ 'Upload.ExtractReview' | translate }}</strong>
           <p>TaxVault reads the document locally, then asks you to verify extracted details before recording a transaction.</p>
         </div>
       </div>

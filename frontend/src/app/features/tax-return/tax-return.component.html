@@ -2,9 +2,9 @@
   <tv-back-navigation />
   <header class="page-header">
     <div>
-      <div class="eyebrow">Tax workspace</div>
-      <h1>Accountant pack</h1>
-      <p>Hand your accountant a complete, verifiable evidence package for the financial year: reviewed records, source documents and a transaction ledger.</p>
+      <div class="eyebrow">{{ 'TaxWorkspace.Title' | translate }}</div>
+      <h1>{{ 'TaxReturn.Title' | translate }}</h1>
+      <p>{{ 'TaxReturn.Description' | translate }}</p>
     </div>
   </header>
 
@@ -18,41 +18,41 @@
   <section class="export-layout">
     <article class="export-card">
       <div class="step-number">01</div>
-      <h2>Select a financial year</h2>
-      <p>TaxVault packages the records and evidence associated with the selected Australian financial year.</p>
+      <h2>{{ 'TaxReturn.SelectYear' | translate }}</h2>
+      <p>{{ 'TaxReturn.PackageDescription' | translate }}</p>
 
       @if (isLoading) {
-        <p role="status">Loading financial years...</p>
+        <p role="status">{{ 'TaxReturn.LoadingYears' | translate }}</p>
       } @else if (financialYears.length === 0) {
         <div class="empty-state">
-          <strong>No financial years available</strong>
-          <span>Add a financial year before generating an export.</span>
+          <strong>{{ 'TaxReturn.NoYears' | translate }}</strong>
+          <span>{{ 'TaxReturn.AddYearFirst' | translate }}</span>
         </div>
       } @else {
         @if (selectedYear; as year) {
           <p class="year-chip"><strong>FY {{ formatYearCode(year.year_code) }}</strong> &middot; {{ year.start_date | date: 'd MMM y' : 'UTC' }} to {{ year.end_date | date: 'd MMM y' : 'UTC' }}</p>
-          <p class="year-hint">To pack a different year, change the Financial year selector at the top of the page.</p>
+          <p class="year-hint">{{ 'TaxReturn.YearHint' | translate }}</p>
         }
 
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
-          {{ isExporting ? 'Preparing pack…' : 'Generate accountant pack' }}
+          {{ isExporting ? ('TaxReturn.PreparingPack' | translate) : ('TaxReturn.GeneratePack' | translate) }}
         </button>
         <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
-          <tv-icon name="download" /> {{ isDownloadingCsv ? 'Preparing CSV…' : 'Download transactions CSV' }}
+          <tv-icon name="download" /> {{ isDownloadingCsv ? ('TaxReturn.PreparingCsv' | translate) : ('TaxReturn.DownloadCsv' | translate) }}
         </button>
       }
     </article>
 
     <article class="export-card included-card">
       <div class="step-number">02</div>
-      <h2>What's included</h2>
+      <h2>{{ 'TaxReturn.Included' | translate }}</h2>
       <ul>
-        <li><span><tv-icon name="check" /></span> Financial-year manifest and export version</li>
-        <li><span><tv-icon name="check" /></span> Tax evidence, provenance, and classification records</li>
-        <li><span><tv-icon name="check" /></span> Data integrity hash for the generated snapshot</li>
-        <li><span><tv-icon name="check" /></span> A downloadable JSON record</li>
+        <li><span><tv-icon name="check" /></span> {{ 'TaxReturn.Manifest' | translate }}</li>
+        <li><span><tv-icon name="check" /></span> {{ 'TaxReturn.Evidence' | translate }}</li>
+        <li><span><tv-icon name="check" /></span> {{ 'TaxReturn.Integrity' | translate }}</li>
+        <li><span><tv-icon name="check" /></span> {{ 'TaxReturn.JsonRecord' | translate }}</li>
       </ul>
-      <p class="disclaimer">TaxVault organises evidence for your accountant. It does not prepare or lodge tax returns and does not give tax advice.</p>
+      <p class="disclaimer">{{ 'TaxReturn.Disclaimer' | translate }}</p>
     </article>
   </section>
 
@@ -60,20 +60,20 @@
     <section class="result-card summary-card" aria-label="Financial year summary">
       <div class="result-heading">
         <div>
-          <div class="eyebrow">Summary</div>
-          <h2>FY {{ selectedYearLabel }} transactions</h2>
+          <div class="eyebrow">{{ 'TaxReturn.Summary' | translate }}</div>
+          <h2>FY {{ selectedYearLabel }} {{ 'TaxReturn.TransactionsSummary' | translate }}</h2>
         </div>
-        <button type="button" class="secondary-button no-print" (click)="printSummary()">Print summary</button>
+        <button type="button" class="secondary-button no-print" (click)="printSummary()">{{ 'TaxReturn.PrintSummary' | translate }}</button>
       </div>
       <dl>
-        <div><dt>Income</dt><dd>{{ formatMoney(totalIncome) }}</dd></div>
-        <div><dt>Expenses</dt><dd>{{ formatMoney(totalExpenses) }}</dd></div>
-        <div><dt>Net</dt><dd>{{ formatMoney(totalIncome - totalExpenses) }}</dd></div>
-        <div><dt>Transactions</dt><dd>{{ yearTransactions.length }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Income' | translate }}</dt><dd>{{ formatMoney(totalIncome) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Expenses' | translate }}</dt><dd>{{ formatMoney(totalExpenses) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Net' | translate }}</dt><dd>{{ formatMoney(totalIncome - totalExpenses) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Transactions' | translate }}</dt><dd>{{ yearTransactions.length }}</dd></div>
       </dl>
       @if (yearTransactions.length > 0) {
         <table class="summary-table">
-          <thead><tr><th>Date</th><th>Description</th><th>Type</th><th class="amount">Amount</th></tr></thead>
+          <thead><tr><th>{{ 'TaxReturn.Date' | translate }}</th><th>{{ 'TaxReturn.DescriptionField' | translate }}</th><th>{{ 'TaxReturn.Type' | translate }}</th><th class="amount">{{ 'Transactions.Amount' | translate }}</th></tr></thead>
           <tbody>
             @for (item of yearTransactions; track item.id) {
               <tr>
@@ -105,16 +105,16 @@
     <section class="result-card" aria-label="Generated accountant pack">
       <div class="result-heading">
         <div>
-          <div class="eyebrow">Export ready</div>
+          <div class="eyebrow">{{ 'TaxReturn.ExportReady' | translate }}</div>
           <h2>FY {{ exportedYearCode }} pack</h2>
         </div>
         <button type="button" class="secondary-button" (click)="downloadExport()">
-          <tv-icon name="download" /> Download JSON
+          <tv-icon name="download" /> {{ 'TaxReturn.DownloadJson' | translate }}
         </button>
       </div>
       <dl>
-        <div><dt>Generated</dt><dd>{{ formatDate(latestExport.generated_at) }}</dd></div>
-        <div><dt>Version</dt><dd>{{ latestExport.export_version }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Generated' | translate }}</dt><dd>{{ formatDate(latestExport.generated_at) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Version' | translate }}</dt><dd>{{ latestExport.export_version }}</dd></div>
         <div class="hash"><dt>SHA-256</dt><dd>{{ latestExport.sha256 }}</dd></div>
       </dl>
     </section>

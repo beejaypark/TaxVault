@@ -27,6 +27,7 @@ import {
 } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewService } from '../../../../shared/services/reviews/review.service';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 
 interface MonthlyTransactionSummary {
   key: string;
@@ -39,7 +40,7 @@ interface MonthlyTransactionSummary {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent, WealthOverviewComponent],
+  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent, WealthOverviewComponent, TranslatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,59 @@
+{
+  "Common": {
+    "MainNavigation": "Navegación principal",
+    "ToggleNavigation": "Alternar navegación",
+    "FinancialYear": "Año fiscal",
+    "AllFinancialYears": "Todos los años fiscales",
+    "LoadingFinancialYears": "Cargando años fiscales…",
+    "NoFinancialYears": "No hay años fiscales",
+    "SignedInAs": "Sesión iniciada como",
+    "SignOut": "Cerrar sesión",
+    "ReadOnlyView": "Vista de solo lectura"
+  },
+  "Overview": {
+    "Title": "Resumen"
+  },
+  "Dashboard": {
+    "Title": "Panel"
+  },
+  "TaxWorkspace": {
+    "Title": "Espacio fiscal"
+  },
+  "Documents": {
+    "Title": "Documentos",
+    "AllDocuments": "Todos los documentos"
+  },
+  "FinancialYears": {
+    "Title": "Años fiscales"
+  },
+  "Reviews": {
+    "Title": "Revisiones"
+  },
+  "IncomeExpenses": {
+    "Title": "Ingresos y gastos"
+  },
+  "Assets": {
+    "Title": "Activos"
+  },
+  "Properties": {
+    "Title": "Propiedades"
+  },
+  "Investments": {
+    "Title": "Inversiones"
+  },
+  "Reports": {
+    "Title": "Informes"
+  },
+  "AccountantPack": {
+    "Title": "Paquete para el contable"
+  },
+  "Manage": {
+    "Title": "Administrar"
+  },
+  "Accountants": {
+    "Title": "Contables"
+  },
+  "Settings": {
+    "Title": "Configuración"
+  }
+}

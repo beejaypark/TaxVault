@@ -31,11 +31,12 @@ import {
 import { DocumentApiService } from '../../../../shared/services/documents/document-api.service';
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-review-list',
   standalone: true,
-  imports: [RouterLink, TaxIconComponent, BackNavigationComponent],
+  imports: [RouterLink, TaxIconComponent, BackNavigationComponent, TranslatePipe],
   templateUrl: './review-list.component.html',
   styleUrl: './review-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

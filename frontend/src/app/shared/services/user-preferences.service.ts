@@ -1,9 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, effect, inject, signal } from '@angular/core';
+import { catchError, map, of } from 'rxjs';
 
 import { AuthService } from './auth/auth.service';
+import { LocaleCode, DEFAULT_LOCALE } from '../../i18n/locale';
 
 export interface UserPreferences {
+  language: LocaleCode;
   notifyDocuments: boolean;
   notifyUncategorised: boolean;
   defaultFinancialYear: 'current' | 'all';
@@ -14,6 +17,7 @@ export interface UserPreferences {
 
 const STORAGE_KEY = 'taxvault.preferences';
 const DEFAULTS: UserPreferences = {
+  language: DEFAULT_LOCALE,
   notifyDocuments: true,
   notifyUncategorised: true,
   defaultFinancialYear: 'current',
@@ -24,6 +28,7 @@ const DEFAULTS: UserPreferences = {
 
 function normalise(stored: Partial<UserPreferences> | null | undefined): UserPreferences {
   return {
+    language: stored?.language === 'kr' || stored?.language === 'cn' || stored?.language === 'es' ? stored.language : DEFAULTS.language,
     notifyDocuments: stored?.notifyDocuments ?? DEFAULTS.notifyDocuments,
     notifyUncategorised: stored?.notifyUncategorised ?? DEFAULTS.notifyUncategorised,
     defaultFinancialYear: stored?.defaultFinancialYear === 'all' ? 'all' : 'current',
@@ -51,7 +56,16 @@ export class UserPreferencesService {
 
     this.preferences.set(next);
     this.store(next);
-    this.save(next);
+    this.save(next).subscribe();
+  }
+
+  updateAndWait(changes: Partial<UserPreferences>) {
+    const next = { ...this.preferences(), ...changes };
+
+    this.preferences.set(next);
+    this.store(next);
+
+    return this.save(next);
   }
 
   private initial(): UserPreferences {
@@ -87,14 +101,15 @@ export class UserPreferencesService {
     }
   }
 
-  private save(preferences: UserPreferences): void {
+  private save(preferences: UserPreferences) {
     if (!this.auth.user()) {
-      return;
+      return of(undefined);
     }
 
-    this.http.put('/api/auth/preferences', preferences, { withCredentials: true }).subscribe({
-      error: () => undefined,
-    });
+    return this.http.put('/api/auth/preferences', preferences, { withCredentials: true }).pipe(
+      map(() => undefined),
+      catchError(() => of(undefined)),
+    );
   }
 
   private readLocal(): Partial<UserPreferences> | null {

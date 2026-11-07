@@ -2,49 +2,49 @@
   <tv-back-navigation />
   <header class="page-header">
     <div>
-      <p class="eyebrow">Tax workspace</p>
-      <h1>Review queue</h1>
-      <p class="page-description">Check extracted details and resolve items that need your attention.</p>
-      <p class="refresh-indicator">Review statuses update automatically every 5 seconds.</p>
+      <p class="eyebrow">{{ 'TaxWorkspace.Title' | translate }}</p>
+      <h1>{{ 'Reviews.Title' | translate }}</h1>
+      <p class="page-description">{{ 'Reviews.Description' | translate }}</p>
+      <p class="refresh-indicator">{{ 'Reviews.RefreshStatus' | translate }}</p>
     </div>
     <div class="queue-count" aria-live="polite">
       <span class="count-value">{{ total }}</span>
-      <span class="count-label">total items</span>
+      <span class="count-label">{{ 'Reviews.TotalItems' | translate }}</span>
     </div>
   </header>
 
-  <section class="queue-toolbar" aria-label="Review filters">
+  <section class="queue-toolbar" [attr.aria-label]="'Reviews.Filters' | translate">
     <div class="filter-heading">
       <div>
-        <h2>{{ financialYearLabel }} reviews</h2>
-        <p>Filter by status or review type</p>
+        <h2>{{ financialYearLabel }} {{ 'Reviews.ReviewsForYear' | translate }}</h2>
+        <p>{{ 'Reviews.FilterBy' | translate }}</p>
       </div>
-      <span class="result-count">{{ total }} {{ total === 1 ? 'review' : 'reviews' }}</span>
+        <span class="result-count">{{ total }} {{ 'Reviews.Reviews' | translate }}</span>
     </div>
     <div class="filters">
       <label>
-        <span>Status</span>
+        <span>{{ 'Reviews.Status' | translate }}</span>
         <select
           id="review-status-filter"
           data-testid="review-status-filter"
           [value]="selectedStatus"
           (change)="onStatusChange($event)"
         >
-          <option value="">All statuses</option>
+          <option value="">{{ 'Reviews.AllStatuses' | translate }}</option>
           @for (status of statusOptions; track status) {
             <option [value]="status">{{ statusLabel(status) }}</option>
           }
         </select>
       </label>
       <label>
-        <span>Review type</span>
+        <span>{{ 'Reviews.Type' | translate }}</span>
         <select
           id="review-type-filter"
           data-testid="review-type-filter"
           [value]="selectedType"
           (change)="onTypeChange($event)"
         >
-          <option value="">All types</option>
+          <option value="">{{ 'Reviews.AllTypes' | translate }}</option>
           @for (type of typeOptions; track type) {
             <option [value]="type">{{ typeLabel(type) }}</option>
           }
@@ -63,31 +63,31 @@
   @if (isLoading) {
     <div class="state-card" role="status">
       <span class="state-spinner" aria-hidden="true"></span>
-      <span>Loading reviews...</span>
+      <span>{{ 'Reviews.Loading' | translate }}</span>
     </div>
   } @else if (errorMessage) {
     <div class="state-card error-state" role="alert">
       <div>
-        <h2>Reviews couldn’t be loaded</h2>
+        <h2>{{ 'Reviews.LoadFailed' | translate }}</h2>
         <p>{{ errorMessage }}</p>
       </div>
-      <button type="button" class="secondary-button" (click)="loadReviews()">Try again</button>
+      <button type="button" class="secondary-button" (click)="loadReviews()">{{ 'Reviews.TryAgain' | translate }}</button>
     </div>
   } @else if (reviews.length === 0) {
     <div class="state-card empty-state">
       <span class="empty-icon"><tv-icon name="check" /></span>
-      <h2>{{ selectedStatus || selectedType ? 'No matching reviews' : 'You’re all caught up' }}</h2>
+    <h2>{{ selectedStatus || selectedType ? ('Reviews.NoMatching' | translate) : ('Reviews.CaughtUp' | translate) }}</h2>
       <p>
         {{ selectedStatus || selectedType || financialYearLabel !== 'All financial years'
-          ? 'Try changing or clearing your filters to see other reviews.'
-          : 'There are no items waiting in your review queue right now.' }}
+          ? ('Reviews.ChangeFilters' | translate)
+          : ('Reviews.NoWaiting' | translate) }}
       </p>
       @if (selectedStatus || selectedType) {
-        <button type="button" class="text-button" (click)="clearFilters()">Clear filters</button>
+        <button type="button" class="text-button" (click)="clearFilters()">{{ 'Reviews.ClearFilters' | translate }}</button>
       }
     </div>
   } @else {
-    <section class="review-list" aria-label="Reviews" [attr.aria-busy]="isLoading">
+    <section class="review-list" [attr.aria-label]="'Reviews.Reviews' | translate" [attr.aria-busy]="isLoading">
       @for (review of reviews; track review.id) {
         <article class="review-card" [class.needs-attention]="review.status === 'pending'">
           <div class="review-card-main">
@@ -106,16 +106,16 @@
                 @if (review.document?.originalFilename) {
                   {{ review.document?.originalFilename }}
                 } @else if (review.target.documentId) {
-                  Document {{ review.target.documentId }}
+                  {{ 'Reviews.Document' | translate }} {{ review.target.documentId }}
                 } @else {
-                  Review item
+                  {{ 'Reviews.ReviewItem' | translate }}
                 }
               </p>
               <div class="review-meta">
                 @if (review.extraction?.fields; as fields) {
-                  <span>{{ fieldCount(fields) }} extracted {{ fieldCount(fields) === 1 ? 'field' : 'fields' }}</span>
+                  <span>{{ fieldCount(fields) }} extracted {{ fieldCount(fields) === 1 ? ('Reviews.Field' | translate) : ('Reviews.Fields' | translate) }}</span>
                   <span class="meta-separator" aria-hidden="true">·</span>
-                  <span>{{ lowConfidenceCount(review) }} below 80%</span>
+                  <span>{{ lowConfidenceCount(review) }} {{ 'Reviews.BelowConfidence' | translate }}</span>
                   <span class="meta-separator" aria-hidden="true">·</span>
                 }
                 <time [attr.datetime]="review.createdAt">{{ formatDate(review.createdAt) }}</time>
@@ -126,9 +126,9 @@
             class="open-review"
             [routerLink]="['/reviews', review.id]"
             [attr.data-testid]="'review-detail-link'"
-            [attr.aria-label]="'Open ' + typeLabel(review.type) + ' review'"
+            [attr.aria-label]="'Reviews.OpenReview' | translate"
           >
-            <span>{{ review.status === 'pending' ? 'Review item' : 'View details' }}</span>
+            <span>{{ review.status === 'pending' ? ('Reviews.ReviewItem' | translate) : ('Reviews.ViewDetails' | translate) }}</span>
             <tv-icon name="arrowRight" />
           </a>
           @if (auth.canEdit) {
@@ -136,11 +136,11 @@
             type="button"
             class="delete-review"
             [disabled]="deletingReviewId !== null"
-            [attr.aria-label]="'Delete ' + typeLabel(review.type) + ' review'"
+            [attr.aria-label]="'Reviews.Delete' | translate"
             (click)="deleteReview(review)"
           >
             <tv-icon name="delete" />
-            {{ deletingReviewId === review.id ? 'Deleting…' : 'Delete' }}
+            {{ deletingReviewId === review.id ? ('Reviews.Deleting' | translate) : ('Reviews.Delete' | translate) }}
           </button>
           }
         </article>
@@ -148,16 +148,16 @@
     </section>
 
     @if (lastPage > 1) {
-      <nav class="pagination" aria-label="Review pagination" data-testid="review-pagination">
-        <span data-testid="review-page-indicator">Page {{ currentPage }} of {{ lastPage }}</span>
+      <nav class="pagination" [attr.aria-label]="'Reviews.Pagination' | translate" data-testid="review-pagination">
+        <span data-testid="review-page-indicator">{{ 'Reviews.Page' | translate }} {{ currentPage }} {{ 'Reviews.Of' | translate }} {{ lastPage }}</span>
         <div class="pagination-actions">
           <button type="button" class="secondary-button" data-testid="review-previous-page"
             [disabled]="currentPage <= 1" (click)="goToPreviousPage()">
-            <tv-icon name="arrowLeft" /> Previous
+            <tv-icon name="arrowLeft" /> {{ 'Reviews.Previous' | translate }}
           </button>
           <button type="button" class="secondary-button" data-testid="review-next-page"
             [disabled]="currentPage >= lastPage" (click)="goToNextPage()">
-            Next <tv-icon name="arrowRight" />
+            {{ 'Reviews.Next' | translate }} <tv-icon name="arrowRight" />
           </button>
         </div>
       </nav>

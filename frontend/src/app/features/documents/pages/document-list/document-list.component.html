@@ -3,15 +3,15 @@
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
-      <h1>Documents</h1>
-      <p>All your tax documents in one place.</p>
-      <p class="refresh-indicator">Processing and review statuses update automatically every 5 seconds.</p>
+      <h1>{{ 'Documents.Title' | translate }}</h1>
+      <p>{{ 'Documents.Description' | translate }}</p>
+      <p class="refresh-indicator">{{ 'Documents.ProcessingStatus' | translate }}</p>
     </div>
 
     @if (auth.canEdit) {
       <a routerLink="/documents/upload" class="primary-button">
         <tv-icon name="plus" />
-        Upload receipt
+        {{ 'Documents.UploadReceipt' | translate }}
       </a>
     }
   </header>
@@ -19,7 +19,7 @@
   <section class="documents-card">
     <div class="card-header">
       <div>
-        <h2>All documents</h2>
+        <h2>{{ 'Documents.AllDocuments' | translate }}</h2>
         <p>
           {{ filteredDocuments.length }}
           {{ filteredDocuments.length === 1 ? 'document' : 'documents' }}
@@ -31,75 +31,75 @@
       <p class="options-notice" role="status">{{ optionsErrorMessage }}</p>
     }
 
-    <div class="filter-bar" role="search" aria-label="Filter documents">
+    <div class="filter-bar" role="search" [attr.aria-label]="'Documents.FilterDocuments' | translate">
       <label class="filter-keyword">
-        <span>Keyword</span>
-        <input type="search" name="keyword" [(ngModel)]="keyword" placeholder="File name, supplier, text…" />
+        <span>{{ 'Documents.Keyword' | translate }}</span>
+        <input type="search" name="keyword" [(ngModel)]="keyword" [placeholder]="'Documents.KeywordPlaceholder' | translate" />
       </label>
       <label>
-        <span>Document type</span>
+        <span>{{ 'Documents.DocumentType' | translate }}</span>
         <select name="typeFilter" [(ngModel)]="typeFilter">
-          <option value="">All types</option>
+          <option value="">{{ 'Documents.AllTypes' | translate }}</option>
           @for (type of documentTypes; track type.id) { <option [value]="type.id">{{ type.name }}</option> }
         </select>
       </label>
       <label>
-        <span>Status</span>
+        <span>{{ 'Documents.Status' | translate }}</span>
         <select name="statusFilter" [(ngModel)]="statusFilter">
-          <option value="">All statuses</option>
+          <option value="">{{ 'Documents.AllStatuses' | translate }}</option>
           @for (status of statusOptions; track status) { <option [value]="status">{{ getStatusLabel(status) }}</option> }
         </select>
       </label>
       <label>
-        <span>Payment</span>
+        <span>{{ 'Documents.Payment' | translate }}</span>
         <select name="paymentFilter" [(ngModel)]="paymentFilter">
-          <option value="">Any</option>
-          <option value="paid">Paid</option>
-          <option value="unpaid">Not confirmed</option>
+          <option value="">{{ 'Documents.Any' | translate }}</option>
+          <option value="paid">{{ 'Documents.Paid' | translate }}</option>
+          <option value="unpaid">{{ 'Documents.NotConfirmed' | translate }}</option>
         </select>
       </label>
       <label>
-        <span>Issue date from</span>
+        <span>{{ 'Documents.IssueDateFrom' | translate }}</span>
         <input type="date" name="dateFrom" [(ngModel)]="dateFrom" />
       </label>
       <label>
-        <span>Issue date to</span>
+        <span>{{ 'Documents.IssueDateTo' | translate }}</span>
         <input type="date" name="dateTo" [(ngModel)]="dateTo" />
       </label>
       @if (hasActiveFilters) {
-        <button type="button" class="filter-clear" (click)="clearFilters()">Clear filters</button>
+        <button type="button" class="filter-clear" (click)="clearFilters()">{{ 'Documents.ClearFilters' | translate }}</button>
       }
     </div>
 
     @if (isLoading) {
-      <div class="empty-state" role="status">Loading documents...</div>
+      <div class="empty-state" role="status">{{ 'Documents.Loading' | translate }}</div>
     } @else if (errorMessage) {
       <div class="empty-state error-state" role="alert">
         {{ errorMessage }}
       </div>
     } @else if (filteredDocuments.length === 0) {
       <div class="empty-state">
-        <h3>{{ hasActiveFilters ? 'No documents match your filters' : (hasSelectedFinancialYear ? 'No documents for this financial year' : 'No documents yet') }}</h3>
+        <h3>{{ hasActiveFilters ? ('Documents.NoFilterMatch' | translate) : (hasSelectedFinancialYear ? ('Documents.NoForYear' | translate) : ('Documents.NoneYet' | translate)) }}</h3>
         <p>{{ hasActiveFilters
-          ? 'Try removing a filter or searching with different keywords.'
+          ? ('Documents.TryDifferentFilters' | translate)
           : (hasSelectedFinancialYear
-          ? 'Choose another year or upload a receipt or tax document.'
-          : 'Upload a receipt or tax document to see it listed here.') }}</p>
+          ? ('Documents.ChooseAnotherYear' | translate)
+          : ('Documents.UploadToList' | translate)) }}</p>
         @if (hasActiveFilters) {
-          <button type="button" class="filter-clear" (click)="clearFilters()">Clear filters</button>
+          <button type="button" class="filter-clear" (click)="clearFilters()">{{ 'Documents.ClearFilters' | translate }}</button>
         } @else if (auth.canEdit) {
           <a routerLink="/documents/upload" class="empty-state-link">
-            Upload your first document
+            {{ 'Documents.UploadFirst' | translate }}
           </a>
         }
       </div>
     } @else {
       <div class="document-table">
         <div class="table-header">
-          <span>Document</span>
-          <span>Uploaded</span>
-          <span>File size</span>
-          <span>Status &amp; actions</span>
+          <span>{{ 'Documents.Title' | translate }}</span>
+          <span>{{ 'Documents.Uploaded' | translate }}</span>
+          <span>{{ 'Documents.FileSize' | translate }}</span>
+          <span>{{ 'Documents.StatusActions' | translate }}</span>
         </div>
 
         @for (document of filteredDocuments; track document.id) {

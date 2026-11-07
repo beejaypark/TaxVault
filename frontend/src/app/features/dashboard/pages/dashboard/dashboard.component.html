@@ -2,15 +2,15 @@
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
-      <h1>Dashboard</h1>
-      <p>Your tax records and next steps, all in one place.</p>
-      <p class="refresh-indicator">Statuses update automatically every 5 seconds.</p>
+      <h1>{{ 'Dashboard.Title' | translate }}</h1>
+      <p>{{ 'Dashboard.Description' | translate }}</p>
+      <p class="refresh-indicator">{{ 'Dashboard.RefreshStatus' | translate }}</p>
     </div>
 
     @if (auth.canEdit) {
     <a routerLink="/documents/upload" class="primary-button">
       <tv-icon name="plus" />
-      Upload document
+      {{ 'Dashboard.UploadDocument' | translate }}
     </a>
     }
   </header>
@@ -25,25 +25,25 @@
   }
 
   @if (isLoading) {
-    <p class="dashboard-loading" role="status">Loading your tax workspace...</p>
+    <p class="dashboard-loading" role="status">{{ 'Dashboard.Loading' | translate }}</p>
   } @else {
-    <section class="summary-grid" aria-label="Tax workspace summary">
+    <section class="summary-grid" [attr.aria-label]="'Dashboard.Summary' | translate">
       <a routerLink="/documents" class="summary-card">
-        <span class="summary-label">Documents</span>
+        <span class="summary-label">{{ 'Dashboard.Documents' | translate }}</span>
         <strong class="summary-value">{{ filteredDocuments.length }}</strong>
-        <span class="summary-description">Tax records uploaded</span>
+        <span class="summary-description">{{ 'Dashboard.TaxRecordsUploaded' | translate }}</span>
       </a>
 
       <a routerLink="/reviews" class="summary-card attention">
-        <span class="summary-label">Needs attention</span>
+        <span class="summary-label">{{ 'Dashboard.NeedsAttention' | translate }}</span>
         <strong class="summary-value">{{ openReviews.length }}</strong>
-        <span class="summary-description">Reviews waiting for you</span>
+        <span class="summary-description">{{ 'Dashboard.ReviewsWaiting' | translate }}</span>
       </a>
 
       <a routerLink="/reviews" class="summary-card">
-        <span class="summary-label">Reviewed</span>
+        <span class="summary-label">{{ 'Dashboard.Reviewed' | translate }}</span>
         <strong class="summary-value">{{ completedReviews }}</strong>
-        <span class="summary-description">Completed review items</span>
+        <span class="summary-description">{{ 'Dashboard.CompletedReviewItems' | translate }}</span>
       </a>
     </section>
 
@@ -54,31 +54,31 @@
     <section class="analysis-section" aria-labelledby="financial-analysis-heading">
       <div class="section-heading">
         <div>
-          <h2 id="financial-analysis-heading">Financial year at a glance</h2>
-          <p>Income and expenses from transactions recorded for {{ financialYear }}.</p>
+          <h2 id="financial-analysis-heading">{{ 'Dashboard.FinancialYearAtGlance' | translate }}</h2>
+          <p>{{ 'Dashboard.IncomeExpensesForYear' | translate }} {{ financialYear }}.</p>
         </div>
-        <a routerLink="/transactions" class="text-link">View transactions</a>
+        <a routerLink="/transactions" class="text-link">{{ 'Dashboard.ViewTransactions' | translate }}</a>
       </div>
 
       @if (!selectedFinancialYear) {
         <div class="empty-panel">
           <div>
-            <strong>Select a financial year</strong>
-            <p>Choose a year from the sidebar to see its financial trends.</p>
+            <strong>{{ 'Dashboard.SelectFinancialYear' | translate }}</strong>
+            <p>{{ 'Dashboard.ChooseYear' | translate }}</p>
           </div>
         </div>
       } @else {
         <div class="analysis-metrics">
           <article class="analysis-metric">
-            <span>Total income</span>
+            <span>{{ 'Dashboard.TotalIncome' | translate }}</span>
             <strong>{{ formatCurrency(totalIncome) }}</strong>
           </article>
           <article class="analysis-metric">
-            <span>Total expenses</span>
+            <span>{{ 'Dashboard.TotalExpenses' | translate }}</span>
             <strong>{{ formatCurrency(totalExpenses) }}</strong>
           </article>
           <article class="analysis-metric" [class.negative]="netAmount < 0">
-            <span>Net</span>
+            <span>{{ 'Dashboard.Net' | translate }}</span>
             <strong>{{ formatCurrency(netAmount) }}</strong>
           </article>
         </div>
@@ -87,12 +87,12 @@
           <section class="analysis-card" aria-labelledby="monthly-chart-heading">
             <div class="analysis-card-heading">
               <div>
-                <h3 id="monthly-chart-heading">Monthly income &amp; expenses</h3>
-                <p>Amounts grouped by transaction date.</p>
+                <h3 id="monthly-chart-heading">{{ 'Dashboard.MonthlyIncomeExpenses' | translate }}</h3>
+                <p>{{ 'Dashboard.AmountsByDate' | translate }}</p>
               </div>
               <div class="chart-legend" aria-hidden="true">
-                <span><i class="income-swatch"></i>Income</span>
-                <span><i class="expense-swatch"></i>Expenses</span>
+                <span><i class="income-swatch"></i>{{ 'Dashboard.Income' | translate }}</span>
+                <span><i class="expense-swatch"></i>{{ 'Dashboard.Expenses' | translate }}</span>
               </div>
             </div>
 
@@ -100,8 +100,8 @@
               <div class="chart-empty" role="alert">{{ financialAnalysisError }}</div>
             } @else if (filteredTransactions.length === 0) {
               <div class="chart-empty">
-                No transactions recorded for this financial year yet.
-                <a routerLink="/transactions">Add a transaction</a>
+                {{ 'Dashboard.NoTransactions' | translate }}
+                <a routerLink="/transactions">{{ 'Dashboard.AddTransaction' | translate }}</a>
               </div>
             } @else {
               <div
@@ -133,13 +133,13 @@
           <section class="analysis-card review-analysis" aria-labelledby="review-chart-heading">
             <div class="analysis-card-heading">
               <div>
-                <h3 id="review-chart-heading">Document review progress</h3>
-                <p>{{ filteredReviews.length }} review items this year</p>
+                <h3 id="review-chart-heading">{{ 'Dashboard.DocumentReviewProgress' | translate }}</h3>
+                <p>{{ filteredReviews.length }} {{ 'Dashboard.ReviewItemsThisYear' | translate }}</p>
               </div>
-              <a routerLink="/reviews" class="text-link">Open reviews</a>
+              <a routerLink="/reviews" class="text-link">{{ 'Dashboard.OpenReviews' | translate }}</a>
             </div>
             @if (filteredReviews.length === 0) {
-              <div class="chart-empty">No review items for this financial year.</div>
+              <div class="chart-empty">{{ 'Dashboard.NoReviewItems' | translate }}</div>
             } @else {
               <div
                 class="review-progress-chart"
@@ -151,9 +151,9 @@
                 <span class="review-progress-other" [style.width.%]="otherReviewWidth"></span>
               </div>
               <ul class="review-legend">
-                <li><i class="completed-swatch"></i><span>Completed</span><strong>{{ completedReviews }}</strong></li>
-                <li><i class="open-swatch"></i><span>Needs attention</span><strong>{{ openReviews.length }}</strong></li>
-                <li><i class="other-swatch"></i><span>Other</span><strong>{{ otherReviews }}</strong></li>
+                <li><i class="completed-swatch"></i><span>{{ 'Dashboard.Completed' | translate }}</span><strong>{{ completedReviews }}</strong></li>
+                <li><i class="open-swatch"></i><span>{{ 'Dashboard.NeedsAttention' | translate }}</span><strong>{{ openReviews.length }}</strong></li>
+                <li><i class="other-swatch"></i><span>{{ 'Dashboard.Other' | translate }}</span><strong>{{ otherReviews }}</strong></li>
               </ul>
             }
           </section>
@@ -171,22 +171,22 @@
     </section>
     </div>
 
-    <aside class="dashboard-side" aria-label="Tasks and shortcuts">
+    <aside class="dashboard-side" [attr.aria-label]="'Dashboard.TasksShortcuts' | translate">
     <section class="dashboard-section">
       <div class="section-heading">
         <div>
-          <h2>Needs attention</h2>
-          <p>Review and confirm extracted tax information.</p>
+          <h2>{{ 'Dashboard.NeedsAttention' | translate }}</h2>
+          <p>{{ 'Dashboard.ReviewConfirm' | translate }}</p>
         </div>
-        <a routerLink="/reviews" class="text-link">View reviews</a>
+        <a routerLink="/reviews" class="text-link">{{ 'Dashboard.ViewReviews' | translate }}</a>
       </div>
 
       @if (openReviews.length === 0) {
         <div class="empty-panel">
           <span class="empty-icon"><tv-icon name="check" /></span>
           <div>
-            <strong>You're all caught up</strong>
-            <p>New items needing your review will appear here.</p>
+            <strong>{{ 'Dashboard.CaughtUp' | translate }}</strong>
+            <p>{{ 'Dashboard.NewReviewItems' | translate }}</p>
           </div>
         </div>
       } @else {
@@ -200,7 +200,7 @@
                   <span>{{ review.type }} · {{ review.status.replace('_', ' ') }}</span>
                 </div>
               </div>
-              <span class="row-action">Review</span>
+              <span class="row-action">{{ 'Dashboard.Review' | translate }}</span>
             </a>
           }
         </div>
@@ -210,21 +210,21 @@
     <section class="dashboard-section">
       <div class="section-heading">
         <div>
-          <h2>Recent documents</h2>
-          <p>Your latest uploaded tax records.</p>
+          <h2>{{ 'Dashboard.RecentDocuments' | translate }}</h2>
+          <p>{{ 'Dashboard.LatestUploaded' | translate }}</p>
         </div>
-        <a routerLink="/documents" class="text-link">View all documents</a>
+        <a routerLink="/documents" class="text-link">{{ 'Dashboard.ViewAllDocuments' | translate }}</a>
       </div>
 
       @if (recentDocuments.length === 0) {
         <div class="empty-panel">
           <span class="empty-icon"><tv-icon name="upload" /></span>
           <div>
-            <strong>Start with your tax documents</strong>
-            <p>Upload receipts and statements to keep your evidence together.</p>
+            <strong>{{ 'Dashboard.StartWithDocuments' | translate }}</strong>
+            <p>{{ 'Dashboard.UploadReceipts' | translate }}</p>
           </div>
           @if (auth.canEdit) {
-            <a routerLink="/documents/upload" class="text-link">Upload a document</a>
+            <a routerLink="/documents/upload" class="text-link">{{ 'Dashboard.UploadADocument' | translate }}</a>
           }
         </div>
       } @else {
@@ -248,15 +248,15 @@
       }
     </section>
 
-    <section class="dashboard-section" aria-label="Tax workspace">
+    <section class="dashboard-section" [attr.aria-label]="'TaxWorkspace.Title' | translate">
       <div class="section-heading">
-        <div><h2>Shortcuts</h2></div>
+        <div><h2>{{ 'Dashboard.Shortcuts' | translate }}</h2></div>
       </div>
       <nav class="quick-actions">
-        @if (auth.can('transactions')) {<a routerLink="/transactions"><span><tv-icon name="transactions" /></span><div><strong>Income & expenses</strong><small>Record and review your transactions</small></div></a>}
-        @if (auth.can('assets')) {<a routerLink="/properties"><span><tv-icon name="property" /></span><div><strong>Properties</strong><small>Manage rental property records</small></div></a>}
-        @if (auth.can('assets')) {<a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>Investments</strong><small>Track acquisition and disposal details</small></div></a>}
-        <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><div><strong>Accountant pack</strong><small>Evidence package for your accountant</small></div></a>
+        @if (auth.can('transactions')) {<a routerLink="/transactions"><span><tv-icon name="transactions" /></span><div><strong>{{ 'IncomeExpenses.Title' | translate }}</strong><small>{{ 'Dashboard.RecordTransactions' | translate }}</small></div></a>}
+        @if (auth.can('assets')) {<a routerLink="/properties"><span><tv-icon name="property" /></span><div><strong>{{ 'Properties.Title' | translate }}</strong><small>{{ 'Dashboard.ManageRental' | translate }}</small></div></a>}
+        @if (auth.can('assets')) {<a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>{{ 'Investments.Title' | translate }}</strong><small>{{ 'Dashboard.TrackInvestment' | translate }}</small></div></a>}
+        <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><div><strong>{{ 'AccountantPack.Title' | translate }}</strong><small>{{ 'Dashboard.EvidencePackage' | translate }}</small></div></a>
       </nav>
     </section>
     </aside>

@@ -22,10 +22,11 @@ import {
 } from '../../../../shared/services/documents/document-api.service';
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-document-list',
-  imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent],
+  imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent, TranslatePipe],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

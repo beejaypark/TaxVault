@@ -34,10 +34,11 @@ import {
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { TransactionImportComponent } from './transaction-import.component';
 import { WorkFromHomeComponent } from './work-from-home.component';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-transactions',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TransactionImportComponent, WorkFromHomeComponent],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TransactionImportComponent, WorkFromHomeComponent, TranslatePipe],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -23,10 +23,11 @@ import {
   TaxWorkspaceApiService,
   TransactionDto,
 } from '../../shared/services/tax-workspace-api.service';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-tax-return',
-  imports: [DatePipe, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent],
+  imports: [DatePipe, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent, TranslatePipe],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

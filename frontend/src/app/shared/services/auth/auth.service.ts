@@ -29,6 +29,7 @@ export interface AuthUser {
   identity_provider: string;
   role?: 'owner' | 'accountant';
   preferences?: {
+    language?: 'en' | 'kr' | 'cn' | 'es';
     notifyDocuments?: boolean;
     notifyUncategorised?: boolean;
     defaultFinancialYear?: 'current' | 'all';

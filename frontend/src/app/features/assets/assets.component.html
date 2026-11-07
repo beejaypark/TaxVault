@@ -2,25 +2,25 @@
   <tv-back-navigation />
   <header class="page-header">
     <div>
-      <div class="eyebrow">Tax workspace</div>
-      <h1>Assets</h1>
-      <p>Property and investment details are maintained across years. The financial-year selector filters documents, transactions and reviews, and the rental summary on each property.</p>
+      <div class="eyebrow">{{ 'TaxWorkspace.Title' | translate }}</div>
+      <h1>{{ 'Assets.Title' | translate }}</h1>
+      <p>{{ 'Assets.Description' | translate }}</p>
     </div>
     @if (!auth.canEdit) {
     } @else if (activeTab === 'properties') {
       <button class="primary-button" type="button" (click)="showPropertyForm ? closePropertyForm() : startAddProperty()">
-        @if (showPropertyForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add property }
+        @if (showPropertyForm) { <tv-icon name="close" /> {{ 'Assets.Cancel' | translate }} } @else { <tv-icon name="plus" /> {{ 'Assets.AddProperty' | translate }} }
       </button>
     } @else {
       <button class="primary-button" type="button" (click)="showInvestmentForm ? closeInvestmentForm() : startAddInvestment()">
-        @if (showInvestmentForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add investment }
+        @if (showInvestmentForm) { <tv-icon name="close" /> {{ 'Assets.Cancel' | translate }} } @else { <tv-icon name="plus" /> {{ 'Assets.AddInvestment' | translate }} }
       </button>
     }
   </header>
 
-  <nav class="tabs" aria-label="Asset sections">
-    <a routerLink="/properties" [class.active]="activeTab === 'properties'">Properties <span>{{ properties.length }}</span></a>
-    <a routerLink="/investments" [class.active]="activeTab === 'investments'">Investments <span>{{ investments.length }}</span></a>
+  <nav class="tabs" [attr.aria-label]="'Assets.Sections' | translate">
+    <a routerLink="/properties" [class.active]="activeTab === 'properties'">{{ 'Assets.Properties' | translate }} <span>{{ properties.length }}</span></a>
+    <a routerLink="/investments" [class.active]="activeTab === 'investments'">{{ 'Assets.Investments' | translate }} <span>{{ investments.length }}</span></a>
   </nav>
 
   @if (errorMessage) {
@@ -31,35 +31,35 @@
   }
 
   @if (isLoading) {
-    <div class="content-card loading" role="status">Loading asset records...</div>
+    <div class="content-card loading" role="status">{{ 'Assets.Loading' | translate }}</div>
   } @else if (activeTab === 'properties') {
     @if (showPropertyForm) {
       <form class="content-card editor" (ngSubmit)="saveProperty()">
         <div class="card-heading">
-          <div><h2>{{ editingPropertyId ? 'Edit property' : 'Property details' }}</h2><p>{{ editingPropertyId ? 'Update this property.' : 'Add an Australian property to your records.' }}</p></div>
+          <div><h2>{{ editingPropertyId ? ('Assets.EditProperty' | translate) : ('Assets.PropertyDetails' | translate) }}</h2><p>{{ editingPropertyId ? ('Assets.UpdateProperty' | translate) : ('Assets.AddAustralianProperty' | translate) }}</p></div>
         </div>
         <div class="form-grid">
-          <label>Reference name <input name="referenceCode" [(ngModel)]="propertyForm.reference_code" maxlength="100" placeholder="e.g. Investment property" /></label>
-          <label class="wide">Address <input name="address" [(ngModel)]="propertyForm.address_line_1" maxlength="255" required /></label>
-          <label>Suburb <input name="suburb" [(ngModel)]="propertyForm.suburb" maxlength="100" /></label>
-          <label>State or territory
+          <label>{{ 'Assets.ReferenceName' | translate }} <input name="referenceCode" [(ngModel)]="propertyForm.reference_code" maxlength="100" [placeholder]="'Assets.ReferencePlaceholder' | translate" /></label>
+          <label class="wide">{{ 'Assets.Address' | translate }} <input name="address" [(ngModel)]="propertyForm.address_line_1" maxlength="255" required /></label>
+          <label>{{ 'Assets.Suburb' | translate }} <input name="suburb" [(ngModel)]="propertyForm.suburb" maxlength="100" /></label>
+          <label>{{ 'Assets.StateTerritory' | translate }}
             <select name="state" [(ngModel)]="propertyForm.state">
-              <option value="">Select</option>
+              <option value="">{{ 'Assets.Select' | translate }}</option>
               @for (state of states; track state) { <option [value]="state">{{ state }}</option> }
             </select>
           </label>
-          <label>Postcode <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
-          <label>Current value (AUD) <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" placeholder="From property.com.au" /></label>
-          <label>Value as of <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" /></label>
+          <label>{{ 'Assets.Postcode' | translate }} <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
+          <label>{{ 'Assets.CurrentValue' | translate }} <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" [placeholder]="'Assets.PropertySourcePlaceholder' | translate" /></label>
+          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" /></label>
           <label class="checkbox-field">
             <input name="isMainResidence" type="checkbox" [(ngModel)]="propertyForm.is_main_residence" />
-            <span>I live here (main residence). Its costs and loan interest are kept out of the accountant pack.</span>
+            <span>{{ 'Assets.MainResidence' | translate }}</span>
           </label>
         </div>
         <div class="form-actions">
-          <button type="button" class="secondary-button" (click)="closePropertyForm()">Cancel</button>
+          <button type="button" class="secondary-button" (click)="closePropertyForm()">{{ 'Assets.Cancel' | translate }}</button>
           <button type="submit" class="primary-button" [disabled]="isSaving || !propertyForm.address_line_1.trim()">
-            {{ isSaving ? 'Saving…' : 'Save property' }}
+            {{ isSaving ? ('Assets.Saving' | translate) : ('Assets.SaveProperty' | translate) }}
           </button>
         </div>
       </form>
@@ -68,42 +68,42 @@
     @if (properties.length === 0 && !showPropertyForm) {
       <div class="content-card empty-state">
         <span class="empty-icon"><tv-icon name="property" /></span>
-        <h2>No properties added</h2>
-        <p>Record property details to keep rental and ownership evidence together.</p>
-        <button type="button" class="secondary-button" (click)="startAddProperty()">Add your first property</button>
+        <h2>{{ 'Assets.NoProperties' | translate }}</h2>
+        <p>{{ 'Assets.PropertyEmptyDescription' | translate }}</p>
+        <button type="button" class="secondary-button" (click)="startAddProperty()">{{ 'Assets.AddFirstProperty' | translate }}</button>
       </div>
     } @else {
-      <section class="record-grid" aria-label="Properties">
+      <section class="record-grid" [attr.aria-label]="'Assets.Properties' | translate">
         @for (property of properties; track property.id) {
           <article class="record-card">
             <div class="record-icon"><tv-icon name="property" /></div>
             <div class="record-title">
-              <h2>{{ property.reference_code || property.address_line_1 || 'Property' }}</h2>
-              <p>{{ propertyAddress(property) || 'Address details not provided' }}</p>
+              <h2>{{ property.reference_code || property.address_line_1 || ('Assets.Property' | translate) }}</h2>
+              <p>{{ propertyAddress(property) || ('Assets.AddressDetailsMissing' | translate) }}</p>
             </div>
             <span class="record-meta">{{ property.country_code }}</span>
             @if (property.is_main_residence) {
-              <span class="record-meta">Main residence · not on tax return</span>
+              <span class="record-meta">{{ 'Assets.MainResidenceShort' | translate }}</span>
             }
             @if (auth.canEdit) {
               <div class="row-actions">
-                <button type="button" class="row-action" (click)="startEditProperty(property)"><tv-icon name="edit" /> Edit</button>
-                <button type="button" class="row-action danger" (click)="deleteProperty(property)"><tv-icon name="delete" /> Delete</button>
+                <button type="button" class="row-action" (click)="startEditProperty(property)"><tv-icon name="edit" /> {{ 'Assets.Edit' | translate }}</button>
+                <button type="button" class="row-action danger" (click)="deleteProperty(property)"><tv-icon name="delete" /> {{ 'Assets.Delete' | translate }}</button>
               </div>
             }
             <div class="property-value">
               <div>
-                <span>Current value</span>
+                <span>{{ 'Assets.CurrentValue' | translate }}</span>
                 @if (property.current_value !== null && property.current_value !== undefined) {
                   <strong>{{ formatCurrency(property.current_value) }}</strong>
-                  <small>as of {{ formatDate(property.current_value_date ?? '') }}</small>
+                  <small>{{ 'Assets.ValueAsOf' | translate }} {{ formatDate(property.current_value_date ?? '') }}</small>
                 } @else {
-                  <strong>Not set</strong>
-                  <small>Look it up on property.com.au, then enter it with Edit.</small>
+                  <strong>{{ 'Assets.NotSet' | translate }}</strong>
+                  <small>{{ 'Assets.PropertyLookup' | translate }}</small>
                 }
               </div>
               <a class="row-action" href="https://www.property.com.au/" target="_blank" rel="noopener noreferrer">
-                <tv-icon name="arrowRight" /> Check on property.com.au
+                <tv-icon name="arrowRight" /> {{ 'Assets.CheckProperty' | translate }}
               </a>
             </div>
             <app-property-mortgages [property]="property" (mortgagesChange)="property.mortgages = $event" />
@@ -118,33 +118,33 @@
     @if (showInvestmentForm) {
       <form class="content-card editor" (ngSubmit)="saveInvestment()">
         <div class="card-heading">
-          <div><h2>{{ editingInvestmentId ? 'Edit investment' : 'Investment details' }}</h2><p>{{ editingInvestmentId ? 'Update this investment.' : 'Record an acquisition or investment position.' }}</p></div>
+          <div><h2>{{ editingInvestmentId ? ('Assets.EditInvestment' | translate) : ('Assets.InvestmentDetails' | translate) }}</h2><p>{{ editingInvestmentId ? ('Assets.UpdateInvestment' | translate) : ('Assets.RecordInvestment' | translate) }}</p></div>
         </div>
         <div class="form-grid">
-          <label>Investment type
+          <label>{{ 'Assets.InvestmentType' | translate }}
             <select name="investmentType" [(ngModel)]="investmentForm.investment_type">
               @for (type of investmentTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
             </select>
           </label>
-          <label>Acquisition date <input name="acquisitionDate" type="date" [(ngModel)]="investmentForm.acquisition_date" required /></label>
-          <label>Related property
+          <label>{{ 'Assets.AcquisitionDate' | translate }} <input name="acquisitionDate" type="date" [(ngModel)]="investmentForm.acquisition_date" required /></label>
+          <label>{{ 'Assets.RelatedProperty' | translate }}
             <select name="propertyId" [(ngModel)]="investmentForm.property_id">
-              <option value="">None</option>
+              <option value="">{{ 'Assets.None' | translate }}</option>
               @for (property of properties; track property.id) { <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option> }
             </select>
           </label>
-          <label>Cost base (AUD) <input name="costBase" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.cost_base" /></label>
-          <label>Incidental costs (AUD) <input name="incidentalCosts" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.incidental_costs" /></label>
-          <label>Units / quantity <input name="quantity" type="number" min="0" step="any" [(ngModel)]="investmentForm.quantity" /></label>
-          <label>Ownership (%) <input name="ownership" type="number" min="0" max="100" step="0.01" [(ngModel)]="investmentForm.ownership_percentage" /></label>
-          <label>Current value (AUD) <input name="invCurrentValue" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.current_value" placeholder="Market value today" /></label>
-          <label>Value as of <input name="invCurrentValueDate" type="date" [(ngModel)]="investmentForm.current_value_date" /></label>
-          <label>Sale proceeds (AUD) <input name="proceeds" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.proceeds" /></label>
+          <label>{{ 'Assets.CostBase' | translate }} <input name="costBase" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.cost_base" /></label>
+          <label>{{ 'Assets.IncidentalCosts' | translate }} <input name="incidentalCosts" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.incidental_costs" /></label>
+          <label>{{ 'Assets.UnitsQuantity' | translate }} <input name="quantity" type="number" min="0" step="any" [(ngModel)]="investmentForm.quantity" /></label>
+          <label>{{ 'Assets.Ownership' | translate }} <input name="ownership" type="number" min="0" max="100" step="0.01" [(ngModel)]="investmentForm.ownership_percentage" /></label>
+          <label>{{ 'Assets.CurrentValue' | translate }} <input name="invCurrentValue" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.current_value" [placeholder]="'Assets.MarketValuePlaceholder' | translate" /></label>
+          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="invCurrentValueDate" type="date" [(ngModel)]="investmentForm.current_value_date" /></label>
+          <label>{{ 'Assets.SaleProceeds' | translate }} <input name="proceeds" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.proceeds" /></label>
         </div>
         <div class="form-actions">
-          <button type="button" class="secondary-button" (click)="closeInvestmentForm()">Cancel</button>
+          <button type="button" class="secondary-button" (click)="closeInvestmentForm()">{{ 'Assets.Cancel' | translate }}</button>
           <button type="submit" class="primary-button" [disabled]="isSaving || !investmentForm.acquisition_date">
-            {{ isSaving ? 'Saving…' : 'Save investment' }}
+            {{ isSaving ? ('Assets.Saving' | translate) : ('Assets.SaveInvestment' | translate) }}
           </button>
         </div>
       </form>
@@ -153,33 +153,33 @@
     @if (investments.length === 0 && !showInvestmentForm) {
       <div class="content-card empty-state">
         <span class="empty-icon"><tv-icon name="investment" /></span>
-        <h2>No investments recorded</h2>
-        <p>Add shares, funds, or other investments to organise acquisition and disposal details.</p>
-        <button type="button" class="secondary-button" (click)="startAddInvestment()">Add your first investment</button>
+        <h2>{{ 'Assets.NoInvestments' | translate }}</h2>
+        <p>{{ 'Assets.InvestmentEmptyDescription' | translate }}</p>
+        <button type="button" class="secondary-button" (click)="startAddInvestment()">{{ 'Assets.AddFirstInvestment' | translate }}</button>
       </div>
     } @else {
-      <section class="record-list" aria-label="Investments">
+      <section class="record-list" [attr.aria-label]="'Assets.Investments' | translate">
         @for (investment of investments; track investment.id) {
           <article class="investment-row">
             <div class="record-icon"><tv-icon name="investment" /></div>
             <div class="record-title">
               <h2>{{ investment.investment_type.replace('_', ' ') }}</h2>
-              <p>Acquired {{ formatDate(investment.acquisition_date) }}</p>
+              <p>{{ 'Assets.Acquired' | translate }} {{ formatDate(investment.acquisition_date) }}</p>
             </div>
             <div class="investment-value">
               @if (investment.current_value !== null && investment.current_value !== undefined) {
                 <strong>{{ formatCurrency(investment.current_value) }}</strong>
-                <span>Value{{ investment.current_value_date ? ' as of ' + formatDate(investment.current_value_date) : '' }}, cost {{ formatCurrency(investment.cost_base) }}</span>
+                <span>{{ 'Assets.Value' | translate }}{{ investment.current_value_date ? ' ' + ('Assets.ValueAsOf' | translate) + ' ' + formatDate(investment.current_value_date) : '' }}, {{ 'Assets.Cost' | translate }} {{ formatCurrency(investment.cost_base) }}</span>
               } @else {
                 <strong>{{ formatCurrency(investment.cost_base) }}</strong>
-                <span>Cost base</span>
+                <span>{{ 'Assets.CostBase' | translate }}</span>
               }
             </div>
-            <span class="record-meta">{{ investment.disposal_date ? 'Disposed' : 'Held' }}</span>
+            <span class="record-meta">{{ investment.disposal_date ? ('Assets.Disposed' | translate) : ('Assets.Held' | translate) }}</span>
             @if (auth.canEdit) {
               <div class="row-actions">
-                <button type="button" class="row-action" (click)="startEditInvestment(investment)"><tv-icon name="edit" /> Edit</button>
-                <button type="button" class="row-action danger" (click)="deleteInvestment(investment)"><tv-icon name="delete" /> Delete</button>
+                <button type="button" class="row-action" (click)="startEditInvestment(investment)"><tv-icon name="edit" /> {{ 'Assets.Edit' | translate }}</button>
+                <button type="button" class="row-action danger" (click)="deleteInvestment(investment)"><tv-icon name="delete" /> {{ 'Assets.Delete' | translate }}</button>
               </div>
             }
           </article>

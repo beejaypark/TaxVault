@@ -2,17 +2,17 @@
   <tv-back-navigation />
   <header class="page-header">
     <div>
-      <div class="eyebrow">Tax workspace</div>
-      <h1>Income & expenses</h1>
-      <p>{{ financialYearLabel }} · Record and review the transactions that support your tax position.</p>
-      <p class="refresh-indicator">Records update automatically every 5 seconds.</p>
+      <div class="eyebrow">{{ 'TaxWorkspace.Title' | translate }}</div>
+      <h1>{{ 'Transactions.Title' | translate }}</h1>
+      <p>{{ financialYearLabel }} · {{ 'Transactions.Description' | translate }}</p>
+      <p class="refresh-indicator">{{ 'Transactions.RefreshStatus' | translate }}</p>
     </div>
     @if (auth.canEdit) {
     <div class="header-actions">
-      <button class="secondary-button" type="button" (click)="showWfh = !showWfh"><tv-icon name="chart" /> Working from home</button>
-      <button class="secondary-button" type="button" (click)="showImport = !showImport"><tv-icon name="upload" /> Import bank file</button>
+      <button class="secondary-button" type="button" (click)="showWfh = !showWfh"><tv-icon name="chart" /> {{ 'Transactions.WorkingFromHome' | translate }}</button>
+      <button class="secondary-button" type="button" (click)="showImport = !showImport"><tv-icon name="upload" /> {{ 'Transactions.ImportBankFile' | translate }}</button>
       <button class="primary-button" type="button" (click)="showForm ? closeForm() : startCreate()">
-        @if (showForm) { <tv-icon name="close" /> Cancel } @else { <tv-icon name="plus" /> Add transaction }
+        @if (showForm) { <tv-icon name="close" /> {{ 'Transactions.Cancel' | translate }} } @else { <tv-icon name="plus" /> {{ 'Transactions.Add' | translate }} }
       </button>
     </div>
     }
@@ -31,30 +31,30 @@
   @if (showForm) {
     <form class="transaction-form" (ngSubmit)="saveTransaction()">
       <div class="form-heading">
-        <div><h2>{{ editingId ? 'Edit transaction' : 'Transaction details' }}</h2><p>Records are assigned to a financial year using the transaction date.</p></div>
+        <div><h2>{{ editingId ? ('Transactions.Edit' | translate) : ('Transactions.Details' | translate) }}</h2><p>{{ 'Transactions.FinancialYearAssignment' | translate }}</p></div>
       </div>
       <div class="form-grid">
-        <label>Description <input name="description" [(ngModel)]="form.description" maxlength="1000" required placeholder="e.g. Interest from savings account" /></label>
-        <label>Type
+        <label>{{ 'Transactions.DescriptionField' | translate }} <input name="description" [(ngModel)]="form.description" maxlength="1000" required [placeholder]="'Transactions.DescriptionPlaceholder' | translate" /></label>
+        <label>{{ 'Transactions.Type' | translate }}
           <select name="direction" [(ngModel)]="form.direction" (ngModelChange)="onDirectionChange()">
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
+            <option value="income">{{ 'Transactions.Income' | translate }}</option>
+            <option value="expense">{{ 'Transactions.Expense' | translate }}</option>
           </select>
         </label>
-        <label>Date <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
-        <label>Amount (AUD) <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
-        <label>Tax return item
+        <label>{{ 'Transactions.Date' | translate }} <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
+        <label>{{ 'Transactions.Amount' | translate }} <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
+        <label>{{ 'Transactions.TaxReturnItem' | translate }}
           <select name="atoCategory" [(ngModel)]="form.ato_category" (ngModelChange)="onCategoryChange()">
-            <option value="">Not categorised</option>
+            <option value="">{{ 'Transactions.NotCategorised' | translate }}</option>
             @for (category of categoryOptions; track category.code) {
               <option [value]="category.code">{{ category.group }} · {{ category.label }} ({{ category.ref }})</option>
             }
           </select>
         </label>
         @if (needsProperty) {
-          <label>Rental property
+          <label>{{ 'Transactions.RentalProperty' | translate }}
             <select name="propertyId" [(ngModel)]="form.property_id" required>
-              <option value="">Select property</option>
+              <option value="">{{ 'Transactions.SelectProperty' | translate }}</option>
               @for (property of properties; track property.id) {
                 <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option>
               }
@@ -63,71 +63,71 @@
         }
       </div>
       <div class="form-actions">
-        <button type="button" class="secondary-button" (click)="closeForm()">Cancel</button>
+        <button type="button" class="secondary-button" (click)="closeForm()">{{ 'Transactions.Cancel' | translate }}</button>
         <button type="submit" class="primary-button" [disabled]="isSaving || !isFormValid">
-          {{ isSaving ? 'Saving…' : 'Save transaction' }}
+          {{ isSaving ? ('Transactions.Saving' | translate) : ('Transactions.Save' | translate) }}
         </button>
       </div>
     </form>
   }
 
-  <section class="summary-grid" aria-label="Income and expenses summary">
-    <article class="summary-card"><span>Income</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
-    <article class="summary-card"><span>Expenses</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
-    <article class="summary-card"><span>Net records</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
+  <section class="summary-grid" [attr.aria-label]="'Transactions.Summary' | translate">
+    <article class="summary-card"><span>{{ 'Transactions.Income' | translate }}</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
+    <article class="summary-card"><span>{{ 'Transactions.Expenses' | translate }}</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
+    <article class="summary-card"><span>{{ 'Transactions.NetRecords' | translate }}</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
   </section>
 
   <section class="records-card">
     <div class="toolbar">
       <div>
-        <h2>Transactions</h2>
-        <p>{{ filteredTransactions.length }} records</p>
+        <h2>{{ 'Transactions.Transactions' | translate }}</h2>
+        <p>{{ filteredTransactions.length }} {{ 'Transactions.Records' | translate }}</p>
       </div>
       <div class="filters">
-        <label class="sr-only" for="direction-filter">Transaction type</label>
+        <label class="sr-only" for="direction-filter">{{ 'Transactions.TransactionType' | translate }}</label>
         <select id="direction-filter" [(ngModel)]="selectedDirection" name="directionFilter">
-          <option value="all">All types</option>
-          <option value="income">Income</option>
-          <option value="expense">Expenses</option>
+          <option value="all">{{ 'Transactions.AllTypes' | translate }}</option>
+          <option value="income">{{ 'Transactions.Income' | translate }}</option>
+          <option value="expense">{{ 'Transactions.Expenses' | translate }}</option>
         </select>
-        <label class="sr-only" for="transaction-search">Search transactions</label>
-        <input id="transaction-search" name="search" [(ngModel)]="searchText" placeholder="Search descriptions" />
+        <label class="sr-only" for="transaction-search">{{ 'Transactions.SearchTransactions' | translate }}</label>
+        <input id="transaction-search" name="search" [(ngModel)]="searchText" [placeholder]="'Transactions.SearchDescriptions' | translate" />
       </div>
     </div>
 
     @if (auth.canEdit && selectedIds.size > 0) {
-      <div class="bulk-bar" role="region" aria-label="Bulk categorise">
-        <strong>{{ selectedIds.size }} selected</strong>
-        <select name="bulkCategory" [(ngModel)]="bulkCategory" (ngModelChange)="onBulkCategoryChange()" aria-label="Tax return item">
-          <option value="">Clear tax return item</option>
+      <div class="bulk-bar" role="region" [attr.aria-label]="'Transactions.BulkCategorise' | translate">
+        <strong>{{ selectedIds.size }} {{ 'Transactions.Selected' | translate }}</strong>
+        <select name="bulkCategory" [(ngModel)]="bulkCategory" (ngModelChange)="onBulkCategoryChange()" [attr.aria-label]="'Transactions.TaxReturnItem' | translate">
+          <option value="">{{ 'Transactions.ClearTaxReturnItem' | translate }}</option>
           @for (category of bulkOptions; track category.code) {
             <option [value]="category.code">{{ category.group }} · {{ category.label }} ({{ category.ref }})</option>
           }
         </select>
         @if (bulkNeedsProperty) {
           <select name="bulkProperty" [(ngModel)]="bulkProperty" aria-label="Rental property">
-            <option value="">Select property</option>
+            <option value="">{{ 'Transactions.SelectProperty' | translate }}</option>
             @for (property of properties; track property.id) { <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option> }
           </select>
         }
-        <button type="button" class="primary-button" [disabled]="isBulkSaving || (bulkNeedsProperty && !bulkProperty)" (click)="applyBulk()">Apply</button>
-        <button type="button" class="secondary-button" [disabled]="isBulkSaving" (click)="suggestForSelected()" title="Applies only to selected rows currently shown in the list">Suggest from description</button>
-        <button type="button" class="secondary-button" (click)="selectedIds.clear()">Clear selection</button>
+        <button type="button" class="primary-button" [disabled]="isBulkSaving || (bulkNeedsProperty && !bulkProperty)" (click)="applyBulk()">{{ 'Transactions.Apply' | translate }}</button>
+        <button type="button" class="secondary-button" [disabled]="isBulkSaving" (click)="suggestForSelected()">{{ 'Transactions.SuggestFromDescription' | translate }}</button>
+        <button type="button" class="secondary-button" (click)="selectedIds.clear()">{{ 'Transactions.ClearSelection' | translate }}</button>
       </div>
     }
 
     @if (isLoading) {
-      <p class="empty-state" role="status">Loading transactions...</p>
+      <p class="empty-state" role="status">{{ 'Transactions.Loading' | translate }}</p>
     } @else if (filteredTransactions.length === 0) {
       <div class="empty-state">
-        <h3>No transactions found</h3>
-        <p>Add income and expenses manually. Bank imports and receipt matching are planned follow-up features.</p>
-        @if (auth.canEdit) {<button class="secondary-button" type="button" (click)="startCreate()">Add a transaction</button>}
+        <h3>{{ 'Transactions.NoTransactions' | translate }}</h3>
+        <p>{{ 'Transactions.EmptyDescription' | translate }}</p>
+        @if (auth.canEdit) {<button class="secondary-button" type="button" (click)="startCreate()">{{ 'Transactions.AddTransaction' | translate }}</button>}
       </div>
     } @else {
       <div class="table-wrap">
         <table>
-          <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" aria-label="Select all" /></th>}<th>Description</th><th>Date</th><th>Type</th><th>Financial year</th><th class="amount">Amount</th>@if (auth.canEdit) {<th class="actions-col">Actions</th>}</tr></thead>
+          <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" [attr.aria-label]="'Transactions.SelectAll' | translate" /></th>}<th>{{ 'Transactions.DescriptionField' | translate }}</th><th>{{ 'Transactions.Date' | translate }}</th><th>{{ 'Transactions.Type' | translate }}</th><th>{{ 'Common.FinancialYear' | translate }}</th><th class="amount">{{ 'Transactions.Amount' | translate }}</th>@if (auth.canEdit) {<th class="actions-col">{{ 'Transactions.Actions' | translate }}</th>}</tr></thead>
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
               <tr>
@@ -149,8 +149,8 @@
                 @if (auth.canEdit) {
                   <td class="actions-col">
                     <div class="row-actions">
-                      <button type="button" class="row-action" (click)="startEdit(transaction)"><tv-icon name="edit" /> Edit</button>
-                      <button type="button" class="row-action danger" (click)="deleteTransaction(transaction)"><tv-icon name="delete" /> Delete</button>
+                      <button type="button" class="row-action" (click)="startEdit(transaction)"><tv-icon name="edit" /> {{ 'Transactions.EditAction' | translate }}</button>
+                      <button type="button" class="row-action danger" (click)="deleteTransaction(transaction)"><tv-icon name="delete" /> {{ 'Transactions.DeleteAction' | translate }}</button>
                     </div>
                   </td>
                 }

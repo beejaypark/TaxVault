@@ -17,10 +17,11 @@ import {
   DocumentTypeDto,
   FinancialYearDto,
 } from '../../../../shared/services/documents/document-api.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-upload-document',
-  imports: [TaxIconComponent, BackNavigationComponent],
+  imports: [TaxIconComponent, BackNavigationComponent, TranslatePipe],
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

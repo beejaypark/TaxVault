@@ -16,6 +16,7 @@ import { UserPreferencesService } from '../../services/user-preferences.service'
 import { formatFinancialYear } from '../../utils/financial-year';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationHistoryService } from '../../services/navigation-history.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import {
   DocumentApiService,
   FinancialYearDto,
@@ -23,7 +24,7 @@ import {
 
 @Component({
   selector: 'app-shell',
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent, BrandLogoComponent, GlobalSearchComponent, NotificationsComponent],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, TaxIconComponent, BrandLogoComponent, GlobalSearchComponent, NotificationsComponent, TranslatePipe],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

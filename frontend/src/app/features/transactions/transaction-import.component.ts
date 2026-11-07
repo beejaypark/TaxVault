@@ -23,6 +23,7 @@ import {
   suggestAtoCategory,
 } from '../../shared/utils/ato-categories';
 import { parseBankFile } from '../../shared/utils/bank-import';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 interface PreviewRow {
   date: string;
@@ -37,22 +38,22 @@ const MAX_ROWS = 1000;
 
 @Component({
   selector: 'app-transaction-import',
-  imports: [FormsModule, TaxIconComponent],
+  imports: [FormsModule, TaxIconComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-label="Import bank transactions">
+    <section class="panel" [attr.aria-label]="'Transactions.ImportTitle' | translate">
       <div class="head">
         <div>
-          <h2>Import bank transactions</h2>
-          <p>Upload a CSV or OFX export from your bank's online banking. Review the rows, then import. Re-importing the same file will not create duplicates. Nothing is sent to a third party.</p>
+          <h2>{{ 'Transactions.ImportTitle' | translate }}</h2>
+          <p>{{ 'Transactions.ImportDescription' | translate }}</p>
         </div>
-        <button type="button" class="btn" (click)="closed.emit()"><tv-icon name="close" /> Close</button>
+        <button type="button" class="btn" (click)="closed.emit()"><tv-icon name="close" /> {{ 'Transactions.Close' | translate }}</button>
       </div>
 
       @if (bank && bank.enabled) {
         <div class="bank">
           <div>
-            <strong>Bank connection</strong>
+            <strong>{{ 'Transactions.BankConnection' | translate }}</strong>
             <p>
               @if (bank.connected) {
                 Connected through our bank data provider{{ bank.last_synced_at ? ', last synced ' + lastSynced : '' }}. Synced transactions arrive uncategorised; use bulk categorise afterwards.
@@ -62,15 +63,15 @@ const MAX_ROWS = 1000;
             </p>
           </div>
           <div class="actions">
-            <button type="button" class="btn" [disabled]="bankBusy" (click)="connectBank()">{{ bank.connected ? 'Add another bank' : 'Connect bank' }}</button>
+            <button type="button" class="btn" [disabled]="bankBusy" (click)="connectBank()">{{ bank.connected ? ('Transactions.AddAnotherBank' | translate) : ('Transactions.ConnectBank' | translate) }}</button>
             @if (bank.connected) {
-              <button type="button" class="btn primary" [disabled]="bankBusy" (click)="syncBank()">{{ bankBusy ? 'Working…' : 'Sync now' }}</button>
+              <button type="button" class="btn primary" [disabled]="bankBusy" (click)="syncBank()">{{ bankBusy ? ('Transactions.Working' | translate) : ('Transactions.SyncNow' | translate) }}</button>
             }
           </div>
         </div>
       }
 
-      <label class="file">Bank file (.csv, .ofx, .qfx)
+      <label class="file">{{ 'Transactions.BankFile' | translate }}
         <input type="file" accept=".csv,.ofx,.qfx,text/csv" (change)="onFile($event)" />
       </label>
 
@@ -84,7 +85,7 @@ const MAX_ROWS = 1000;
       @if (rows.length > 0) {
         <p class="note">
           {{ selectedCount }} of {{ rows.length }} rows selected@if (skippedRows > 0) { · {{ skippedRows }} unreadable rows ignored }.
-          Suggested tax return items are only hints based on the description. Check them before importing.
+          {{ 'Transactions.SuggestedHint' | translate }}
         </p>
         <div class="table-wrap">
           <table>
@@ -115,7 +116,7 @@ const MAX_ROWS = 1000;
         </div>
         <div class="actions">
           <button type="button" class="btn primary" [disabled]="isImporting || selectedCount === 0" (click)="runImport()">
-            {{ isImporting ? 'Importing…' : 'Import ' + selectedCount + ' transactions' }}
+            {{ isImporting ? ('Transactions.Importing' | translate) : ('Transactions.ImportTransactions' | translate) + ' ' + selectedCount }}
           </button>
         </div>
       }

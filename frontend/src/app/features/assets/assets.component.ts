@@ -20,10 +20,11 @@ import {
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { PropertyMortgagesComponent } from './property-mortgages.component';
 import { PropertyRentalSummaryComponent } from './property-rental-summary.component';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-assets',
-  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent, PropertyRentalSummaryComponent],
+  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent, PropertyRentalSummaryComponent, TranslatePipe],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,73 +6,84 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { buildReminderIcs } from '../../shared/utils/calendar';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { LocaleCode, angularLocale, pathWithLocale } from '../../i18n/locale';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-page">
       <header>
-        <div class="eyebrow">Account</div>
-        <h1>Settings</h1>
-        <p>Your profile and how TaxVault works for you. Preferences are saved to your account.</p>
+        <div class="eyebrow">{{ 'Settings.Account' | translate }}</div>
+        <h1>{{ 'Settings.Title' | translate }}</h1>
+        <p>{{ 'Settings.Description' | translate }}</p>
       </header>
 
       <section class="card" aria-labelledby="profile-heading">
-        <h2 id="profile-heading">Profile</h2>
+        <h2 id="profile-heading">{{ 'Settings.Profile' | translate }}</h2>
         <dl>
-          <div><dt>Name</dt><dd>{{ auth.currentUser?.display_name || '—' }}</dd></div>
-          <div><dt>Email</dt><dd>{{ auth.currentUser?.email || '—' }}</dd></div>
+          <div><dt>{{ 'Settings.Name' | translate }}</dt><dd>{{ auth.currentUser?.display_name || '—' }}</dd></div>
+          <div><dt>{{ 'Settings.Email' | translate }}</dt><dd>{{ auth.currentUser?.email || '—' }}</dd></div>
         </dl>
-        <p class="hint">Your name and email come from your sign-in account and are managed there.</p>
+        <p class="hint">{{ 'Settings.ProfileHint' | translate }}</p>
       </section>
 
       <section class="card" aria-labelledby="general-heading">
-        <h2 id="general-heading">General</h2>
+        <h2 id="general-heading">{{ 'Settings.General' | translate }}</h2>
         <label class="field">
-          <span>Financial year when you sign in</span>
+          <span>{{ 'Settings.Language' | translate }}</span>
+          <select name="language" [ngModel]="prefs().language" (ngModelChange)="changeLanguage($event)">
+            <option value="en">English</option>
+            <option value="kr">한국어</option>
+            <option value="cn">简体中文</option>
+            <option value="es">Español</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>{{ 'Settings.FinancialYearOnSignIn' | translate }}</span>
           <select name="defaultYear" [ngModel]="prefs().defaultFinancialYear" (ngModelChange)="update({ defaultFinancialYear: $event })">
-            <option value="current">Current financial year</option>
+            <option value="current">{{ 'Settings.CurrentFinancialYear' | translate }}</option>
             <option value="all">All financial years</option>
           </select>
         </label>
-        <p class="hint">You can still change the financial year at any time from the header.</p>
+        <p class="hint">{{ 'Settings.GeneralHint' | translate }}</p>
       </section>
 
       <section class="card" aria-labelledby="notify-heading">
-        <h2 id="notify-heading">Notifications</h2>
-        <p class="hint">Choose what appears under the bell in the header.</p>
+        <h2 id="notify-heading">{{ 'Settings.Notifications' | translate }}</h2>
+        <p class="hint">{{ 'Settings.NotificationsHint' | translate }}</p>
         <label class="toggle">
           <input type="checkbox" name="notifyDocuments" [ngModel]="prefs().notifyDocuments" (ngModelChange)="update({ notifyDocuments: $event })" />
-          <span><strong>Documents</strong><small>Documents that need review, failed processing or need a financial year.</small></span>
+          <span><strong>{{ 'Settings.DocumentsNotification' | translate }}</strong><small>{{ 'Settings.DocumentsNotificationHint' | translate }}</small></span>
         </label>
         <label class="toggle">
           <input type="checkbox" name="notifyUncategorised" [ngModel]="prefs().notifyUncategorised" (ngModelChange)="update({ notifyUncategorised: $event })" />
-          <span><strong>Uncategorised transactions</strong><small>Transactions without a tax return item.</small></span>
+          <span><strong>{{ 'Settings.UncategorisedTransactions' | translate }}</strong><small>{{ 'Settings.UncategorisedTransactionsHint' | translate }}</small></span>
         </label>
       </section>
 
       @if (!auth.isAccountant) {
         <section class="card" aria-labelledby="email-heading">
-          <h2 id="email-heading">Email reminders</h2>
-          <p class="hint">Optional emails to your sign-in address. Each email has an unsubscribe link.</p>
+          <h2 id="email-heading">{{ 'Settings.EmailReminders' | translate }}</h2>
+          <p class="hint">{{ 'Settings.EmailRemindersHint' | translate }}</p>
           <label class="toggle">
             <input type="checkbox" name="emailReviewDigest" [ngModel]="prefs().emailReviewDigest" (ngModelChange)="update({ emailReviewDigest: $event })" />
-            <span><strong>Weekly review digest</strong><small>At most one email a week when documents need your review.</small></span>
+            <span><strong>{{ 'Settings.WeeklyReviewDigest' | translate }}</strong><small>{{ 'Settings.WeeklyReviewDigestHint' | translate }}</small></span>
           </label>
           <label class="toggle">
             <input type="checkbox" name="emailDeadlineReminders" [ngModel]="prefs().emailDeadlineReminders" (ngModelChange)="update({ emailDeadlineReminders: $event })" />
-            <span><strong>Lodgement deadline reminders</strong><small>30 days, 7 days and 1 day before the deadline.</small></span>
+            <span><strong>{{ 'Settings.DeadlineReminders' | translate }}</strong><small>{{ 'Settings.DeadlineRemindersHint' | translate }}</small></span>
           </label>
           <label class="field">
-            <span>Your lodgement date (optional)</span>
+            <span>{{ 'Settings.LodgementDate' | translate }}</span>
             <input type="date" name="lodgementDeadline" [ngModel]="prefs().lodgementDeadline" (ngModelChange)="update({ lodgementDeadline: $event || null })" />
           </label>
-          <p class="hint">Without a date we use 31 October after each financial year ends. Please confirm your actual date with the ATO or a tax agent.</p>
+          <p class="hint">{{ 'Settings.DeadlineHint' | translate }}</p>
           <div class="actions">
-            <button type="button" class="link-button" (click)="sendTest()" [disabled]="sending()">{{ sending() ? 'Sending…' : 'Send test email' }}</button>
-            <button type="button" class="link-button" (click)="downloadIcs()">Add to calendar (.ics)</button>
+            <button type="button" class="link-button" (click)="sendTest()" [disabled]="sending()">{{ sending() ? ('Settings.Sending' | translate) : ('Settings.SendTestEmail' | translate) }}</button>
+            <button type="button" class="link-button" (click)="downloadIcs()">{{ 'Settings.AddToCalendar' | translate }}</button>
           </div>
           @if (testMessage()) {
             <p class="hint" role="status">{{ testMessage() }}</p>
@@ -80,9 +91,9 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
         </section>
 
         <section class="card" aria-labelledby="access-heading">
-          <h2 id="access-heading">Access</h2>
-          <p class="hint">Invite your accountant to view your records, or remove their access.</p>
-          <a routerLink="/accountants" class="link-button">Manage accountants</a>
+          <h2 id="access-heading">{{ 'Settings.Access' | translate }}</h2>
+          <p class="hint">{{ 'Settings.AccessHint' | translate }}</p>
+          <a routerLink="/accountants" class="link-button">{{ 'Settings.ManageAccountants' | translate }}</a>
         </section>
       }
     </div>
@@ -156,5 +167,17 @@ export class SettingsComponent {
 
   update(changes: Parameters<UserPreferencesService['update']>[0]): void {
     this.preferences.update(changes);
+  }
+
+  changeLanguage(value: string): void {
+    if (!['en', 'kr', 'cn', 'es'].includes(value)) {
+      return;
+    }
+
+    const locale = value as LocaleCode;
+    this.preferences.updateAndWait({ language: locale }).subscribe(() => {
+      document.documentElement.lang = angularLocale(locale);
+      window.location.assign(pathWithLocale(window.location.pathname, locale));
+    });
   }
 }

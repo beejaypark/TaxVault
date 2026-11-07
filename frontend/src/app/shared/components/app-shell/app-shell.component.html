@@ -1,6 +1,6 @@
 <div class="app-shell">
   <header class="topbar no-print">
-    <button type="button" class="menu-toggle" aria-label="Toggle navigation"
+    <button type="button" class="menu-toggle" [attr.aria-label]="'Common.ToggleNavigation' | translate"
             [attr.aria-expanded]="menuOpen" (click)="toggleMenu()">
       <span></span><span></span><span></span>
     </button>
@@ -11,11 +11,11 @@
 
     @if (auth.isAccountant) {
       <span class="viewer-badge" title="Accountant access is read-only">
-        Read-only view{{ auth.viewingOwnerName ? ' · ' + auth.viewingOwnerName : '' }}
+        {{ 'Common.ReadOnlyView' | translate }}{{ auth.viewingOwnerName ? ' · ' + auth.viewingOwnerName : '' }}
       </span>
     }
     <div class="fy-picker">
-      <label class="fy-label" for="active-financial-year">Financial year</label>
+      <label class="fy-label" for="active-financial-year">{{ 'Common.FinancialYear' | translate }}</label>
       <select
         id="active-financial-year"
         class="financial-year"
@@ -23,11 +23,11 @@
         [disabled]="isLoadingFinancialYears || financialYears.length === 0"
         (ngModelChange)="onFinancialYearChange($event)"
       >
-        <option value="">All financial years</option>
+        <option value="">{{ 'Common.AllFinancialYears' | translate }}</option>
         @if (isLoadingFinancialYears) {
-          <option value="">Loading financial years…</option>
+          <option value="">{{ 'Common.LoadingFinancialYears' | translate }}</option>
         } @else if (financialYears.length === 0) {
-          <option value="">No financial years</option>
+          <option value="">{{ 'Common.NoFinancialYears' | translate }}</option>
         }
         @for (year of financialYears; track year.id) {
           <option [value]="year.id">FY {{ formatYearCode(year.year_code) }}</option>
@@ -36,7 +36,7 @@
     </div>
 
     <app-notifications />
-    <a routerLink="/settings" class="icon-link" aria-label="Settings" title="Settings"><tv-icon name="settings" /></a>
+    <a routerLink="/settings" class="icon-link" [attr.aria-label]="'Settings.Title' | translate" [title]="'Settings.Title' | translate"><tv-icon name="settings" /></a>
 
     <div class="user-menu">
       <button type="button" class="user-button" aria-haspopup="menu"
@@ -49,14 +49,14 @@
           <div class="user-info">
             <span class="avatar avatar-large" aria-hidden="true">{{ userInitial }}</span>
             <div class="user-text">
-              <span class="user-label">Signed in as</span>
+          <span class="user-label">{{ 'Common.SignedInAs' | translate }}</span>
               <span class="user-name">{{ auth.currentUser?.display_name || auth.currentUser?.email }}</span>
             </div>
           </div>
           @if (logoutError) {
             <span class="logout-error" role="alert">Unable to sign out. Please try again.</span>
           }
-          <button type="button" class="logout-button" role="menuitem" (click)="logout()">Sign out</button>
+          <button type="button" class="logout-button" role="menuitem" (click)="logout()">{{ 'Common.SignOut' | translate }}</button>
         </div>
       }
     </div>
@@ -65,59 +65,59 @@
   <aside class="sidebar no-print" [class.open]="menuOpen">
     <tv-brand-logo class="brand" [size]="32" />
 
-    <nav class="navigation" aria-label="Main navigation" (click)="closeMenu()">
-      <div class="nav-section-label">Overview</div>
+    <nav class="navigation" [attr.aria-label]="'Common.MainNavigation' | translate" (click)="closeMenu()">
+      <div class="nav-section-label">{{ 'Overview.Title' | translate }}</div>
       <a routerLink="/dashboard" routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: true }" class="nav-item"
          (click)="navigationHistory.clearForPrimaryNavigation('/dashboard')">
-        <span class="nav-icon"><tv-icon name="dashboard" /></span><span>Dashboard</span>
+        <span class="nav-icon"><tv-icon name="dashboard" /></span><span>{{ 'Dashboard.Title' | translate }}</span>
       </a>
-      <div class="nav-section-label">Tax workspace</div>
+      <div class="nav-section-label">{{ 'TaxWorkspace.Title' | translate }}</div>
       @if (auth.can('documents')) {
         <a routerLink="/documents" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/documents')">
-          <span class="nav-icon"><tv-icon name="document" /></span><span>Documents</span>
+          <span class="nav-icon"><tv-icon name="document" /></span><span>{{ 'Documents.Title' | translate }}</span>
         </a>
       }
       <a routerLink="/financial-years" routerLinkActive="active" class="nav-item"
          (click)="navigationHistory.clearForPrimaryNavigation('/financial-years')">
-        <span class="nav-icon"><tv-icon name="financialYear" /></span><span>Financial years</span>
+        <span class="nav-icon"><tv-icon name="financialYear" /></span><span>{{ 'FinancialYears.Title' | translate }}</span>
       </a>
       @if (auth.can('reviews')) {
         <a routerLink="/reviews" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/reviews')">
-          <span class="nav-icon"><tv-icon name="review" /></span><span>Reviews</span>
+          <span class="nav-icon"><tv-icon name="review" /></span><span>{{ 'Reviews.Title' | translate }}</span>
         </a>
       }
       @if (auth.can('transactions')) {
         <a routerLink="/transactions" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/transactions')">
-          <span class="nav-icon"><tv-icon name="transactions" /></span><span>Income & expenses</span>
+          <span class="nav-icon"><tv-icon name="transactions" /></span><span>{{ 'IncomeExpenses.Title' | translate }}</span>
         </a>
       }
       @if (auth.can('assets')) {
-        <div class="nav-section-label">Assets</div>
+        <div class="nav-section-label">{{ 'Assets.Title' | translate }}</div>
         <a routerLink="/properties" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/properties')">
-          <span class="nav-icon"><tv-icon name="property" /></span><span>Properties</span>
+          <span class="nav-icon"><tv-icon name="property" /></span><span>{{ 'Properties.Title' | translate }}</span>
         </a>
         <a routerLink="/investments" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/investments')">
-          <span class="nav-icon"><tv-icon name="investment" /></span><span>Investments</span>
+          <span class="nav-icon"><tv-icon name="investment" /></span><span>{{ 'Investments.Title' | translate }}</span>
         </a>
       }
-      <div class="nav-section-label">Reports</div>
+      <div class="nav-section-label">{{ 'Reports.Title' | translate }}</div>
       @if (auth.can('transactions')) {
         <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">
-          <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>Accountant pack</span>
+          <span class="nav-icon"><tv-icon name="taxReturn" /></span><span>{{ 'AccountantPack.Title' | translate }}</span>
         </a>
       }
       @if (auth.canEdit) {
-        <div class="nav-section-label">Manage</div>
+        <div class="nav-section-label">{{ 'Manage.Title' | translate }}</div>
         <a routerLink="/accountants" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/accountants')">
-          <span class="nav-icon"><tv-icon name="accountant" /></span><span>Accountants</span>
+          <span class="nav-icon"><tv-icon name="accountant" /></span><span>{{ 'Accountants.Title' | translate }}</span>
         </a>
       }
     </nav>

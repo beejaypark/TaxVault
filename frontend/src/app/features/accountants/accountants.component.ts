@@ -12,6 +12,7 @@ import {
   DocumentApiService,
   FinancialYearDto,
 } from '../../shared/services/documents/document-api.service';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 const SECTION_LABELS: Record<AccessSection, string> = {
   documents: 'Documents',
@@ -31,16 +32,16 @@ interface AccountantForm {
 
 @Component({
   selector: 'app-accountants',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="page">
       <header class="head">
         <div>
-          <h1>Manage accountants</h1>
-          <p>Give your accountant read-only access, or email them your Accountant pack.</p>
+          <h1>{{ 'Accountants.Title' | translate }}</h1>
+          <p>{{ 'Accountants.Description' | translate }}</p>
         </div>
-        <button type="button" class="primary-button" (click)="startCreate()">Add accountant</button>
+        <button type="button" class="primary-button" (click)="startCreate()">{{ 'Accountants.Add' | translate }}</button>
       </header>
 
       @if (message) {
@@ -51,25 +52,25 @@ interface AccountantForm {
       }
       @if (temporaryPassword) {
         <div class="notice password" role="status">
-          <strong>Temporary password for {{ temporaryFor }}</strong>
+          <strong>{{ 'Accountants.TemporaryPassword' | translate }} {{ temporaryFor }}</strong>
           <code>{{ temporaryPassword }}</code>
-          <span>Shown only once. Share it securely; they must change it at first sign-in.</span>
-          <button type="button" (click)="copyPassword()">Copy</button>
-          <button type="button" (click)="temporaryPassword = ''">Dismiss</button>
+          <span>{{ 'Accountants.ShownOnce' | translate }}</span>
+          <button type="button" (click)="copyPassword()">{{ 'Accountants.Copy' | translate }}</button>
+          <button type="button" (click)="temporaryPassword = ''">{{ 'Accountants.Dismiss' | translate }}</button>
         </div>
       }
 
       @if (form) {
         <form class="panel form" (ngSubmit)="save()">
-          <h2>{{ editingId ? 'Edit access' : 'Add accountant' }}</h2>
-          <label>Name <input name="name" [(ngModel)]="form.name" required maxlength="120" /></label>
+          <h2>{{ editingId ? ('Accountants.EditAccess' | translate) : ('Accountants.Add' | translate) }}</h2>
+          <label>{{ 'Accountants.Name' | translate }} <input name="name" [(ngModel)]="form.name" required maxlength="120" /></label>
           @if (!editingId) {
-            <label>Email <input name="email" type="email" [(ngModel)]="form.email" required /></label>
+            <label>{{ 'Accountants.Email' | translate }} <input name="email" type="email" [(ngModel)]="form.email" required /></label>
           }
-          <label>Firm <input name="firm" [(ngModel)]="form.firm" maxlength="160" /></label>
+          <label>{{ 'Accountants.Firm' | translate }} <input name="firm" [(ngModel)]="form.firm" maxlength="160" /></label>
 
           <fieldset>
-            <legend>Can view</legend>
+            <legend>{{ 'Accountants.CanView' | translate }}</legend>
             @for (section of sectionKeys; track section) {
               <label class="check">
                 <input
@@ -84,9 +85,9 @@ interface AccountantForm {
           </fieldset>
 
           <fieldset>
-            <legend>Financial years</legend>
+            <legend>{{ 'Accountants.FinancialYears' | translate }}</legend>
             <label class="check">
-              <input type="checkbox" name="allYears" [(ngModel)]="form.allYears" /> All years
+              <input type="checkbox" name="allYears" [(ngModel)]="form.allYears" /> {{ 'Accountants.AllYears' | translate }}
             </label>
             @if (!form.allYears) {
               @for (year of financialYears; track year.id) {
@@ -104,38 +105,38 @@ interface AccountantForm {
           </fieldset>
 
           <div class="actions">
-            <button type="submit" class="primary-button" [disabled]="busy">Save</button>
-            <button type="button" (click)="form = null">Cancel</button>
+            <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.Save' | translate }}</button>
+            <button type="button" (click)="form = null">{{ 'Accountants.Cancel' | translate }}</button>
           </div>
         </form>
       }
 
       @if (packFor) {
         <form class="panel form" (ngSubmit)="sendPack()">
-          <h2>Send Accountant pack to {{ packFor.name }}</h2>
+          <h2>{{ 'Accountants.SendPackTo' | translate }} {{ packFor.name }}</h2>
           <label>
-            Financial year
+            {{ 'Accountants.FinancialYears' | translate }}
             <select name="packYear" [(ngModel)]="packYear">
-              <option value="">Latest available</option>
+              <option value="">{{ 'Accountants.LatestAvailable' | translate }}</option>
               @for (year of packYears(packFor); track year.id) {
                 <option [value]="year.id">{{ year.year_code }}</option>
               }
             </select>
           </label>
-          <label>Note <textarea name="packNote" [(ngModel)]="packNote" maxlength="1000"></textarea></label>
+          <label>{{ 'Accountants.Note' | translate }} <textarea name="packNote" [(ngModel)]="packNote" maxlength="1000"></textarea></label>
           <div class="actions">
-            <button type="submit" class="primary-button" [disabled]="busy">Send email</button>
-            <button type="button" (click)="packFor = null">Cancel</button>
+            <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.SendEmail' | translate }}</button>
+            <button type="button" (click)="packFor = null">{{ 'Accountants.Cancel' | translate }}</button>
           </div>
         </form>
       }
 
       <div class="panel">
-        <div class="panel-title">Accountants</div>
+        <div class="panel-title">{{ 'Accountants.Accountants' | translate }}</div>
         <table>
           <thead>
             <tr>
-              <th>Name</th><th>Firm</th><th>Email</th><th>Access</th><th>Last invited</th><th>Pack sent</th><th></th>
+              <th>{{ 'Accountants.Name' | translate }}</th><th>{{ 'Accountants.Firm' | translate }}</th><th>{{ 'Accountants.Email' | translate }}</th><th>{{ 'Accountants.Access' | translate }}</th><th>{{ 'Accountants.LastInvited' | translate }}</th><th>{{ 'Accountants.PackSent' | translate }}</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -148,14 +149,14 @@ interface AccountantForm {
                 <td>{{ item.last_invited_at ? (item.last_invited_at | date: 'mediumDate') : '—' }}</td>
                 <td>{{ item.last_pack_sent_at ? (item.last_pack_sent_at | date: 'mediumDate') : '—' }}</td>
                 <td class="row-actions">
-                  <button type="button" (click)="startPack(item)">Send pack</button>
-                  <button type="button" (click)="startEdit(item)">Edit</button>
-                  <button type="button" (click)="resetPassword(item)">Reset password</button>
-                  <button type="button" class="danger" (click)="revoke(item)">Revoke</button>
+                  <button type="button" (click)="startPack(item)">{{ 'Accountants.SendPack' | translate }}</button>
+                  <button type="button" (click)="startEdit(item)">{{ 'Accountants.Edit' | translate }}</button>
+                  <button type="button" (click)="resetPassword(item)">{{ 'Accountants.ResetPassword' | translate }}</button>
+                  <button type="button" class="danger" (click)="revoke(item)">{{ 'Accountants.Revoke' | translate }}</button>
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" class="empty">No accountants yet.</td></tr>
+              <tr><td colspan="7" class="empty">{{ 'Accountants.Empty' | translate }}</td></tr>
             }
           </tbody>
         </table>

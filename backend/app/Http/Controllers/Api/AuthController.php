@@ -244,6 +244,7 @@ class AuthController extends Controller
         }
 
         $preferences = $request->validate([
+            'language' => ['sometimes', 'in:en,kr,cn,es'],
             'notifyDocuments' => ['required', 'boolean'],
             'notifyUncategorised' => ['required', 'boolean'],
             'defaultFinancialYear' => ['required', 'in:current,all'],
