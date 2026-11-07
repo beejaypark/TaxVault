@@ -192,7 +192,8 @@ interface RateSeries {
     </section>
   `,
   styles: [`
-    .mortgages { display: grid; gap: 12px; width: 100%; padding-top: 16px; border-top: 1px solid var(--tv-color-border); }
+    :host { display: block; flex: 0 0 100%; min-width: 0; width: 100%; box-sizing: border-box; }
+    .mortgages { display: grid; gap: 12px; width: 100%; min-width: 0; box-sizing: border-box; padding-top: 16px; border-top: 1px solid var(--tv-color-border); }
     .mortgage-head, .mortgage-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     h3 { margin: 0; font-size: 14px; }
     .mortgage-empty { margin: 0; color: var(--tv-color-text-secondary); font-size: 12px; }

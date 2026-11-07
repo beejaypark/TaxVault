@@ -68,7 +68,8 @@ import { formatFinancialYear } from '../../shared/utils/financial-year';
     </section>
   `,
   styles: [`
-    .rental { display: grid; gap: 10px; width: 100%; padding-top: 16px; border-top: 1px solid var(--tv-color-border); }
+    :host { display: block; flex: 0 0 100%; min-width: 0; width: 100%; box-sizing: border-box; }
+    .rental { display: grid; gap: 10px; width: 100%; min-width: 0; box-sizing: border-box; padding-top: 16px; border-top: 1px solid var(--tv-color-border); }
     .rental-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     h3 { margin: 0; font-size: 14px; }
     .rental-link { font-size: 12px; font-weight: 600; color: var(--tv-color-primary); }
