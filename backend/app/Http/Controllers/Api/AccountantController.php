@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Domain\FinancialYears\Models\FinancialYear;
+use App\Domain\Reporting\Services\AccountantPackAttachmentService;
+use App\Domain\Reporting\Services\FinancialYearExportService;
 use App\Http\Controllers\Controller;
 use App\Mail\AccountantAccessMail;
 use App\Models\AccountantGrant;
@@ -175,9 +177,15 @@ final class AccountantController extends Controller
         $data = $request->validate([
             'financial_year_id' => ['nullable', 'uuid'],
             'note' => ['nullable', 'string', 'max:1000'],
+            'to' => ['nullable', 'email:rfc', 'max:190'],
+            'from_email' => ['nullable', 'email:rfc', 'max:190'],
+            'from_name' => ['nullable', 'string', 'max:120'],
+            'subject' => ['nullable', 'string', 'max:255'],
+            'content' => ['nullable', 'string', 'max:10000'],
         ]);
 
         $yearLabel = null;
+        $year = null;
 
         if (! empty($data['financial_year_id'])) {
             $year = FinancialYear::query()
@@ -195,7 +203,38 @@ final class AccountantController extends Controller
             $yearLabel = $year->year_code;
         }
 
-        $this->sendMail($grant, $owner, 'pack', $this->appUrl('/tax-return'), $yearLabel, $data['note'] ?? null);
+        if ($year === null) {
+            $yearQuery = FinancialYear::query()->where('user_id', $owner->getKey());
+            if ($grant->financial_year_ids !== null) {
+                $yearQuery->whereIn('id', $grant->financial_year_ids);
+            }
+            $year = $yearQuery->orderByDesc('start_date')->first();
+            $yearLabel = $year?->year_code;
+        }
+
+        $attachmentData = null;
+        $attachmentName = null;
+        if ($year !== null) {
+            $export = app(FinancialYearExportService::class)->export($owner, $year->getKey());
+            $attachmentData = app(AccountantPackAttachmentService::class)->xlsx($export->payload);
+            $attachmentName = sprintf('taxvault-%s-accountant-pack.xlsx', $year->year_code);
+        }
+
+        $this->sendMail(
+            grant: $grant,
+            owner: $owner,
+            kind: 'pack',
+            link: $this->appUrl('/tax-return'),
+            yearLabel: $yearLabel,
+            note: $data['note'] ?? null,
+            attachmentData: $attachmentData,
+            attachmentName: $attachmentName,
+            toEmail: $data['to'] ?? $grant->email,
+            fromEmail: $data['from_email'] ?? config('mail.from.address'),
+            fromName: $data['from_name'] ?? config('mail.from.name'),
+            subject: $data['subject'] ?? null,
+            content: $data['content'] ?? null,
+        );
         $grant->update(['last_pack_sent_at' => now()]);
 
         return response()->json(['data' => $this->present($grant->refresh())]);
@@ -208,15 +247,36 @@ final class AccountantController extends Controller
         string $link,
         ?string $yearLabel = null,
         ?string $note = null,
+        ?string $attachmentData = null,
+        ?string $attachmentName = null,
+        ?string $toEmail = null,
+        ?string $fromEmail = null,
+        ?string $fromName = null,
+        ?string $subject = null,
+        ?string $content = null,
     ): void {
-        Mail::to($grant->email)->send(new AccountantAccessMail(
+        $mail = new AccountantAccessMail(
             ownerName: $owner->display_name ?: ($owner->email ?? 'A TaxVault user'),
             accountantName: $grant->name,
             link: $link,
             kind: $kind,
             yearLabel: $yearLabel,
             note: $note,
-        ));
+            attachmentData: $attachmentData,
+            attachmentName: $attachmentName,
+            fromEmail: $fromEmail,
+            fromName: $fromName,
+            subjectOverride: $subject,
+            contentOverride: $content,
+        );
+
+        if ($attachmentData !== null && $attachmentName !== null) {
+            $mail->attachData($attachmentData, $attachmentName, [
+                'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        }
+
+        Mail::to($toEmail ?: $grant->email)->send($mail);
     }
 
     private function findGrant(Request $request, string $id): AccountantGrant

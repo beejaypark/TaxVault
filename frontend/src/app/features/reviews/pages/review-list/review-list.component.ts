@@ -32,6 +32,7 @@ import { DocumentApiService } from '../../../../shared/services/documents/docume
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
+import { documentDisplayName } from '../../../../shared/utils/document-display-name';
 
 @Component({
   selector: 'app-review-list',
@@ -89,6 +90,12 @@ export class ReviewListComponent implements OnInit {
     }
 
     return `Selected financial year`;
+  }
+
+  documentName(review: Review): string {
+    return review.document
+      ? documentDisplayName(review.document.originalFilename, review.document.description, review.extraction?.fields)
+      : review.target.documentId ?? 'Review item';
   }
 
   ngOnInit(): void {

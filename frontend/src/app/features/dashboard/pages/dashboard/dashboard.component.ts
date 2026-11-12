@@ -23,11 +23,16 @@ import {
 } from '../../../../shared/services/documents/document-api.service';
 import {
   TaxWorkspaceApiService,
+  TaxNewsDto,
   TransactionDto,
 } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewService } from '../../../../shared/services/reviews/review.service';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { DashboardWidgetLayout } from '../../../../shared/services/auth/auth.service';
+import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../../../shared/i18n/translation.service';
+import { CollapsibleCardDirective } from '../../../../shared/directives/collapsible-card.directive';
 
 interface MonthlyTransactionSummary {
   key: string;
@@ -38,9 +43,16 @@ interface MonthlyTransactionSummary {
   expensesHeight: number;
 }
 
+interface DashboardWidgetDefinition {
+  id: string;
+  label: string;
+  description: string;
+  zone: 'main' | 'side';
+}
+
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent, WealthOverviewComponent, TranslatePipe],
+  imports: [RouterLink, TaxIconComponent, CashFlowAnalysisComponent, DeadlineCardComponent, WealthOverviewComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,12 +63,26 @@ export class DashboardComponent implements OnInit {
   private readonly reviewService = inject(ReviewService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly preferences = inject(UserPreferencesService);
+  private readonly translations = inject(TranslationService);
   readonly auth = inject(AuthService);
+  readonly widgetDefinitions: DashboardWidgetDefinition[] = [
+    { id: 'wealth', label: 'Dashboard.WidgetWealth', description: 'Dashboard.WidgetWealthDescription', zone: 'main' },
+    { id: 'financial-analysis', label: 'Dashboard.WidgetAnalysis', description: 'Dashboard.WidgetAnalysisDescription', zone: 'main' },
+    { id: 'attention', label: 'Dashboard.WidgetAttention', description: 'Dashboard.WidgetAttentionDescription', zone: 'side' },
+    { id: 'recent-documents', label: 'Dashboard.WidgetDocuments', description: 'Dashboard.WidgetDocumentsDescription', zone: 'side' },
+    { id: 'shortcuts', label: 'Dashboard.WidgetShortcuts', description: 'Dashboard.WidgetShortcutsDescription', zone: 'side' },
+    { id: 'tax-news', label: 'TaxNews.Title', description: 'TaxNews.MatchedUpdates', zone: 'side' },
+  ];
+  editWidgets = false;
+  widgetLayout: DashboardWidgetLayout[] = this.defaultWidgetLayout();
+  draggingWidgetId: string | null = null;
   private readonly refreshErrors = new Map<string, string>();
 
   documents: DocumentDto[] = [];
   transactions: TransactionDto[] = [];
   reviews: Review[] = [];
+  taxNews: TaxNewsDto[] = [];
   financialYears: FinancialYearDto[] = [];
   isLoading = true;
   errorMessage = '';
@@ -67,6 +93,103 @@ export class DashboardComponent implements OnInit {
     const selectedYearId = this.documentsApi.selectedFinancialYearId();
 
     return this.financialYears.find((year) => year.id === selectedYearId) ?? null;
+  }
+
+  toggleWidgetEditor(): void {
+    this.editWidgets = !this.editWidgets;
+  }
+
+  isWidgetVisible(id: string): boolean {
+    return this.widgetLayout.find((item) => item.id === id)?.visible ?? true;
+  }
+
+  widgetOrder(id: string): number {
+    return this.widgetLayout.find((item) => item.id === id)?.order ?? 0;
+  }
+
+  toggleWidget(id: string): void {
+    this.widgetLayout = this.widgetLayout.map((item) => item.id === id ? { ...item, visible: !item.visible } : item);
+    this.saveWidgetLayout();
+  }
+
+  moveWidget(id: string, direction: -1 | 1): void {
+    const item = this.widgetLayout.find((candidate) => candidate.id === id);
+    if (!item) return;
+
+    const sameZone = this.widgetLayout
+      .filter((candidate) => this.definition(candidate.id)?.zone === this.definition(id)?.zone)
+      .sort((left, right) => left.order - right.order);
+    const index = sameZone.findIndex((candidate) => candidate.id === id);
+    const target = sameZone[index + direction];
+    if (!target) return;
+
+    const order = item.order;
+    item.order = target.order;
+    target.order = order;
+    this.widgetLayout = [...this.widgetLayout];
+    this.saveWidgetLayout();
+  }
+
+  startWidgetDrag(id: string, event: DragEvent): void {
+    if (!this.editWidgets) return;
+    this.draggingWidgetId = id;
+    event.dataTransfer?.setData('text/plain', id);
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+  }
+
+  dropWidget(id: string, event: DragEvent): void {
+    event.preventDefault();
+    const sourceId = this.draggingWidgetId || event.dataTransfer?.getData('text/plain');
+    this.draggingWidgetId = null;
+    if (!sourceId || sourceId === id) return;
+
+    const source = this.widgetLayout.find((item) => item.id === sourceId);
+    const target = this.widgetLayout.find((item) => item.id === id);
+    if (!source || !target || this.definition(sourceId)?.zone !== this.definition(id)?.zone) return;
+
+    const sourceOrder = source.order;
+    source.order = target.order;
+    target.order = sourceOrder;
+    this.widgetLayout = [...this.widgetLayout];
+    this.saveWidgetLayout();
+  }
+
+  endWidgetDrag(): void {
+    this.draggingWidgetId = null;
+  }
+
+  resetWidgetLayout(): void {
+    this.widgetLayout = this.defaultWidgetLayout();
+    this.saveWidgetLayout();
+  }
+
+  widgetLabel(id: string): string {
+    const label = this.definition(id)?.label ?? id;
+    return label.includes('.') ? this.translations.translate(label) : label;
+  }
+
+  private definition(id: string): DashboardWidgetDefinition | undefined {
+    return this.widgetDefinitions.find((widget) => widget.id === id);
+  }
+
+  private defaultWidgetLayout(): DashboardWidgetLayout[] {
+    return this.widgetDefinitions.map((widget, index) => ({ id: widget.id, visible: true, order: index }));
+  }
+
+  private saveWidgetLayout(): void {
+    this.preferences.update({ dashboardLayout: this.widgetLayout });
+    this.cdr.markForCheck();
+  }
+
+  private loadWidgetLayout(): void {
+    const saved = this.preferences.preferences().dashboardLayout;
+    if (saved.length === 0) return;
+
+    const known = this.defaultWidgetLayout().map((item) => {
+      const stored = saved.find((candidate) => candidate.id === item.id);
+      return stored ? { ...item, ...stored } : item;
+    });
+    this.widgetLayout = known;
   }
 
   private filteredCache: { source: TransactionDto[]; yearId: string | null; result: TransactionDto[] } | null = null;
@@ -160,7 +283,10 @@ export class DashboardComponent implements OnInit {
   }
 
   get reviewChartDescription(): string {
-    return `${this.completedReviews} completed, ${this.openReviews.length} needing attention, ${this.otherReviews} other reviews`;
+    return this.translations.translate('Dashboard.ReviewChartDescription')
+      .replace('{completed}', String(this.completedReviews))
+      .replace('{attention}', String(this.openReviews.length))
+      .replace('{other}', String(this.otherReviews));
   }
 
   get otherReviews(): number {
@@ -187,14 +313,14 @@ export class DashboardComponent implements OnInit {
     const selectedYearId = this.documentsApi.selectedFinancialYearId();
 
     if (!selectedYearId) {
-      return 'All financial years';
+      return this.translations.translate('Common.AllFinancialYears');
     }
 
     const year = this.financialYears.find(
       (item) => item.id === selectedYearId,
     );
 
-    return year ? `FY ${formatFinancialYear(year.year_code)}` : 'Your tax workspace';
+    return year ? `FY ${formatFinancialYear(year.year_code)}` : this.translations.translate('TaxWorkspace.Title');
   }
 
   get filteredDocuments(): DocumentDto[] {
@@ -232,6 +358,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadWidgetLayout();
     this.documentsApi.listDocuments().subscribe({
       next: (documents) => {
         this.documents = documents;
@@ -239,7 +366,7 @@ export class DashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.errorMessage = 'Unable to load your dashboard. Please try again.';
+        this.errorMessage = this.translations.translate('Dashboard.LoadFailed');
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -251,7 +378,7 @@ export class DashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.errorMessage = 'Unable to load your financial year. Please try again.';
+        this.errorMessage = this.translations.translate('Dashboard.FinancialYearLoadFailed');
         this.cdr.markForCheck();
       },
     });
@@ -262,7 +389,7 @@ export class DashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.errorMessage = 'Unable to load your review status. Please try again.';
+        this.errorMessage = this.translations.translate('Dashboard.ReviewLoadFailed');
         this.cdr.markForCheck();
       },
     });
@@ -274,7 +401,14 @@ export class DashboardComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.financialAnalysisError = 'Unable to load financial analysis for this year.';
+        this.financialAnalysisError = this.translations.translate('Dashboard.AnalysisLoadFailed');
+        this.cdr.markForCheck();
+      },
+    });
+
+    this.workspaceApi.listTaxNews('all', true, true).subscribe({
+      next: (news) => {
+        this.taxNews = news;
         this.cdr.markForCheck();
       },
     });
@@ -283,7 +417,7 @@ export class DashboardComponent implements OnInit {
       () => this.documentsApi.listDocuments(),
       () => this.setRefreshError(
         'documents',
-        'Unable to refresh document statuses.',
+        this.translations.translate('Dashboard.DocumentRefreshFailed'),
       ),
     ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((documents) => {
       this.documents = documents;
@@ -295,7 +429,7 @@ export class DashboardComponent implements OnInit {
       () => this.reviewService.listReviews(),
       () => this.setRefreshError(
         'reviews',
-        'Unable to refresh review statuses.',
+        this.translations.translate('Dashboard.ReviewRefreshFailed'),
       ),
     ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((response) => {
       this.reviews = response.data;
@@ -307,7 +441,7 @@ export class DashboardComponent implements OnInit {
       () => this.workspaceApi.listTransactions(),
       () => this.setRefreshError(
         'transactions',
-        'Unable to refresh your financial analysis.',
+        this.translations.translate('Dashboard.AnalysisRefreshFailed'),
       ),
     ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((transactions) => {
       this.transactions = transactions;
@@ -332,7 +466,7 @@ export class DashboardComponent implements OnInit {
     const date = new Date(value);
 
     if (Number.isNaN(date.getTime())) {
-      return 'Date unavailable';
+      return this.translations.translate('Common.DateUnavailable');
     }
 
     return new Intl.DateTimeFormat('en-AU', {

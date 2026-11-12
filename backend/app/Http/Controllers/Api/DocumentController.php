@@ -11,6 +11,7 @@ use App\Application\Documents\FinancialYearSuggestionUnavailable;
 use App\Application\Documents\UploadDocument;
 use App\Application\Reviews\DeleteReview;
 use App\Domain\Documents\Models\Document;
+use App\Domain\Reviews\Models\Review;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Documents\AssignDocumentFinancialYearRequest;
 use App\Http\Requests\Documents\ConfirmDocumentPaymentRequest;
@@ -25,8 +26,35 @@ final class DocumentController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $pendingDocumentIds = Review::query()
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->whereNotNull('document_id')
+            ->pluck('document_id');
+
+        $staleReviewRequiredDocuments = Document::query()
+            ->where('user_id', $request->user()->getKey())
+            ->where('status', 'review_required');
+
+        if ($pendingDocumentIds->isNotEmpty()) {
+            $staleReviewRequiredDocuments->whereNotIn('id', $pendingDocumentIds);
+        }
+
+        $staleReviewRequiredDocuments->update(['status' => 'active']);
+
         $documents = Document::query()
             ->where('user_id', $request->user()->getKey())
+            ->addSelect([
+                'review_id' => Review::query()
+                    ->select('id')
+                    ->whereColumn('document_id', 'documents.id')
+                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->latest('created_at')
+                    ->limit(1),
+            ])
+            ->withCount([
+                'transactions as linked_income_count' => fn ($query) => $query->where('direction', 'income'),
+                'transactions as linked_expense_count' => fn ($query) => $query->where('direction', 'expense'),
+            ])
             ->with('latestExtraction')
             ->orderByDesc('uploaded_at')
             ->get();
@@ -90,6 +118,24 @@ final class DocumentController extends Controller
         return response()->json([
             'data' => $document,
         ]);
+    }
+
+    public function updateDescription(Request $request, string $id): JsonResponse
+    {
+        $document = Document::query()
+            ->whereKey($id)
+            ->where('user_id', $request->user()->getKey())
+            ->firstOrFail();
+
+        $data = $request->validate(['description' => ['nullable', 'string', 'max:255']]);
+        $document->update(['description' => $data['description'] ?? null]);
+
+        $transactionDescription = $document->description ?: 'Payment for '.$document->original_filename;
+        $document->transactions()
+            ->whereIn('source_system', ['document_payment_confirmation', 'document_review'])
+            ->update(['description' => $transactionDescription]);
+
+        return response()->json(['data' => $document->refresh()]);
     }
 
     public function assignFinancialYear(

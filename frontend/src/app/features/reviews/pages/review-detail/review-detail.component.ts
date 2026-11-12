@@ -13,6 +13,7 @@ import { takeWhile } from 'rxjs';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
 import { BackNavigationComponent } from '../../../../shared/components/back-navigation/back-navigation.component';
+import { CollapsibleCardDirective } from '../../../../shared/directives/collapsible-card.directive';
 import { refreshEvery } from '../../../../shared/utils/status-refresh';
 import {
   Review,
@@ -26,9 +27,12 @@ import {
 } from '../../../../shared/services/reviews/review.service';
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { documentDisplayName } from '../../../../shared/utils/document-display-name';
+import { TaxWorkspaceApiService } from '../../../../shared/services/tax-workspace-api.service';
+import { ReviewDocumentTransaction } from '../../../../shared/models/reviews/review-extraction.model';
 
 @Component({
-  imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent],
+  imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective],
   selector: 'app-review-detail',
   styleUrl: './review-detail.component.scss',
   templateUrl: './review-detail.component.html',
@@ -44,6 +48,7 @@ export class ReviewDetailComponent
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly workspaceApi = inject(TaxWorkspaceApiService);
 
   readonly Object = Object;
   private statusRefreshStarted = false;
@@ -66,13 +71,29 @@ export class ReviewDetailComponent
   correctionError: string | null = null;
   correctionSuccessField: string | null = null;
   isEditingCompletedReview = false;
+  transactionSavingId: string | null = null;
+  transactionEditError: string | null = null;
   recordExpense = false;
-  expenseDraft: {
+  transactionDrafts: {
     transaction_date: string;
     direction: 'income' | 'expense';
     amount: number | null;
     description: string;
-  } = this.emptyExpenseDraft();
+  }[] = [this.emptyExpenseDraft()];
+
+  // Kept as a compatibility alias for existing callers and tests.
+  get expenseDraft() {
+    return this.transactionDrafts[0];
+  }
+
+  set expenseDraft(value: {
+    transaction_date: string;
+    direction: 'income' | 'expense';
+    amount: number | null;
+    description: string;
+  }) {
+    this.transactionDrafts[0] = value;
+  }
 
   ngOnInit(): void {
     const id =
@@ -255,6 +276,39 @@ export class ReviewDetailComponent
     }
 
     this.isEditingCompletedReview = !this.isEditingCompletedReview;
+    this.transactionEditError = null;
+  }
+
+  updateReviewedTransaction(transaction: ReviewDocumentTransaction): void {
+    if (this.transactionSavingId !== null) {
+      return;
+    }
+
+    this.transactionSavingId = transaction.id;
+    this.transactionEditError = null;
+    this.workspaceApi.updateTransaction(transaction.id, {
+      transaction_date: transaction.transactionDate.slice(0, 10),
+      direction: transaction.direction,
+      amount: Number(transaction.amount),
+      description: transaction.description.trim(),
+      currency: transaction.currency || 'AUD',
+      ato_category: transaction.atoCategory ?? null,
+      property_id: transaction.propertyId ?? null,
+    }).subscribe({
+      next: () => {
+        this.transactionSavingId = null;
+        this.cdr.markForCheck();
+        this.reviewService.getReview(this.review?.id ?? '').subscribe((review) => {
+          this.review = review;
+          this.cdr.markForCheck();
+        });
+      },
+      error: () => {
+        this.transactionSavingId = null;
+        this.transactionEditError = 'Unable to update this transaction.';
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   submitDecision(
@@ -271,17 +325,13 @@ export class ReviewDetailComponent
       return;
     }
 
-    if (
-      decision === 'approved'
-      && this.recordExpense
-      && (
-        !this.expenseDraft.transaction_date
-        || !this.expenseDraft.amount
-        || this.expenseDraft.amount <= 0
-        || !this.expenseDraft.description.trim()
-      )
-    ) {
-      this.decisionError = 'Enter a transaction date, positive amount, and description before saving this expense.';
+    if (decision === 'approved' && this.recordExpense && this.transactionDrafts.some((draft) =>
+      !draft.transaction_date
+      || !draft.amount
+      || draft.amount <= 0
+      || !draft.description.trim()
+    )) {
+      this.decisionError = 'Enter a date, positive amount, and description for every transaction before approving.';
       return;
     }
 
@@ -291,13 +341,22 @@ export class ReviewDetailComponent
       decision,
       notes,
       ...(decision === 'approved' && this.recordExpense
-        ? {
+        ? this.transactionDrafts.length === 1
+          ? {
             expense: {
-              transaction_date: this.expenseDraft.transaction_date,
-              direction: this.expenseDraft.direction,
-              amount: this.expenseDraft.amount ?? 0,
-              description: this.expenseDraft.description.trim(),
+              transaction_date: this.transactionDrafts[0].transaction_date,
+              direction: this.transactionDrafts[0].direction,
+              amount: this.transactionDrafts[0].amount ?? 0,
+              description: this.transactionDrafts[0].description.trim(),
             },
+          }
+          : {
+            transactions: this.transactionDrafts.map((draft) => ({
+              transaction_date: draft.transaction_date,
+              direction: draft.direction,
+              amount: draft.amount ?? 0,
+              description: draft.description.trim(),
+            })),
           }
         : {}),
     };
@@ -438,9 +497,6 @@ export class ReviewDetailComponent
         correction.extractedValue.value;
     }
 
-    const supplier = Object.values(fields).find(
-      (field) => field.value === 'Brisbane City Council',
-    )?.value;
     const extractedAmount =
       fields['total_amount']?.value
       ?? fields['transaction.total']?.value
@@ -449,19 +505,33 @@ export class ReviewDetailComponent
       fields['invoice_date']?.value
       ?? fields['transaction.date']?.value;
     const filename = this.review?.document?.originalFilename ?? 'Tax document';
-    const quarter = filename.match(/\bq([1-4])\b/i)?.[1];
+    const displayName = this.review?.document
+      ? documentDisplayName(
+        this.review.document.originalFilename,
+        this.review.document.description,
+        fields,
+      )
+      : filename.replace(/\.[^.]+$/, '');
 
-    this.expenseDraft = {
+    this.transactionDrafts = [{
       transaction_date: typeof invoiceDate === 'string' ? invoiceDate : '',
       direction: 'expense',
       amount: typeof extractedAmount === 'string' || typeof extractedAmount === 'number'
         ? Number(extractedAmount)
         : null,
-      description: supplier
-        ? `Brisbane City Council rates${quarter ? ` - Q${quarter}` : ''}`
-        : filename.replace(/\.[^.]+$/, ''),
-    };
+      description: displayName,
+    }];
     this.recordExpense = false;
+  }
+
+  addTransactionDraft(): void {
+    this.transactionDrafts.push(this.emptyExpenseDraft());
+  }
+
+  removeTransactionDraft(index: number): void {
+    if (this.transactionDrafts.length > 1) {
+      this.transactionDrafts.splice(index, 1);
+    }
   }
 
   private amountCandidateFromText(value: unknown): number | null {

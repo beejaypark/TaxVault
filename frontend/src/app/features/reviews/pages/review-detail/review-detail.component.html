@@ -43,7 +43,7 @@
       <div class="inline-notice success-notice" role="status">
         Review decision submitted successfully.
         @if (review.target.transactionId) {
-          The transaction has been added to Income &amp; expenses.
+          The transaction(s) have been added to Income &amp; expenses.
         }
       </div>
     }
@@ -59,7 +59,7 @@
 
     <div class="detail-layout">
       <div class="detail-main-column">
-        <section class="detail-card source-card" aria-label="Source document">
+        <section class="detail-card source-card" tvCollapsibleCard aria-label="Source document">
           <div class="section-title-row">
             <div class="section-icon document-icon"><tv-icon name="document" /></div>
             <div>
@@ -71,7 +71,7 @@
             <div class="source-document">
               <div class="file-icon" aria-hidden="true">PDF</div>
               <div class="source-file-copy">
-                <strong>{{ review.document.originalFilename }}</strong>
+                <strong>{{ review.document.description || review.document.originalFilename }}</strong>
                 <span>
                   @if (review.document.mimeType) { {{ review.document.mimeType }} }
                   @if (review.document.sizeBytes !== null) {
@@ -109,7 +109,7 @@
         </section>
 
         @if (review.extraction) {
-          <section class="detail-card extraction-card" aria-label="Document extraction">
+          <section class="detail-card extraction-card" tvCollapsibleCard aria-label="Document extraction">
             <div class="section-title-row extraction-heading">
               <div class="section-icon extraction-icon"><tv-icon name="extraction" /></div>
               <div>
@@ -245,7 +245,7 @@
         }
 
         @if (review.notes) {
-          <section class="detail-card notes-card" aria-label="Reviewer notes">
+          <section class="detail-card notes-card" tvCollapsibleCard aria-label="Reviewer notes">
             <p class="eyebrow">Review history</p>
             <h2>Reviewer notes</h2>
             <p>{{ review.notes }}</p>
@@ -254,7 +254,7 @@
       </div>
 
       <aside class="detail-side-column">
-        <section class="detail-card summary-card" aria-label="Review summary">
+          <section class="detail-card summary-card" tvCollapsibleCard aria-label="Review summary">
           <p class="eyebrow">Review details</p>
           <h2>Summary</h2>
           <dl class="summary-list">
@@ -274,7 +274,7 @@
         </section>
 
         @if (review.status === 'pending' && auth.canEdit) {
-          <section class="detail-card decision-card" aria-label="Review decision">
+          <section class="detail-card decision-card" tvCollapsibleCard aria-label="Review decision">
             <div class="decision-heading">
               <div>
                 <p class="eyebrow">Your decision</p>
@@ -292,29 +292,46 @@
               <label class="expense-toggle">
                 <input type="checkbox" [(ngModel)]="recordExpense" [ngModelOptions]="{ standalone: true }"
                   [disabled]="isSubmitting" />
-                Also save a transaction in Income &amp; expenses
+                Also save transactions in Income &amp; expenses
               </label>
             }
             @if (recordExpense) {
-              <label for="expense-date">Transaction date</label>
-              <input id="expense-date" type="date" [(ngModel)]="expenseDraft.transaction_date"
-                [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting" />
-              <label for="expense-direction">Record as</label>
-              <select id="expense-direction" [(ngModel)]="expenseDraft.direction"
-                [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting">
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
-              <label for="expense-amount">Amount (AUD)</label>
-              <input id="expense-amount" type="number" min="0.01" step="0.01"
-                [(ngModel)]="expenseDraft.amount" [ngModelOptions]="{ standalone: true }"
-                [disabled]="isSubmitting" />
-              <label for="expense-description">Description</label>
-              <input id="expense-description" type="text" maxlength="1000"
-                [(ngModel)]="expenseDraft.description" [ngModelOptions]="{ standalone: true }"
-                [disabled]="isSubmitting" />
+              <div class="transaction-drafts">
+                @for (draft of transactionDrafts; track $index; let i = $index) {
+                  <div class="transaction-draft">
+                    <div class="transaction-draft-heading">
+                      <h3>Transaction {{ i + 1 }}</h3>
+                      @if (transactionDrafts.length > 1) {
+                        <button type="button" class="text-button" (click)="removeTransactionDraft(i)"
+                          [disabled]="isSubmitting">Remove</button>
+                      }
+                    </div>
+                    <label [for]="'expense-date-' + i">Transaction date</label>
+                    <input [id]="'expense-date-' + i" type="date" [(ngModel)]="draft.transaction_date"
+                      [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting" />
+                    <label [for]="'expense-direction-' + i">Record as</label>
+                    <select [id]="'expense-direction-' + i" [(ngModel)]="draft.direction"
+                      [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting">
+                      <option value="expense">Expense</option>
+                      <option value="income">Income</option>
+                    </select>
+                    <label [for]="'expense-amount-' + i">Amount (AUD)</label>
+                    <input [id]="'expense-amount-' + i" type="number" min="0.01" step="0.01"
+                      [(ngModel)]="draft.amount" [ngModelOptions]="{ standalone: true }"
+                      [disabled]="isSubmitting" />
+                    <label [for]="'expense-description-' + i">Description</label>
+                    <input [id]="'expense-description-' + i" type="text" maxlength="1000"
+                      [(ngModel)]="draft.description" [ngModelOptions]="{ standalone: true }"
+                      [disabled]="isSubmitting" />
+                  </div>
+                }
+                <button type="button" class="secondary-button add-transaction-button"
+                  (click)="addTransactionDraft()" [disabled]="isSubmitting">
+                  Add another transaction
+                </button>
+              </div>
               <p class="decision-description">
-                The date determines the financial year. This saves an uncategorised transaction linked to the source document; review its tax treatment separately.
+                Add income and expenses from the same statement as separate transactions. Each date determines its financial year, and every transaction is linked to the source document. Review tax treatment separately.
               </p>
             }
             <label for="review-notes">Reviewer notes <span>(optional)</span></label>
@@ -345,7 +362,7 @@
             </div>
           </section>
         } @else {
-          <section class="detail-card read-only-card">
+          <section class="detail-card read-only-card" tvCollapsibleCard>
             <span class="read-only-icon"><tv-icon name="check" /></span>
             <h2>This review is {{ review.status === 'completed' ? 'complete' : statusLabel(review.status).toLowerCase() }}</h2>
             @if (review.decision) {
@@ -360,6 +377,39 @@
               >
                 {{ isEditingCompletedReview ? 'Done' : 'Edit' }}
               </button>
+            }
+            @if (review.status === 'completed' && isEditingCompletedReview && review.document?.transactions?.length) {
+              <section class="review-transactions" aria-label="Linked transactions">
+                <h3>Linked transactions</h3>
+                <p class="decision-description">These transactions were saved from this review. Update and save them here if needed.</p>
+                @for (transaction of review.document?.transactions ?? []; track transaction.id) {
+                  <article class="review-transaction-row">
+                    <div class="review-transaction-fields">
+                      <label>Type
+                        <select [(ngModel)]="transaction.direction" [ngModelOptions]="{ standalone: true }" [disabled]="transactionSavingId !== null">
+                          <option value="income">Income</option>
+                          <option value="expense">Expense</option>
+                        </select>
+                      </label>
+                      <label>Date
+                        <input type="date" [(ngModel)]="transaction.transactionDate" [ngModelOptions]="{ standalone: true }" [disabled]="transactionSavingId !== null" />
+                      </label>
+                      <label>Amount (AUD)
+                        <input type="number" min="0.01" step="0.01" [(ngModel)]="transaction.amount" [ngModelOptions]="{ standalone: true }" [disabled]="transactionSavingId !== null" />
+                      </label>
+                      <label>Description
+                        <input type="text" maxlength="1000" [(ngModel)]="transaction.description" [ngModelOptions]="{ standalone: true }" [disabled]="transactionSavingId !== null" />
+                      </label>
+                    </div>
+                    <button type="button" class="secondary-button" [disabled]="transactionSavingId !== null" (click)="updateReviewedTransaction(transaction)">
+                      {{ transactionSavingId === transaction.id ? 'Saving...' : 'Save transaction' }}
+                    </button>
+                  </article>
+                }
+                @if (transactionEditError) {
+                  <p class="inline-notice error-notice" role="alert">{{ transactionEditError }}</p>
+                }
+              </section>
             }
           </section>
         }

@@ -12,6 +12,7 @@ import { TaxReturnComponent } from './features/tax-return/tax-return.component';
 import { TransactionsComponent } from './features/transactions/transactions.component';
 import { FinancialYearsComponent } from './features/financial-years/financial-years.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { TaxNewsComponent } from './features/tax-news/tax-news.component';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,7 @@ export const routes: Routes = [
           ),
       },
       { path: 'tax-return', component: TaxReturnComponent },
+      { path: 'tax-news', component: TaxNewsComponent },
       { path: 'accountants', component: AccountantsComponent, canActivate: [ownerGuard] },
       { path: 'settings', component: SettingsComponent },
     ],

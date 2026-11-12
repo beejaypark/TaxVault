@@ -31,6 +31,8 @@ export interface DocumentDto {
   financial_year_id: string | null;
   document_type_id: string;
   original_filename: string;
+  description?: string | null;
+  review_id?: string | null;
   mime_type: string | null;
   size_bytes: number;
   uploaded_at: string;
@@ -39,6 +41,8 @@ export interface DocumentDto {
   payment_date?: string | null;
   payment_method?: string | null;
   payment_amount?: number | string | null;
+  linked_income_count?: number;
+  linked_expense_count?: number;
   payment_suggestion?: { date: string | null; amount: string | null } | null;
   latest_extraction?: {
     id: string;
@@ -201,6 +205,10 @@ export class DocumentApiService {
     return this.http
       .post<ApiItem<DocumentDto>>(`/api/documents/${documentId}/retry`, {})
       .pipe(map((response) => response.data));
+  }
+
+  updateDocumentDescription(documentId: string, description: string | null): Observable<DocumentDto> {
+    return this.http.patch<ApiItem<DocumentDto>>(`/api/documents/${documentId}/description`, { description }).pipe(map((response) => response.data));
   }
 
   confirmDocumentPayment(

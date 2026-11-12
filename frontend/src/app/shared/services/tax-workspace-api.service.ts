@@ -18,6 +18,46 @@ export interface MortgageInterestEntryDto {
   interest_amount: string | number;
 }
 
+export interface PropertyValuationDto {
+  id: string;
+  value: string | number;
+  as_of: string;
+}
+
+export interface PropertyDeductionDto {
+  id: string;
+  property_id: string;
+  financial_year_id: string;
+  deduction_type: 'capital_works' | 'plant_equipment';
+  amount: string | number;
+  source_document_id: string | null;
+  notes: string | null;
+  financial_year?: { id: string; year_code: string };
+}
+
+export interface PropertyDeductionRequest {
+  financial_year_id: string;
+  deduction_type: 'capital_works' | 'plant_equipment';
+  amount: number;
+  source_document_id?: string | null;
+  notes?: string | null;
+}
+
+export interface TaxNewsDto {
+  id: string;
+  source: string;
+  title: string;
+  summary: string | null;
+  url: string;
+  category: string;
+  importance: 'info' | 'important';
+  status: 'proposed' | 'passed' | 'effective' | 'guidance';
+  published_at: string | null;
+  effective_at: string | null;
+  ai_summary?: string | null;
+  ai_reason?: string | null;
+}
+
 export interface MortgageRateChangeDto {
   id: string;
   effective_date: string;
@@ -32,6 +72,7 @@ export interface MortgageDto {
   loan_amount: string | number;
   interest_rate: string | number | null;
   start_date: string | null;
+  maturity_date: string | null;
   interest_entries: MortgageInterestEntryDto[];
   rate_changes: MortgageRateChangeDto[];
 }
@@ -42,6 +83,7 @@ export interface MortgageRequest {
   loan_amount: number;
   interest_rate: number | null;
   start_date: string | null;
+  maturity_date: string | null;
 }
 
 export interface PropertyDto {
@@ -57,6 +99,8 @@ export interface PropertyDto {
   current_value_date?: string | null;
   is_main_residence?: boolean;
   mortgages?: MortgageDto[];
+  valuations?: PropertyValuationDto[];
+  deductions?: PropertyDeductionDto[];
 }
 
 export interface CreatePropertyRequest {
@@ -131,6 +175,28 @@ export interface CreateTransactionRequest {
   currency: string;
   ato_category?: string | null;
   property_id?: string | null;
+}
+
+export interface RecurringIncomeRuleDto {
+  id: string;
+  name: string;
+  description: string;
+  amount: string | number;
+  day_of_month: number;
+  start_date: string;
+  end_date: string | null;
+  ato_category: string | null;
+  active: boolean;
+}
+
+export interface RecurringIncomeRuleRequest {
+  name: string;
+  description: string;
+  amount: number;
+  day_of_month: number;
+  start_date: string;
+  end_date?: string | null;
+  ato_category?: string | null;
 }
 
 export interface RentalSummaryLine {
@@ -258,6 +324,22 @@ export class TaxWorkspaceApiService {
     return this.http.delete(`/api/properties/${id}`);
   }
 
+  savePropertyDeduction(propertyId: string, deduction: PropertyDeductionRequest): Observable<PropertyDeductionDto> {
+    return this.http
+      .post<ApiItem<PropertyDeductionDto>>(`/api/properties/${propertyId}/deductions`, deduction)
+      .pipe(map((response) => response.data));
+  }
+
+  updatePropertyDeduction(propertyId: string, deductionId: string, deduction: PropertyDeductionRequest): Observable<PropertyDeductionDto> {
+    return this.http
+      .put<ApiItem<PropertyDeductionDto>>(`/api/properties/${propertyId}/deductions/${deductionId}`, deduction)
+      .pipe(map((response) => response.data));
+  }
+
+  deletePropertyDeduction(propertyId: string, deductionId: string): Observable<unknown> {
+    return this.http.delete(`/api/properties/${propertyId}/deductions/${deductionId}`);
+  }
+
   getRentalSummary(propertyId: string, financialYearId: string): Observable<RentalSummaryDto> {
     return this.http
       .get<ApiItem<RentalSummaryDto>>(`/api/properties/${propertyId}/rental-summary`, {
@@ -339,6 +421,13 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
+  downloadAccountantPack(financialYearId: string, format: 'csv' | 'excel'): Observable<Blob> {
+    return this.http.get('/api/exports/pack', {
+      params: { financial_year_id: financialYearId, format },
+      responseType: 'blob',
+    });
+  }
+
   downloadTransactionsCsv(financialYearId: string): Observable<Blob> {
     return this.http.get('/api/exports/transactions.csv', {
       params: { financial_year_id: financialYearId },
@@ -350,6 +439,14 @@ export class TaxWorkspaceApiService {
     return this.http
       .get<ApiList<TransactionDto>>('/api/transactions')
       .pipe(map((response) => response.data));
+  }
+
+  listTaxNews(category = 'all', recommended = false, ai = false): Observable<TaxNewsDto[]> {
+    return this.http.get<ApiList<TaxNewsDto>>('/api/tax-news', { params: { category, recommended, ai } }).pipe(map((response) => response.data));
+  }
+
+  syncTaxNews(): Observable<void> {
+    return this.http.post<void>('/api/tax-news/sync', {});
   }
 
   createTransaction(transaction: CreateTransactionRequest): Observable<TransactionDto> {
@@ -366,6 +463,22 @@ export class TaxWorkspaceApiService {
 
   deleteTransaction(id: string): Observable<unknown> {
     return this.http.delete(`/api/transactions/${id}`);
+  }
+
+  listRecurringIncome(): Observable<RecurringIncomeRuleDto[]> {
+    return this.http.get<ApiList<RecurringIncomeRuleDto>>('/api/recurring-income').pipe(map((response) => response.data));
+  }
+
+  createRecurringIncome(rule: RecurringIncomeRuleRequest): Observable<RecurringIncomeRuleDto> {
+    return this.http.post<ApiItem<RecurringIncomeRuleDto>>('/api/recurring-income', rule).pipe(map((response) => response.data));
+  }
+
+  updateRecurringIncome(id: string, rule: Partial<RecurringIncomeRuleRequest> & { active?: boolean }): Observable<RecurringIncomeRuleDto> {
+    return this.http.put<ApiItem<RecurringIncomeRuleDto>>(`/api/recurring-income/${id}`, rule).pipe(map((response) => response.data));
+  }
+
+  deleteRecurringIncome(id: string): Observable<unknown> {
+    return this.http.delete(`/api/recurring-income/${id}`);
   }
 
   bulkCategorise(

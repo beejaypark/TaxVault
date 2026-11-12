@@ -24,6 +24,7 @@ import {
 } from '../../shared/utils/ato-categories';
 import { parseBankFile } from '../../shared/utils/bank-import';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 interface PreviewRow {
   date: string;
@@ -38,10 +39,10 @@ const MAX_ROWS = 1000;
 
 @Component({
   selector: 'app-transaction-import',
-  imports: [FormsModule, TaxIconComponent, TranslatePipe],
+  imports: [FormsModule, TaxIconComponent, TranslatePipe, CollapsibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" [attr.aria-label]="'Transactions.ImportTitle' | translate">
+    <section class="panel" tvCollapsibleCard [attr.aria-label]="'Transactions.ImportTitle' | translate">
       <div class="head">
         <div>
           <h2>{{ 'Transactions.ImportTitle' | translate }}</h2>

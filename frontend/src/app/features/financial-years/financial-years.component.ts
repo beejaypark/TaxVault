@@ -20,10 +20,11 @@ import {
 
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 @Component({
   selector: 'app-financial-years',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TranslatePipe],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './financial-years.component.html',
   styleUrl: './financial-years.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

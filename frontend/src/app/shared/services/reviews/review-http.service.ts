@@ -17,6 +17,7 @@ import {
 
 import {
   ReviewDocument,
+  ReviewDocumentTransaction,
   ReviewExtraction,
   ReviewExtractionField,
 } from '../../models/reviews/review-extraction.model';
@@ -80,9 +81,23 @@ interface ReviewDocumentApiDto {
   id: string;
   financial_year_id?: string | null;
   original_filename?: string | null;
+  description?: string | null;
   mime_type?: string | null;
   size_bytes?: number | null;
   uploaded_at?: string | null;
+  transactions?: ReviewDocumentTransactionApiDto[];
+}
+
+interface ReviewDocumentTransactionApiDto {
+  id: string;
+  financial_year_id: string;
+  transaction_date: string;
+  description: string;
+  direction: 'income' | 'expense';
+  amount: string | number;
+  currency: string;
+  ato_category?: string | null;
+  property_id?: string | null;
 }
 
 interface ReviewExtractionApiDto {
@@ -227,6 +242,7 @@ export class ReviewHttpService extends ReviewService {
             ),
           reviewer_notes:
             request.notes ?? null,
+          ...(request.transactions ? { transactions: request.transactions } : {}),
           ...(request.expense ? { expense: request.expense } : {}),
         },
       )
@@ -361,6 +377,8 @@ export class ReviewHttpService extends ReviewService {
       originalFilename:
         dto.original_filename ?? dto.id,
 
+      description: dto.description ?? null,
+
       mimeType:
         dto.mime_type ?? null,
 
@@ -369,6 +387,18 @@ export class ReviewHttpService extends ReviewService {
 
       uploadedAt:
         dto.uploaded_at ?? null,
+
+      transactions: (dto.transactions ?? []).map((transaction): ReviewDocumentTransaction => ({
+        id: transaction.id,
+        financialYearId: transaction.financial_year_id,
+        transactionDate: transaction.transaction_date,
+        description: transaction.description,
+        direction: transaction.direction,
+        amount: transaction.amount,
+        currency: transaction.currency,
+        atoCategory: transaction.ato_category ?? null,
+        propertyId: transaction.property_id ?? null,
+      })),
     };
   }
 

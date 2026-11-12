@@ -71,9 +71,18 @@
 
 .card-header {
   padding: 16px 24px;
+  padding-right: 64px;
   background: var(--tv-color-navy);
   color: #fff;
 }
+
+.documents-card .tv-collapse-toggle { color: #fff; }
+.documents-card .tv-collapse-toggle:hover { color: rgba(255, 255, 255, 0.72); }
+.original-filename { display: inline-block; margin-left: 8px; color: var(--tv-color-text-muted); font-size: 11px; }
+.description-edit { width: fit-content; padding: 0; border: 0; background: transparent; color: var(--tv-color-primary); font-size: 11px; cursor: pointer; text-align: left; }
+.description-editor { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.description-editor input { min-width: 180px; padding: 5px 7px; border: 1px solid var(--tv-color-border); border-radius: 4px; font: inherit; }
+.description-editor button { padding: 4px 8px; font-size: 11px; }
 
 .card-header h2 {
   margin: 0;

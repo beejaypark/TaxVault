@@ -16,8 +16,8 @@
     }
   </header>
 
-  <section class="documents-card">
-    <div class="card-header">
+  <section class="documents-card" tvCollapsibleCard>
+    <div class="card-header" data-tv-collapse-header>
       <div>
         <h2>{{ 'Documents.AllDocuments' | translate }}</h2>
         <p>
@@ -110,7 +110,15 @@
               </div>
 
               <div class="document-name">
-                <strong>{{ document.original_filename }}</strong>
+                <strong>{{ displayName(document) }}</strong>
+                @if (auth.canEdit && editingDescriptionDocumentId === document.id) {
+                  <span class="description-editor"><input [(ngModel)]="descriptionDraft" maxlength="255" placeholder="Add a description" /><button type="button" class="secondary-button" (click)="saveDescription(document)">Save</button><button type="button" class="secondary-button" (click)="cancelDescriptionEdit()">Cancel</button></span>
+                } @else if (auth.canEdit) {
+                  <button type="button" class="description-edit" (click)="editDescription(document)">{{ document.description ? 'Edit description' : 'Add description' }}</button>
+                }
+                @if (displayName(document) !== document.original_filename) {
+                  <small class="original-filename">Original: {{ document.original_filename }}</small>
+                }
                 <span>{{ getDocumentTypeName(document) }}</span>
                 <span class="document-financial-year">
                   {{ getFinancialYearLabel(document) }}
@@ -191,9 +199,9 @@
                 }
               }
               @if (document.status === 'review_required') {
-                <a routerLink="/reviews" class="review-document-link">Open review queue</a>
+                <a [routerLink]="document.review_id ? ['/reviews', document.review_id] : ['/reviews']" class="review-document-link">Open review item</a>
               }
-              @if (document.payment_status !== 'paid' && document.financial_year_id) {
+              @if (document.payment_status !== 'paid' && document.financial_year_id && !hasMixedOrMultipleTransactions(document)) {
                 <button
                   type="button"
                   class="payment-action"
@@ -201,6 +209,8 @@
                 >
                   Mark as paid
                 </button>
+              } @else if (document.payment_status !== 'paid' && document.financial_year_id && hasMixedOrMultipleTransactions(document)) {
+                <span class="payment-note">Payment confirmation is unavailable because this document has multiple or mixed transactions. Review Income &amp; expenses instead.</span>
               } @else if (document.payment_status !== 'paid' && !document.financial_year_id) {
                 <span class="payment-note">Assign a financial year before recording payment.</span>
               }

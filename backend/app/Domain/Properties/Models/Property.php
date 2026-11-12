@@ -3,6 +3,7 @@
 namespace App\Domain\Properties\Models;
 
 use App\Domain\Shared\Models\UuidModel;
+use App\Domain\Wealth\Models\AssetValuation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,5 +48,15 @@ class Property extends UuidModel
     public function periods(): HasMany
     {
         return $this->hasMany(PropertyPeriod::class);
+    }
+
+    public function valuations(): HasMany
+    {
+        return $this->hasMany(AssetValuation::class)->orderByDesc('as_of');
+    }
+
+    public function deductions(): HasMany
+    {
+        return $this->hasMany(PropertyDeduction::class)->with('financialYear')->orderByDesc('financial_year_id');
     }
 }

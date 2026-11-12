@@ -19,6 +19,7 @@ import {
   faGear,
   faHouse,
   faMagnifyingGlass,
+  faNewspaper,
   faBell,
   faPenToSquare,
   faPlus,
@@ -62,6 +63,7 @@ export type TaxIconName =
   | 'send'
   | 'search'
   | 'bell'
+  | 'news'
   | 'settings';
 
 const ICONS: Record<TaxIconName, IconDefinition> = {
@@ -93,6 +95,7 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   send: faPaperPlane,
   search: faMagnifyingGlass,
   bell: faBell,
+  news: faNewspaper,
   settings: faGear,
 };
 

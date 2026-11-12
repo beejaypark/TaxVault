@@ -31,6 +31,7 @@ describe('UserPreferencesService', () => {
     expect(setup().service.preferences()).toEqual({
       notifyDocuments: true,
       notifyUncategorised: true,
+      notifyTaxNews: true,
       defaultFinancialYear: 'current',
       emailReviewDigest: false,
       emailDeadlineReminders: false,
@@ -56,6 +57,7 @@ describe('UserPreferencesService', () => {
     expect(setup().service.preferences()).toEqual({
       notifyDocuments: false,
       notifyUncategorised: true,
+      notifyTaxNews: true,
       defaultFinancialYear: 'all',
       emailReviewDigest: false,
       emailDeadlineReminders: false,

@@ -224,8 +224,8 @@ class RecordEditingTest extends TestCase
             ->assertCreated()->json('data.id');
         $mortgage = $this->actingAs($this->owner)->postJson("/api/properties/{$property}/mortgages", [
             'bank_name' => 'ANZ', 'loan_type' => 'variable', 'loan_amount' => '600000',
-            'interest_rate' => '5.50', 'start_date' => '2024-01-01',
-        ])->assertCreated()->assertJsonCount(1, 'data.rate_changes')->json('data.id');
+            'interest_rate' => '5.50', 'start_date' => '2024-01-01', 'maturity_date' => '2054-01-01',
+        ])->assertCreated()->assertJsonPath('data.maturity_date', '2054-01-01')->assertJsonCount(1, 'data.rate_changes')->json('data.id');
 
         $this->actingAs($this->owner)->putJson("/api/mortgages/{$mortgage}/rates", ['effective_date' => '2025-03-01', 'rate' => '6.25'])
             ->assertOk()->assertJsonCount(2, 'data.rate_changes')->assertJsonPath('data.interest_rate', '6.250');

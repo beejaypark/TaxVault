@@ -112,7 +112,7 @@ class FinancialYearExportServiceTest extends TestCase
 
         $manifest = $result->payload['manifest'];
 
-        $this->assertSame('1', $manifest['export_version']);
+        $this->assertSame('2', $manifest['export_version']);
         $this->assertNotEmpty($manifest['generated_at']);
         $this->assertSame($fy->id, $manifest['financial_year_id']);
         $this->assertSame('2025-26', $manifest['year_code']);

@@ -1,4 +1,4 @@
-<div class="dashboard-page">
+<div class="dashboard-page" [class.widget-editing]="editWidgets">
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
@@ -8,12 +8,35 @@
     </div>
 
     @if (auth.canEdit) {
-    <a routerLink="/documents/upload" class="primary-button">
-      <tv-icon name="plus" />
-      {{ 'Dashboard.UploadDocument' | translate }}
-    </a>
+    <div class="header-actions">
+      <button type="button" class="secondary-button" (click)="toggleWidgetEditor()">
+        {{ editWidgets ? ('Dashboard.DoneEditing' | translate) : ('Dashboard.Customize' | translate) }}
+      </button>
+      <a routerLink="/documents/upload" class="primary-button">
+        <tv-icon name="plus" />
+        {{ 'Dashboard.UploadDocument' | translate }}
+      </a>
+    </div>
     }
   </header>
+
+  @if (editWidgets) {
+    <section class="widget-editor" [attr.aria-label]="'Dashboard.WidgetEditor' | translate">
+      <div>
+        <strong>{{ 'Dashboard.Widgets' | translate }}</strong>
+        <p>{{ 'Dashboard.WidgetEditorDescription' | translate }}</p>
+      </div>
+      <div class="widget-picker">
+        @for (widget of widgetDefinitions; track widget.id) {
+          <button type="button" [class.selected]="isWidgetVisible(widget.id)" (click)="toggleWidget(widget.id)">
+            <span>{{ isWidgetVisible(widget.id) ? '✓' : '+' }}</span>
+            <span><strong>{{ widget.label | translate }}</strong><small>{{ widget.description | translate }}</small></span>
+          </button>
+        }
+      </div>
+      <button type="button" class="reset-layout" (click)="resetWidgetLayout()">{{ 'Dashboard.RestoreDefault' | translate }}</button>
+    </section>
+  }
 
   <app-deadline-card />
 
@@ -47,10 +70,22 @@
       </a>
     </section>
 
-    <tv-wealth-overview />
-
     <div class="dashboard-columns">
     <div class="dashboard-main">
+    @if (isWidgetVisible('wealth')) {
+      <section class="dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'wealth'" [style.order]="widgetOrder('wealth')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('wealth', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('wealth', $event)" (dragend)="endWidgetDrag()">
+        @if (editWidgets) {
+          <div class="widget-edit-bar"><strong>{{ widgetLabel('wealth') }}</strong><span><button type="button" (click)="moveWidget('wealth', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('wealth', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('wealth')">{{ 'Dashboard.Hide' | translate }}</button></span></div>
+        }
+        <tv-wealth-overview />
+      </section>
+    }
+
+    @if (isWidgetVisible('financial-analysis')) {
+    <section class="dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'financial-analysis'" [style.order]="widgetOrder('financial-analysis')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('financial-analysis', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('financial-analysis', $event)" (dragend)="endWidgetDrag()">
+    @if (editWidgets) {
+      <div class="widget-edit-bar"><strong>{{ widgetLabel('financial-analysis') }}</strong><span><button type="button" (click)="moveWidget('financial-analysis', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('financial-analysis', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('financial-analysis')">{{ 'Dashboard.Hide' | translate }}</button></span></div>
+    }
     <section class="analysis-section" aria-labelledby="financial-analysis-heading">
       <div class="section-heading">
         <div>
@@ -84,7 +119,7 @@
         </div>
 
         <div class="analysis-grid">
-          <section class="analysis-card" aria-labelledby="monthly-chart-heading">
+          <section class="analysis-card" tvCollapsibleCard aria-labelledby="monthly-chart-heading">
             <div class="analysis-card-heading">
               <div>
                 <h3 id="monthly-chart-heading">{{ 'Dashboard.MonthlyIncomeExpenses' | translate }}</h3>
@@ -130,7 +165,7 @@
             }
           </section>
 
-          <section class="analysis-card review-analysis" aria-labelledby="review-chart-heading">
+          <section class="analysis-card review-analysis" tvCollapsibleCard aria-labelledby="review-chart-heading">
             <div class="analysis-card-heading">
               <div>
                 <h3 id="review-chart-heading">{{ 'Dashboard.DocumentReviewProgress' | translate }}</h3>
@@ -169,10 +204,14 @@
         }
       }
     </section>
+    </section>
+    }
     </div>
 
     <aside class="dashboard-side" [attr.aria-label]="'Dashboard.TasksShortcuts' | translate">
-    <section class="dashboard-section">
+    @if (isWidgetVisible('attention')) {
+    <section class="dashboard-section dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'attention'" [style.order]="widgetOrder('attention')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('attention', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('attention', $event)" (dragend)="endWidgetDrag()">
+      @if (editWidgets) {<div class="widget-edit-bar"><strong>{{ widgetLabel('attention') }}</strong><span><button type="button" (click)="moveWidget('attention', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('attention', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('attention')">{{ 'Dashboard.Hide' | translate }}</button></span></div>}
       <div class="section-heading">
         <div>
           <h2>{{ 'Dashboard.NeedsAttention' | translate }}</h2>
@@ -206,8 +245,12 @@
         </div>
       }
     </section>
+    }
 
-    <section class="dashboard-section">
+    @if (isWidgetVisible('recent-documents')) {
+    <section class="dashboard-section dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'recent-documents'" [style.order]="widgetOrder('recent-documents')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('recent-documents', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('recent-documents', $event)" (dragend)="endWidgetDrag()">
+      @if (editWidgets) {<div class="widget-edit-bar"><strong>{{ widgetLabel('recent-documents') }}</strong><span><button type="button" (click)="moveWidget('recent-documents', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('recent-documents', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('recent-documents')">{{ 'Dashboard.Hide' | translate }}</button></span></div>}
+    <div class="dashboard-widget-content">
       <div class="section-heading">
         <div>
           <h2>{{ 'Dashboard.RecentDocuments' | translate }}</h2>
@@ -246,9 +289,40 @@
           }
         </div>
       }
+    </div>
     </section>
+    }
 
-    <section class="dashboard-section" [attr.aria-label]="'TaxWorkspace.Title' | translate">
+    @if (isWidgetVisible('tax-news')) {
+    <section class="dashboard-section dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'tax-news'" [style.order]="widgetOrder('tax-news')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('tax-news', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('tax-news', $event)" (dragend)="endWidgetDrag()">
+      @if (editWidgets) {<div class="widget-edit-bar"><strong>{{ widgetLabel('tax-news') }}</strong><span><button type="button" (click)="moveWidget('tax-news', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('tax-news', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('tax-news')">{{ 'Dashboard.Hide' | translate }}</button></span></div>}
+      <div class="section-heading">
+        <div>
+          <h2><tv-icon name="news" /> {{ 'TaxNews.Title' | translate }}</h2>
+          <p>{{ 'TaxNews.MatchedUpdates' | translate }}</p>
+        </div>
+        <a routerLink="/tax-news" class="text-link">{{ 'TaxNews.ViewAll' | translate }}</a>
+      </div>
+      @if (taxNews.length === 0) {
+        <div class="widget-empty">{{ 'TaxNews.WidgetEmpty' | translate }}</div>
+      } @else {
+        <div class="tax-news-list">
+          @for (item of taxNews.slice(0, 4); track item.id) {
+            <a class="tax-news-row" [href]="item.url" target="_blank" rel="noopener noreferrer">
+              <span class="tax-news-mark" [class.important]="item.importance === 'important'"></span>
+              <span class="tax-news-title">{{ item.ai_summary || item.title }}</span>
+              <time>{{ formatDate(item.published_at ?? '') }}</time>
+            </a>
+          }
+        </div>
+      }
+    </section>
+    }
+
+    @if (isWidgetVisible('shortcuts')) {
+    <section class="dashboard-section dashboard-widget" [class.widget-dragging]="draggingWidgetId === 'shortcuts'" [style.order]="widgetOrder('shortcuts')" [draggable]="editWidgets" (dragstart)="startWidgetDrag('shortcuts', $event)" (dragover)="$event.preventDefault()" (drop)="dropWidget('shortcuts', $event)" (dragend)="endWidgetDrag()">
+      @if (editWidgets) {<div class="widget-edit-bar"><strong>{{ widgetLabel('shortcuts') }}</strong><span><button type="button" (click)="moveWidget('shortcuts', -1)" [attr.aria-label]="'Dashboard.MoveUp' | translate">↑</button><button type="button" (click)="moveWidget('shortcuts', 1)" [attr.aria-label]="'Dashboard.MoveDown' | translate">↓</button><button type="button" (click)="toggleWidget('shortcuts')">{{ 'Dashboard.Hide' | translate }}</button></span></div>}
+    <div class="dashboard-widget-content" [attr.aria-label]="'TaxWorkspace.Title' | translate">
       <div class="section-heading">
         <div><h2>{{ 'Dashboard.Shortcuts' | translate }}</h2></div>
       </div>
@@ -258,7 +332,9 @@
         @if (auth.can('assets')) {<a routerLink="/investments"><span><tv-icon name="investment" /></span><div><strong>{{ 'Investments.Title' | translate }}</strong><small>{{ 'Dashboard.TrackInvestment' | translate }}</small></div></a>}
         <a routerLink="/tax-return"><span><tv-icon name="taxReturn" /></span><div><strong>{{ 'AccountantPack.Title' | translate }}</strong><small>{{ 'Dashboard.EvidencePackage' | translate }}</small></div></a>
       </nav>
+    </div>
     </section>
+    }
     </aside>
     </div>
   }

@@ -1,5 +1,5 @@
 @if (hasData()) {
-  <section class="card" aria-labelledby="cash-flow-heading">
+  <section class="card" tvCollapsibleCard aria-labelledby="cash-flow-heading">
     <div class="heading">
       <div>
         <h3 id="cash-flow-heading">Cash flow</h3>
@@ -40,7 +40,7 @@
   </section>
 
   @if (showForecast() && forecast(); as plan) {
-    <section class="card no-print-controls" aria-labelledby="forecast-heading">
+    <section class="card no-print-controls" tvCollapsibleCard aria-labelledby="forecast-heading">
       <div class="heading">
         <div>
           <h3 id="forecast-heading">Cash flow forecast</h3>
@@ -110,7 +110,7 @@
     </section>
   }
 
-  <section class="card" aria-labelledby="spending-heading">
+    <section class="card" tvCollapsibleCard aria-labelledby="spending-heading">
     <div class="heading">
       <div>
         <h3 id="spending-heading">Where the money goes</h3>
@@ -149,7 +149,7 @@
     </div>
   </section>
 
-  <section class="card" aria-labelledby="insights-heading">
+    <section class="card" tvCollapsibleCard aria-labelledby="insights-heading">
     <div class="heading">
       <div>
         <h3 id="insights-heading">Where to cut or grow</h3>
@@ -172,7 +172,7 @@
     </ul>
   </section>
 } @else {
-  <section class="card" aria-labelledby="cash-flow-heading">
+  <section class="card" tvCollapsibleCard aria-labelledby="cash-flow-heading">
     <div class="heading">
       <div>
         <h3 id="cash-flow-heading">Cash flow</h3>

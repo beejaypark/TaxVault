@@ -207,6 +207,11 @@ select:focus {
   padding: 20px;
 }
 
+.property-history { display: grid; gap: 8px; width: 100%; padding-top: 12px; border-top: 1px solid var(--tv-color-border); }
+.property-history h3 { margin: 0; font-size: 13px; }
+.property-history ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.property-history li { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+
 .property-value {
   display: flex;
   align-items: center;

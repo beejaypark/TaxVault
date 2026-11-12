@@ -80,4 +80,5 @@ The dashboard opens with a "My assets" overview.
 - Changing the rate on the mortgage edit form also records a change dated today. Existing mortgages start with one point from their current rate.
 - The headline rate always follows the latest change that has taken effect; it feeds My assets.
 - A step chart under the mortgages shows the rate over time (one line per mortgage), next to the monthly interest chart.
+- Mortgages can also record a maturity date. The UI shows the calculated loan term and maturity date, while rate and monthly interest history remains available for the full recorded life of the mortgage.
 

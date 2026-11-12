@@ -6,10 +6,10 @@
     </div>
 
     <div class="stats">
-      <div><span>Net worth</span><strong data-test="net-worth">{{ money(s.net_worth) }}</strong></div>
-      <div><span>Assets</span><strong>{{ money(s.total_assets) }}</strong></div>
-      <div><span>Loans</span><strong>{{ money(s.total_liabilities) }}</strong></div>
-      <div><span>Savings rate</span><strong>{{ percent(totals().savingsRate) }}</strong></div>
+      <div title="Assets minus loans for the selected financial year"><span>Net worth</span><strong data-test="net-worth">{{ money(s.net_worth) }}</strong></div>
+      <div title="Recorded property and investment values for the selected financial year"><span>Assets</span><strong>{{ money(s.total_assets) }}</strong></div>
+      <div title="Recorded mortgage loan amounts"><span>Loans</span><strong>{{ money(s.total_liabilities) }}</strong></div>
+      <div title="Income remaining after expenses, shown as a percentage"><span>Savings rate</span><strong>{{ percent(totals().savingsRate) }}</strong></div>
     </div>
 
     @if (!hasAssets()) {
@@ -17,7 +17,7 @@
     }
 
     <div class="grid">
-      <section class="panel">
+      <section class="panel" tvCollapsibleCard>
         <h4>Cash flow, 12 months</h4>
         <p class="sub">Income {{ money(totals().income) }} - expenses {{ money(totals().expenses) }} = <b [class.neg]="totals().net < 0">{{ money(totals().net) }}</b></p>
         <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Monthly income and expenses for the last 12 months">
@@ -37,7 +37,7 @@
         <p class="legend"><i class="income"></i>Income <i class="expense"></i>Expenses</p>
       </section>
 
-      <section class="panel">
+      <section class="panel" tvCollapsibleCard>
         <h4>Net worth trend</h4>
         @if (trend(); as t) {
           <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" role="img" aria-label="Net worth over time">
@@ -54,7 +54,7 @@
       </section>
     </div>
 
-    <section class="panel">
+    <section class="panel" tvCollapsibleCard>
       <div class="proj-head">
         <h4>Long-term projection</h4>
         <div class="tabs" role="tablist">
@@ -96,7 +96,7 @@
       <p class="disclaimer">Estimates based on the last 12 months of cash flow and the assumptions above. Loans are treated as interest-only. This is not financial or tax advice.</p>
     </section>
 
-    <section class="panel insights">
+    <section class="panel insights" tvCollapsibleCard>
       <h4>Strengths and things to improve</h4>
       <div class="cols">
         <ul class="strengths">

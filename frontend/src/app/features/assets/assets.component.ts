@@ -20,11 +20,13 @@ import {
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { PropertyMortgagesComponent } from './property-mortgages.component';
 import { PropertyRentalSummaryComponent } from './property-rental-summary.component';
+import { PropertyDeductionsComponent } from './property-deductions.component';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 @Component({
   selector: 'app-assets',
-  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent, PropertyRentalSummaryComponent, TranslatePipe],
+  imports: [FormsModule, RouterLink, TaxIconComponent, BackNavigationComponent, PropertyMortgagesComponent, PropertyRentalSummaryComponent, PropertyDeductionsComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

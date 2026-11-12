@@ -14,10 +14,65 @@
     "Title": "概览"
   },
   "Dashboard": {
-    "Title": "仪表板"
+    "Title": "仪表板",
+    "DoneEditing": "完成编辑",
+    "Customize": "自定义仪表板",
+    "WidgetEditor": "仪表板小组件编辑器",
+    "Widgets": "仪表板小组件",
+    "WidgetEditorDescription": "选择显示在仪表板上的内容，并使用箭头调整顺序。",
+    "RestoreDefault": "恢复默认布局",
+    "MoveUp": "向上移动小组件",
+    "MoveDown": "向下移动小组件",
+    "Hide": "隐藏",
+    "WidgetWealth": "财富概览",
+    "WidgetWealthDescription": "资产、贷款和净资产",
+    "WidgetAnalysis": "财务分析",
+    "WidgetAnalysisDescription": "收入、支出和现金流",
+    "WidgetAttention": "需要关注",
+    "WidgetAttentionDescription": "等待处理的审核项目",
+    "WidgetDocuments": "最近文件",
+    "WidgetDocumentsDescription": "最近上传的税务记录",
+    "WidgetShortcuts": "快捷方式",
+    "WidgetShortcutsDescription": "常用工作区操作",
+    "ReviewChartDescription": "已完成{completed}项，需要关注{attention}项，其他审核{other}项",
+    "NoReviews": "没有审核项目",
+    "LoadFailed": "无法加载仪表板，请重试。",
+    "FinancialYearLoadFailed": "无法加载财务年度，请重试。",
+    "ReviewLoadFailed": "无法加载审核状态，请重试。",
+    "AnalysisLoadFailed": "无法加载本财年的财务分析。",
+    "DocumentRefreshFailed": "无法刷新文件状态。",
+    "ReviewRefreshFailed": "无法刷新审核状态。",
+    "AnalysisRefreshFailed": "无法刷新财务分析。"
   },
   "TaxWorkspace": {
     "Title": "税务工作区"
+  },
+  "TaxNews": {
+    "Title": "税务新闻",
+    "Eyebrow": "澳大利亚税务更新",
+    "Description": "来自ATO官方来源的重要更新。采取行动前请务必查看原始通知。",
+    "SyncNow": "立即同步",
+    "Syncing": "同步中…",
+    "All": "全部",
+    "Rental": "出租房产",
+    "Individuals": "个人",
+    "SmallBusiness": "小型企业",
+    "Super": "养老金",
+    "General": "一般",
+    "Update": "更新",
+    "Source": "来源",
+    "Status": "状态",
+    "Published": "发布日期",
+    "NoNews": "尚未同步税务新闻",
+    "ScheduledSync": "计划同步每天检查ATO信息源。",
+    "LoadFailed": "无法加载税务新闻。",
+    "SyncFailed": "无法同步税务新闻。",
+    "Disclaimer": "税务新闻仅供一般信息参考，不构成税务或法律建议。请向ATO或注册税务顾问确认现行法律及您的具体情况。",
+    "ViewAll": "查看全部",
+    "MatchedUpdates": "与您的房产和投资相关的更新",
+    "Category": { "rental": "出租房产", "individuals": "个人", "small_business": "小型企业", "super": "养老金", "general": "一般" },
+    "StatusLabel": { "proposed": "拟议", "passed": "已通过", "effective": "已生效", "guidance": "指南" },
+    "WidgetEmpty": "尚未同步税务新闻。"
   },
   "Documents": {
     "Title": "文件",
@@ -33,7 +88,16 @@
     "Title": "收入与支出"
   },
   "Assets": {
-    "Title": "资产"
+    "Title": "资产",
+    "PropertyDeductions": "房产扣除",
+    "PropertyDeductionsDescription": "来自资本折旧和税务折旧表的年度扣除额。",
+    "NoPropertyDeductions": "此房产尚未记录折旧扣除。",
+    "SelectFinancialYear": "选择财务年度",
+    "CapitalWorks": "资本工程扣除（Division 43）",
+    "PlantEquipment": "厂房设备折旧（Division 40）",
+    "Amount": "金额（AUD）",
+    "NotesOptional": "备注（可选）",
+    "SaveDeduction": "保存扣除"
   },
   "Properties": {
     "Title": "房产"

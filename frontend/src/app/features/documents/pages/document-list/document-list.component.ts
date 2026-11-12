@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  HostListener,
   OnInit,
   inject,
 } from '@angular/core';
@@ -23,10 +24,12 @@ import {
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../../../shared/directives/collapsible-card.directive';
+import { documentDisplayName } from '../../../../shared/utils/document-display-name';
 
 @Component({
   selector: 'app-document-list',
-  imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent, TranslatePipe],
+  imports: [RouterLink, FormsModule, TaxIconComponent, BackNavigationComponent, ModalDialogComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './document-list.component.html',
   styleUrl: './document-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +65,8 @@ export class DocumentListComponent implements OnInit {
   paymentMethod = 'bpay';
   failedPaymentDocumentId: string | null = null;
   paymentErrorMessage = '';
+  editingDescriptionDocumentId: string | null = null;
+  descriptionDraft = '';
   private readonly deletedDocumentIds = new Set<string>();
 
   readonly paymentMethods = [
@@ -191,6 +196,11 @@ export class DocumentListComponent implements OnInit {
     ) ?? null;
   }
 
+  hasMixedOrMultipleTransactions(document: DocumentDto): boolean {
+    return (document.linked_income_count ?? 0) > 0
+      || (document.linked_expense_count ?? 0) > 1;
+  }
+
   getFinancialYearLabel(document: DocumentDto): string {
     if (document.financial_year_id === null) {
       return 'Financial year needed';
@@ -316,6 +326,23 @@ export class DocumentListComponent implements OnInit {
     });
   }
 
+  @HostListener('window:focus')
+  refreshWhenReturningToDocuments(): void {
+    this.api.listDocuments().subscribe({
+      next: (documents) => {
+        this.documents = documents.filter(
+          (document) => !this.deletedDocumentIds.has(document.id),
+        );
+        this.optionsErrorMessage = '';
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.optionsErrorMessage = 'Unable to refresh documents. Reload the page to check again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   retryProcessing(document: DocumentDto): void {
     if (
       document.status !== 'processing_failed'
@@ -342,7 +369,11 @@ export class DocumentListComponent implements OnInit {
   }
 
   openPaymentConfirmation(document: DocumentDto): void {
-    if (document.financial_year_id === null || document.payment_status === 'paid') {
+    if (
+      document.financial_year_id === null
+      || document.payment_status === 'paid'
+      || this.hasMixedOrMultipleTransactions(document)
+    ) {
       return;
     }
 
@@ -430,6 +461,37 @@ export class DocumentListComponent implements OnInit {
     return this.documentTypes.find(
       (type) => type.id === document.document_type_id,
     )?.name ?? 'Tax document';
+  }
+
+  displayName(document: DocumentDto): string {
+    const type = this.getDocumentTypeName(document);
+    return documentDisplayName(document.original_filename, document.description, document.latest_extraction?.output?.normalized?.fields, type === 'Tax document' ? '' : type);
+  }
+
+  editDescription(document: DocumentDto): void {
+    this.editingDescriptionDocumentId = document.id;
+    this.descriptionDraft = document.description ?? '';
+  }
+
+  cancelDescriptionEdit(): void {
+    this.editingDescriptionDocumentId = null;
+    this.descriptionDraft = '';
+  }
+
+  saveDescription(document: DocumentDto): void {
+    this.api.updateDocumentDescription(document.id, this.descriptionDraft.trim() || null).subscribe({
+      next: (updated) => { this.documents = this.documents.map((item) => item.id === updated.id ? { ...item, description: updated.description } : item); this.cancelDescriptionEdit(); this.cdr.markForCheck(); },
+      error: () => { this.errorMessage = 'Unable to save document description.'; this.cdr.markForCheck(); },
+    });
+  }
+
+  private firstExtractedValue(document: DocumentDto, keys: string[]): string {
+    const fields = document.latest_extraction?.output?.normalized?.fields ?? {};
+    for (const key of keys) {
+      const value = fields[key]?.value;
+      if (typeof value === 'string' && value.trim()) return value.trim();
+    }
+    return '';
   }
 
   formatDate(value: string): string {

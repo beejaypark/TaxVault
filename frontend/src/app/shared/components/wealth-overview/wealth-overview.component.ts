@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 
 import { DocumentApiService } from '../../services/documents/document-api.service';
 import { TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
+import { CollapsibleCardDirective } from '../../directives/collapsible-card.directive';
 import {
   ProjectionAssumptions,
   ScenarioName,
@@ -20,7 +21,7 @@ const SCENARIOS: ScenarioName[] = ['conservative', 'base', 'optimistic'];
 
 @Component({
   selector: 'tv-wealth-overview',
-  imports: [RouterLink],
+  imports: [RouterLink, CollapsibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './wealth-overview.component.html',
   styleUrl: './wealth-overview.component.scss',

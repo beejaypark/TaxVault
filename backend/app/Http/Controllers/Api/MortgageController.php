@@ -132,6 +132,7 @@ class MortgageController extends Controller
             'loan_amount' => ['required', 'numeric', 'min:0', 'max:999999999999'],
             'interest_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'start_date' => ['nullable', 'date'],
+            'maturity_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
     }
 }

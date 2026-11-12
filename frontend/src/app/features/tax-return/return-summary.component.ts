@@ -7,6 +7,7 @@ import {
   input,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 import { forkJoin, of } from 'rxjs';
 
 import {
@@ -29,10 +30,10 @@ interface LineGroup {
 
 @Component({
   selector: 'app-return-summary',
-  imports: [RouterLink],
+  imports: [RouterLink, CollapsibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-label="Tax return item summary">
+    <section class="panel" tvCollapsibleCard aria-label="Tax return item summary">
       <div class="head">
         <div>
           <div class="eyebrow">By tax return item</div>

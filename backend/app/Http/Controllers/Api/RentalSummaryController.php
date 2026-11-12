@@ -88,6 +88,18 @@ class RentalSummaryController extends Controller
             ];
         }
 
+        foreach ($model->deductions()->where('financial_year_id', $year->getKey())->get() as $deduction) {
+            $expenses[] = [
+                'category' => 'rental_'.$deduction->deduction_type,
+                'label' => $deduction->deduction_type === 'capital_works'
+                    ? 'Capital works deduction'
+                    : 'Plant and equipment depreciation',
+                'amount' => round((float) $deduction->amount, 2),
+                'records' => 1,
+                'source' => 'property_deduction',
+            ];
+        }
+
         $totalIncome = round(array_sum(array_column($income, 'amount')), 2);
         $totalExpenses = round(array_sum(array_column($expenses, 'amount')), 2);
 

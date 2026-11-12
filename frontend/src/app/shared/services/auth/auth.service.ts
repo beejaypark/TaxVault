@@ -15,6 +15,19 @@ import {
 
 export type AccessSection = 'documents' | 'transactions' | 'reviews' | 'assets';
 
+export interface DashboardWidgetLayout {
+  id: string;
+  visible: boolean;
+  order: number;
+}
+
+export interface UserAiPreferences {
+  enabled: boolean;
+  provider: 'openai' | 'anthropic' | 'gemini';
+  model: string;
+  api_key_configured: boolean;
+}
+
 export interface AccountantClient {
   owner_id: string;
   owner_name: string | null;
@@ -32,10 +45,13 @@ export interface AuthUser {
     language?: 'en' | 'kr' | 'cn' | 'es';
     notifyDocuments?: boolean;
     notifyUncategorised?: boolean;
+    notifyTaxNews?: boolean;
     defaultFinancialYear?: 'current' | 'all';
     emailReviewDigest?: boolean;
     emailDeadlineReminders?: boolean;
     lodgementDeadline?: string | null;
+    dashboardLayout?: DashboardWidgetLayout[];
+    ai?: UserAiPreferences;
   } | null;
   clients?: AccountantClient[];
 }

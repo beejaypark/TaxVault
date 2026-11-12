@@ -34,7 +34,7 @@ class FinancialYearExportApiTest extends TestCase
         $response
             ->assertCreated()
             ->assertJsonPath('data.financial_year_id', $financialYear->id)
-            ->assertJsonPath('data.export_version', '1')
+            ->assertJsonPath('data.export_version', '2')
             ->assertJsonStructure([
                 'data' => [
                     'id',
@@ -59,7 +59,7 @@ class FinancialYearExportApiTest extends TestCase
             'id' => $response->json('data.id'),
             'user_id' => $user->id,
             'financial_year_id' => $financialYear->id,
-            'export_version' => '1',
+            'export_version' => '2',
             'sha256' => $response->json('data.sha256'),
         ]);
     }

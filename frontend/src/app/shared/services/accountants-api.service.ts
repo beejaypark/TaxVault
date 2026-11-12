@@ -53,7 +53,15 @@ export class AccountantsApiService {
       .pipe(map((r) => r.data.temporary_password));
   }
 
-  sendPack(id: string, payload: { financial_year_id?: string | null; note?: string | null }): Observable<AccountantDto> {
+  sendPack(id: string, payload: {
+    financial_year_id?: string | null;
+    note?: string | null;
+    to?: string | null;
+    from_email?: string | null;
+    from_name?: string | null;
+    subject?: string | null;
+    content?: string | null;
+  }): Observable<AccountantDto> {
     return this.http
       .post<{ data: AccountantDto }>(`/api/accountants/${id}/send-pack`, payload)
       .pipe(map((r) => r.data));

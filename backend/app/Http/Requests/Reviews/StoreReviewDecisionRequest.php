@@ -47,6 +47,30 @@ class StoreReviewDecisionRequest extends FormRequest
                 'string',
                 'max:1000',
             ],
+            'transactions' => [
+                'sometimes',
+                'array',
+                'min:1',
+            ],
+            'transactions.*.transaction_date' => [
+                'required',
+                'date',
+            ],
+            'transactions.*.direction' => [
+                'required',
+                'string',
+                'in:income,expense',
+            ],
+            'transactions.*.amount' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+            'transactions.*.description' => [
+                'required',
+                'string',
+                'max:1000',
+            ],
         ];
     }
 }

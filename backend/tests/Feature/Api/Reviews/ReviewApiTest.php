@@ -287,6 +287,82 @@ class ReviewApiTest extends TestCase
         ]);
     }
 
+    public function test_approving_review_can_create_multiple_linked_transactions(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user, reviewType: 'classification');
+        $review->document()->update(['status' => 'review_required']);
+
+        $this->actingAs($user)
+            ->postJson('/api/reviews/' . $review->id . '/decision', [
+                'decision' => 'approve',
+                'transactions' => [
+                    [
+                        'transaction_date' => '2026-06-30',
+                        'direction' => 'income',
+                        'amount' => 36680.00,
+                        'description' => 'Annual rent income',
+                    ],
+                    [
+                        'transaction_date' => '2026-06-30',
+                        'direction' => 'expense',
+                        'amount' => 4928.19,
+                        'description' => 'Annual rental expenses',
+                    ],
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed');
+
+        $this->assertDatabaseHas('transactions', [
+            'document_id' => $review->document_id,
+            'direction' => 'income',
+            'amount' => '36680.00',
+            'description' => 'Annual rent income',
+        ]);
+        $this->assertDatabaseHas('transactions', [
+            'document_id' => $review->document_id,
+            'direction' => 'expense',
+            'amount' => '4928.19',
+            'description' => 'Annual rental expenses',
+        ]);
+        $this->assertDatabaseCount('transactions', 2);
+        $this->assertDatabaseCount('income', 1);
+        $this->assertDatabaseCount('expenses', 1);
+        $this->assertDatabaseHas('documents', [
+            'id' => $review->document_id,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_approving_review_uses_document_description_for_linked_transactions(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user, reviewType: 'classification');
+        $review->document()->update(['description' => 'Document description']);
+
+        $this->actingAs($user)
+            ->postJson('/api/reviews/'.$review->id.'/decision', [
+                'decision' => 'approve',
+                'expense' => [
+                    'transaction_date' => '2026-07-15',
+                    'direction' => 'expense',
+                    'amount' => 145.60,
+                    'description' => 'OCR description that should not win',
+                ],
+            ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('transactions', [
+            'document_id' => $review->document_id,
+            'description' => 'Document description',
+        ]);
+        $this->assertDatabaseMissing('transactions', [
+            'document_id' => $review->document_id,
+            'description' => 'OCR description that should not win',
+        ]);
+    }
+
     public function test_show_review_includes_active_authoritative_corrections(): void
     {
         $user = User::factory()->create();

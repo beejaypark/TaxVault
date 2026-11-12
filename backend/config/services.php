@@ -62,4 +62,22 @@ return [
         'consent_url' => env('BASIQ_CONSENT_URL', 'https://consent.basiq.io/home'),
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        'tax_news_model' => env('OPENAI_TAX_NEWS_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'base_url' => env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com/v1'),
+        'tax_news_model' => env('ANTHROPIC_TAX_NEWS_MODEL', 'claude-3-5-haiku-latest'),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'tax_news_model' => env('GEMINI_TAX_NEWS_MODEL', 'gemini-2.0-flash'),
+    ],
+
 ];

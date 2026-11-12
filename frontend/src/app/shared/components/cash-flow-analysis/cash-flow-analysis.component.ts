@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 
 import { TransactionDto } from '../../services/tax-workspace-api.service';
 import { analyseFinancialYear, forecastCashFlow } from '../../utils/financial-insights';
+import { CollapsibleCardDirective } from '../../directives/collapsible-card.directive';
 
 const WIDTH = 640;
 const HEIGHT = 240;
@@ -10,6 +11,7 @@ const PAD = { top: 16, right: 12, bottom: 28, left: 52 };
 @Component({
   selector: 'tv-cash-flow-analysis',
   standalone: true,
+  imports: [CollapsibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cash-flow-analysis.component.html',
   styleUrl: './cash-flow-analysis.component.scss',

@@ -28,6 +28,26 @@
     <app-work-from-home />
   }
 
+  @if (auth.canEdit) {
+    <section class="recurring-card" tvCollapsibleCard>
+      <div class="toolbar"><div><h2>Recurring income</h2><p>Automatically create monthly income transactions without duplicates.</p></div><button type="button" class="secondary-button" (click)="showRecurringForm ? resetRecurringForm() : showRecurringForm = true">{{ showRecurringForm ? 'Cancel' : 'Add income rule' }}</button></div>
+      @if (showRecurringForm) {
+        <form class="recurring-form" (ngSubmit)="saveRecurringIncome()">
+          <label>Company / source <input name="recurringName" [(ngModel)]="recurringForm.name" required /></label>
+          <label>Description <input name="recurringDescription" [(ngModel)]="recurringForm.description" placeholder="Optional — company name will be used" /></label>
+          <label>Gross amount (before tax) <input name="recurringAmount" type="number" min="0.01" step="0.01" [(ngModel)]="recurringForm.amount" required /><small>Use gross salary or GST-exclusive business income.</small></label>
+          <label>Day of month <input name="recurringDay" type="number" min="1" max="28" [(ngModel)]="recurringForm.day_of_month" required /></label>
+          <label>Start date <input name="recurringStart" type="date" [(ngModel)]="recurringForm.start_date" required /></label>
+          <label>End date <input name="recurringEnd" type="date" [(ngModel)]="recurringForm.end_date" /></label>
+          <button type="submit" class="primary-button">{{ editingRecurringId ? 'Update rule' : 'Save rule' }}</button>
+        </form>
+      }
+      @for (rule of recurringIncome; track rule.id) {
+        <div class="recurring-row"><div><strong>{{ rule.name }}</strong><span>{{ rule.description }} · day {{ rule.day_of_month }}</span></div><strong>{{ formatCurrency(rule.amount) }}</strong><div class="row-actions"><button type="button" class="secondary-button" (click)="editRecurringIncome(rule)">Edit</button><button type="button" class="secondary-button" (click)="toggleRecurringIncome(rule)">{{ rule.active ? 'Pause' : 'Resume' }}</button><button type="button" class="danger-button" (click)="deleteRecurringIncome(rule)">Delete</button></div></div>
+      } @empty { <p class="empty-state">No recurring income rules yet.</p> }
+    </section>
+  }
+
   @if (showForm) {
     <form class="transaction-form" (ngSubmit)="saveTransaction()">
       <div class="form-heading">
@@ -41,6 +61,16 @@
             <option value="expense">{{ 'Transactions.Expense' | translate }}</option>
           </select>
         </label>
+        @if (form.direction === 'income') {
+          <label>Income source
+            <select name="incomeSource" [(ngModel)]="incomeSource" (ngModelChange)="selectIncomeSource($event)">
+              <option value="manual">Manual income</option>
+              @for (rule of recurringIncome; track rule.id) {
+                <option [value]="rule.id">{{ rule.name }} · {{ formatCurrency(rule.amount) }}</option>
+              }
+            </select>
+          </label>
+        }
         <label>{{ 'Transactions.Date' | translate }} <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
         <label>{{ 'Transactions.Amount' | translate }} <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
         <label>{{ 'Transactions.TaxReturnItem' | translate }}
@@ -72,12 +102,12 @@
   }
 
   <section class="summary-grid" [attr.aria-label]="'Transactions.Summary' | translate">
-    <article class="summary-card"><span>{{ 'Transactions.Income' | translate }}</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
-    <article class="summary-card"><span>{{ 'Transactions.Expenses' | translate }}</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
-    <article class="summary-card"><span>{{ 'Transactions.NetRecords' | translate }}</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
+    <article class="summary-card" title="Total income transactions in the selected financial year"><span>{{ 'Transactions.Income' | translate }}</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
+    <article class="summary-card" title="Total expense transactions in the selected financial year"><span>{{ 'Transactions.Expenses' | translate }}</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
+    <article class="summary-card" title="Income minus expenses in the selected financial year"><span>{{ 'Transactions.NetRecords' | translate }}</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
   </section>
 
-  <section class="records-card">
+  <section class="records-card" tvCollapsibleCard>
     <div class="toolbar">
       <div>
         <h2>{{ 'Transactions.Transactions' | translate }}</h2>
@@ -127,7 +157,7 @@
     } @else {
       <div class="table-wrap">
         <table>
-          <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" [attr.aria-label]="'Transactions.SelectAll' | translate" /></th>}<th>{{ 'Transactions.DescriptionField' | translate }}</th><th>{{ 'Transactions.Date' | translate }}</th><th>{{ 'Transactions.Type' | translate }}</th><th>{{ 'Common.FinancialYear' | translate }}</th><th class="amount">{{ 'Transactions.Amount' | translate }}</th>@if (auth.canEdit) {<th class="actions-col">{{ 'Transactions.Actions' | translate }}</th>}</tr></thead>
+          <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" [attr.aria-label]="'Transactions.SelectAll' | translate" /></th>}<th><button type="button" class="sort-button" (click)="sortTransactions('description')">{{ 'Transactions.DescriptionField' | translate }}{{ sortIndicator('description') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('transaction_date')">{{ 'Transactions.Date' | translate }}{{ sortIndicator('transaction_date') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('direction')">{{ 'Transactions.Type' | translate }}{{ sortIndicator('direction') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('financial_year_id')">{{ 'Common.FinancialYear' | translate }}{{ sortIndicator('financial_year_id') }}</button></th><th class="amount"><button type="button" class="sort-button" (click)="sortTransactions('amount')">{{ 'Transactions.Amount' | translate }}{{ sortIndicator('amount') }}</button></th>@if (auth.canEdit) {<th class="actions-col">{{ 'Transactions.Actions' | translate }}</th>}</tr></thead>
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
               <tr>

@@ -3,16 +3,20 @@ import { Injectable, effect, inject, signal } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 
 import { AuthService } from './auth/auth.service';
+import { DashboardWidgetLayout, UserAiPreferences } from './auth/auth.service';
 import { LocaleCode, DEFAULT_LOCALE } from '../../i18n/locale';
 
 export interface UserPreferences {
   language: LocaleCode;
   notifyDocuments: boolean;
   notifyUncategorised: boolean;
+  notifyTaxNews: boolean;
   defaultFinancialYear: 'current' | 'all';
   emailReviewDigest: boolean;
   emailDeadlineReminders: boolean;
   lodgementDeadline: string | null;
+  dashboardLayout: DashboardWidgetLayout[];
+  ai: UserAiPreferences;
 }
 
 const STORAGE_KEY = 'taxvault.preferences';
@@ -20,10 +24,13 @@ const DEFAULTS: UserPreferences = {
   language: DEFAULT_LOCALE,
   notifyDocuments: true,
   notifyUncategorised: true,
+  notifyTaxNews: true,
   defaultFinancialYear: 'current',
   emailReviewDigest: false,
   emailDeadlineReminders: false,
   lodgementDeadline: null,
+  dashboardLayout: [],
+  ai: { enabled: true, provider: 'openai', model: 'gpt-4o-mini', api_key_configured: false },
 };
 
 function normalise(stored: Partial<UserPreferences> | null | undefined): UserPreferences {
@@ -31,10 +38,27 @@ function normalise(stored: Partial<UserPreferences> | null | undefined): UserPre
     language: stored?.language === 'kr' || stored?.language === 'cn' || stored?.language === 'es' ? stored.language : DEFAULTS.language,
     notifyDocuments: stored?.notifyDocuments ?? DEFAULTS.notifyDocuments,
     notifyUncategorised: stored?.notifyUncategorised ?? DEFAULTS.notifyUncategorised,
+    notifyTaxNews: stored?.notifyTaxNews ?? DEFAULTS.notifyTaxNews,
     defaultFinancialYear: stored?.defaultFinancialYear === 'all' ? 'all' : 'current',
     emailReviewDigest: stored?.emailReviewDigest ?? DEFAULTS.emailReviewDigest,
     emailDeadlineReminders: stored?.emailDeadlineReminders ?? DEFAULTS.emailDeadlineReminders,
     lodgementDeadline: stored?.lodgementDeadline || null,
+    dashboardLayout: Array.isArray(stored?.dashboardLayout)
+      ? stored!.dashboardLayout!.filter((item): item is DashboardWidgetLayout =>
+          !!item
+          && typeof item.id === 'string'
+          && typeof item.visible === 'boolean'
+          && Number.isInteger(item.order),
+        )
+      : DEFAULTS.dashboardLayout,
+    ai: stored?.ai && typeof stored.ai === 'object'
+      ? {
+          enabled: stored.ai.enabled ?? DEFAULTS.ai.enabled,
+          provider: stored.ai.provider ?? DEFAULTS.ai.provider,
+          model: stored.ai.model || DEFAULTS.ai.model,
+          api_key_configured: stored.ai.api_key_configured ?? false,
+        }
+      : DEFAULTS.ai,
   };
 }
 
@@ -66,6 +90,20 @@ export class UserPreferencesService {
     this.store(next);
 
     return this.save(next);
+  }
+
+  updateAi(settings: { enabled: boolean; provider: 'openai' | 'anthropic' | 'gemini'; model: string; api_key?: string; clear_api_key?: boolean }) {
+    const payload = { ...this.preferences(), ai: settings };
+
+    return this.http.put<{ data: UserPreferences }>('/api/auth/preferences', payload, { withCredentials: true }).pipe(
+      map((response) => {
+        const next = normalise(response.data);
+        this.preferences.set(next);
+        this.store(next);
+        return next.ai;
+      }),
+      catchError(() => of(this.preferences().ai)),
+    );
   }
 
   private initial(): UserPreferences {

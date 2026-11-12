@@ -14,10 +14,65 @@
     "Title": "Resumen"
   },
   "Dashboard": {
-    "Title": "Panel"
+    "Title": "Panel",
+    "DoneEditing": "Terminar edición",
+    "Customize": "Personalizar panel",
+    "WidgetEditor": "Editor de widgets del panel",
+    "Widgets": "Widgets del panel",
+    "WidgetEditorDescription": "Elige qué aparece en tu panel y usa las flechas para cambiar el orden.",
+    "RestoreDefault": "Restaurar diseño predeterminado",
+    "MoveUp": "Mover widget arriba",
+    "MoveDown": "Mover widget abajo",
+    "Hide": "Ocultar",
+    "WidgetWealth": "Resumen patrimonial",
+    "WidgetWealthDescription": "Activos, préstamos y patrimonio neto",
+    "WidgetAnalysis": "Análisis financiero",
+    "WidgetAnalysisDescription": "Ingresos, gastos y flujo de caja",
+    "WidgetAttention": "Requiere atención",
+    "WidgetAttentionDescription": "Revisiones pendientes de acción",
+    "WidgetDocuments": "Documentos recientes",
+    "WidgetDocumentsDescription": "Últimos registros fiscales cargados",
+    "WidgetShortcuts": "Accesos rápidos",
+    "WidgetShortcutsDescription": "Acciones habituales del espacio de trabajo",
+    "ReviewChartDescription": "{completed} completadas, {attention} requieren atención, {other} otras revisiones",
+    "NoReviews": "No hay revisiones",
+    "LoadFailed": "No se puede cargar el panel. Inténtalo de nuevo.",
+    "FinancialYearLoadFailed": "No se puede cargar el año fiscal. Inténtalo de nuevo.",
+    "ReviewLoadFailed": "No se puede cargar el estado de las revisiones. Inténtalo de nuevo.",
+    "AnalysisLoadFailed": "No se puede cargar el análisis financiero de este año.",
+    "DocumentRefreshFailed": "No se pueden actualizar los estados de los documentos.",
+    "ReviewRefreshFailed": "No se pueden actualizar los estados de las revisiones.",
+    "AnalysisRefreshFailed": "No se puede actualizar el análisis financiero."
   },
   "TaxWorkspace": {
     "Title": "Espacio fiscal"
+  },
+  "TaxNews": {
+    "Title": "Noticias fiscales",
+    "Eyebrow": "Actualizaciones fiscales australianas",
+    "Description": "Actualizaciones importantes de fuentes oficiales de la ATO. Consulta siempre el aviso original antes de actuar.",
+    "SyncNow": "Sincronizar ahora",
+    "Syncing": "Sincronizando…",
+    "All": "Todas",
+    "Rental": "Propiedad de alquiler",
+    "Individuals": "Personas",
+    "SmallBusiness": "Pequeñas empresas",
+    "Super": "Superannuation",
+    "General": "General",
+    "Update": "Actualización",
+    "Source": "Fuente",
+    "Status": "Estado",
+    "Published": "Publicado",
+    "NoNews": "Aún no se han sincronizado noticias fiscales",
+    "ScheduledSync": "La sincronización programada consulta las fuentes oficiales de la ATO diariamente.",
+    "LoadFailed": "No se pueden cargar las noticias fiscales.",
+    "SyncFailed": "No se pueden sincronizar las noticias fiscales.",
+    "Disclaimer": "Las noticias fiscales son información general, no asesoramiento fiscal o legal. Confirma la legislación vigente y tu situación con la ATO o un asesor fiscal registrado.",
+    "ViewAll": "Ver todo",
+    "MatchedUpdates": "Actualizaciones relacionadas con tus propiedades e inversiones",
+    "Category": { "rental": "Propiedad de alquiler", "individuals": "Personas", "small_business": "Pequeñas empresas", "super": "Superannuation", "general": "General" },
+    "StatusLabel": { "proposed": "Propuesto", "passed": "Aprobado", "effective": "Vigente", "guidance": "Orientación" },
+    "WidgetEmpty": "Aún no se han sincronizado noticias fiscales."
   },
   "Documents": {
     "Title": "Documentos",
@@ -33,7 +88,16 @@
     "Title": "Ingresos y gastos"
   },
   "Assets": {
-    "Title": "Activos"
+    "Title": "Activos",
+    "PropertyDeductions": "Deducciones de la propiedad",
+    "PropertyDeductionsDescription": "Deducciones anuales de tu informe de asignaciones de capital y depreciación fiscal.",
+    "NoPropertyDeductions": "No hay deducciones por depreciación registradas para esta propiedad.",
+    "SelectFinancialYear": "Seleccionar año fiscal",
+    "CapitalWorks": "Deducción por obras de capital (Division 43)",
+    "PlantEquipment": "Depreciación de planta y equipo (Division 40)",
+    "Amount": "Importe (AUD)",
+    "NotesOptional": "Notas (opcional)",
+    "SaveDeduction": "Guardar deducción"
   },
   "Properties": {
     "Title": "Propiedades"

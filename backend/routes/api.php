@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\FinancialYearController;
 use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\MortgageController;
+use App\Http\Controllers\Api\MortgageInterestImportController;
 use App\Http\Controllers\Api\NotificationEmailController;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\Api\RentalSummaryController;
@@ -20,6 +21,9 @@ use App\Http\Controllers\Api\TransactionBulkController;
 use App\Http\Controllers\Api\WorkFromHomeController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\RecurringIncomeController;
+use App\Http\Controllers\Api\TaxNewsController;
+use App\Http\Controllers\Api\PropertyDeductionController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -66,6 +70,9 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::post('/properties', [PropertyController::class, 'store']);
     Route::get('/properties/{property}', [PropertyController::class, 'show']);
     Route::get('/properties/{property}/rental-summary', [RentalSummaryController::class, 'show']);
+    Route::post('/properties/{property}/deductions', [PropertyDeductionController::class, 'store']);
+    Route::put('/properties/{property}/deductions/{deduction}', [PropertyDeductionController::class, 'update']);
+    Route::delete('/properties/{property}/deductions/{deduction}', [PropertyDeductionController::class, 'destroy']);
     Route::put('/properties/{property}', [PropertyController::class, 'update'])->middleware('audit:property.update,property');
     Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->middleware('audit:property.delete,property');
     Route::post('/properties/{property}/mortgages', [MortgageController::class, 'store'])->middleware('audit:mortgage.create,property');
@@ -73,6 +80,8 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::delete('/mortgages/{id}', [MortgageController::class, 'destroy'])->middleware('audit:mortgage.delete,mortgage');
     Route::put('/mortgages/{id}/interest', [MortgageController::class, 'saveInterest'])->middleware('audit:mortgage.interest,mortgage');
     Route::delete('/mortgages/{id}/interest/{entry}', [MortgageController::class, 'destroyInterest'])->middleware('audit:mortgage.interest_delete,mortgage');
+    Route::post('/financial-years/{financialYear}/mortgage-interest/preview', [MortgageInterestImportController::class, 'preview']);
+    Route::post('/financial-years/{financialYear}/mortgage-interest/import', [MortgageInterestImportController::class, 'store'])->middleware('audit:mortgage.interest_import,financial_year');
     Route::put('/mortgages/{id}/rates', [MortgageController::class, 'saveRate'])->middleware('audit:mortgage.rate,mortgage');
     Route::delete('/mortgages/{id}/rates/{entry}', [MortgageController::class, 'destroyRate'])->middleware('audit:mortgage.rate_delete,mortgage');
     Route::post(
@@ -82,6 +91,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
 
     Route::post('/exports', [ExportController::class, 'store'])->middleware('audit:export.create,financial_year_export');
     Route::get('/exports/transactions.csv', [ExportController::class, 'transactionsCsv'])->middleware('audit:export.transactions_csv,financial_year');
+    Route::get('/exports/pack', [ExportController::class, 'packDownload'])->middleware('audit:export.pack_download,financial_year');
     Route::get('/exports/{id}', [ExportController::class, 'show']);
 
     Route::get('/investments', [InvestmentController::class, 'index']);
@@ -91,6 +101,10 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::delete('/investments/{id}', [InvestmentController::class, 'destroy'])->middleware('audit:investment.delete,investment');
 
     Route::get('/transactions', [TransactionController::class, 'index']);
+    Route::get('/recurring-income', [RecurringIncomeController::class, 'index']);
+    Route::post('/recurring-income', [RecurringIncomeController::class, 'store']);
+    Route::put('/recurring-income/{id}', [RecurringIncomeController::class, 'update']);
+    Route::delete('/recurring-income/{id}', [RecurringIncomeController::class, 'destroy']);
     Route::post('/transactions', [TransactionController::class, 'store']);
     Route::put('/transactions/{id}', [TransactionController::class, 'update'])->middleware('audit:transaction.update,transaction');
     Route::post('/transactions/bulk-categorise', [TransactionBulkController::class, 'categorise'])->middleware('audit:transaction.bulk_categorise,transaction');
@@ -98,6 +112,8 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/bank/status', [BankConnectionController::class, 'status']);
     Route::get('/wealth', [WealthController::class, 'index']);
     Route::get('/deadlines', [DeadlineController::class, 'index']);
+    Route::get('/tax-news', [TaxNewsController::class, 'index']);
+    Route::post('/tax-news/sync', [TaxNewsController::class, 'sync'])->middleware('throttle:10,1');
     Route::put('/deadlines/{date}/complete', [DeadlineController::class, 'complete']);
     Route::delete('/deadlines/{date}/complete', [DeadlineController::class, 'reopen']);
     Route::post('/bank/connect', [BankConnectionController::class, 'connect'])->middleware(['throttle:10,1', 'audit:bank.connect,bank']);
@@ -114,6 +130,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store']);
     Route::get('/documents/{id}', [DocumentController::class, 'show']);
+    Route::patch('/documents/{id}/description', [DocumentController::class, 'updateDescription']);
     Route::post('/documents/{id}/payment', [DocumentController::class, 'confirmPayment'])->middleware('audit:document.payment_confirmed,document');
     Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->middleware('audit:document.delete,document');
     Route::post(

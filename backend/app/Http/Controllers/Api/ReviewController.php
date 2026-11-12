@@ -27,7 +27,7 @@ final class ReviewController extends Controller
 
         $reviews = Review::query()
             ->with([
-                'document',
+                'document.transactions',
                 'extraction',
                 'corrections',
             ])
@@ -97,7 +97,7 @@ final class ReviewController extends Controller
     ): JsonResponse {
         $review = Review::query()
             ->with([
-                'document',
+                'document.transactions',
                 'extraction',
                 'corrections',
             ])
@@ -168,62 +168,68 @@ final class ReviewController extends Controller
             $createExpense,
         ): void {
             $transactionId = $review->transaction_id;
-            $expenseDetails = $request->validated('expense');
+            $transactions = $request->validated('transactions');
+            if (! is_array($transactions) && is_array($request->validated('expense'))) {
+                $transactions = [$request->validated('expense')];
+            }
 
             if (
                 $request->string('decision')->toString() === 'approve'
-                && is_array($expenseDetails)
+                && is_array($transactions)
             ) {
                 if ($review->document === null) {
-                    abort(422, 'A source document is required to record an expense from a review.');
+                    abort(422, 'A source document is required to record transactions from a review.');
                 }
 
-                if ($review->document->payment_status === 'paid') {
-                    $transaction = Transaction::query()
-                        ->where('document_id', $review->document_id)
-                        ->where('direction', 'expense')
-                        ->where('amount', $expenseDetails['amount'])
-                        ->first();
+                foreach ($transactions as $transactionDetails) {
+                    if ($review->document->payment_status === 'paid') {
+                        $transaction = Transaction::query()
+                            ->where('document_id', $review->document_id)
+                            ->where('direction', $transactionDetails['direction'])
+                            ->where('amount', $transactionDetails['amount'])
+                            ->first();
 
-                    if ($transaction === null) {
-                        abort(422, 'This document is already marked paid. Review its existing linked expense instead of creating another transaction.');
-                    }
-                } else {
-                    $transaction = $createTransaction->execute(
-                        user: $request->user(),
-                        transactionDate: $expenseDetails['transaction_date'],
-                        direction: $expenseDetails['direction'],
-                        amount: (string) $expenseDetails['amount'],
-                        currency: 'AUD',
-                        documentId: $review->document_id,
-                        description: $expenseDetails['description'],
-                        sourceSystem: 'document_review',
-                        provenance: [
-                            'review_id' => $review->getKey(),
-                            'extraction_id' => $review->document_extraction_id,
-                        ],
-                    );
-
-                    if ($transaction->direction === 'income') {
-                        $createIncome->execute(
-                            user: $request->user(),
-                            transaction: $transaction,
-                            amount: $transaction->amount,
-                            sourceSystem: 'document_review',
-                            metadata: ['review_id' => $review->getKey()],
-                        );
+                        if ($transaction === null) {
+                            abort(422, 'This document is already marked paid. Review its existing linked transactions instead of creating another transaction.');
+                        }
                     } else {
-                        $createExpense->execute(
+                        $transaction = $createTransaction->execute(
                             user: $request->user(),
-                            transaction: $transaction,
-                            amount: $transaction->amount,
+                            transactionDate: $transactionDetails['transaction_date'],
+                            direction: $transactionDetails['direction'],
+                            amount: (string) $transactionDetails['amount'],
+                            currency: 'AUD',
+                            documentId: $review->document_id,
+                            description: $review->document->description ?: $transactionDetails['description'],
                             sourceSystem: 'document_review',
-                            metadata: ['review_id' => $review->getKey()],
+                            provenance: [
+                                'review_id' => $review->getKey(),
+                                'extraction_id' => $review->document_extraction_id,
+                            ],
                         );
-                    }
-                }
 
-                $transactionId = $transaction->getKey();
+                        if ($transaction->direction === 'income') {
+                            $createIncome->execute(
+                                user: $request->user(),
+                                transaction: $transaction,
+                                amount: $transaction->amount,
+                                sourceSystem: 'document_review',
+                                metadata: ['review_id' => $review->getKey()],
+                            );
+                        } else {
+                            $createExpense->execute(
+                                user: $request->user(),
+                                transaction: $transaction,
+                                amount: $transaction->amount,
+                                sourceSystem: 'document_review',
+                                metadata: ['review_id' => $review->getKey()],
+                            );
+                        }
+                    }
+
+                    // Keep the existing single transaction link as the primary link for compatibility.
+                    $transactionId ??= $transaction->getKey();
+                }
             }
 
             $review->update([
@@ -236,11 +242,23 @@ final class ReviewController extends Controller
                 'transaction_id' => $transactionId,
                 'completed_at' => now(),
             ]);
+
+            if (
+                $request->string('decision')->toString() === 'approve'
+                && $review->document_id !== null
+                && ! Review::query()
+                    ->where('document_id', $review->document_id)
+                    ->whereKeyNot($review->getKey())
+                    ->whereIn('status', ['pending', 'in_progress'])
+                    ->exists()
+            ) {
+                $review->document()->update(['status' => 'active']);
+            }
         });
 
         return response()->json([
             'data' => $review->fresh([
-                'document',
+                'document.transactions',
                 'extraction',
                 'corrections',
             ]),

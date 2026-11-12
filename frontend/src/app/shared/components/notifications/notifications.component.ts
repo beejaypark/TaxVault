@@ -14,7 +14,7 @@ import { catchError, forkJoin, interval, of } from 'rxjs';
 
 import { TaxIconComponent } from '../tax-icon/tax-icon.component';
 import { DocumentApiService } from '../../services/documents/document-api.service';
-import { DeadlineDto, TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
+import { DeadlineDto, TaxNewsDto, TaxWorkspaceApiService } from '../../services/tax-workspace-api.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 
 export interface AppNotification {
@@ -100,7 +100,10 @@ export class NotificationsComponent {
         ? this.api.listTransactions().pipe(catchError(() => of([])))
         : of([]),
       deadlines: this.api.getDeadlines().pipe(catchError(() => of([] as DeadlineDto[]))),
-    }).subscribe(({ documents, transactions, deadlines }) => {
+      taxNews: prefs.notifyTaxNews
+        ? this.api.listTaxNews().pipe(catchError(() => of([] as TaxNewsDto[])))
+        : of([] as TaxNewsDto[]),
+    }).subscribe(({ documents, transactions, deadlines, taxNews }) => {
       const items: AppNotification[] = [];
       const count = (status: string) => documents.filter((document) => document.status === status).length;
       const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
@@ -164,6 +167,19 @@ export class NotificationsComponent {
           link: '/transactions',
         });
       }
+
+      const recentNewsCutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const importantNews = taxNews
+        .filter((item) => item.importance === 'important')
+        .filter((item) => !item.published_at || new Date(item.published_at).getTime() >= recentNewsCutoff)
+        .slice(0, 3);
+      importantNews.forEach((item) => items.push({
+        id: `tax-news-${item.id}`,
+        severity: 'warning',
+        title: item.title,
+        detail: `${item.source} · ${item.status}`,
+        link: '/tax-news',
+      }));
 
       this.notifications = items;
       this.cdr.markForCheck();

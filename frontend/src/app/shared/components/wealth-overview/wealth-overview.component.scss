@@ -1,27 +1,27 @@
 :host { display: block; margin-bottom: 18px; }
 .wealth { display: grid; gap: 14px; }
-.heading { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-radius: var(--tv-radius-lg); background: var(--tv-color-navy); color: #fff; }
-.heading a { color: #fff; font-size: 12px; }
+.heading { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border: 1px solid var(--tv-color-border); border-bottom: 0; border-radius: var(--tv-radius-lg) var(--tv-radius-lg) 0 0; background: var(--tv-color-surface); color: var(--tv-color-text); }
+.heading a { color: var(--tv-color-primary); font-size: 12px; }
 h3, h4, p { margin: 0; }
-h3 { font-family: var(--tv-font-heading); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
-h4 { margin-bottom: 6px; font-size: 12px; color: var(--tv-color-text-secondary); text-transform: uppercase; }
+h3 { font-family: var(--tv-font-heading); font-size: 15px; font-weight: 600; }
+h4 { margin-bottom: 6px; font-size: 12px; color: var(--tv-color-text-secondary); }
 
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .stats div, .panel { padding: 14px 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
-.stats span { display: block; font-size: 11px; color: var(--tv-color-text-secondary); text-transform: uppercase; }
+.stats span { display: block; font-size: 11px; color: var(--tv-color-text-secondary); }
 .stats strong { font-size: 22px; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
 svg { width: 100%; height: auto; }
 .grid-line { stroke: var(--tv-color-border); stroke-width: 1; }
 .axis { fill: var(--tv-color-text-secondary); font-size: 10px; }
-.income { fill: #16a34a; background: #16a34a; }
-.expense { fill: #e11d48; background: #e11d48; }
-.trend { fill: none; stroke: #1f7ac4; stroke-width: 3; }
+.income { fill: var(--tv-color-primary); background: var(--tv-color-primary); }
+.expense { fill: #a7b0bc; background: #a7b0bc; }
+.trend { fill: none; stroke: var(--tv-color-primary-dark); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .proj { fill: none; stroke-width: 2.5; }
-.proj.conservative { stroke: #e11d48; }
-.proj.base { stroke: #1f7ac4; }
-.proj.optimistic { stroke: #16a34a; }
+.proj.conservative { stroke: #a7b0bc; stroke-dasharray: 5 4; }
+.proj.base { stroke: var(--tv-color-primary); stroke-linecap: round; stroke-linejoin: round; }
+.proj.optimistic { stroke: #6f7d8d; stroke-dasharray: 2 4; }
 .sub, .empty, .disclaimer { font-size: 12px; color: var(--tv-color-text-secondary); line-height: 1.5; }
 .empty a { color: inherit; font-weight: 600; }
 .neg { color: #e11d48; }
@@ -29,9 +29,10 @@ svg { width: 100%; height: auto; }
 .legend i { width: 10px; height: 10px; border-radius: 3px; }
 
 .proj-head { display: flex; justify-content: space-between; align-items: center; }
+.panel.tv-collapsible-card:has(.proj-head) { padding-top: 52px; }
 .tabs { display: flex; gap: 6px; }
-.tabs button { padding: 4px 10px; border: 1px solid var(--tv-color-border); border-radius: 999px; background: transparent; cursor: pointer; font-size: 12px; }
-.tabs button.on { background: var(--tv-color-navy); color: #fff; }
+.tabs button { padding: 6px 10px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); background: transparent; cursor: pointer; font-size: 12px; color: var(--tv-color-text-secondary); }
+.tabs button.on { border-color: var(--tv-color-primary); background: var(--tv-color-primary-soft); color: var(--tv-color-primary); }
 .sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 8px 0; }
 .sliders label { display: grid; gap: 4px; font-size: 12px; }
 table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 13px; }
@@ -48,6 +49,6 @@ th:first-child, td:first-child { text-align: left; }
 .improve li::marker { content: '! '; }
 
 .heading a, .empty a { transition: color 0.15s ease, opacity 0.15s ease; }
-.heading a { padding: 4px 10px; border-radius: 999px; }
-.heading a:hover { background: rgba(255, 255, 255, 0.18); text-decoration: underline; }
+.heading a { padding: 4px 8px; border-radius: var(--tv-radius-sm); }
+.heading a:hover { background: var(--tv-color-primary-soft); text-decoration: underline; }
 .empty a:hover { color: var(--tv-color-navy); text-decoration: underline; }

@@ -79,6 +79,13 @@ h2 { font-size: 15px; font-weight: 650; }
 .decision-heading .eyebrow { margin-bottom: 4px; }
 .decision-icon { width: 30px; height: 30px; }
 .decision-description { margin-top: 11px; color: var(--tv-color-text-secondary); font-size: 11px; line-height: 1.5; }
+.transaction-drafts { display: grid; gap: 12px; margin-top: 12px; }
+.transaction-draft { padding: 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: #fcfcfd; }
+.transaction-draft-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.transaction-draft-heading h3 { color: var(--tv-color-text-secondary); font-size: 11px; }
+.text-button { padding: 0; border: 0; background: transparent; color: var(--tv-color-danger); font-size: 10px; cursor: pointer; }
+.text-button:disabled { cursor: not-allowed; opacity: .6; }
+.add-transaction-button { justify-self: start; }
 .decision-card > input, .decision-card > select { box-sizing: border-box; width: 100%; min-height: 36px; }
 .decision-card label span { color: var(--tv-color-text-muted); font-weight: 400; }
 .decision-card textarea { box-sizing: border-box; width: 100%; min-height: 90px; padding: 10px; resize: vertical; }
@@ -93,6 +100,12 @@ h2 { font-size: 15px; font-weight: 650; }
 .read-only-card h2 { font-size: 13px; }
 .read-only-card p { color: var(--tv-color-text-secondary); font-size: 11px; }
 .read-only-card .secondary-button { margin-top: 3px; }
+.review-transactions { display: grid; gap: 10px; width: 100%; margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--tv-color-border); }
+.review-transactions h3 { color: var(--tv-color-text-secondary); font-size: 12px; }
+.review-transaction-row { display: grid; gap: 9px; padding: 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: #fcfcfd; }
+.review-transaction-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.review-transaction-fields label { display: grid; gap: 5px; color: var(--tv-color-text-muted); font-size: 10px; font-weight: 650; }
+.review-transaction-fields input, .review-transaction-fields select { box-sizing: border-box; width: 100%; min-height: 34px; padding: 0 8px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: white; color: var(--tv-color-text); font: inherit; }
 .notes-card > h2 { margin-bottom: 10px; }
 .notes-card > p:last-child { color: var(--tv-color-text-secondary); font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
 .detail-state { display: grid; justify-items: center; gap: 12px; min-height: 240px; padding: 30px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); color: var(--tv-color-text-secondary); font-size: 13px; text-align: center; }

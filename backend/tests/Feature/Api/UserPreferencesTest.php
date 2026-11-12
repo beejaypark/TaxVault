@@ -13,6 +13,7 @@ class UserPreferencesTest extends TestCase
     private array $payload = [
         'notifyDocuments' => false,
         'notifyUncategorised' => true,
+        'notifyTaxNews' => true,
         'defaultFinancialYear' => 'all',
     ];
 

@@ -12,3 +12,13 @@ Schedule::command('notifications:send-emails')
     ->dailyAt('08:00')
     ->timezone(config('notifications.timezone'))
     ->withoutOverlapping();
+
+Schedule::command('tax-news:sync')
+    ->dailyAt('07:30')
+    ->timezone(config('notifications.timezone'))
+    ->withoutOverlapping();
+
+Schedule::command('income:generate-recurring')
+    ->dailyAt('00:10')
+    ->timezone(config('notifications.timezone'))
+    ->withoutOverlapping();

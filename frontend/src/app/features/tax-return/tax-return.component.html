@@ -16,7 +16,7 @@
   }
 
   <section class="export-layout">
-    <article class="export-card">
+    <article class="export-card" tvCollapsibleCard>
       <div class="step-number">01</div>
       <h2>{{ 'TaxReturn.SelectYear' | translate }}</h2>
       <p>{{ 'TaxReturn.PackageDescription' | translate }}</p>
@@ -34,8 +34,17 @@
           <p class="year-hint">{{ 'TaxReturn.YearHint' | translate }}</p>
         }
 
+        <label class="format-select">{{ 'TaxReturn.OutputFormat' | translate }}
+          <select name="packFormat" [(ngModel)]="packFormat">
+            <option value="json">JSON</option>
+            <option value="excel">Excel (.xlsx)</option>
+            <option value="pdf">PDF</option>
+            <option value="csv">CSV</option>
+          </select>
+        </label>
+
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
-          {{ isExporting ? ('TaxReturn.PreparingPack' | translate) : ('TaxReturn.GeneratePack' | translate) }}
+          {{ isExporting ? ('TaxReturn.PreparingPack' | translate) : ('TaxReturn.GenerateSelectedPack' | translate) }}
         </button>
         <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
           <tv-icon name="download" /> {{ isDownloadingCsv ? ('TaxReturn.PreparingCsv' | translate) : ('TaxReturn.DownloadCsv' | translate) }}
@@ -43,7 +52,7 @@
       }
     </article>
 
-    <article class="export-card included-card">
+    <article class="export-card included-card" tvCollapsibleCard>
       <div class="step-number">02</div>
       <h2>{{ 'TaxReturn.Included' | translate }}</h2>
       <ul>
@@ -57,7 +66,7 @@
   </section>
 
   @if (!isLoading && selectedFinancialYearId) {
-    <section class="result-card summary-card" aria-label="Financial year summary">
+    <section class="result-card summary-card" tvCollapsibleCard aria-label="Financial year summary">
       <div class="result-heading">
         <div>
           <div class="eyebrow">{{ 'TaxReturn.Summary' | translate }}</div>
@@ -102,7 +111,7 @@
   }
 
   @if (latestExport) {
-    <section class="result-card" aria-label="Generated accountant pack">
+    <section class="result-card" tvCollapsibleCard aria-label="Generated accountant pack">
       <div class="result-heading">
         <div>
           <div class="eyebrow">{{ 'TaxReturn.ExportReady' | translate }}</div>

@@ -103,8 +103,8 @@
                 </span>
               </div>
               <p class="document-name">
-                @if (review.document?.originalFilename) {
-                  {{ review.document?.originalFilename }}
+                @if (review.document) {
+                  {{ documentName(review) }}
                 } @else if (review.target.documentId) {
                   {{ 'Reviews.Document' | translate }} {{ review.target.documentId }}
                 } @else {

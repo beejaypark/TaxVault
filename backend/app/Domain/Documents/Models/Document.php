@@ -22,6 +22,7 @@ class Document extends UuidModel
         'object_key',
         'content_sha256',
         'original_filename',
+        'description',
         'mime_type',
         'size_bytes',
         'captured_at',
@@ -124,5 +125,11 @@ class Document extends UuidModel
         return $this->hasOne(DocumentExtraction::class)
             ->orderByDesc('created_at')
             ->orderByDesc('id');
+    }
+
+    /** @return HasMany<Transaction, $this> */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Transactions\Models\Transaction::class);
     }
 }

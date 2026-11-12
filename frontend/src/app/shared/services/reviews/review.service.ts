@@ -25,12 +25,20 @@ export interface ReviewListResponse {
 export interface ReviewDecisionRequest {
   decision: ReviewDecision;
   notes?: string;
+  transactions?: ReviewTransactionDraft[];
   expense?: {
     transaction_date: string;
     direction: 'income' | 'expense';
     amount: number;
     description: string;
   };
+}
+
+export interface ReviewTransactionDraft {
+  transaction_date: string;
+  direction: 'income' | 'expense';
+  amount: number;
+  description: string;
 }
 
 export interface ReviewCorrectionRequest {

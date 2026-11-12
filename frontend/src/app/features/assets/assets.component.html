@@ -75,7 +75,7 @@
     } @else {
       <section class="record-grid" [attr.aria-label]="'Assets.Properties' | translate">
         @for (property of properties; track property.id) {
-          <article class="record-card">
+          <article class="record-card" tvCollapsibleCard>
             <div class="record-icon"><tv-icon name="property" /></div>
             <div class="record-title">
               <h2>{{ property.reference_code || property.address_line_1 || ('Assets.Property' | translate) }}</h2>
@@ -106,6 +106,17 @@
                 <tv-icon name="arrowRight" /> {{ 'Assets.CheckProperty' | translate }}
               </a>
             </div>
+            @if ((property.valuations ?? []).length > 0) {
+              <section class="property-history" aria-label="Property value history">
+                <h3>Property value history</h3>
+                <ul>
+                  @for (valuation of property.valuations; track valuation.id) {
+                    <li><span>{{ formatDate(valuation.as_of) }}</span><strong>{{ formatCurrency(valuation.value) }}</strong></li>
+                  }
+                </ul>
+              </section>
+            }
+            <app-property-deductions [property]="property" />
             <app-property-mortgages [property]="property" (mortgagesChange)="property.mortgages = $event" />
             @if (!property.is_main_residence) {
               <app-property-rental-summary [property]="property" />

@@ -62,13 +62,17 @@ final class ConfirmDocumentPayment
             $existingTransactions = Transaction::query()
                 ->where('user_id', $user->getKey())
                 ->where('document_id', $document->getKey())
-                ->where('direction', 'expense')
                 ->lockForUpdate()
                 ->get();
 
-            if ($existingTransactions->count() > 1) {
+            $existingIncomeTransactions = $existingTransactions
+                ->where('direction', 'income');
+            $existingExpenseTransactions = $existingTransactions
+                ->where('direction', 'expense');
+
+            if ($existingIncomeTransactions->isNotEmpty() || $existingExpenseTransactions->count() > 1) {
                 throw ValidationException::withMessages([
-                    'document' => 'More than one expense is already linked to this document. Review the existing transactions before confirming payment.',
+                    'document' => 'Multiple or mixed transactions are already linked to this document. Review the existing transactions instead of confirming payment here.',
                 ]);
             }
 
@@ -79,7 +83,7 @@ final class ConfirmDocumentPayment
                 ],
             ];
 
-            if ($existingTransactions->isEmpty()) {
+            if ($existingExpenseTransactions->isEmpty()) {
                 $this->ensureFinancialYearExists($user, $paymentDate);
 
                 $transaction = $this->createTransaction->execute(
@@ -89,7 +93,7 @@ final class ConfirmDocumentPayment
                     amount: $amount,
                     currency: 'AUD',
                     documentId: $document->getKey(),
-                    description: 'Payment for '.$document->original_filename,
+                    description: $document->description ?: 'Payment for '.$document->original_filename,
                     sourceSystem: 'document_payment_confirmation',
                     provenance: $paymentProvenance,
                 );
@@ -105,7 +109,7 @@ final class ConfirmDocumentPayment
                     ],
                 );
             } else {
-                $transaction = $existingTransactions->sole();
+                $transaction = $existingExpenseTransactions->sole();
                 if (bccomp((string) $transaction->amount, $amount, 2) !== 0) {
                     throw ValidationException::withMessages([
                         'amount' => 'An expense is already linked to this document with a different amount. Reconcile it before confirming payment to avoid a duplicate or incorrect record.',

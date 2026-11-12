@@ -107,6 +107,10 @@
         </a>
       }
       <div class="nav-section-label">{{ 'Reports.Title' | translate }}</div>
+      <a routerLink="/tax-news" routerLinkActive="active" class="nav-item"
+         (click)="navigationHistory.clearForPrimaryNavigation('/tax-news')">
+        <span class="nav-icon"><tv-icon name="news" /></span><span>{{ 'TaxNews.Title' | translate }}</span>
+      </a>
       @if (auth.can('transactions')) {
         <a routerLink="/tax-return" routerLinkActive="active" class="nav-item"
            (click)="navigationHistory.clearForPrimaryNavigation('/tax-return')">

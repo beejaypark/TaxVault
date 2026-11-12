@@ -18,6 +18,7 @@ class Mortgage extends UuidModel
         'loan_amount',
         'interest_rate',
         'start_date',
+        'maturity_date',
     ];
 
     protected $with = ['interestEntries', 'rateChanges'];

@@ -6,11 +6,13 @@ RUN apt-get update \
         unzip \
         libpq-dev \
         libzip-dev \
+        libxml2-dev \
         curl \
         poppler-utils \
         tesseract-ocr \
     && docker-php-ext-install \
         bcmath \
+        xml \
         pdo_pgsql \
         pgsql \
         zip \

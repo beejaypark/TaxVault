@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  effect,
   OnInit,
   inject,
   input,
@@ -10,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { DocumentApiService } from '../../shared/services/documents/document-api.service';
 import {
   MortgageDto,
   PropertyDto,
@@ -71,6 +73,7 @@ interface RateSeries {
           <label>Loan amount (AUD) <input name="loanAmount" type="number" min="0" step="0.01" [(ngModel)]="form.loan_amount" required /></label>
           <label>Interest rate (% p.a.) <input name="rate" type="number" min="0" max="100" step="0.001" [(ngModel)]="form.interest_rate" /></label>
           <label>Start date <input name="start" type="date" [(ngModel)]="form.start_date" /></label>
+          <label>Maturity date <input name="maturity" type="date" [min]="form.start_date || undefined" [(ngModel)]="form.maturity_date" /></label>
           <div class="mortgage-actions">
             <button type="button" class="row-action" (click)="closeForm()">Cancel</button>
             <button type="submit" class="row-action" [disabled]="isSaving || !isFormValid">{{ isSaving ? 'Saving…' : 'Save mortgage' }}</button>
@@ -87,7 +90,7 @@ interface RateSeries {
           <div class="mortgage-summary">
             <div>
               <strong>{{ mortgage.bank_name }}</strong>
-              <span>{{ loanTypeLabel(mortgage.loan_type) }}@if (mortgage.interest_rate !== null) { · {{ mortgage.interest_rate }}% p.a. }</span>
+              <span>{{ loanTypeLabel(mortgage.loan_type) }}@if (mortgage.interest_rate !== null) { · {{ mortgage.interest_rate }}% p.a. }@if (mortgage.maturity_date) { · {{ mortgageTerm(mortgage) }} }</span>
             </div>
             <div class="mortgage-amount">{{ formatCurrency(mortgage.loan_amount) }}</div>
             @if (auth.canEdit) {
@@ -152,8 +155,11 @@ interface RateSeries {
               <line [attr.x1]="chart.left" [attr.x2]="chart.width - chart.right" [attr.y1]="tick.y" [attr.y2]="tick.y" class="grid" />
               <text [attr.x]="chart.left - 8" [attr.y]="tick.y + 4" text-anchor="end">{{ tick.value.toFixed(2) }}%</text>
             }
+            @if (financialYearBand.width > 0) {
+              <rect [attr.x]="financialYearBand.x" [attr.y]="chart.top" [attr.width]="financialYearBand.width" [attr.height]="chart.height - chart.top - chart.bottom" class="financial-year-band" />
+            }
             @for (axis of rateAxis; track axis.label) {
-              <text [attr.x]="axis.x" [attr.y]="chart.height - 12" text-anchor="middle">{{ axis.label }}</text>
+              <text [attr.x]="axis.x" [attr.y]="chart.height - 12" [attr.text-anchor]="axis.anchor">{{ axis.label }}</text>
             }
             @for (series of rateSeries; track series.id) {
               <path [attr.d]="series.path" class="line" [style.stroke]="series.color" />
@@ -214,6 +220,7 @@ interface RateSeries {
     svg { width: 100%; height: auto; }
     svg text { fill: var(--tv-color-text-secondary); font-size: 11px; }
     .grid { stroke: var(--tv-color-border); stroke-width: 1; }
+    .financial-year-band { fill: var(--tv-color-primary-soft); opacity: .55; }
     .line { fill: none; stroke: var(--tv-color-primary); stroke-width: 2.5; }
     .area { fill: var(--tv-color-primary-soft); opacity: .7; }
     .dot { fill: var(--tv-color-primary); }
@@ -225,6 +232,7 @@ interface RateSeries {
 export class PropertyMortgagesComponent implements OnInit {
   private readonly api = inject(TaxWorkspaceApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly documents = inject(DocumentApiService);
   readonly auth = inject(AuthService);
 
   readonly property = input.required<PropertyDto>();
@@ -259,12 +267,24 @@ export class PropertyMortgagesComponent implements OnInit {
 
   rateSeries: RateSeries[] = [];
   rateTicks: { value: number; y: number }[] = [];
-  rateAxis: { label: string; x: number }[] = [];
+  rateAxis: { label: string; x: number; anchor: 'start' | 'middle' | 'end' }[] = [];
+  financialYearBand = { x: 0, width: 0 };
 
   chartPoints: ChartPoint[] = [];
   yTicks: { value: number; y: number }[] = [];
   linePath = '';
   areaPath = '';
+
+  constructor() {
+    effect(() => {
+      this.documents.selectedFinancialYearId();
+      this.documents.financialYears();
+      if (this.mortgages.length > 0) {
+        this.rebuildChart();
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   get isFormValid(): boolean {
     const bank = this.form.bank === 'Other' ? this.form.bankOther.trim() : this.form.bank;
@@ -294,6 +314,7 @@ export class PropertyMortgagesComponent implements OnInit {
       loan_amount: Number(mortgage.loan_amount),
       interest_rate: mortgage.interest_rate === null ? null : Number(mortgage.interest_rate),
       start_date: mortgage.start_date ? mortgage.start_date.slice(0, 10) : '',
+      maturity_date: mortgage.maturity_date ? mortgage.maturity_date.slice(0, 10) : '',
     };
     this.showForm = true;
   }
@@ -320,6 +341,7 @@ export class PropertyMortgagesComponent implements OnInit {
         ? null
         : Number(this.form.interest_rate),
       start_date: this.form.start_date || null,
+      maturity_date: this.form.maturity_date || null,
     };
     const editing = this.editingId;
     const request$ = editing
@@ -434,6 +456,22 @@ export class PropertyMortgagesComponent implements OnInit {
     return new Intl.NumberFormat('en-AU', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
   }
 
+  mortgageTerm(mortgage: MortgageDto): string {
+    const start = mortgage.start_date ? new Date(mortgage.start_date) : null;
+    const maturityDate = mortgage.maturity_date;
+    const maturity = maturityDate ? new Date(maturityDate) : null;
+
+    if (!start || !maturity || Number.isNaN(start.getTime()) || Number.isNaN(maturity.getTime())) {
+      return `Matures ${this.dateLabel(maturityDate ?? '')}`;
+    }
+
+    const months = Math.max(0, (maturity.getUTCFullYear() - start.getUTCFullYear()) * 12 + maturity.getUTCMonth() - start.getUTCMonth());
+    const years = Math.floor(months / 12);
+    const remainder = months % 12;
+    const term = years > 0 && remainder > 0 ? `${years}y ${remainder}m` : years > 0 ? `${years}y` : `${remainder}m`;
+    return `${term} · matures ${this.dateLabel(maturityDate!)}`;
+  }
+
   private apply(mortgages: MortgageDto[]): void {
     this.mortgages = mortgages;
     this.rebuildChart();
@@ -447,21 +485,64 @@ export class PropertyMortgagesComponent implements OnInit {
   }
 
   private rebuildRateChart(): void {
-    const withHistory = this.mortgages.filter((mortgage) => (mortgage.rate_changes ?? []).length > 0);
-    const all = withHistory.flatMap((mortgage) => mortgage.rate_changes);
+    const day = (value: string) => new Date(value.slice(0, 10)).getTime();
+    const selectedYear = this.documents.financialYears().find(
+      (year) => year.id === this.documents.selectedFinancialYearId(),
+    );
+    const financialYearStart = selectedYear ? day(selectedYear.start_date) : null;
+    const financialYearEnd = selectedYear ? day(selectedYear.end_date) : null;
+    const today = Date.now();
+    const nextFinancialYearEnd = financialYearEnd === null
+      ? today
+      : (() => {
+        const date = new Date(financialYearEnd);
+        date.setUTCFullYear(date.getUTCFullYear() + 1);
+        return date.getTime();
+      })();
+    const chartEnd = nextFinancialYearEnd;
+    const histories = this.mortgages
+      .map((mortgage) => {
+        const loanStart = mortgage.start_date ? day(mortgage.start_date) : Number.NEGATIVE_INFINITY;
+        const loanEnd = mortgage.maturity_date
+          ? Math.min(day(mortgage.maturity_date), today)
+          : today;
+        const sourceChanges = (mortgage.rate_changes ?? []).length > 0
+          ? mortgage.rate_changes
+          : mortgage.interest_rate !== null && mortgage.interest_rate !== undefined
+            ? [{
+              id: `${mortgage.id}-initial-rate`,
+              effective_date: mortgage.start_date ?? selectedYear?.start_date ?? new Date().toISOString(),
+              rate: mortgage.interest_rate,
+            }]
+            : [];
+        const firstChange = Math.min(...sourceChanges.map((change) => day(change.effective_date)), chartEnd);
+        const naturalStart = Number.isFinite(loanStart) ? loanStart : firstChange;
+        const seriesStart = naturalStart;
+        const seriesEnd = loanEnd;
+        const changes = sourceChanges.filter((change) => {
+          const effective = day(change.effective_date);
+          return effective >= seriesStart && effective <= seriesEnd;
+        });
+
+        return { mortgage, changes, seriesStart, seriesEnd };
+      })
+      .filter(({ changes, seriesStart, seriesEnd }) => changes.length > 0 && seriesEnd >= seriesStart);
+    const all = histories.flatMap(({ changes }) => changes);
 
     if (all.length === 0) {
       this.rateSeries = [];
       this.rateTicks = [];
       this.rateAxis = [];
+      this.financialYearBand = { x: 0, width: 0 };
 
       return;
     }
 
-    const day = (value: string) => new Date(value.slice(0, 10)).getTime();
     const times = all.map((change) => day(change.effective_date));
-    const start = Math.min(...times);
-    const end = Math.max(Math.max(...times), Date.now());
+    const rangeStarts = histories.map(({ seriesStart }) => seriesStart);
+    const rangeEnds = histories.map(({ seriesEnd }) => seriesEnd);
+    const start = Math.min(...rangeStarts, ...times);
+    const end = Math.max(chartEnd, ...rangeEnds, ...times);
     const span = Math.max(end - start, 1);
     const rates = all.map((change) => Number(change.rate));
     const low = Math.max(0, Math.min(...rates) - 0.5);
@@ -472,8 +553,14 @@ export class PropertyMortgagesComponent implements OnInit {
     const xOf = (time: number) => CHART.left + (plotWidth * (time - start)) / span;
     const yOf = (rate: number) => baseline - ((rate - low) / (high - low)) * plotHeight;
 
-    this.rateSeries = withHistory.map((mortgage, index) => {
-      const points = mortgage.rate_changes.map((change) => ({
+    const bandStart = financialYearStart === null ? null : Math.max(financialYearStart, start);
+    const bandEnd = financialYearEnd === null ? null : Math.min(financialYearEnd, end);
+    this.financialYearBand = bandStart !== null && bandEnd !== null && bandEnd > bandStart
+      ? { x: xOf(bandStart), width: xOf(bandEnd) - xOf(bandStart) }
+      : { x: 0, width: 0 };
+
+    this.rateSeries = histories.map(({ mortgage, changes, seriesEnd }, index) => {
+      const points = changes.map((change) => ({
         x: xOf(day(change.effective_date)),
         y: yOf(Number(change.rate)),
         label: this.dateLabel(change.effective_date),
@@ -482,7 +569,9 @@ export class PropertyMortgagesComponent implements OnInit {
       const steps = points.map((point, i) => (i === 0
         ? `M${point.x.toFixed(1)},${point.y.toFixed(1)}`
         : `H${point.x.toFixed(1)} V${point.y.toFixed(1)}`));
-      steps.push(`H${xOf(end).toFixed(1)}`);
+      if (seriesEnd >= day(changes[changes.length - 1].effective_date)) {
+        steps.push(`H${xOf(seriesEnd).toFixed(1)}`);
+      }
 
       return {
         id: mortgage.id,
@@ -496,9 +585,10 @@ export class PropertyMortgagesComponent implements OnInit {
       value: low + (high - low) * ratio,
       y: baseline - ratio * plotHeight,
     }));
-    this.rateAxis = [0, 1].map((ratio) => ({
+    this.rateAxis = [0, 1].map((ratio, index) => ({
       label: this.dateLabel(new Date(start + span * ratio).toISOString()),
       x: CHART.left + plotWidth * ratio,
+      anchor: index === 0 ? 'start' : 'end',
     }));
   }
 
@@ -562,6 +652,7 @@ export class PropertyMortgagesComponent implements OnInit {
       loan_amount: null as number | null,
       interest_rate: null as number | null,
       start_date: '',
+      maturity_date: '',
     };
   }
 }

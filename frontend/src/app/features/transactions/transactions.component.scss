@@ -83,6 +83,9 @@ h1 {
   box-shadow: var(--tv-shadow-card);
 }
 
+.sort-button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.sort-button:hover { color: var(--tv-color-primary); }
+
 .transaction-form {
   padding: 24px;
 }
@@ -366,3 +369,10 @@ tbody tr:last-child td {
 .header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .bulk-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; background: var(--tv-color-background); }
 .bulk-bar select { max-width: 280px; min-height: 36px; border: 1px solid var(--tv-color-border); border-radius: 6px; }
+.recurring-card { margin-bottom: 16px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); }
+.recurring-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 16px 0; }
+.recurring-form label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; }
+.recurring-form input { padding: 8px; border: 1px solid var(--tv-color-border); border-radius: 4px; font: inherit; }
+.recurring-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid var(--tv-color-border); }
+.recurring-row span { display: block; margin-top: 4px; color: var(--tv-color-text-secondary); font-size: 12px; }
+@media (max-width: 760px) { .recurring-form { grid-template-columns: 1fr 1fr; } .recurring-row { grid-template-columns: 1fr auto; } .recurring-row .row-actions { grid-column: 1 / -1; } }

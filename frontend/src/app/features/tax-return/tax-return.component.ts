@@ -8,6 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
 import { BackNavigationComponent } from '../../shared/components/back-navigation/back-navigation.component';
@@ -24,10 +25,11 @@ import {
   TransactionDto,
 } from '../../shared/services/tax-workspace-api.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 @Component({
   selector: 'app-tax-return',
-  imports: [DatePipe, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent, TranslatePipe],
+  imports: [DatePipe, FormsModule, TaxIconComponent, BackNavigationComponent, CashFlowAnalysisComponent, ReturnSummaryComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './tax-return.component.html',
   styleUrl: './tax-return.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +45,8 @@ export class TaxReturnComponent implements OnInit {
   isLoading = true;
   isExporting = false;
   isDownloadingCsv = false;
+  isDownloadingPack = false;
+  packFormat: 'json' | 'excel' | 'pdf' | 'csv' = 'json';
   transactions: TransactionDto[] = [];
   errorMessage = '';
   successMessage = '';
@@ -203,9 +207,26 @@ export class TaxReturnComponent implements OnInit {
     this.workspaceApi.createExport(this.selectedFinancialYearId).subscribe({
       next: (result) => {
         this.latestExport = result;
-        this.successMessage = 'Accountant pack generated and saved.';
-        this.isExporting = false;
-        this.cdr.markForCheck();
+        if (this.packFormat === 'json') {
+          this.successMessage = 'Accountant pack generated and saved.';
+          this.isExporting = false;
+          this.cdr.markForCheck();
+        } else if (this.packFormat === 'pdf') {
+          this.isExporting = false;
+          this.successMessage = 'PDF print view opened. Choose Save as PDF in the print dialog.';
+          this.printPack(result.payload);
+          this.cdr.markForCheck();
+        } else {
+          this.workspaceApi.downloadAccountantPack(this.selectedFinancialYearId, this.packFormat).subscribe({
+            next: (blob) => {
+              this.downloadBlob(blob, `taxvault-${this.exportedYearCode}-accountant-pack.${this.packFormat === 'excel' ? 'xlsx' : 'csv'}`);
+              this.successMessage = 'Accountant pack generated and downloaded.';
+              this.isExporting = false;
+              this.cdr.markForCheck();
+            },
+            error: () => { this.errorMessage = 'Unable to download the selected pack format.'; this.isExporting = false; this.cdr.markForCheck(); },
+          });
+        }
       },
       error: (error: { status?: number }) => {
         this.errorMessage = error.status === 422
@@ -215,6 +236,41 @@ export class TaxReturnComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private printPack(payload: ExportDto['payload']): void {
+    const data = payload as {
+      tax_records?: { transactions?: Record<string, unknown>[] };
+      assets?: { property_deductions?: Record<string, unknown>[]; properties?: Record<string, unknown>[]; investments?: Record<string, unknown>[]; mortgages?: Record<string, unknown>[]; mortgage_interest_entries?: Record<string, unknown>[]; mortgage_rate_changes?: Record<string, unknown>[]; asset_valuations?: Record<string, unknown>[] };
+      source_references?: { documents?: Record<string, unknown>[] };
+    };
+    const groups = [
+      ['Transactions (income & expenses)', data.tax_records?.transactions ?? []],
+      ['Property deductions', data.assets?.property_deductions ?? []],
+      ['Interest paid', data.assets?.mortgage_interest_entries ?? []],
+      ['Investments', data.assets?.investments ?? []],
+      ['Documents', data.source_references?.documents ?? []],
+    ] as const;
+    const win = window.open('', '_blank', 'noopener,noreferrer');
+    if (!win) return;
+    const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char] ?? char));
+    const html = groups.map(([title, rows]) => `<section><h2>${esc(title)}</h2><table><thead><tr><th>Item</th><th>Details</th><th>Amount</th></tr></thead><tbody>${rows.map((row: Record<string, unknown>) => {
+      const first = (...keys: string[]) => keys.map((key) => row[key]).find((value) => value !== undefined && value !== null && value !== '') ?? '';
+      return `<tr><td>${esc(first('description', 'property_reference_code', 'reference_code', 'original_filename', 'deduction_type', 'investment_type', 'id'))}</td><td>${esc(first('bank_name', 'month', 'ato_category', 'address_line_1', 'notes', 'status', 'acquisition_date'))}</td><td>${esc(first('interest_amount', 'amount', 'current_value'))}</td></tr>`;
+    }).join('')}</tbody></table></section>`).join('');
+    win.document.write(`<!doctype html><html><head><title>TaxVault Accountant Pack - ${esc(this.exportedYearCode)}</title><style>body{font-family:Arial,sans-serif;color:#17243b;margin:32px}h1{font-size:24px}h2{font-size:16px;margin-top:28px;border-bottom:2px solid #17385f;padding-bottom:6px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #d8dee8;padding:6px;text-align:left}th{background:#edf3fb}@media print{body{margin:16mm}}</style></head><body><h1>TaxVault Accountant Pack - FY ${esc(this.exportedYearCode)}</h1><p>Generated ${esc(new Date().toLocaleString('en-AU'))}</p>${html}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 250);
   }
 
   downloadExport(): void {

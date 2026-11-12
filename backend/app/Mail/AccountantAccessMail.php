@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 
@@ -16,14 +17,21 @@ class AccountantAccessMail extends Mailable
         public readonly string $kind,
         public readonly ?string $yearLabel = null,
         public readonly ?string $note = null,
+        public readonly ?string $attachmentData = null,
+        public readonly ?string $attachmentName = null,
+        public readonly ?string $fromEmail = null,
+        public readonly ?string $fromName = null,
+        public readonly ?string $subjectOverride = null,
+        public readonly ?string $contentOverride = null,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->kind === 'invitation'
+            from: $this->fromEmail ? new Address($this->fromEmail, $this->fromName ?: '') : null,
+            subject: $this->subjectOverride ?: ($this->kind === 'invitation'
                 ? "{$this->ownerName} invited you to TaxVault"
-                : "{$this->ownerName} shared an accountant pack".($this->yearLabel ? " for FY {$this->yearLabel}" : ''),
+                : "{$this->ownerName} shared an accountant pack".($this->yearLabel ? " for FY {$this->yearLabel}" : '')),
         );
     }
 
@@ -32,13 +40,18 @@ class AccountantAccessMail extends Mailable
         $name = e($this->accountantName);
         $owner = e($this->ownerName);
         $link = e($this->link);
-        $intro = $this->kind === 'invitation'
-            ? "{$owner} has given you read-only access to their TaxVault records. Sign in with your TaxVault account to review them."
-            : "{$owner} has shared an accountant pack".($this->yearLabel ? ' for FY '.e($this->yearLabel) : '').' with you. Sign in to review it.';
+        $intro = $this->contentOverride !== null
+            ? nl2br(e($this->contentOverride))
+            : ($this->kind === 'invitation'
+                ? "{$owner} has given you read-only access to their TaxVault records. Sign in with your TaxVault account to review them."
+                : "{$owner} has shared an accountant pack".($this->yearLabel ? ' for FY '.e($this->yearLabel) : '').' with you. Sign in to review it.');
         $note = $this->note ? '<p>'.nl2br(e($this->note)).'</p>' : '';
+        $attachment = $this->attachmentName ? '<p>The accountant pack is attached to this email.</p>' : '';
 
         return new Content(htmlString: "<p>Hello {$name},</p><p>{$intro}</p>{$note}"
+            .$attachment
             ."<p><a href=\"{$link}\">Open TaxVault</a></p>"
             .'<p>Your sign-in details are provided separately by the sender. This link does not contain a password.</p>');
     }
+
 }

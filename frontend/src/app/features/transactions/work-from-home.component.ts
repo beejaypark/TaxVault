@@ -17,13 +17,14 @@ import {
 } from '../../shared/services/tax-workspace-api.service';
 import { formatFinancialYear } from '../../shared/utils/financial-year';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 @Component({
   selector: 'app-work-from-home',
-  imports: [FormsModule, TaxIconComponent, TranslatePipe],
+  imports: [FormsModule, TaxIconComponent, TranslatePipe, CollapsibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" [attr.aria-label]="'Transactions.WfhTitle' | translate">
+    <section class="panel" tvCollapsibleCard [attr.aria-label]="'Transactions.WfhTitle' | translate">
       <div class="head">
         <div>
           <h2>{{ 'Transactions.WfhTitle' | translate }}{{ yearLabel ? ' · FY ' + yearLabel : '' }}</h2>

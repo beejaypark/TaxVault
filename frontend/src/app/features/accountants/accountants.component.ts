@@ -55,8 +55,8 @@ interface AccountantForm {
           <strong>{{ 'Accountants.TemporaryPassword' | translate }} {{ temporaryFor }}</strong>
           <code>{{ temporaryPassword }}</code>
           <span>{{ 'Accountants.ShownOnce' | translate }}</span>
-          <button type="button" (click)="copyPassword()">{{ 'Accountants.Copy' | translate }}</button>
-          <button type="button" (click)="temporaryPassword = ''">{{ 'Accountants.Dismiss' | translate }}</button>
+          <button type="button" class="secondary-button" (click)="copyPassword()">{{ 'Accountants.Copy' | translate }}</button>
+          <button type="button" class="secondary-button" (click)="temporaryPassword = ''">{{ 'Accountants.Dismiss' | translate }}</button>
         </div>
       }
 
@@ -106,7 +106,7 @@ interface AccountantForm {
 
           <div class="actions">
             <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.Save' | translate }}</button>
-            <button type="button" (click)="form = null">{{ 'Accountants.Cancel' | translate }}</button>
+            <button type="button" class="secondary-button" (click)="form = null">{{ 'Accountants.Cancel' | translate }}</button>
           </div>
         </form>
       }
@@ -124,9 +124,14 @@ interface AccountantForm {
             </select>
           </label>
           <label>{{ 'Accountants.Note' | translate }} <textarea name="packNote" [(ngModel)]="packNote" maxlength="1000"></textarea></label>
+          <label>From name <input name="packFromName" [(ngModel)]="packFromName" maxlength="120" required /></label>
+          <label>From email <input name="packFrom" type="email" [(ngModel)]="packFrom" required /></label>
+          <label>To <input name="packTo" type="email" [(ngModel)]="packTo" required /></label>
+          <label>Subject <input name="packSubject" [(ngModel)]="packSubject" maxlength="255" required /></label>
+          <label>Content <textarea name="packContent" [(ngModel)]="packContent" rows="7" maxlength="10000" required></textarea></label>
           <div class="actions">
             <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.SendEmail' | translate }}</button>
-            <button type="button" (click)="packFor = null">{{ 'Accountants.Cancel' | translate }}</button>
+            <button type="button" class="secondary-button" (click)="packFor = null">{{ 'Accountants.Cancel' | translate }}</button>
           </div>
         </form>
       }
@@ -149,10 +154,10 @@ interface AccountantForm {
                 <td>{{ item.last_invited_at ? (item.last_invited_at | date: 'mediumDate') : '—' }}</td>
                 <td>{{ item.last_pack_sent_at ? (item.last_pack_sent_at | date: 'mediumDate') : '—' }}</td>
                 <td class="row-actions">
-                  <button type="button" (click)="startPack(item)">{{ 'Accountants.SendPack' | translate }}</button>
-                  <button type="button" (click)="startEdit(item)">{{ 'Accountants.Edit' | translate }}</button>
-                  <button type="button" (click)="resetPassword(item)">{{ 'Accountants.ResetPassword' | translate }}</button>
-                  <button type="button" class="danger" (click)="revoke(item)">{{ 'Accountants.Revoke' | translate }}</button>
+                  <button type="button" class="secondary-button" (click)="startPack(item)">{{ 'Accountants.SendPack' | translate }}</button>
+                  <button type="button" class="secondary-button" (click)="startEdit(item)">{{ 'Accountants.Edit' | translate }}</button>
+                  <button type="button" class="secondary-button" (click)="resetPassword(item)">{{ 'Accountants.ResetPassword' | translate }}</button>
+                  <button type="button" class="danger-button" (click)="revoke(item)">{{ 'Accountants.Revoke' | translate }}</button>
                 </td>
               </tr>
             } @empty {
@@ -163,11 +168,14 @@ interface AccountantForm {
       </div>
     </section>
   `,
-  styles: `
+  styles: [`
     .page { display: grid; gap: 16px; width: min(100%, var(--tv-content-max-width)); margin: 0 auto; padding: 40px 40px 64px; }
-    .primary-button { padding: 9px 16px; border: 0; border-radius: 4px; background: #1b2f4e; color: #fff; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .primary-button { padding: 9px 16px; border: 1px solid var(--tv-color-primary); border-radius: 4px; background: var(--tv-color-primary); color: #fff; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease; }
+    .primary-button:hover:not(:disabled) { border-color: var(--tv-color-primary-hover); background: var(--tv-color-primary-hover); box-shadow: 0 2px 5px rgba(15, 61, 120, 0.2); }
     .primary-button:disabled { opacity: 0.6; }
     .row-actions button, .actions button:not(.primary-button), .notice button { padding: 5px 10px; border: 1px solid #c3cddb; background: #fff; border-radius: 4px; cursor: pointer; }
+    .secondary-button:hover:not(:disabled) { border-color: var(--tv-color-primary); background: var(--tv-color-secondary-hover); color: var(--tv-color-primary-dark); }
+    .danger-button:hover:not(:disabled) { border-color: var(--tv-color-danger); background: var(--tv-color-danger-soft); }
     .head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
     .head h1 { margin: 0; }
     .head p { margin: 4px 0 0; color: #5b6b7f; }
@@ -192,7 +200,7 @@ interface AccountantForm {
     .notice code { font-size: 15px; padding: 2px 8px; background: #fff; border-radius: 4px; }
     @media (max-width: 900px) { table { display: block; overflow-x: auto; } }
     @media (max-width: 700px) { .page { padding: 28px 16px 48px; } }
-  `,
+  `],
 })
 export class AccountantsComponent implements OnInit {
   private readonly api = inject(AccountantsApiService);
@@ -209,6 +217,11 @@ export class AccountantsComponent implements OnInit {
   packFor: AccountantDto | null = null;
   packYear = '';
   packNote = '';
+  packFrom = 'taxvault@localhost';
+  packFromName = 'TaxVault';
+  packTo = '';
+  packSubject = '';
+  packContent = '';
   temporaryPassword = '';
   temporaryFor = '';
   message = '';
@@ -272,6 +285,11 @@ export class AccountantsComponent implements OnInit {
     this.packFor = item;
     this.packYear = '';
     this.packNote = '';
+    this.packFrom = 'taxvault@localhost';
+    this.packFromName = 'TaxVault';
+    this.packTo = item.email;
+    this.packSubject = 'Accountant pack from TaxVault';
+    this.packContent = 'Please find the accountant pack attached. You can also open TaxVault using the link below.';
   }
 
   toggleSection(section: AccessSection): void {
@@ -325,7 +343,15 @@ export class AccountantsComponent implements OnInit {
     const target = this.packFor;
     this.busy = true;
     this.api
-      .sendPack(target.id, { financial_year_id: this.packYear || null, note: this.packNote || null })
+      .sendPack(target.id, {
+        financial_year_id: this.packYear || null,
+        note: this.packNote || null,
+        to: this.packTo,
+        from_email: this.packFrom,
+        from_name: this.packFromName,
+        subject: this.packSubject,
+        content: this.packContent,
+      })
       .subscribe({
         next: () => {
           this.busy = false;

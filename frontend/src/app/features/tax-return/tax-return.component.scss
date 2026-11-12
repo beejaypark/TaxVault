@@ -229,6 +229,9 @@ select {
   margin: 12px 0 0 10px;
 }
 
+.format-select { display: grid; gap: 6px; margin: 16px 0 10px; color: var(--tv-color-text-secondary); font-size: 12px; font-weight: 650; }
+.format-select select { width: 100%; padding: 9px 10px; border: 1px solid var(--tv-color-border); border-radius: 7px; background: var(--tv-color-surface); color: var(--tv-color-text); font: inherit; }
+
 @media print {
   .export-layout,
   .notice {

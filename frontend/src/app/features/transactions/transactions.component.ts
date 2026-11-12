@@ -22,6 +22,7 @@ import {
   TaxWorkspaceApiService,
   PropertyDto,
   TransactionDto,
+  RecurringIncomeRuleDto,
 } from '../../shared/services/tax-workspace-api.service';
 import {
   AtoCategoryOption,
@@ -35,10 +36,11 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { TransactionImportComponent } from './transaction-import.component';
 import { WorkFromHomeComponent } from './work-from-home.component';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
 
 @Component({
   selector: 'app-transactions',
-  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TransactionImportComponent, WorkFromHomeComponent, TranslatePipe],
+  imports: [FormsModule, TaxIconComponent, BackNavigationComponent, TransactionImportComponent, WorkFromHomeComponent, TranslatePipe, CollapsibleCardDirective],
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +57,8 @@ export class TransactionsComponent implements OnInit {
   properties: PropertyDto[] = [];
   financialYears: FinancialYearDto[] = [];
   selectedDirection: 'all' | 'income' | 'expense' = 'all';
+  sortKey: 'description' | 'transaction_date' | 'direction' | 'financial_year_id' | 'amount' = 'transaction_date';
+  sortDirection: 'asc' | 'desc' = 'desc';
   searchText = this.route?.snapshot.queryParamMap.get('q') ?? '';
   isLoading = true;
   isSaving = false;
@@ -68,6 +72,11 @@ export class TransactionsComponent implements OnInit {
   bulkCategory = '';
   bulkProperty = '';
   isBulkSaving = false;
+  recurringIncome: RecurringIncomeRuleDto[] = [];
+  recurringForm = { name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+  showRecurringForm = false;
+  editingRecurringId: string | null = null;
+  incomeSource = 'manual';
 
   form = this.emptyForm();
 
@@ -188,13 +197,44 @@ export class TransactionsComponent implements OnInit {
     const selectedFinancialYearId =
       this.documentsApi.selectedFinancialYearId();
 
-    return this.transactions.filter((transaction) =>
+    const filtered = this.transactions.filter((transaction) =>
       (!selectedFinancialYearId
         || transaction.financial_year_id === selectedFinancialYearId)
       && (this.selectedDirection === 'all'
         || transaction.direction === this.selectedDirection)
       && (!search || transaction.description.toLowerCase().includes(search)),
     );
+
+    return [...filtered].sort((left, right) => {
+      const a = this.sortValue(left, this.sortKey);
+      const b = this.sortValue(right, this.sortKey);
+      const comparison = typeof a === 'number' && typeof b === 'number'
+        ? a - b
+        : String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+
+      return this.sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }
+
+  sortTransactions(key: typeof this.sortKey): void {
+    if (this.sortKey === key) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKey = key;
+      this.sortDirection = key === 'amount' ? 'desc' : 'asc';
+    }
+  }
+
+  sortIndicator(key: typeof this.sortKey): string {
+    return this.sortKey === key ? (this.sortDirection === 'asc' ? ' ▲' : ' ▼') : '';
+  }
+
+  private sortValue(transaction: TransactionDto, key: typeof this.sortKey): string | number {
+    if (key === 'amount') {
+      return Number(transaction.amount);
+    }
+
+    return transaction[key] ?? '';
   }
 
   get financialYearLabel(): string {
@@ -234,6 +274,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   onDirectionChange(): void {
+    if (this.form.direction !== 'income') this.incomeSource = 'manual';
     const valid = this.categoryOptions.some((item) => item.code === this.form.ato_category);
 
     if (!valid) {
@@ -261,6 +302,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.auth.canEdit) this.loadRecurringIncome();
     this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.searchText = params.get('q') ?? this.searchText;
       this.cdr.markForCheck();
@@ -296,6 +338,63 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
+  loadRecurringIncome(): void {
+    this.api.listRecurringIncome().subscribe({ next: (items) => { this.recurringIncome = items; this.cdr.markForCheck(); } });
+  }
+
+  saveRecurringIncome(): void {
+    const amount = Number(this.recurringForm.amount);
+    const name = this.recurringForm.name.trim();
+    const description = this.recurringForm.description.trim() || name;
+    if (!name || !Number.isFinite(amount) || amount <= 0) {
+      this.errorMessage = 'Enter a company/source and a gross amount greater than zero.';
+      this.cdr.markForCheck();
+      return;
+    }
+    this.errorMessage = '';
+    const payload = { ...this.recurringForm, amount, name, description, end_date: this.recurringForm.end_date || null };
+    const request$ = this.editingRecurringId
+      ? this.api.updateRecurringIncome(this.editingRecurringId, payload)
+      : this.api.createRecurringIncome(payload);
+    request$.subscribe({
+      next: (item) => { this.recurringIncome = this.editingRecurringId ? this.recurringIncome.map((rule) => rule.id === item.id ? item : rule) : [...this.recurringIncome, item]; this.resetRecurringForm(); this.successMessage = this.editingRecurringId ? 'Recurring income updated.' : 'Recurring income saved.'; this.cdr.markForCheck(); },
+      error: (error: { error?: { message?: string } }) => { this.errorMessage = error?.error?.message || 'Unable to save recurring income.'; this.cdr.markForCheck(); },
+    });
+  }
+
+  editRecurringIncome(item: RecurringIncomeRuleDto): void {
+    this.editingRecurringId = item.id;
+    this.recurringForm = { name: item.name, description: item.description, amount: Number(item.amount), day_of_month: item.day_of_month, start_date: item.start_date.slice(0, 10), end_date: item.end_date?.slice(0, 10) ?? '' };
+    this.showRecurringForm = true;
+    this.errorMessage = '';
+  }
+
+  resetRecurringForm(): void {
+    this.editingRecurringId = null;
+    this.recurringForm = { name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+    this.showRecurringForm = false;
+  }
+
+  toggleRecurringIncome(item: RecurringIncomeRuleDto): void {
+    this.api.updateRecurringIncome(item.id, { active: !item.active }).subscribe({ next: (updated) => { this.recurringIncome = this.recurringIncome.map((rule) => rule.id === updated.id ? updated : rule); this.cdr.markForCheck(); } });
+  }
+
+  selectIncomeSource(value: string): void {
+    this.incomeSource = value;
+    if (value === 'manual') return;
+    const rule = this.recurringIncome.find((item) => item.id === value);
+    if (!rule) return;
+    this.form.description = rule.description;
+    this.form.amount = Number(rule.amount);
+    this.form.ato_category = rule.ato_category ?? '';
+    this.cdr.markForCheck();
+  }
+
+  deleteRecurringIncome(item: RecurringIncomeRuleDto): void {
+    if (!confirm(`Delete recurring income "${item.name}"?`)) return;
+    this.api.deleteRecurringIncome(item.id).subscribe({ next: () => { this.recurringIncome = this.recurringIncome.filter((rule) => rule.id !== item.id); this.cdr.markForCheck(); } });
+  }
+
   loadTransactions(): void {
     this.api.listTransactions().subscribe({
       next: (transactions) => {
@@ -312,7 +411,15 @@ export class TransactionsComponent implements OnInit {
   }
 
   saveTransaction(): void {
-    if (this.isSaving || !this.isFormValid) {
+    if (this.isSaving) {
+      return;
+    }
+
+    if (!this.form.transaction_date) {
+      this.form.transaction_date = this.defaultTransactionDate();
+    }
+
+    if (!this.isFormValid) {
       return;
     }
 
@@ -355,6 +462,8 @@ export class TransactionsComponent implements OnInit {
 
   startCreate(): void {
     this.closeForm();
+    this.incomeSource = 'manual';
+    this.form.transaction_date = this.defaultTransactionDate();
     this.showForm = true;
   }
 
@@ -371,6 +480,7 @@ export class TransactionsComponent implements OnInit {
       ato_category: transaction.ato_category ?? '',
       property_id: transaction.property_id ?? '',
     };
+    this.incomeSource = 'manual';
     this.showForm = true;
   }
 
@@ -424,6 +534,21 @@ export class TransactionsComponent implements OnInit {
     const yearCode = this.financialYears.find((year) => year.id === id)?.year_code;
 
     return yearCode ? formatFinancialYear(yearCode) : '—';
+  }
+
+  private defaultTransactionDate(): string {
+    const selectedYearId = this.documentsApi.selectedFinancialYearId();
+    const selectedYear = this.financialYears.find((year) => year.id === selectedYearId);
+
+    if (!selectedYear) {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    return today >= selectedYear.start_date && today <= selectedYear.end_date
+      ? today
+      : selectedYear.end_date;
   }
 
   private emptyForm() {

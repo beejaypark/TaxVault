@@ -29,6 +29,7 @@ class User extends Authenticatable
         'role',
         'deactivated_at',
         'preferences',
+        'ai_settings',
     ];
 
     public function isAccountant(): bool
@@ -51,6 +52,7 @@ class User extends Authenticatable
         return [
             'deactivated_at' => 'datetime',
             'preferences' => 'array',
+            'ai_settings' => 'encrypted:array',
         ];
     }
 

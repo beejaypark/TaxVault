@@ -247,13 +247,47 @@ class AuthController extends Controller
             'language' => ['sometimes', 'in:en,kr,cn,es'],
             'notifyDocuments' => ['required', 'boolean'],
             'notifyUncategorised' => ['required', 'boolean'],
+            'notifyTaxNews' => ['sometimes', 'boolean'],
             'defaultFinancialYear' => ['required', 'in:current,all'],
             'emailReviewDigest' => ['sometimes', 'boolean'],
             'emailDeadlineReminders' => ['sometimes', 'boolean'],
             'lodgementDeadline' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'dashboardLayout' => ['sometimes', 'array', 'max:20'],
+            'dashboardLayout.*.id' => ['required', 'string', 'max:80'],
+            'dashboardLayout.*.visible' => ['required', 'boolean'],
+            'dashboardLayout.*.order' => ['required', 'integer', 'min:0', 'max:100'],
+            'ai' => ['sometimes', 'array'],
+            'ai.enabled' => ['sometimes', 'boolean'],
+            'ai.provider' => ['sometimes', 'in:openai,anthropic,gemini'],
+            'ai.model' => ['sometimes', 'string', 'max:100'],
+            'ai.api_key' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'ai.api_key_configured' => ['sometimes', 'boolean'],
+            'ai.clear_api_key' => ['sometimes', 'boolean'],
         ]);
 
+        $aiInput = $preferences['ai'] ?? [];
+        $storedAi = $user->ai_settings ?? [];
+        $previousProvider = $storedAi['provider'] ?? null;
+        if (array_key_exists('provider', $aiInput) && $previousProvider !== null && $previousProvider !== $aiInput['provider'] && !array_key_exists('api_key', $aiInput)) {
+            unset($storedAi['api_key']);
+        }
+        if (($aiInput['clear_api_key'] ?? false) === true) {
+            unset($storedAi['api_key']);
+        } elseif (array_key_exists('api_key', $aiInput) && trim((string) $aiInput['api_key']) !== '') {
+            $storedAi['api_key'] = trim((string) $aiInput['api_key']);
+        }
+        if (array_key_exists('enabled', $aiInput)) $storedAi['enabled'] = (bool) $aiInput['enabled'];
+        if (array_key_exists('provider', $aiInput)) $storedAi['provider'] = (string) $aiInput['provider'];
+        if (array_key_exists('model', $aiInput)) $storedAi['model'] = (string) $aiInput['model'];
+        $user->forceFill(['ai_settings' => $storedAi])->save();
+
         $preferences = array_merge($user->preferences ?? [], $preferences);
+        $preferences['ai'] = [
+            'enabled' => (bool) ($storedAi['enabled'] ?? true),
+            'provider' => (string) ($storedAi['provider'] ?? 'openai'),
+            'model' => (string) ($storedAi['model'] ?? config('services.openai.tax_news_model', 'gpt-4o-mini')),
+            'api_key_configured' => isset($storedAi['api_key']) && $storedAi['api_key'] !== '',
+        ];
 
         $user->forceFill(['preferences' => $preferences])->save();
 
@@ -269,7 +303,14 @@ class AuthController extends Controller
             'display_name' => $user->display_name,
             'identity_provider' => $user->identity_provider,
             'role' => $user->role,
-            'preferences' => $user->preferences,
+            'preferences' => array_merge($user->preferences ?? [], [
+                'ai' => [
+                    'enabled' => (bool) (($user->ai_settings ?? [])['enabled'] ?? true),
+                    'provider' => (string) (($user->ai_settings ?? [])['provider'] ?? 'openai'),
+                    'model' => (string) (($user->ai_settings ?? [])['model'] ?? config('services.openai.tax_news_model', 'gpt-4o-mini')),
+                    'api_key_configured' => isset(($user->ai_settings ?? [])['api_key']),
+                ],
+            ]),
             'clients' => [],
         ];
 
