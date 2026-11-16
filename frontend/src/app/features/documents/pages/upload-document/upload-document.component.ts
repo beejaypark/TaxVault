@@ -155,6 +155,10 @@ export class UploadDocumentComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     this.addFiles(Array.from(input.files ?? []));
     input.value = '';
+    // Android camera capture can return from the camera without triggering a
+    // second OnPush check. Explicitly mark the view so the selection summary
+    // and upload action are rendered immediately.
+    this.cdr.markForCheck();
   }
 
   onDragOver(event: DragEvent): void {
@@ -228,6 +232,7 @@ export class UploadDocumentComponent implements OnInit {
             error?: {
               code?: string;
               message?: string;
+              errors?: Record<string, string[] | string>;
               duplicate_document?: DuplicateDocument;
             };
           }) => {
@@ -240,11 +245,14 @@ export class UploadDocumentComponent implements OnInit {
               item.duplicate = error.error.duplicate_document;
               item.error = '';
             } else {
+              const validationMessages = Object.values(error.error?.errors ?? {})
+                .flatMap((messages) => Array.isArray(messages) ? messages : [messages])
+                .filter(Boolean);
               item.status = 'failed';
               item.error = error.status === 401
                 ? 'Session expired.'
                 : error.status === 422
-                  ? 'Rejected: check file type, size, and upload fields.'
+                  ? validationMessages[0] ?? error.error?.message ?? 'Rejected: check file type, size, and upload fields.'
                   : error.error?.message ?? 'Upload failed.';
             }
             this.cdr.markForCheck();
@@ -318,6 +326,7 @@ export class UploadDocumentComponent implements OnInit {
     if (rejected.length > 0) {
       this.errorMessage = `${rejected.length} file${rejected.length === 1 ? '' : 's'} not added: ${rejected.slice(0, 3).join('; ')}${rejected.length > 3 ? '; …' : ''}.`;
     }
+    this.cdr.markForCheck();
   }
 
   private isSupportedFile(file: File): boolean {

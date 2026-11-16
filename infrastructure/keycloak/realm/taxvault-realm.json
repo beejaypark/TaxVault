@@ -19,14 +19,16 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "redirectUris": [
-        "https://localhost:8443/api/auth/oidc/callback"
+        "https://localhost:8443/api/auth/oidc/callback",
+        "https://desktop-fn3ojjj.tailc14f46.ts.net/api/auth/oidc/callback"
       ],
       "webOrigins": [
-        "https://localhost:8443"
+        "https://localhost:8443",
+        "https://desktop-fn3ojjj.tailc14f46.ts.net"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "https://localhost:8443/login"
+        "post.logout.redirect.uris": "https://localhost:8443/login##https://desktop-fn3ojjj.tailc14f46.ts.net/login"
       },
       "defaultClientScopes": [
         "profile",

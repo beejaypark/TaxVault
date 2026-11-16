@@ -22,6 +22,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+COPY docker/php-upload.ini /usr/local/etc/php/conf.d/99-taxvault-upload.ini
+
 COPY composer.json composer.lock ./
 
 RUN composer install \
