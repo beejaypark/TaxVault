@@ -37,6 +37,7 @@ import { TransactionImportComponent } from './transaction-import.component';
 import { WorkFromHomeComponent } from './work-from-home.component';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
+import { TranslationService } from '../../shared/i18n/translation.service';
 
 @Component({
   selector: 'app-transactions',
@@ -50,6 +51,7 @@ export class TransactionsComponent implements OnInit {
   private readonly documentsApi = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
+  private readonly i18n = inject(TranslationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute, { optional: true });
 
@@ -267,10 +269,33 @@ export class TransactionsComponent implements OnInit {
   }
 
   get isFormValid(): boolean {
-    return !!this.form.transaction_date
-      && !!this.form.description.trim()
-      && this.form.amount > 0
+    return !this.transactionDateError()
+      && !this.transactionDescriptionError()
+      && !this.transactionAmountError()
       && (!this.needsProperty || !!this.form.property_id);
+  }
+
+  transactionDateError(): string | null {
+    if (!this.form.transaction_date) return this.i18n.translate('Common.Required');
+    const date = new Date(`${this.form.transaction_date}T00:00:00Z`);
+    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== this.form.transaction_date ? this.i18n.translate('Common.ValidationFailed') : null;
+  }
+
+  transactionDescriptionError(): string | null {
+    return this.form.description.trim() ? null : this.i18n.translate('Common.Required');
+  }
+
+  transactionAmountError(): string | null {
+    return Number.isFinite(Number(this.form.amount)) && Number(this.form.amount) > 0 ? null : this.i18n.translate('Common.ValidationFailed');
+  }
+
+  recurringFieldError(field: 'name' | 'amount' | 'day' | 'start' | 'end'): string | null {
+    if (field === 'name') return this.recurringForm.name.trim() ? null : this.i18n.translate('Common.Required');
+    if (field === 'amount') return Number(this.recurringForm.amount) > 0 ? null : this.i18n.translate('Common.ValidationFailed');
+    if (field === 'day') return Number(this.recurringForm.day_of_month) >= 1 && Number(this.recurringForm.day_of_month) <= 28 ? null : this.i18n.translate('Common.ValidationFailed');
+    if (field === 'start') return this.recurringForm.start_date ? null : this.i18n.translate('Common.Required');
+    if (!this.recurringForm.end_date) return null;
+    return new Date(`${this.recurringForm.end_date}T00:00:00Z`).toString() === 'Invalid Date' ? this.i18n.translate('Common.ValidationFailed') : null;
   }
 
   onDirectionChange(): void {
@@ -413,10 +438,6 @@ export class TransactionsComponent implements OnInit {
   saveTransaction(): void {
     if (this.isSaving) {
       return;
-    }
-
-    if (!this.form.transaction_date) {
-      this.form.transaction_date = this.defaultTransactionDate();
     }
 
     if (!this.isFormValid) {

@@ -30,6 +30,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { documentDisplayName } from '../../../../shared/utils/document-display-name';
 import { TaxWorkspaceApiService } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewDocumentTransaction } from '../../../../shared/models/reviews/review-extraction.model';
+import { TranslationService } from '../../../../shared/i18n/translation.service';
 
 @Component({
   imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective],
@@ -47,6 +48,7 @@ export class ReviewDetailComponent
     inject(ReviewService);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
+  private readonly i18n = inject(TranslationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly workspaceApi = inject(TaxWorkspaceApiService);
 
@@ -63,6 +65,7 @@ export class ReviewDetailComponent
   decisionSuccess = false;
 
   correctionValues: Record<string, unknown> = {};
+  correctionValidationErrors: Record<string, string | null> = {};
   correctionEvidenceByField: Record<
     string,
     ReviewCorrectionEvidence
@@ -335,6 +338,11 @@ export class ReviewDetailComponent
       return;
     }
 
+    if (decision === 'approved' && this.recordExpense && this.hasInvalidTransactionDates()) {
+      this.decisionError = this.i18n.translate('Common.ValidationFailedDate');
+      return;
+    }
+
     const request:
       import('../../../../shared/services/reviews/review.service')
         .ReviewDecisionRequest = {
@@ -392,6 +400,68 @@ export class ReviewDetailComponent
   ): void {
     this.correctionValues[fieldPath] =
       value;
+    this.correctionValidationErrors[fieldPath] =
+      this.correctionValidationMessage(fieldPath, value);
+    this.correctionSuccessField = null;
+  }
+
+  correctionValidationMessage(
+    fieldPath: string,
+    value: unknown,
+  ): string | null {
+    if (!this.isDateField(fieldPath)) {
+      return null;
+    }
+
+    if (
+      typeof value !== 'string' ||
+      value.trim() === ''
+    ) {
+      return this.i18n.translate('Common.Required');
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return this.i18n.translate('Common.ValidationFailedDateFormat');
+    }
+
+    const year = Number(value.slice(0, 4));
+    const date = new Date(`${value}T00:00:00Z`);
+
+    if (
+      year < 1900 ||
+      year > 2100 ||
+      Number.isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== value
+    ) {
+      return this.i18n.translate('Common.ValidationFailedDate');
+    }
+
+    return null;
+  }
+
+  isCorrectionInvalid(fieldPath: string): boolean {
+    return this.correctionValidationMessage(
+      fieldPath,
+      this.correctionValues[fieldPath],
+    ) !== null;
+  }
+
+  transactionDateValidationMessage(value: unknown): string | null {
+    return this.correctionValidationMessage('transaction_date', value);
+  }
+
+  isTransactionDateInvalid(value: unknown): boolean {
+    return this.transactionDateValidationMessage(value) !== null;
+  }
+
+  hasInvalidTransactionDates(): boolean {
+    return this.transactionDrafts.some((draft) =>
+      this.isTransactionDateInvalid(draft.transaction_date),
+    );
+  }
+
+  private isDateField(fieldPath: string): boolean {
+    return fieldPath.endsWith('_date') || fieldPath.endsWith('.date');
   }
 
   submitCorrection(
@@ -473,6 +543,7 @@ export class ReviewDetailComponent
 
   private initializeCorrectionValues(): void {
     this.correctionValues = {};
+    this.correctionValidationErrors = {};
     this.correctionEvidenceByField = {};
 
     const fields = this.review?.extraction?.fields ?? {};
@@ -483,6 +554,8 @@ export class ReviewDetailComponent
     ] of Object.entries(fields)) {
       this.correctionValues[fieldPath] =
         field.value;
+      this.correctionValidationErrors[fieldPath] =
+        this.correctionValidationMessage(fieldPath, field.value);
     }
 
     for (const correction of this.review
@@ -495,6 +568,11 @@ export class ReviewDetailComponent
         correction.fieldPath
       ] =
         correction.extractedValue.value;
+      this.correctionValidationErrors[correction.fieldPath] =
+        this.correctionValidationMessage(
+          correction.fieldPath,
+          correction.extractedValue.value,
+        );
     }
 
     const extractedAmount =

@@ -40,7 +40,7 @@
         </div>
         <div class="form-grid">
           <label>{{ 'Assets.ReferenceName' | translate }} <input name="referenceCode" [(ngModel)]="propertyForm.reference_code" maxlength="100" [placeholder]="'Assets.ReferencePlaceholder' | translate" /></label>
-          <label class="wide">{{ 'Assets.Address' | translate }} <input name="address" [(ngModel)]="propertyForm.address_line_1" maxlength="255" required /></label>
+          <label class="wide">{{ 'Assets.Address' | translate }} <input name="address" [(ngModel)]="propertyForm.address_line_1" maxlength="255" required [class.input-invalid]="propertyFieldError('address')" /> @if (propertyFieldError('address'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
           <label>{{ 'Assets.Suburb' | translate }} <input name="suburb" [(ngModel)]="propertyForm.suburb" maxlength="100" /></label>
           <label>{{ 'Assets.StateTerritory' | translate }}
             <select name="state" [(ngModel)]="propertyForm.state">
@@ -49,8 +49,8 @@
             </select>
           </label>
           <label>{{ 'Assets.Postcode' | translate }} <input name="postcode" [(ngModel)]="propertyForm.postcode" maxlength="20" /></label>
-          <label>{{ 'Assets.CurrentValue' | translate }} <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" [placeholder]="'Assets.PropertySourcePlaceholder' | translate" /></label>
-          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" /></label>
+          <label>{{ 'Assets.CurrentValue' | translate }} <input name="currentValue" type="number" min="0" step="1" [(ngModel)]="propertyForm.current_value" [placeholder]="'Assets.PropertySourcePlaceholder' | translate" [class.input-invalid]="propertyFieldError('value')" /> @if (propertyFieldError('value'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="currentValueDate" type="date" [(ngModel)]="propertyForm.current_value_date" [class.input-invalid]="propertyFieldError('date')" /> @if (propertyFieldError('date'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
           <label class="checkbox-field">
             <input name="isMainResidence" type="checkbox" [(ngModel)]="propertyForm.is_main_residence" />
             <span>{{ 'Assets.MainResidence' | translate }}</span>
@@ -58,7 +58,7 @@
         </div>
         <div class="form-actions">
           <button type="button" class="secondary-button" (click)="closePropertyForm()">{{ 'Assets.Cancel' | translate }}</button>
-          <button type="submit" class="primary-button" [disabled]="isSaving || !propertyForm.address_line_1.trim()">
+          <button type="submit" class="primary-button" [disabled]="isSaving || !!propertyFieldError('address') || !!propertyFieldError('value') || !!propertyFieldError('date')">
             {{ isSaving ? ('Assets.Saving' | translate) : ('Assets.SaveProperty' | translate) }}
           </button>
         </div>
@@ -137,24 +137,24 @@
               @for (type of investmentTypes; track type.value) { <option [value]="type.value">{{ type.label }}</option> }
             </select>
           </label>
-          <label>{{ 'Assets.AcquisitionDate' | translate }} <input name="acquisitionDate" type="date" [(ngModel)]="investmentForm.acquisition_date" required /></label>
+          <label>{{ 'Assets.AcquisitionDate' | translate }} <input name="acquisitionDate" type="date" [(ngModel)]="investmentForm.acquisition_date" required [class.input-invalid]="investmentFieldError('acquisitionDate')" /> @if (investmentFieldError('acquisitionDate'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
           <label>{{ 'Assets.RelatedProperty' | translate }}
             <select name="propertyId" [(ngModel)]="investmentForm.property_id">
               <option value="">{{ 'Assets.None' | translate }}</option>
               @for (property of properties; track property.id) { <option [value]="property.id">{{ property.reference_code || property.address_line_1 }}</option> }
             </select>
           </label>
-          <label>{{ 'Assets.CostBase' | translate }} <input name="costBase" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.cost_base" /></label>
-          <label>{{ 'Assets.IncidentalCosts' | translate }} <input name="incidentalCosts" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.incidental_costs" /></label>
-          <label>{{ 'Assets.UnitsQuantity' | translate }} <input name="quantity" type="number" min="0" step="any" [(ngModel)]="investmentForm.quantity" /></label>
-          <label>{{ 'Assets.Ownership' | translate }} <input name="ownership" type="number" min="0" max="100" step="0.01" [(ngModel)]="investmentForm.ownership_percentage" /></label>
-          <label>{{ 'Assets.CurrentValue' | translate }} <input name="invCurrentValue" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.current_value" [placeholder]="'Assets.MarketValuePlaceholder' | translate" /></label>
-          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="invCurrentValueDate" type="date" [(ngModel)]="investmentForm.current_value_date" /></label>
-          <label>{{ 'Assets.SaleProceeds' | translate }} <input name="proceeds" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.proceeds" /></label>
+          <label>{{ 'Assets.CostBase' | translate }} <input name="costBase" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.cost_base" [class.input-invalid]="investmentFieldError('costBase')" /> @if (investmentFieldError('costBase'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.IncidentalCosts' | translate }} <input name="incidentalCosts" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.incidental_costs" [class.input-invalid]="investmentFieldError('incidentalCosts')" /> @if (investmentFieldError('incidentalCosts'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.UnitsQuantity' | translate }} <input name="quantity" type="number" min="0" step="any" [(ngModel)]="investmentForm.quantity" [class.input-invalid]="investmentFieldError('quantity')" /> @if (investmentFieldError('quantity'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.Ownership' | translate }} <input name="ownership" type="number" min="0" max="100" step="0.01" [(ngModel)]="investmentForm.ownership_percentage" [class.input-invalid]="investmentFieldError('ownership')" /> @if (investmentFieldError('ownership'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.CurrentValue' | translate }} <input name="invCurrentValue" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.current_value" [placeholder]="'Assets.MarketValuePlaceholder' | translate" [class.input-invalid]="investmentFieldError('currentValue')" /> @if (investmentFieldError('currentValue'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.ValueAsOf' | translate }} <input name="invCurrentValueDate" type="date" [(ngModel)]="investmentForm.current_value_date" [class.input-invalid]="investmentFieldError('currentValueDate')" /> @if (investmentFieldError('currentValueDate'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Assets.SaleProceeds' | translate }} <input name="proceeds" type="number" min="0" step="0.01" [(ngModel)]="investmentForm.proceeds" [class.input-invalid]="investmentFieldError('proceeds')" /> @if (investmentFieldError('proceeds'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
         </div>
         <div class="form-actions">
           <button type="button" class="secondary-button" (click)="closeInvestmentForm()">{{ 'Assets.Cancel' | translate }}</button>
-          <button type="submit" class="primary-button" [disabled]="isSaving || !investmentForm.acquisition_date">
+          <button type="submit" class="primary-button" [disabled]="isSaving || !!investmentFieldError('acquisitionDate') || !!investmentFieldError('ownership') || !!investmentFieldError('currentValueDate')">
             {{ isSaving ? ('Assets.Saving' | translate) : ('Assets.SaveInvestment' | translate) }}
           </button>
         </div>

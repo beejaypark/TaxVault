@@ -16,6 +16,11 @@ return [
 
     'provider' => env('OCR_PROVIDER', 'local'),
 
+    'local' => [
+        'timeout' => (int) env('OCR_LOCAL_TIMEOUT', 120),
+        'max_image_dimension' => (int) env('OCR_LOCAL_MAX_IMAGE_DIMENSION', 1600),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Generic HTTP OCR Adapter

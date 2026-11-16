@@ -218,18 +218,23 @@
                             type="text"
                             [id]="'correction-' + field[0]"
                             [value]="correctionValues[field[0]]"
+                            [class.input-invalid]="isCorrectionInvalid(field[0])"
+                            [attr.aria-invalid]="isCorrectionInvalid(field[0])"
                             [disabled]="correctionSubmittingField !== null"
                             (input)="setCorrectionValue(field[0], $any($event.target).value)"
                           />
                           <button
                             type="button"
                             class="secondary-button"
-                            [disabled]="correctionSubmittingField !== null"
+                            [disabled]="correctionSubmittingField !== null || isCorrectionInvalid(field[0])"
                             (click)="submitCorrection(field[0])"
                           >
                             {{ isCorrectionSubmitting(field[0]) ? 'Saving...' : 'Save Correction' }}
                           </button>
                         </div>
+                        @if (correctionValidationErrors[field[0]]; as validationError) {
+                          <p class="field-validation-error" role="alert">{{ validationError }}</p>
+                        }
                         @if (correctionSuccessField === field[0]) {
                           <p class="field-success" role="status">Correction submitted successfully.</p>
                         }
@@ -308,7 +313,11 @@
                     </div>
                     <label [for]="'expense-date-' + i">Transaction date</label>
                     <input [id]="'expense-date-' + i" type="date" [(ngModel)]="draft.transaction_date"
-                      [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting" />
+                      [ngModelOptions]="{ standalone: true }" [class.input-invalid]="isTransactionDateInvalid(draft.transaction_date)"
+                      [attr.aria-invalid]="isTransactionDateInvalid(draft.transaction_date)" [disabled]="isSubmitting" />
+                    @if (isTransactionDateInvalid(draft.transaction_date)) {
+                      <p class="field-validation-error" role="alert">{{ transactionDateValidationMessage(draft.transaction_date) }}</p>
+                    }
                     <label [for]="'expense-direction-' + i">Record as</label>
                     <select [id]="'expense-direction-' + i" [(ngModel)]="draft.direction"
                       [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting">
@@ -346,7 +355,7 @@
               <button
                 type="button"
                 class="approve-button"
-                [disabled]="isSubmitting"
+                [disabled]="isSubmitting || (recordExpense && hasInvalidTransactionDates())"
                 (click)="submitDecision('approved', reviewNotes.value)"
               >
                 {{ isSubmitting ? 'Submitting...' : 'Approve' }}

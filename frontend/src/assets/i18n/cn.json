@@ -9,6 +9,10 @@
     "SignedInAs": "当前登录账号",
     "SignOut": "退出登录",
     "ReadOnlyView": "只读视图"
+    ,"Required": "必填。"
+    ,"ValidationFailed": "验证失败。"
+    ,"ValidationFailedDate": "请输入 1900 至 2100 之间的有效日期。"
+    ,"ValidationFailedDateFormat": "请使用 YYYY-MM-DD 格式。"
   },
   "Overview": {
     "Title": "概览"

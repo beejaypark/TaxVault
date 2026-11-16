@@ -23,6 +23,7 @@ import { PropertyRentalSummaryComponent } from './property-rental-summary.compon
 import { PropertyDeductionsComponent } from './property-deductions.component';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { CollapsibleCardDirective } from '../../shared/directives/collapsible-card.directive';
+import { TranslationService } from '../../shared/i18n/translation.service';
 
 @Component({
   selector: 'app-assets',
@@ -36,6 +37,7 @@ export class AssetsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
+  private readonly i18n = inject(TranslationService);
 
   readonly states = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
   readonly investmentTypes = [
@@ -58,6 +60,40 @@ export class AssetsComponent implements OnInit {
 
   propertyForm = this.emptyPropertyForm();
   investmentForm = this.emptyInvestmentForm();
+
+  validationMessage(value: unknown, required = false, min?: number, max?: number): string | null {
+    if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
+      return required ? this.i18n.translate('Common.Required') : null;
+    }
+    if (typeof value === 'number' && (!Number.isFinite(value) || (min !== undefined && value < min) || (max !== undefined && value > max))) {
+      return this.i18n.translate('Common.ValidationFailed');
+    }
+    return null;
+  }
+
+  dateValidationMessage(value: unknown, required = false): string | null {
+    if (value === null || value === undefined || value === '') return required ? 'Required.' : null;
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return this.i18n.translate('Common.ValidationFailed');
+    const date = new Date(`${value}T00:00:00Z`);
+    return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value ? this.i18n.translate('Common.ValidationFailed') : null;
+  }
+
+  propertyFieldError(field: string): string | null {
+    if (field === 'address') return this.validationMessage(this.propertyForm.address_line_1, true);
+    if (field === 'value') return this.validationMessage(this.propertyForm.current_value, false, 0);
+    if (field === 'date') return this.dateValidationMessage(this.propertyForm.current_value_date);
+    return null;
+  }
+
+  investmentFieldError(field: string): string | null {
+    if (field === 'acquisitionDate') return this.dateValidationMessage(this.investmentForm.acquisition_date, true);
+    if (field === 'ownership') return this.validationMessage(this.investmentForm.ownership_percentage, false, 0, 100);
+    if (['costBase', 'incidentalCosts', 'quantity', 'currentValue', 'proceeds'].includes(field)) {
+      return this.validationMessage((this.investmentForm as Record<string, unknown>)[field === 'currentValue' ? 'current_value' : field === 'costBase' ? 'cost_base' : field === 'incidentalCosts' ? 'incidental_costs' : field], false, 0);
+    }
+    if (field === 'currentValueDate') return this.dateValidationMessage(this.investmentForm.current_value_date);
+    return null;
+  }
 
   get activeTab(): 'properties' | 'investments' {
     return this.route.snapshot.routeConfig?.path === 'investments'

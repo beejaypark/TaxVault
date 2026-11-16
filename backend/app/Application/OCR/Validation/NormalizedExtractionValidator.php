@@ -3,6 +3,7 @@
 namespace App\Application\OCR\Validation;
 
 use App\Application\OCR\Data\NormalizedExtraction;
+use DateTimeImmutable;
 use InvalidArgumentException;
 
 final class NormalizedExtractionValidator
@@ -86,8 +87,38 @@ final class NormalizedExtractionValidator
                     )
                 );
             }
+
+            $this->validateDateField($fieldPath, $field['value']);
         }
 
         return $extraction;
+    }
+
+    private function validateDateField(string $fieldPath, mixed $value): void
+    {
+        if (! str_ends_with($fieldPath, '_date') && ! str_ends_with($fieldPath, '.date')) {
+            return;
+        }
+
+        if (! is_string($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            throw new InvalidArgumentException(
+                sprintf('Normalized extraction date field "%s" must use YYYY-MM-DD.', $fieldPath),
+            );
+        }
+
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+        $errors = DateTimeImmutable::getLastErrors();
+        $year = (int) substr($value, 0, 4);
+
+        if (
+            $date === false ||
+            ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0)) ||
+            $year < 1900 ||
+            $year > 2100
+        ) {
+            throw new InvalidArgumentException(
+                sprintf('Normalized extraction date field "%s" is invalid: %s.', $fieldPath, $value),
+            );
+        }
     }
 }

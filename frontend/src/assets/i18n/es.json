@@ -9,6 +9,10 @@
     "SignedInAs": "Sesión iniciada como",
     "SignOut": "Cerrar sesión",
     "ReadOnlyView": "Vista de solo lectura"
+    ,"Required": "Obligatorio."
+    ,"ValidationFailed": "La validación ha fallado."
+    ,"ValidationFailedDate": "Introduce una fecha válida entre 1900 y 2100."
+    ,"ValidationFailedDateFormat": "Usa el formato YYYY-MM-DD."
   },
   "Overview": {
     "Title": "Resumen"

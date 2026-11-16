@@ -33,13 +33,13 @@
       <div class="toolbar"><div><h2>Recurring income</h2><p>Automatically create monthly income transactions without duplicates.</p></div><button type="button" class="secondary-button" (click)="showRecurringForm ? resetRecurringForm() : showRecurringForm = true">{{ showRecurringForm ? 'Cancel' : 'Add income rule' }}</button></div>
       @if (showRecurringForm) {
         <form class="recurring-form" (ngSubmit)="saveRecurringIncome()">
-          <label>Company / source <input name="recurringName" [(ngModel)]="recurringForm.name" required /></label>
+          <label>Company / source <input name="recurringName" [(ngModel)]="recurringForm.name" required [class.input-invalid]="recurringFieldError('name')" /> @if (recurringFieldError('name'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
           <label>Description <input name="recurringDescription" [(ngModel)]="recurringForm.description" placeholder="Optional — company name will be used" /></label>
-          <label>Gross amount (before tax) <input name="recurringAmount" type="number" min="0.01" step="0.01" [(ngModel)]="recurringForm.amount" required /><small>Use gross salary or GST-exclusive business income.</small></label>
-          <label>Day of month <input name="recurringDay" type="number" min="1" max="28" [(ngModel)]="recurringForm.day_of_month" required /></label>
-          <label>Start date <input name="recurringStart" type="date" [(ngModel)]="recurringForm.start_date" required /></label>
-          <label>End date <input name="recurringEnd" type="date" [(ngModel)]="recurringForm.end_date" /></label>
-          <button type="submit" class="primary-button">{{ editingRecurringId ? 'Update rule' : 'Save rule' }}</button>
+          <label>Gross amount (before tax) <input name="recurringAmount" type="number" min="0.01" step="0.01" [(ngModel)]="recurringForm.amount" required [class.input-invalid]="recurringFieldError('amount')" /> @if (recurringFieldError('amount'); as error) { <small class="field-validation-error">{{ error }}</small> }<small>Use gross salary or GST-exclusive business income.</small></label>
+          <label>Day of month <input name="recurringDay" type="number" min="1" max="28" [(ngModel)]="recurringForm.day_of_month" required [class.input-invalid]="recurringFieldError('day')" /> @if (recurringFieldError('day'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>Start date <input name="recurringStart" type="date" [(ngModel)]="recurringForm.start_date" required [class.input-invalid]="recurringFieldError('start')" /> @if (recurringFieldError('start'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>End date <input name="recurringEnd" type="date" [(ngModel)]="recurringForm.end_date" [class.input-invalid]="recurringFieldError('end')" /> @if (recurringFieldError('end'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <button type="submit" class="primary-button" [disabled]="!!recurringFieldError('name') || !!recurringFieldError('amount') || !!recurringFieldError('day') || !!recurringFieldError('start') || !!recurringFieldError('end')">{{ editingRecurringId ? 'Update rule' : 'Save rule' }}</button>
         </form>
       }
       @for (rule of recurringIncome; track rule.id) {
@@ -54,7 +54,7 @@
         <div><h2>{{ editingId ? ('Transactions.Edit' | translate) : ('Transactions.Details' | translate) }}</h2><p>{{ 'Transactions.FinancialYearAssignment' | translate }}</p></div>
       </div>
       <div class="form-grid">
-        <label>{{ 'Transactions.DescriptionField' | translate }} <input name="description" [(ngModel)]="form.description" maxlength="1000" required [placeholder]="'Transactions.DescriptionPlaceholder' | translate" /></label>
+        <label>{{ 'Transactions.DescriptionField' | translate }} <input name="description" [(ngModel)]="form.description" maxlength="1000" required [placeholder]="'Transactions.DescriptionPlaceholder' | translate" [class.input-invalid]="transactionDescriptionError()" /> @if (transactionDescriptionError(); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
         <label>{{ 'Transactions.Type' | translate }}
           <select name="direction" [(ngModel)]="form.direction" (ngModelChange)="onDirectionChange()">
             <option value="income">{{ 'Transactions.Income' | translate }}</option>
@@ -71,8 +71,8 @@
             </select>
           </label>
         }
-        <label>{{ 'Transactions.Date' | translate }} <input name="date" type="date" [(ngModel)]="form.transaction_date" required /></label>
-        <label>{{ 'Transactions.Amount' | translate }} <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required /></label>
+        <label>{{ 'Transactions.Date' | translate }} <input name="date" type="date" [(ngModel)]="form.transaction_date" required [class.input-invalid]="transactionDateError()" /> @if (transactionDateError(); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+        <label>{{ 'Transactions.Amount' | translate }} <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="form.amount" required [class.input-invalid]="transactionAmountError()" /> @if (transactionAmountError(); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
         <label>{{ 'Transactions.TaxReturnItem' | translate }}
           <select name="atoCategory" [(ngModel)]="form.ato_category" (ngModelChange)="onCategoryChange()">
             <option value="">{{ 'Transactions.NotCategorised' | translate }}</option>

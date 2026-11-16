@@ -9,6 +9,10 @@
     "SignedInAs": "Signed in as",
     "SignOut": "Sign out",
     "ReadOnlyView": "Read-only view"
+    ,"Required": "Required."
+    ,"ValidationFailed": "Validation failed."
+    ,"ValidationFailedDate": "Validation failed: enter a valid date between 1900 and 2100."
+    ,"ValidationFailedDateFormat": "Validation failed: use YYYY-MM-DD."
   },
   "Auth": {
     "WelcomeBack": "Welcome back",

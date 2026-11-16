@@ -9,6 +9,10 @@
     "SignedInAs": "로그인 계정",
     "SignOut": "로그아웃",
     "ReadOnlyView": "읽기 전용 보기"
+    ,"Required": "필수 입력입니다."
+    ,"ValidationFailed": "입력값을 확인해 주세요."
+    ,"ValidationFailedDate": "유효한 날짜를 입력해 주세요."
+    ,"ValidationFailedDateFormat": "날짜 형식은 YYYY-MM-DD여야 합니다."
   },
   "Auth": {
     "WelcomeBack": "다시 오신 것을 환영합니다",

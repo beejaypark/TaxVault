@@ -8,6 +8,7 @@ RUN apt-get update \
         libzip-dev \
         libxml2-dev \
         curl \
+        imagemagick \
         poppler-utils \
         tesseract-ocr \
     && docker-php-ext-install \

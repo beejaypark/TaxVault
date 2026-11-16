@@ -17,6 +17,8 @@ final class LocalOcrProvider implements OcrProvider
 
     private const MAX_TEXT_LENGTH = 30000;
 
+    private const IMAGE_PREPROCESS_TIMEOUT = 30;
+
     public function process(OcrRequest $request): OcrResult
     {
         $this->assertSupportedMimeType($request->mimeType);
@@ -142,11 +144,55 @@ final class LocalOcrProvider implements OcrProvider
 
     private function runTesseract(string $path): string
     {
-        $process = new Process(['tesseract', $path, 'stdout', '-l', 'eng']);
-        $process->setTimeout(60);
+        $preparedPath = $this->prepareImageForOcr($path);
+
+        try {
+            $process = new Process([
+                'tesseract',
+                $preparedPath,
+                'stdout',
+                '-l',
+                'eng',
+                '--psm',
+                '6',
+            ]);
+            $process->setTimeout((int) config('ocr.local.timeout', 120));
+            $process->mustRun();
+
+            return $process->getOutput();
+        } finally {
+            if ($preparedPath !== $path && is_file($preparedPath)) {
+                unlink($preparedPath);
+            }
+        }
+    }
+
+    private function prepareImageForOcr(string $path): string
+    {
+        $preparedPath = dirname($path).DIRECTORY_SEPARATOR.'ocr-'.Str::uuid().'.jpg';
+        $maxDimension = max(1000, (int) config('ocr.local.max_image_dimension', 1600));
+
+        $process = new Process([
+            'convert',
+            $path,
+            '-auto-orient',
+            '-resize',
+            $maxDimension.'x'.$maxDimension.'>',
+            '-strip',
+            '-background',
+            'white',
+            '-alpha',
+            'remove',
+            '-alpha',
+            'off',
+            '-quality',
+            '85',
+            $preparedPath,
+        ]);
+        $process->setTimeout(self::IMAGE_PREPROCESS_TIMEOUT);
         $process->mustRun();
 
-        return $process->getOutput();
+        return $preparedPath;
     }
 
     /**

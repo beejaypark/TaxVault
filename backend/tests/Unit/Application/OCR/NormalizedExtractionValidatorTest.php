@@ -226,4 +226,41 @@ class NormalizedExtractionValidatorTest extends TestCase
             )
         );
     }
+
+    public function test_date_with_an_unrealistic_year_is_rejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new NormalizedExtractionValidator())->validate(
+            new NormalizedExtraction(
+                schemaVersion: 'ocr-extraction-v1',
+                fields: [
+                    'invoice_date' => [
+                        'value' => '0026-09-01',
+                        'confidence' => 65.0,
+                        'source' => 'local_ocr_candidate',
+                    ],
+                ],
+            )
+        );
+    }
+
+    public function test_valid_date_is_accepted(): void
+    {
+        $extraction = new NormalizedExtraction(
+            schemaVersion: 'ocr-extraction-v1',
+            fields: [
+                'invoice_date' => [
+                    'value' => '2026-09-01',
+                    'confidence' => 65.0,
+                    'source' => 'local_ocr_candidate',
+                ],
+            ],
+        );
+
+        $this->assertSame(
+            $extraction,
+            (new NormalizedExtractionValidator())->validate($extraction),
+        );
+    }
 }

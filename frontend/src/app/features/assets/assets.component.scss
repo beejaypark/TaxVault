@@ -1,3 +1,6 @@
+.field-validation-error { display: block; margin-top: 4px; color: var(--tv-color-danger); font-size: 10px; font-weight: 650; }
+.form-grid input.input-invalid { border-color: var(--tv-color-danger); background: var(--tv-color-danger-soft); }
+
 .workspace-page {
   width: min(100%, var(--tv-content-max-width));
   margin: 0 auto;
