@@ -55,6 +55,7 @@ return [
             'http://localhost:8080/api/auth/oidc/callback',
         ),
     ],
+    'mail_preview_url' => env('MAIL_PREVIEW_URL', 'http://localhost:8025'),
 
     'microsoft_graph' => [
         'authorize_url' => env('MICROSOFT_GRAPH_AUTHORIZE_URL', 'https://login.microsoftonline.com'),

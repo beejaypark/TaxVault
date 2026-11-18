@@ -233,7 +233,7 @@ class AuthController extends Controller
         $idToken = $request->session()->get(self::ID_TOKEN_SESSION_KEY);
         $logoutUrl = is_string($idToken)
             ? $this->keycloakLogoutUrl(Crypt::decryptString($idToken))
-            : null;
+            : (string) config('services.mail_preview_url');
 
         Auth::guard('web')->logout();
         $request->session()->invalidate();
@@ -418,7 +418,7 @@ class AuthController extends Controller
         $realm = rawurlencode((string) config('services.keycloak.realms'));
         $query = http_build_query([
             'client_id' => config('services.keycloak.client_id'),
-            'post_logout_redirect_uri' => rtrim((string) config('app.url'), '/').'/login',
+            'post_logout_redirect_uri' => rtrim((string) config('app.url'), '/').'/login?loggedOut=1',
             'id_token_hint' => $idToken,
         ], '', '&', PHP_QUERY_RFC3986);
 

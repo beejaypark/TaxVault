@@ -173,6 +173,11 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('loggedOut') === '1') {
+      window.location.assign('http://localhost:8025');
+      return;
+    }
+
     const authError = this.route.snapshot.queryParamMap.get('authError');
     this.errorMessage = authError
       ? authError === 'inactive'

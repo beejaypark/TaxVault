@@ -7,6 +7,7 @@ x-mail-env: &mail-env
   MAIL_PASSWORD: ${MAIL_PASSWORD:-}
   MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-taxvault@localhost}
   MAIL_FROM_NAME: ${MAIL_FROM_NAME:-TaxVault}
+  MAIL_PREVIEW_URL: "${MAIL_PREVIEW_URL:-http://localhost:8025}"
   NOTIFICATION_TIMEZONE: ${NOTIFICATION_TIMEZONE:-Australia/Sydney}
   BASIQ_API_KEY: ${BASIQ_API_KEY:-}
   BASIQ_BASE_URL: ${BASIQ_BASE_URL:-https://au-api.basiq.io}
