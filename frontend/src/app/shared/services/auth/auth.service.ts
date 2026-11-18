@@ -146,6 +146,12 @@ export class AuthService {
       );
   }
 
+  authConfiguration(): Observable<{ development_login_enabled: boolean }> {
+    return this.http
+      .get<ApiResponse<{ development_login_enabled: boolean }>>('/api/auth/configuration')
+      .pipe(map((response) => response.data));
+  }
+
   oidcLoginUrl(returnUrl: string, provider?: 'google', register = false): string {
     const backendOrigin =
       window.location.port === '4200' ? 'https://localhost:8443' : '';

@@ -22,16 +22,19 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
         <a class="oidc-button" [href]="keycloakLoginUrl">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
         <a class="google-button" [href]="googleLoginUrl">Continue with Google</a>
         <a class="register-link" [href]="registrationUrl">Create a new account</a>
-        <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
+        @if (developmentLoginEnabled) {
+          <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
 
-        <div class="notice" role="status">
-          {{ 'Auth.DevelopmentNotice' | translate }}
-        </div>
+          <div class="notice" role="status">
+            {{ 'Auth.DevelopmentNotice' | translate }}
+          </div>
+        }
 
         @if (errorMessage) {
           <p class="error-message" role="alert">{{ errorMessage }}</p>
         }
 
+        @if (developmentLoginEnabled) {
         <form (ngSubmit)="submit()" #loginForm="ngForm">
           <label for="login">{{ 'Auth.Login' | translate }}</label>
           <input
@@ -59,6 +62,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
             {{ loading ? ('Auth.SigningIn' | translate) : ('Auth.SignIn' | translate) }}
           </button>
         </form>
+        }
       </section>
     </main>
   `,
@@ -125,6 +129,7 @@ export class LoginComponent implements OnInit {
   password = '';
   loading = false;
   errorMessage = '';
+  developmentLoginEnabled = false;
 
   private readonly translations = inject(TranslationService);
 
@@ -162,6 +167,12 @@ export class LoginComponent implements OnInit {
       },
       error: () => {
         this.errorMessage = this.translations.translate('Auth.StatusCheckFailed');
+      },
+    });
+
+    this.auth.authConfiguration().subscribe({
+      next: (configuration) => {
+        this.developmentLoginEnabled = configuration.development_login_enabled;
       },
     });
   }

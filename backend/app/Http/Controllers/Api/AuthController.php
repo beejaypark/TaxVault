@@ -35,6 +35,15 @@ class AuthController extends Controller
             && (bool) config('dev_admin.enabled', false);
     }
 
+    public function configuration(): JsonResponse
+    {
+        return response()->json([
+            'data' => [
+                'development_login_enabled' => $this->developmentLoginEnabled(),
+            ],
+        ]);
+    }
+
     public function login(Request $request): JsonResponse
     {
         if (! $this->developmentLoginEnabled()) {

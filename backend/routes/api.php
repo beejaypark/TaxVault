@@ -35,6 +35,8 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 Route::middleware('web')->group(function (): void {
     Route::post('/auth/login', [AuthController::class, 'login'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class);
+    Route::get('/auth/configuration', [AuthController::class, 'configuration'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/auth/oidc/redirect', [AuthController::class, 'oidcRedirect'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class);
     Route::get('/auth/oidc/callback', [AuthController::class, 'oidcCallback'])
