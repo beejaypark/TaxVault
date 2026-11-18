@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
   imports: [FormsModule, BrandLogoComponent, TranslatePipe],
   template: `
     <main class="login-page">
+      @if (!embedded) {
       <section class="welcome-panel" aria-labelledby="welcome-title">
         <tv-brand-logo [size]="40" />
         <p class="eyebrow">Tax records, without the scramble</p>
@@ -25,6 +26,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
         </div>
         <p class="welcome-note">Private by default. Clear by design.</p>
       </section>
+      }
       <section class="login-card" aria-labelledby="login-title">
         <h1 id="login-title">{{ 'Auth.WelcomeBack' | translate }}</h1>
         <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
@@ -137,10 +139,13 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
     button:disabled { cursor: not-allowed; opacity: .55; }
     @media (max-width: 820px) { .login-page { grid-template-columns: 1fr; gap: 28px; max-width: 520px; padding: 32px 20px; } .welcome-panel { padding: 0; } .eyebrow { margin-top: 32px; } .welcome-panel h1 { font-size: 44px; } }
     @media (max-width: 480px) { .login-page { padding: 24px 16px; } .login-card { padding: 28px 24px; } .welcome-panel h1 { font-size: 38px; } }
+    .login-page.embedded { min-height: auto; width: auto; display: block; padding: 24px; background: transparent; }
+    .login-page.embedded .login-card { width: 100%; padding: 24px 20px 20px; box-shadow: none; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit {
+  @Input() embedded = false;
   login = '';
   password = '';
   loading = false;

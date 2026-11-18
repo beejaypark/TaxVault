@@ -13,12 +13,17 @@ import { TransactionsComponent } from './features/transactions/transactions.comp
 import { FinancialYearsComponent } from './features/financial-years/financial-years.component';
 import { SettingsComponent } from './features/settings/settings.component';
 import { TaxNewsComponent } from './features/tax-news/tax-news.component';
+import { LandingComponent } from './features/landing/landing.component';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login',
+    redirectTo: 'landing',
+  },
+  {
+    path: 'landing',
+    component: LandingComponent,
   },
   {
     path: 'login',
