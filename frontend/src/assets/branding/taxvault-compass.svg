@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="TaxVault">
+  <circle cx="24" cy="24" r="22" fill="#123f78"/>
+  <circle cx="24" cy="24" r="16" fill="#1f7ac4"/>
+  <circle cx="24" cy="24" r="11.5" fill="none" stroke="#fff" stroke-width="2.5"/>
+  <path d="M24 8.5v4M24 35.5v4M8.5 24h4M35.5 24h4" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M24 14.5l3.8 9.5-3.8 9.5-3.8-9.5z" fill="#fff"/>
+  <path d="M24 18.5l2 5.5-2 5.5-2-5.5z" fill="#39c7a2"/>
+  <circle cx="24" cy="24" r="2.3" fill="#123f78"/>
+</svg>

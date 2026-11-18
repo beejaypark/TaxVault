@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   template: `
     <img
       class="logo-mark"
-      src="assets/branding/taxvault-icon.png"
+      src="assets/branding/taxvault-compass.svg"
       [style.width.px]="size"
       [style.height.px]="size"
       alt=""
