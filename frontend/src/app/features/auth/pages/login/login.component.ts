@@ -79,7 +79,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
     </main>
   `,
   styles: [`
-    :host { display: block; width: 100%; min-height: 100vh; }
+    :host { display: block; width: 100%; }
     .login-page { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 420px); align-items: center; gap: 72px; width: min(100%, 1180px); margin: 0 auto; padding: 48px 32px; box-sizing: border-box; background: var(--tv-color-background, #f5f7fb); }
     .welcome-panel { max-width: 600px; padding: 24px 0; }
     .eyebrow { margin: 52px 0 16px; color: #1f7ac4; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
