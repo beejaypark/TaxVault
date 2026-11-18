@@ -5,23 +5,19 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <svg
+    <img
       class="logo-mark"
-      viewBox="0 0 48 48"
+      src="assets/branding/taxvault-icon.png"
       [style.width.px]="size"
       [style.height.px]="size"
+      alt=""
       aria-hidden="true"
-    >
-      <circle cx="24" cy="24" r="20" fill="#1f7ac4" />
-      <circle cx="24" cy="24" r="13" fill="none" stroke="#fff" stroke-width="3" />
-      <circle cx="24" cy="24" r="3.5" fill="#fff" />
-      <path d="M24 11v5M24 32v5M11 24h5M32 24h5" stroke="#fff" stroke-width="3" stroke-linecap="round" />
-    </svg>
+    />
     <span class="logo-name">TAXVAULT</span>
   `,
   styles: [`
     :host { display: inline-flex; align-items: center; gap: 10px; }
-    .logo-mark { flex: none; }
+    .logo-mark { flex: none; display: block; object-fit: contain; }
     .logo-name { font-family: var(--tv-font-heading); font-size: 17px; font-weight: 800; letter-spacing: 0.08em; }
   `],
 })
