@@ -12,7 +12,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
   selector: 'app-login',
   imports: [FormsModule, BrandLogoComponent, TranslatePipe],
   template: `
-    <main class="login-page">
+    <main class="login-page" [class.embedded]="embedded">
       @if (!embedded) {
       <section class="welcome-panel" aria-labelledby="welcome-title">
         <tv-brand-logo [size]="40" />
