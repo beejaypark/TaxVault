@@ -1,7 +1,7 @@
 ﻿import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { activeLocale, isLocaleCode, pathWithLocale } from './i18n/locale';
+import { activeLocale, angularLocale, isLocaleCode } from './i18n/locale';
 import { AuthService } from './shared/services/auth/auth.service';
 
 @Component({
@@ -23,8 +23,8 @@ export class AppComponent {
         return;
       }
 
-      const targetPath = pathWithLocale(window.location.pathname, language);
-      window.location.assign(`${targetPath}${window.location.search}${window.location.hash}`);
+      activeLocale.set(language);
+      document.documentElement.lang = angularLocale(language);
     });
   }
 }

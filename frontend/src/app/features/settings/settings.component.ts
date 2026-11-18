@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { buildReminderIcs } from '../../shared/utils/calendar';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
-import { LocaleCode, angularLocale, pathWithLocale } from '../../i18n/locale';
+import { LocaleCode, activeLocale, angularLocale } from '../../i18n/locale';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 interface StorageProviderDto {
@@ -570,7 +570,7 @@ export class SettingsComponent {
     const locale = value as LocaleCode;
     this.preferences.updateAndWait({ language: locale }).subscribe(() => {
       document.documentElement.lang = angularLocale(locale);
-      window.location.assign(pathWithLocale(window.location.pathname, locale));
+      activeLocale.set(locale);
     });
   }
 }

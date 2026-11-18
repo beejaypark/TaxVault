@@ -1,19 +1,19 @@
 # TaxVault locale URLs
 
-The frontend uses a locale prefix in the URL:
+The frontend keeps the selected locale out of the URL:
 
-- `/en` → English (`en-AU`)
-- `/kr` → Korean (`ko-KR`)
-- `/cn` → Simplified Chinese (`zh-CN`)
-- `/es` → Spanish (`es-ES`)
+- English → `en-AU`
+- Korean → `ko-KR`
+- Simplified Chinese → `zh-CN`
+- Spanish → `es-ES`
 
 `kr` and `cn` are intentionally kept as the public URL aliases requested by the
 product. The standards-based locale IDs are used for browser and Angular date/
 number formatting.
 
-The locale prefix is handled before Angular bootstraps, so existing application
-routes remain unchanged: `/en/dashboard`, `/kr/documents`, and so on. A URL
-without a locale is redirected to `/en`.
+Legacy locale-prefixed URLs such as `/en/dashboard` and `/kr/documents` are
+rewritten to `/dashboard` and `/documents` when the app starts. New URLs use
+the root domain directly.
 
 Translation messages should be added under `src/assets/i18n/` and consumed by a
 translation service or library in a later migration. Keep API/database enum

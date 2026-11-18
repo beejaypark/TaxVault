@@ -1,33 +1,42 @@
-import { APP_BASE_HREF } from '@angular/common';
 import { provideZoneChangeDetection } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import {
   DEFAULT_LOCALE,
+  LocaleCode,
   activeLocale,
   angularLocale,
   localeFromPath,
-  pathWithLocale,
 } from './app/i18n/locale';
 
 const currentLocale = localeFromPath(window.location.pathname);
 
-if (!currentLocale) {
-  window.location.replace(pathWithLocale(window.location.pathname, DEFAULT_LOCALE));
-} else {
-  activeLocale.set(currentLocale);
-  document.documentElement.lang = angularLocale(currentLocale);
-
-  const baseHref = `/${currentLocale}/`;
-  document.querySelector('base')?.setAttribute('href', baseHref);
-
-  bootstrapApplication(AppComponent, {
-    ...appConfig,
-    providers: [
-      provideZoneChangeDetection(),
-      ...(appConfig.providers ?? []),
-      { provide: APP_BASE_HREF, useValue: baseHref },
-    ],
-  }).catch((err) => console.error(err));
+if (currentLocale) {
+  const withoutLocale = window.location.pathname.replace(/^\/(en|kr|cn|es)(?=\/|$)/, '') || '/';
+  window.history.replaceState({}, '', `${withoutLocale}${window.location.search}${window.location.hash}`);
 }
+
+let storedLocale: string | null = null;
+try {
+  const stored = JSON.parse(window.localStorage.getItem('taxvault.preferences') ?? 'null') as { language?: string } | null;
+  storedLocale = stored?.language ?? null;
+} catch {
+  storedLocale = null;
+}
+
+const browserLocale = (navigator.language || '').toLowerCase().split('-')[0];
+const initialLocale = currentLocale
+  ?? (storedLocale === 'kr' || storedLocale === 'cn' || storedLocale === 'es' ? storedLocale : null)
+  ?? (browserLocale === 'ko' ? 'kr' : browserLocale === 'zh' ? 'cn' : browserLocale === 'es' ? 'es' : DEFAULT_LOCALE);
+
+activeLocale.set(initialLocale as LocaleCode);
+document.documentElement.lang = angularLocale(initialLocale as LocaleCode);
+
+bootstrapApplication(AppComponent, {
+  ...appConfig,
+  providers: [
+    provideZoneChangeDetection(),
+    ...(appConfig.providers ?? []),
+  ],
+}).catch((err) => console.error(err));
