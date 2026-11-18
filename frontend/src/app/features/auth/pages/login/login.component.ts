@@ -13,9 +13,19 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
   imports: [FormsModule, BrandLogoComponent, TranslatePipe],
   template: `
     <main class="login-page">
+      <section class="welcome-panel" aria-labelledby="welcome-title">
+        <tv-brand-logo [size]="40" />
+        <p class="eyebrow">Tax records, without the scramble</p>
+        <h1 id="welcome-title">Your tax documents, ready when you are.</h1>
+        <p class="welcome-copy">TaxVault brings receipts, statements and tax evidence into one calm workspace, so you can find what matters and hand over a clearer record at tax time.</p>
+        <div class="welcome-points">
+          <div><span>01</span><p><strong>Bring documents in</strong><small>Upload in bulk or import folders from connected storage.</small></p></div>
+          <div><span>02</span><p><strong>Find the details</strong><small>OCR-assisted capture surfaces dates and amounts for review.</small></p></div>
+          <div><span>03</span><p><strong>Keep the evidence together</strong><small>Source files, corrections and review history stay connected.</small></p></div>
+        </div>
+        <p class="welcome-note">Private by default. Clear by design.</p>
+      </section>
       <section class="login-card" aria-labelledby="login-title">
-        <tv-brand-logo class="brand" [size]="38" />
-
         <h1 id="login-title">{{ 'Auth.WelcomeBack' | translate }}</h1>
         <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
 
@@ -68,13 +78,18 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
   `,
   styles: [`
     :host { display: block; min-height: 100vh; }
-    .login-page {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: var(--tv-color-background, #f5f7fb);
-    }
+    .login-page { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 420px); align-items: center; gap: 72px; width: min(100%, 1180px); margin: 0 auto; padding: 48px 32px; box-sizing: border-box; background: var(--tv-color-background, #f5f7fb); }
+    .welcome-panel { max-width: 600px; padding: 24px 0; }
+    .eyebrow { margin: 52px 0 16px; color: #1f7ac4; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .welcome-panel h1 { max-width: 580px; margin: 0; color: #12345d; font-size: clamp(42px, 5vw, 64px); font-weight: 500; letter-spacing: -.055em; line-height: 1.02; }
+    .welcome-copy { max-width: 520px; margin: 24px 0 0; color: #58708f; font-size: 16px; line-height: 1.65; }
+    .welcome-points { display: grid; gap: 16px; margin-top: 36px; }
+    .welcome-points > div { display: flex; gap: 14px; align-items: flex-start; }
+    .welcome-points > div > span { color: #1f7ac4; font-size: 12px; font-weight: 700; }
+    .welcome-points p { display: grid; gap: 4px; margin: 0; }
+    .welcome-points strong { color: #294563; font-size: 14px; font-weight: 600; }
+    .welcome-points small { color: #8091a7; font-size: 12px; line-height: 1.45; }
+    .welcome-note { margin: 42px 0 0; color: #8b9aac; font-size: 12px; }
     .login-card {
       width: min(100%, 420px);
       padding: 36px;
@@ -83,8 +98,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
       background: var(--tv-color-surface, #fff);
       box-shadow: 0 16px 48px rgb(15 23 42 / 8%);
     }
-    .brand { margin-bottom: 30px; }
-    h1 { margin: 0 0 8px; font-size: 27px; }
+    .login-card h1 { margin: 0 0 8px; font-size: 27px; }
     .intro { margin: 0 0 24px; color: #64748b; line-height: 1.5; }
     .oidc-button {
       min-height: 46px; display: grid; place-items: center; border-radius: 8px;
@@ -121,6 +135,8 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
       font: inherit; font-weight: 650; cursor: pointer;
     }
     button:disabled { cursor: not-allowed; opacity: .55; }
+    @media (max-width: 820px) { .login-page { grid-template-columns: 1fr; gap: 28px; max-width: 520px; padding: 32px 20px; } .welcome-panel { padding: 0; } .eyebrow { margin-top: 32px; } .welcome-panel h1 { font-size: 44px; } }
+    @media (max-width: 480px) { .login-page { padding: 24px 16px; } .login-card { padding: 28px 24px; } .welcome-panel h1 { font-size: 38px; } }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
