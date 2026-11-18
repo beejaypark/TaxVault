@@ -90,12 +90,24 @@ class AuthController extends Controller
 
         $provider = Socialite::driver('keycloak');
         $provider->scopes(['openid', 'profile', 'email']);
-        $provider->with(['nonce' => $nonce]);
+        $providerParameters = ['nonce' => $nonce];
+        if ($request->query('provider') === 'google') {
+            $providerParameters['kc_idp_hint'] = 'google';
+        }
+        $provider->with($providerParameters);
         $provider->enablePKCE();
 
         $internalBaseUrl = rtrim((string) config('services.keycloak.base_url'), '/');
         $publicBaseUrl = rtrim((string) config('services.keycloak.public_url'), '/');
         $authorizationUrl = $provider->redirect()->getTargetUrl();
+
+        if ($request->boolean('register')) {
+            $authorizationUrl = str_replace(
+                '/protocol/openid-connect/auth?',
+                '/protocol/openid-connect/registrations?',
+                $authorizationUrl,
+            );
+        }
 
         if (
             $internalBaseUrl === ''

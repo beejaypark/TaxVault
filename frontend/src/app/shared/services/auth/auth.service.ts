@@ -146,11 +146,19 @@ export class AuthService {
       );
   }
 
-  oidcLoginUrl(returnUrl: string): string {
+  oidcLoginUrl(returnUrl: string, provider?: 'google', register = false): string {
     const backendOrigin =
       window.location.port === '4200' ? 'https://localhost:8443' : '';
 
-    return `${backendOrigin}/api/auth/oidc/redirect?returnUrl=${encodeURIComponent(returnUrl)}`;
+    const params = new URLSearchParams({ returnUrl });
+    if (provider) {
+      params.set('provider', provider);
+    }
+    if (register) {
+      params.set('register', '1');
+    }
+
+    return `${backendOrigin}/api/auth/oidc/redirect?${params.toString()}`;
   }
 
   logout(): Observable<string | null> {

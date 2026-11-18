@@ -20,6 +20,8 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
         <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
 
         <a class="oidc-button" [href]="keycloakLoginUrl">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
+        <a class="google-button" [href]="googleLoginUrl">Continue with Google</a>
+        <a class="register-link" [href]="registrationUrl">Create a new account</a>
         <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
 
         <div class="notice" role="status">
@@ -86,6 +88,10 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
       font-weight: 650; text-decoration: none;
     }
     .oidc-button:hover { filter: brightness(.95); }
+    .google-button { min-height: 44px; display: grid; place-items: center; margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; background: white; font-weight: 600; text-decoration: none; }
+    .google-button:hover { background: #f8fafc; }
+    .register-link { display: block; margin-top: 14px; color: var(--tv-color-primary, #1d4ed8); font-size: 13px; text-align: center; text-decoration: none; }
+    .register-link:hover { text-decoration: underline; }
     .separator {
       display: flex; align-items: center; gap: 12px; margin: 20px 0;
       color: #64748b; font-size: 12px;
@@ -124,6 +130,14 @@ export class LoginComponent implements OnInit {
 
   get keycloakLoginUrl(): string {
     return this.auth.oidcLoginUrl(this.getReturnUrl());
+  }
+
+  get googleLoginUrl(): string {
+    return this.auth.oidcLoginUrl(this.getReturnUrl(), 'google');
+  }
+
+  get registrationUrl(): string {
+    return this.auth.oidcLoginUrl(this.getReturnUrl(), undefined, true);
   }
 
   constructor(

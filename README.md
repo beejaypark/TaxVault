@@ -84,9 +84,16 @@ Keycloak runs in production mode (`start`) with its data in the `keycloak` Postg
 startup. Create application users in that realm using the Keycloak admin
 console at <https://localhost:8443/auth>; the admin username and password are
 the `KEYCLOAK_ADMIN` and `KEYCLOAK_ADMIN_PASSWORD` values in `.env`. The realm
-uses Authorization Code with PKCE and redirects through the same-origin
+allows self-registration, uses Authorization Code with PKCE and redirects through the same-origin
 `/api/auth/oidc/callback` endpoint. The import does not overwrite an existing
 realm, so existing Keycloak data remains intact.
+
+To enable Google sign-in, configure a Google Identity Provider in the Keycloak
+admin console under `Identity providers -> Google`. Register the broker redirect
+URI shown by Keycloak in Google Cloud Console, then enter the Google client ID
+and secret in Keycloak. TaxVault passes `kc_idp_hint=google` when the user
+selects `Continue with Google`. Existing TaxVault users should be linked only
+after Google reports a verified email; passwords cannot be exported to Keycloak.
 
 At startup, the backend provisions a local application admin in
 `development_admin_credentials` when `APP_ENV` is `local` and
