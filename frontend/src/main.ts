@@ -11,9 +11,10 @@ import {
 } from './app/i18n/locale';
 
 const currentLocale = localeFromPath(window.location.pathname);
+const legacyLocaleSegment = window.location.pathname.match(/^\/([a-z]{2})(?=\/|$)/i)?.[1]?.toLowerCase() ?? null;
 
-if (currentLocale) {
-  const withoutLocale = window.location.pathname.replace(/^\/(en|kr|cn|es)(?=\/|$)/, '') || '/';
+if (legacyLocaleSegment) {
+  const withoutLocale = window.location.pathname.replace(/^\/[a-z]{2}(?=\/|$)/i, '') || '/';
   window.history.replaceState({}, '', `${withoutLocale}${window.location.search}${window.location.hash}`);
 }
 
