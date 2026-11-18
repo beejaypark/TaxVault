@@ -30,6 +30,8 @@ describe('DashboardComponent', () => {
     listTransactions: ReturnType<typeof vi.fn>;
     getDeadlines: ReturnType<typeof vi.fn>;
   getWealth: ReturnType<typeof vi.fn>;
+  getTaxReadiness: ReturnType<typeof vi.fn>;
+  listTaxNews: ReturnType<typeof vi.fn>;
   };
 
   const documents: DocumentDto[] = [
@@ -128,6 +130,21 @@ describe('DashboardComponent', () => {
       listTransactions: vi.fn().mockReturnValue(of(transactions)),
       getDeadlines: vi.fn().mockReturnValue(of([])),
       getWealth: vi.fn().mockReturnValue(of({ assets: [], total_assets: 0, total_liabilities: 0, net_worth: 0, average_interest_rate: 0, history: [], cash_flow: [] })),
+      getTaxReadiness: vi.fn().mockReturnValue(of({
+        financial_year_id: 'year-1',
+        financial_year_code: '2025-26',
+        score: 42,
+        status: 'needs_attention',
+        calculation_version: 'v1',
+        components: {
+          documents: { label: 'Documents reviewed', completed: 0, total: 1, percentage: 0, applicable: true },
+          transactions: { label: 'Transactions categorised', completed: 1, total: 2, percentage: 50, applicable: true },
+          evidence: { label: 'Evidence linked', completed: 1, total: 2, percentage: 50, applicable: true },
+          required_data: { label: 'Required data complete', completed: 2, total: 2, percentage: 100, applicable: true },
+        },
+        issues: [{ severity: 'blocked', code: 'unreviewed_documents', count: 1, message: 'One document needs review.' }],
+      })),
+      listTaxNews: vi.fn().mockReturnValue(of([])),
     };
 
     await TestBed.configureTestingModule({
@@ -152,6 +169,8 @@ describe('DashboardComponent', () => {
     expect(text).toContain('Needs attention');
     expect(text).toContain('1');
     expect(text).toContain('Reviewed');
+    expect(text).toContain('Tax readiness');
+    expect(text).toContain('42%');
   });
 
   it('refreshes dashboard document and review statuses automatically', async () => {

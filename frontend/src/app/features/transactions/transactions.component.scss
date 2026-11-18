@@ -90,6 +90,7 @@ h1 {
 .sort-button:hover { color: var(--tv-color-primary); }
 
 .transaction-form {
+  scroll-margin-top: 24px;
   padding: 24px;
 }
 
@@ -208,6 +209,17 @@ table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+}
+
+table tr.attention-row {
+  outline: 2px solid var(--tv-color-warning);
+  outline-offset: -2px;
+  background: var(--tv-color-warning-soft);
+}
+
+table tr.attention-row-blocked {
+  outline-color: var(--tv-color-danger);
+  background: var(--tv-color-danger-soft);
 }
 
 th,

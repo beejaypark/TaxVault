@@ -70,6 +70,13 @@ class ActAsGrantedOwner
         if (preg_match('#^financial-years/[^/]+/return-summary$#', $path)) {
             return $grant->allows('transactions');
         }
+
+        // Provider descriptions are safe to show to an accountant. Actual
+        // connections and tokens remain owner-only.
+        if ($path === 'document-storage/providers') {
+            return true;
+        }
+
         return match ($segment) {
             'financial-years', 'document-types' => true,
             'documents' => $grant->allows('documents'),

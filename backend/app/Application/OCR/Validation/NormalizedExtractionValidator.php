@@ -17,7 +17,9 @@ final class NormalizedExtractionValidator
             );
         }
 
-        foreach ($extraction->fields as $fieldPath => $field) {
+        $fields = $extraction->fields;
+
+        foreach ($fields as $fieldPath => $field) {
             if (!is_string($fieldPath) || trim($fieldPath) === '') {
                 throw new InvalidArgumentException(
                     'Normalized extraction field path must be a non-empty string.'
@@ -88,37 +90,61 @@ final class NormalizedExtractionValidator
                 );
             }
 
-            $this->validateDateField($fieldPath, $field['value']);
+            $fields[$fieldPath]['value'] = $this->normalizeDateField(
+                $fieldPath,
+                $field['value'],
+            );
         }
 
-        return $extraction;
+        if ($fields === $extraction->fields) {
+            return $extraction;
+        }
+
+        return new NormalizedExtraction(
+            schemaVersion: $extraction->schemaVersion,
+            fields: $fields,
+        );
     }
 
-    private function validateDateField(string $fieldPath, mixed $value): void
+    private function normalizeDateField(string $fieldPath, mixed $value): mixed
     {
         if (! str_ends_with($fieldPath, '_date') && ! str_ends_with($fieldPath, '.date')) {
-            return;
+            return $value;
         }
 
-        if (! is_string($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+        if (! is_string($value)) {
             throw new InvalidArgumentException(
                 sprintf('Normalized extraction date field "%s" must use YYYY-MM-DD.', $fieldPath),
             );
         }
 
-        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
-        $errors = DateTimeImmutable::getLastErrors();
-        $year = (int) substr($value, 0, 4);
+        $formats = preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1
+            ? ['!Y-m-d']
+            : (preg_match('/^\d{1,2}\/\d{1,2}\/\d{2}$/', $value) === 1
+                ? ['!d/m/y']
+                : (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $value) === 1
+                    ? ['!d/m/Y']
+                    : []));
 
-        if (
-            $date === false ||
-            ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0)) ||
-            $year < 1900 ||
-            $year > 2100
-        ) {
-            throw new InvalidArgumentException(
-                sprintf('Normalized extraction date field "%s" is invalid: %s.', $fieldPath, $value),
-            );
+        foreach ($formats as $format) {
+            $date = DateTimeImmutable::createFromFormat($format, $value);
+            $errors = DateTimeImmutable::getLastErrors();
+
+            if (
+                $date !== false
+                && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))
+            ) {
+                $normalized = $date->format('Y-m-d');
+                $year = (int) substr($normalized, 0, 4);
+
+                if ($year >= 1900 && $year <= 2100) {
+                    return $normalized;
+                }
+            }
         }
+
+        throw new InvalidArgumentException(
+            sprintf('Normalized extraction date field "%s" is invalid: %s.', $fieldPath, $value),
+        );
     }
 }

@@ -56,6 +56,12 @@ return [
         ),
     ],
 
+    'microsoft_graph' => [
+        'authorize_url' => env('MICROSOFT_GRAPH_AUTHORIZE_URL', 'https://login.microsoftonline.com'),
+        'api_url' => env('MICROSOFT_GRAPH_API_URL', 'https://graph.microsoft.com/v1.0'),
+        'scopes' => ['openid', 'profile', 'email', 'offline_access', 'User.Read', 'Files.Read'],
+    ],
+
     'basiq' => [
         'api_key' => env('BASIQ_API_KEY'),
         'base_url' => env('BASIQ_BASE_URL', 'https://au-api.basiq.io'),

@@ -7,6 +7,58 @@ use ZipArchive;
 
 final class AccountantPackAttachmentService
 {
+    public function pdf(array $payload): string
+    {
+        $manifest = $payload['manifest'] ?? [];
+        $counts = $manifest['record_counts'] ?? [];
+        $lines = [
+            'TaxVault Accountant Pack',
+            'Financial year: '.($manifest['year_code'] ?? 'Unknown'),
+            'Generated: '.($manifest['generated_at'] ?? 'Unknown'),
+            'Export version: '.($manifest['export_version'] ?? 'Unknown'),
+            '',
+            'Record summary',
+        ];
+
+        foreach ([
+            'transactions' => 'Transactions',
+            'documents' => 'Documents',
+            'properties' => 'Properties',
+            'investments' => 'Investments',
+            'property_deductions' => 'Property deductions',
+            'mortgage_interest_entries' => 'Mortgage interest entries',
+            'reviews' => 'Reviews',
+        ] as $key => $label) {
+            $lines[] = $label.': '.(int) ($counts[$key] ?? 0);
+        }
+
+        $lines[] = '';
+        $lines[] = 'Transactions';
+        $lines[] = 'Date | Description | Direction | Amount | ATO category';
+        foreach ($payload['tax_records']['transactions'] ?? [] as $row) {
+            $lines[] = implode(' | ', [
+                $row['transaction_date'] ?? '',
+                $row['description'] ?? '',
+                $row['direction'] ?? '',
+                $row['amount'] ?? '',
+                $row['ato_category'] ?? '',
+            ]);
+        }
+
+        $lines[] = '';
+        $lines[] = 'Documents';
+        $lines[] = 'Filename | Status | Uploaded at';
+        foreach ($payload['source_references']['documents'] ?? [] as $row) {
+            $lines[] = implode(' | ', [
+                $row['original_filename'] ?? '',
+                $row['status'] ?? '',
+                $row['uploaded_at'] ?? '',
+            ]);
+        }
+
+        return $this->simplePdf($lines);
+    }
+
     public function xlsx(array $payload): string
     {
         if (! class_exists(ZipArchive::class)) {
@@ -52,7 +104,7 @@ final class AccountantPackAttachmentService
             $index++;
         }
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         $temporary = tempnam(sys_get_temp_dir(), 'taxvault-email-xlsx-');
         if ($temporary === false || $zip->open($temporary, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw new RuntimeException('Unable to create the XLSX accountant pack.');
@@ -111,5 +163,68 @@ final class AccountantPackAttachmentService
             'Investments' => $investments,
             'Documents' => $documents,
         ];
+    }
+
+    /** @param list<string> $lines */
+    private function simplePdf(array $lines): string
+    {
+        $wrapped = [];
+        foreach ($lines as $line) {
+            $text = trim((string) $line);
+            if ($text === '') {
+                $wrapped[] = '';
+
+                continue;
+            }
+            foreach (str_split($text, 105) as $part) {
+                $wrapped[] = $part;
+            }
+        }
+
+        $pages = array_chunk($wrapped, 50);
+        $objects = [
+            1 => '<< /Type /Catalog /Pages 2 0 R >>',
+            3 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+        ];
+        $pageReferences = [];
+        $nextObject = 4;
+
+        foreach ($pages as $page) {
+            $content = "BT\n/F1 10 Tf\n40 800 Td\n";
+            foreach ($page as $index => $line) {
+                $safe = $this->pdfText($line);
+                $content .= ($index === 0 ? '' : "0 -14 Td\n").'('.$safe.') Tj\n';
+            }
+            $content .= "ET\n";
+            $contentObject = $nextObject++;
+            $pageObject = $nextObject++;
+            $objects[$contentObject] = '<< /Length '.strlen($content).' >>\nstream\n'.$content.'endstream';
+            $objects[$pageObject] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents '.$contentObject.' 0 R >>';
+            $pageReferences[] = $pageObject.' 0 R';
+        }
+
+        $objects[2] = '<< /Type /Pages /Kids ['.implode(' ', $pageReferences).'] /Count '.count($pageReferences).' >>';
+        ksort($objects);
+        $pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+        $offsets = [0];
+        foreach ($objects as $number => $object) {
+            $offsets[$number] = strlen($pdf);
+            $pdf .= $number." 0 obj\n".$object."\nendobj\n";
+        }
+        $xref = strlen($pdf);
+        $pdf .= "xref\n0 ".(count($objects) + 1)."\n0000000000 65535 f \n";
+        for ($number = 1; $number <= count($objects); $number++) {
+            $pdf .= sprintf("%010d 00000 n \n", $offsets[$number] ?? 0);
+        }
+        $pdf .= "trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n".$xref."\n%%EOF";
+
+        return $pdf;
+    }
+
+    private function pdfText(string $value): string
+    {
+        $value = iconv('UTF-8', 'Windows-1252//TRANSLIT//IGNORE', $value) ?: $value;
+
+        return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $value);
     }
 }

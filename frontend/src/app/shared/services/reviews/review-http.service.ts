@@ -419,18 +419,17 @@ export class ReviewHttpService extends ReviewService {
     ] of Object.entries(
       normalized?.fields ?? {},
     )) {
-      if (
-        field.confidence === undefined ||
-        field.source === undefined
-      ) {
+      if (field.source === undefined) {
         continue;
       }
 
+      const confidence = field.confidence === undefined
+        ? (field.source === 'manual_correction' ? 100 : 0)
+        : Number(field.confidence);
+
       fields[fieldPath] = {
         value: field.value,
-        confidence: Number(
-          field.confidence,
-        ),
+        confidence,
         source: field.source,
       };
     }

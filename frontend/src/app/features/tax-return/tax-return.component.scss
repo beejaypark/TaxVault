@@ -292,3 +292,6 @@ select {
 
 .year-chip { margin: 0 0 4px; padding: 12px 14px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: var(--tv-color-background); }
 .year-hint { margin: 0 0 14px; font-size: 12px; color: var(--tv-color-text-secondary); }
+.advanced-export { display: grid; gap: 8px; margin-top: 2px; padding: 12px 14px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: #f8fafc; }
+.advanced-export p { margin: 0; color: var(--tv-color-text-secondary); font-size: 12px; line-height: 1.45; }
+.advanced-toggle { justify-self: start; }

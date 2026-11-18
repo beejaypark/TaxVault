@@ -241,6 +241,39 @@
   color: var(--tv-color-text-secondary);
 }
 
+.issue-date-correction {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: 8px;
+  background: var(--tv-color-background);
+}
+
+.issue-date-correction label {
+  display: grid;
+  gap: 4px;
+  color: var(--tv-color-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.issue-date-correction input {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--tv-color-border);
+  border-radius: 6px;
+  color: var(--tv-color-text);
+  font: inherit;
+}
+
+.correction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .document-processing {
   display: flex;
   flex-direction: column;

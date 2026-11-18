@@ -50,6 +50,58 @@
   @if (isLoading) {
     <p class="dashboard-loading" role="status">{{ 'Dashboard.Loading' | translate }}</p>
   } @else {
+    @if (taxReadiness) {
+      <section class="readiness-panel" aria-labelledby="readiness-heading">
+        <div class="readiness-score">
+          <span class="readiness-kicker">{{ 'Dashboard.ReadinessKicker' | translate }}</span>
+          <strong id="readiness-heading">{{ taxReadiness.score === null ? ('Dashboard.NotStarted' | translate) : taxReadiness.score + '%' }}</strong>
+          <span class="readiness-status" [class.ready]="taxReadiness.status === 'ready'">
+            {{ ('Dashboard.ReadinessStatus.' + taxReadiness.status) | translate }}
+          </span>
+        </div>
+        <div class="readiness-details">
+          <div class="readiness-heading">
+            <div>
+              <h2>{{ 'Dashboard.ReadinessTitle' | translate }}</h2>
+              <p>{{ 'Dashboard.ReadinessDescription' | translate }}</p>
+              @if (readinessDelta !== null) { <small class="readiness-change" [class.negative]="readinessDelta < 0">{{ readinessDelta > 0 ? '+' : '' }}{{ readinessDelta }} {{ 'Dashboard.PointsVsPreviousYear' | translate }}</small> }
+            </div>
+            <a routerLink="/documents" class="text-link">{{ 'Dashboard.ResolveIssues' | translate }}</a>
+          </div>
+          <div class="readiness-components">
+            @for (component of readinessComponents; track component.key) {
+              <div class="readiness-component">
+                <div class="readiness-component-label">
+                  <span>{{ component.label | translate }}</span>
+                  <strong>{{ component.value.percentage === null ? '—' : component.value.percentage + '%' }}</strong>
+                </div>
+                <div class="readiness-track"><span [style.width.%]="component.value.percentage ?? 0"></span></div>
+                <small>{{ component.value.completed }} / {{ component.value.total }}</small>
+              </div>
+            }
+          </div>
+          @if (taxReadiness.issues.length > 0) {
+            <div class="readiness-issues">
+              @for (issue of taxReadiness.issues; track issue.code) {
+                <a [routerLink]="issue.code === 'missing_evidence' || issue.code === 'uncategorised_transactions' ? '/transactions' : '/documents'" [queryParams]="issue.code === 'missing_evidence' || issue.code === 'uncategorised_transactions' ? { attention: issue.code } : null" class="readiness-issue" [class.blocked]="issue.severity === 'blocked'">
+                  <span class="issue-dot"></span>
+                  <span>{{ readinessIssueMessage(issue) }}</span>
+                  <strong>{{ issue.count }}</strong>
+                </a>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    } @else if (taxReadinessLoading) {
+      <section class="readiness-panel readiness-panel-loading" aria-live="polite" aria-labelledby="readiness-loading-heading">
+        <div class="readiness-loading-copy">
+          <span class="readiness-kicker">{{ 'Dashboard.ReadinessKicker' | translate }}</span>
+          <h2 id="readiness-loading-heading">{{ 'Dashboard.ReadinessTitle' | translate }}</h2>
+          <p>{{ 'Dashboard.Loading' | translate }}</p>
+        </div>
+      </section>
+    }
     <section class="summary-grid" [attr.aria-label]="'Dashboard.Summary' | translate">
       <a routerLink="/documents" class="summary-card">
         <span class="summary-label">{{ 'Dashboard.Documents' | translate }}</span>
@@ -310,7 +362,11 @@
           @for (item of taxNews.slice(0, 4); track item.id) {
             <a class="tax-news-row" [href]="item.url" target="_blank" rel="noopener noreferrer">
               <span class="tax-news-mark" [class.important]="item.importance === 'important'"></span>
-              <span class="tax-news-title">{{ item.ai_summary || item.title }}</span>
+              <span class="tax-news-title">
+                {{ item.title }}
+                @if (item.ai_summary) { <small class="tax-news-ai-badge">{{ 'TaxNews.AISummary' | translate }}</small> }
+                @if (item.ai_summary) { <small class="tax-news-ai-summary">{{ item.ai_summary }}</small> }
+              </span>
               <time>{{ formatDate(item.published_at ?? '') }}</time>
             </a>
           }

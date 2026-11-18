@@ -27,7 +27,7 @@ class MortgageController extends Controller
         ]);
 
         if ($mortgage->interest_rate !== null) {
-            $this->recordRate($mortgage, substr((string) ($mortgage->start_date ?? now()->toDateString()), 0, 10), $mortgage->interest_rate);
+            $this->recordRate($mortgage, substr((string) ($mortgage->start_date ?? now()->toDateString()), 0, 10), $mortgage->interest_rate, $mortgage->repayment_amount);
         }
 
         return response()->json(['data' => $mortgage->fresh()], 201);
@@ -40,7 +40,7 @@ class MortgageController extends Controller
         $mortgage->update($this->validated($request));
 
         if ($mortgage->interest_rate !== null && (float) $mortgage->interest_rate !== (float) $before) {
-            $this->recordRate($mortgage, now()->toDateString(), $mortgage->interest_rate);
+            $this->recordRate($mortgage, now()->toDateString(), $mortgage->interest_rate, $mortgage->repayment_amount);
         }
 
         return response()->json(['data' => $mortgage->refresh()]);
@@ -80,9 +80,10 @@ class MortgageController extends Controller
         $data = $request->validate([
             'effective_date' => ['required', 'date'],
             'rate' => ['required', 'numeric', 'min:0', 'max:100'],
+            'bank_repayment_amount' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999999999'],
         ]);
 
-        $this->recordRate($mortgage, $data['effective_date'], $data['rate']);
+        $this->recordRate($mortgage, $data['effective_date'], $data['rate'], $data['bank_repayment_amount'] ?? null);
 
         return response()->json(['data' => $mortgage->refresh()]);
     }
@@ -106,11 +107,11 @@ class MortgageController extends Controller
         return response()->json(['data' => $mortgage->refresh()->refresh()]);
     }
 
-    private function recordRate(Mortgage $mortgage, string $date, $rate): void
+    private function recordRate(Mortgage $mortgage, string $date, $rate, mixed $bankRepaymentAmount = null): void
     {
         MortgageRateChange::query()->updateOrCreate(
             ['mortgage_id' => $mortgage->getKey(), 'effective_date' => $date],
-            ['rate' => $rate],
+            ['rate' => $rate, 'bank_repayment_amount' => $bankRepaymentAmount],
         );
         $mortgage->syncCurrentRate();
     }
@@ -129,10 +130,14 @@ class MortgageController extends Controller
         return $request->validate([
             'bank_name' => ['required', 'string', 'max:100'],
             'loan_type' => ['required', 'in:variable,fixed,interest_only'],
+            'repayment_frequency' => ['sometimes', 'in:weekly,fortnightly,monthly'],
             'loan_amount' => ['required', 'numeric', 'min:0', 'max:999999999999'],
+            'repayment_amount' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
             'interest_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'start_date' => ['nullable', 'date'],
             'maturity_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'verified_balance' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'verified_balance_date' => ['nullable', 'date'],
         ]);
     }
 }

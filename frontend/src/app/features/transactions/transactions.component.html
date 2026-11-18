@@ -49,7 +49,7 @@
   }
 
   @if (showForm) {
-    <form class="transaction-form" (ngSubmit)="saveTransaction()">
+    <form #transactionEditor class="transaction-form" (ngSubmit)="saveTransaction()">
       <div class="form-heading">
         <div><h2>{{ editingId ? ('Transactions.Edit' | translate) : ('Transactions.Details' | translate) }}</h2><p>{{ 'Transactions.FinancialYearAssignment' | translate }}</p></div>
       </div>
@@ -160,7 +160,7 @@
           <thead><tr>@if (auth.canEdit) {<th><input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAll($any($event.target).checked)" [attr.aria-label]="'Transactions.SelectAll' | translate" /></th>}<th><button type="button" class="sort-button" (click)="sortTransactions('description')">{{ 'Transactions.DescriptionField' | translate }}{{ sortIndicator('description') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('transaction_date')">{{ 'Transactions.Date' | translate }}{{ sortIndicator('transaction_date') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('direction')">{{ 'Transactions.Type' | translate }}{{ sortIndicator('direction') }}</button></th><th><button type="button" class="sort-button" (click)="sortTransactions('financial_year_id')">{{ 'Common.FinancialYear' | translate }}{{ sortIndicator('financial_year_id') }}</button></th><th class="amount"><button type="button" class="sort-button" (click)="sortTransactions('amount')">{{ 'Transactions.Amount' | translate }}{{ sortIndicator('amount') }}</button></th>@if (auth.canEdit) {<th class="actions-col">{{ 'Transactions.Actions' | translate }}</th>}</tr></thead>
           <tbody>
             @for (transaction of filteredTransactions; track transaction.id) {
-              <tr>
+              <tr [class.attention-row]="hasAttention(transaction)" [class.attention-row-blocked]="transactionAttention(transaction) === 'uncategorised_transactions'">
                 @if (auth.canEdit) {
                   <td><input type="checkbox" [checked]="selectedIds.has(transaction.id)" (change)="toggleOne(transaction.id, $any($event.target).checked)" [attr.aria-label]="'Select ' + transaction.description" /></td>
                 }

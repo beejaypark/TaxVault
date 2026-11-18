@@ -15,6 +15,7 @@ import {
   faFile,
   faFileInvoiceDollar,
   faFileLines,
+  faFolder,
   faGauge,
   faGear,
   faHouse,
@@ -47,6 +48,7 @@ export type TaxIconName =
   | 'currency'
   | 'download'
   | 'file'
+  | 'folder'
   | 'taxReturn'
   | 'document'
   | 'dashboard'
@@ -79,6 +81,7 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   currency: faDollarSign,
   download: faDownload,
   file: faFile,
+  folder: faFolder,
   taxReturn: faFileInvoiceDollar,
   document: faFileLines,
   dashboard: faGauge,

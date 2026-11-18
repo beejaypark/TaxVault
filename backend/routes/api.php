@@ -4,9 +4,12 @@ use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
 use App\Http\Controllers\Api\DeadlineController;
-use App\Http\Controllers\Api\WealthController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
+use App\Http\Controllers\Api\DocumentStorageProviderController;
+use App\Http\Controllers\Api\StorageConnectionController;
+use App\Http\Controllers\Api\StorageProviderSettingController;
+use App\Http\Controllers\Api\OneDriveController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FinancialYearController;
 use App\Http\Controllers\Api\InboundEmailController;
@@ -15,15 +18,17 @@ use App\Http\Controllers\Api\MortgageController;
 use App\Http\Controllers\Api\MortgageInterestImportController;
 use App\Http\Controllers\Api\NotificationEmailController;
 use App\Http\Controllers\Api\PropertyController;
+use App\Http\Controllers\Api\PropertyDeductionController;
+use App\Http\Controllers\Api\RecurringIncomeController;
 use App\Http\Controllers\Api\RentalSummaryController;
 use App\Http\Controllers\Api\ReturnSummaryController;
-use App\Http\Controllers\Api\TransactionBulkController;
-use App\Http\Controllers\Api\WorkFromHomeController;
 use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\TransactionController;
-use App\Http\Controllers\Api\RecurringIncomeController;
 use App\Http\Controllers\Api\TaxNewsController;
-use App\Http\Controllers\Api\PropertyDeductionController;
+use App\Http\Controllers\Api\TaxReadinessController;
+use App\Http\Controllers\Api\TransactionBulkController;
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\WealthController;
+use App\Http\Controllers\Api\WorkFromHomeController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -35,6 +40,8 @@ Route::middleware('web')->group(function (): void {
     Route::get('/auth/oidc/callback', [AuthController::class, 'oidcCallback'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->name('auth.oidc.callback');
+    Route::get('/document-storage/onedrive/callback', [OneDriveController::class, 'callback'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class);
     Route::post('/auth/logout', [AuthController::class, 'logout'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('auth');
@@ -119,6 +126,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::post('/bank/connect', [BankConnectionController::class, 'connect'])->middleware(['throttle:10,1', 'audit:bank.connect,bank']);
     Route::post('/bank/sync', [BankConnectionController::class, 'sync'])->middleware(['throttle:10,1', 'audit:bank.sync,bank']);
     Route::get('/financial-years/{id}/return-summary', [ReturnSummaryController::class, 'show']);
+    Route::get('/financial-years/{id}/tax-readiness', [TaxReadinessController::class, 'show']);
     Route::put('/financial-years/{id}/wfh-rate', [WorkFromHomeController::class, 'updateRate'])->middleware('audit:work_from_home.rate,financial_year');
     Route::get('/work-from-home', [WorkFromHomeController::class, 'index']);
     Route::post('/work-from-home', [WorkFromHomeController::class, 'store'])->middleware('audit:work_from_home.save,work_from_home');
@@ -126,6 +134,15 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->middleware('audit:transaction.delete,transaction');
 
     Route::get('/document-types', [DocumentTypeController::class, 'index']);
+    Route::get('/document-storage/providers', [DocumentStorageProviderController::class, 'index']);
+    Route::get('/document-storage/settings/{provider}', [StorageProviderSettingController::class, 'show']);
+    Route::put('/document-storage/settings/{provider}', [StorageProviderSettingController::class, 'update']);
+    Route::get('/document-storage/connections', [StorageConnectionController::class, 'index']);
+    Route::delete('/document-storage/connections/{id}', [StorageConnectionController::class, 'destroy'])
+        ->middleware('audit:storage_connection.disconnect,storage_connection');
+    Route::get('/document-storage/onedrive/redirect', [OneDriveController::class, 'redirect']);
+    Route::get('/document-storage/connections/{id}/items', [OneDriveController::class, 'items']);
+    Route::post('/document-storage/connections/{id}/import', [OneDriveController::class, 'import']);
 
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store']);
@@ -139,6 +156,7 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     )->middleware('audit:document.assign_financial_year,document');
     Route::get('/documents/{id}/content', [DocumentController::class, 'content'])->middleware('audit:document.download,document');
     Route::post('/documents/{id}/retry', [DocumentController::class, 'retry'])->middleware('audit:document.retry,document');
+    Route::post('/documents/{id}/extraction-correction', [DocumentController::class, 'correctExtraction'])->middleware('audit:document.extraction_correction,document');
 
     Route::get('/reviews', [ReviewController::class, 'index']);
     Route::get('/reviews/{id}', [ReviewController::class, 'show']);

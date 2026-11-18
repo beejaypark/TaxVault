@@ -62,6 +62,7 @@ export interface MortgageRateChangeDto {
   id: string;
   effective_date: string;
   rate: string | number;
+  bank_repayment_amount: string | number | null;
 }
 
 export interface MortgageDto {
@@ -69,10 +70,17 @@ export interface MortgageDto {
   property_id: string;
   bank_name: string;
   loan_type: string;
+  repayment_frequency: 'weekly' | 'fortnightly' | 'monthly';
   loan_amount: string | number;
+  repayment_amount?: string | number | null;
   interest_rate: string | number | null;
   start_date: string | null;
   maturity_date: string | null;
+  estimated_balance?: number;
+  verified_balance?: number | null;
+  verified_balance_date?: string | null;
+  balance_variance?: number | null;
+  balance_needs_review?: boolean;
   interest_entries: MortgageInterestEntryDto[];
   rate_changes: MortgageRateChangeDto[];
 }
@@ -80,10 +88,14 @@ export interface MortgageDto {
 export interface MortgageRequest {
   bank_name: string;
   loan_type: string;
+  repayment_frequency: 'weekly' | 'fortnightly' | 'monthly';
   loan_amount: number;
+  repayment_amount?: number | null;
   interest_rate: number | null;
   start_date: string | null;
   maturity_date: string | null;
+  verified_balance?: number | null;
+  verified_balance_date?: string | null;
 }
 
 export interface PropertyDto {
@@ -246,6 +258,36 @@ export interface ReturnSummaryDto {
   totals: { income: number; deductions: number; net_rental_result: number };
 }
 
+export interface TaxReadinessComponentDto {
+  label: string;
+  completed: number;
+  total: number;
+  percentage: number | null;
+  applicable: boolean;
+}
+
+export interface TaxReadinessIssueDto {
+  severity: 'blocked' | 'needs_attention';
+  code: string;
+  count: number;
+  message: string;
+}
+
+export interface TaxReadinessDto {
+  financial_year_id: string;
+  financial_year_code: string;
+  score: number | null;
+  status: 'ready' | 'needs_attention' | 'not_started';
+  calculation_version: string;
+  components: {
+    documents: TaxReadinessComponentDto;
+    transactions: TaxReadinessComponentDto;
+    evidence: TaxReadinessComponentDto;
+    required_data: TaxReadinessComponentDto;
+  };
+  issues: TaxReadinessIssueDto[];
+}
+
 export interface WorkFromHomeLogDto {
   id: string;
   work_date: string;
@@ -373,9 +415,9 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
-  saveMortgageRate(id: string, effectiveDate: string, rate: number): Observable<MortgageDto> {
+  saveMortgageRate(id: string, effectiveDate: string, rate: number, bankRepaymentAmount: number): Observable<MortgageDto> {
     return this.http
-      .put<ApiItem<MortgageDto>>(`/api/mortgages/${id}/rates`, { effective_date: effectiveDate, rate })
+      .put<ApiItem<MortgageDto>>(`/api/mortgages/${id}/rates`, { effective_date: effectiveDate, rate, bank_repayment_amount: bankRepaymentAmount })
       .pipe(map((response) => response.data));
   }
 
@@ -421,7 +463,7 @@ export class TaxWorkspaceApiService {
       .pipe(map((response) => response.data));
   }
 
-  downloadAccountantPack(financialYearId: string, format: 'csv' | 'excel'): Observable<Blob> {
+  downloadAccountantPack(financialYearId: string, format: 'csv' | 'excel' | 'pdf'): Observable<Blob> {
     return this.http.get('/api/exports/pack', {
       params: { financial_year_id: financialYearId, format },
       responseType: 'blob',
@@ -536,6 +578,12 @@ export class TaxWorkspaceApiService {
   getReturnSummary(financialYearId: string): Observable<ReturnSummaryDto> {
     return this.http
       .get<ApiItem<ReturnSummaryDto>>(`/api/financial-years/${financialYearId}/return-summary`)
+      .pipe(map((response) => response.data));
+  }
+
+  getTaxReadiness(financialYearId: string): Observable<TaxReadinessDto> {
+    return this.http
+      .get<ApiItem<TaxReadinessDto>>(`/api/financial-years/${financialYearId}/tax-readiness`)
       .pipe(map((response) => response.data));
   }
 

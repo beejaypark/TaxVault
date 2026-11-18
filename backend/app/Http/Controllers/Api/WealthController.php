@@ -33,7 +33,12 @@ final class WealthController extends Controller
 
         $properties = Property::query()->where('user_id', $userId)->get();
         $investments = Investment::query()->where('user_id', $userId)->whereNull('disposal_date')->get();
-        $mortgages = Mortgage::query()->where('user_id', $userId)->get();
+        $mortgages = Mortgage::query()
+            ->where('user_id', $userId)
+            ->where(function ($query) use ($asOf): void {
+                $query->whereNull('maturity_date')->orWhereDate('maturity_date', '>=', $asOf->toDateString());
+            })
+            ->get();
 
         $assets = [];
         foreach ($properties as $property) {
@@ -60,9 +65,11 @@ final class WealthController extends Controller
         }
 
         $totalAssets = array_sum(array_map(static fn (array $a): float => $a['value'] ?? 0.0, $assets));
-        $liabilities = (float) $mortgages->sum('loan_amount');
+        $liabilities = $mortgages->sum(fn (Mortgage $mortgage): float => $mortgage->verified_balance !== null
+            ? (float) $mortgage->verified_balance
+            : $mortgage->estimatedBalance($asOf));
         $weightedRate = $liabilities > 0
-            ? $mortgages->sum(static fn ($m): float => (float) $m->loan_amount * (float) ($m->interest_rate ?? 0)) / $liabilities
+            ? $mortgages->sum(fn (Mortgage $mortgage): float => $mortgage->estimatedBalance($asOf) * (float) ($mortgage->interest_rate ?? 0)) / $liabilities
             : 0.0;
 
         return response()->json(['data' => [

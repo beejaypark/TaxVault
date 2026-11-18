@@ -80,6 +80,12 @@ h1 {
   border-bottom: 1px solid var(--tv-color-border);
 }
 
+.asset-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.asset-summary article { display: grid; gap: 6px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
+.asset-summary span, .asset-summary small { color: var(--tv-color-text-secondary); font-size: 12px; }
+.asset-summary strong { color: var(--tv-color-primary); font-size: 22px; }
+@media (max-width: 720px) { .asset-summary { grid-template-columns: 1fr; } }
+
 .tabs a {
   display: inline-flex;
   align-items: center;

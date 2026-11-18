@@ -214,10 +214,17 @@ final class AccountantController extends Controller
 
         $attachmentData = null;
         $attachmentName = null;
+        $attachments = [];
         if ($year !== null) {
             $export = app(FinancialYearExportService::class)->export($owner, $year->getKey());
-            $attachmentData = app(AccountantPackAttachmentService::class)->xlsx($export->payload);
+            $xlsx = app(AccountantPackAttachmentService::class)->xlsx($export->payload);
+            $pdf = app(AccountantPackAttachmentService::class)->pdf($export->payload);
+            $attachmentData = $xlsx;
             $attachmentName = sprintf('taxvault-%s-accountant-pack.xlsx', $year->year_code);
+            $attachments = [
+                ['data' => $xlsx, 'name' => $attachmentName, 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+                ['data' => $pdf, 'name' => sprintf('taxvault-%s-accountant-pack.pdf', $year->year_code), 'mime' => 'application/pdf'],
+            ];
         }
 
         $this->sendMail(
@@ -229,6 +236,7 @@ final class AccountantController extends Controller
             note: $data['note'] ?? null,
             attachmentData: $attachmentData,
             attachmentName: $attachmentName,
+            attachments: $attachments,
             toEmail: $data['to'] ?? $grant->email,
             fromEmail: $data['from_email'] ?? config('mail.from.address'),
             fromName: $data['from_name'] ?? config('mail.from.name'),
@@ -249,6 +257,7 @@ final class AccountantController extends Controller
         ?string $note = null,
         ?string $attachmentData = null,
         ?string $attachmentName = null,
+        array $attachments = [],
         ?string $toEmail = null,
         ?string $fromEmail = null,
         ?string $fromName = null,
@@ -271,8 +280,15 @@ final class AccountantController extends Controller
         );
 
         if ($attachmentData !== null && $attachmentName !== null) {
-            $mail->attachData($attachmentData, $attachmentName, [
+            $attachments = $attachments ?: [[
+                'data' => $attachmentData,
+                'name' => $attachmentName,
                 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]];
+        }
+        foreach ($attachments as $attachment) {
+            $mail->attachData($attachment['data'], $attachment['name'], [
+                'mime' => $attachment['mime'],
             ]);
         }
 

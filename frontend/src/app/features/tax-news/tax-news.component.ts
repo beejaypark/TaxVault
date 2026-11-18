@@ -45,7 +45,10 @@ import { TranslationService } from '../../shared/i18n/translation.service';
                 @if (item.importance === 'important') { <span class="important-mark"><tv-icon name="warning" /></span> }
                 <div>
                   <a [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+                  @if (item.ai_summary) { <span class="ai-badge">{{ 'TaxNews.AISummary' | translate }}</span> }
                   @if (item.summary) { <p>{{ item.summary }}</p> }
+                  @if (item.ai_summary) { <p class="ai-summary"><strong>{{ 'TaxNews.AISummary' | translate }}:</strong> {{ item.ai_summary }}</p> }
+                  @if (item.ai_reason) { <small class="ai-reason"><strong>{{ 'TaxNews.AIRelevance' | translate }}:</strong> {{ item.ai_reason }}</small> }
                   <small>{{ categoryLabel(item.category) }}</small>
                 </div>
               </div>
@@ -84,6 +87,9 @@ import { TranslationService } from '../../shared/i18n/translation.service';
     .news-main a:hover { color: var(--tv-color-primary-dark); text-decoration: underline; }
     .news-main p { margin-top: 5px; color: var(--tv-color-text-secondary); line-height: 1.4; }
     .news-main small { display: inline-block; margin-top: 6px; color: var(--tv-color-text-muted); }
+    .ai-badge { display: inline-block; margin-left: 7px; padding: 3px 6px; border-radius: 999px; background: #e8f0fb; color: var(--tv-color-primary); font-size: 10px; font-weight: 700; }
+    .news-main .ai-summary { color: var(--tv-color-primary); }
+    .news-main .ai-reason { color: var(--tv-color-text-secondary); line-height: 1.4; }
     .important-mark { color: var(--tv-color-warning); }
     .status { justify-self: start; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: capitalize; }
     .status-important, .status-effective { background: var(--tv-color-warning-soft); color: var(--tv-color-warning); }
@@ -130,7 +136,7 @@ export class TaxNewsComponent implements OnInit {
   categoryLabel(value: string): string { return this.translations.translate(`TaxNews.Category.${value}`); }
 
   private load(): void {
-    this.api.listTaxNews(this.category).subscribe({
+    this.api.listTaxNews(this.category, false, true).subscribe({
       next: (news) => { this.news = news; this.isLoading = false; this.cdr.markForCheck(); },
       error: () => { this.errorMessage = this.translations.translate('TaxNews.LoadFailed'); this.isLoading = false; this.cdr.markForCheck(); },
     });

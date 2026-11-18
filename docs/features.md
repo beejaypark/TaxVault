@@ -2,6 +2,24 @@
 
 TaxVault organises evidence for your accountant. It does not prepare or lodge tax returns and does not give tax advice.
 
+## Storage providers
+
+- Direct uploads use the built-in `taxvault` provider by default.
+- Microsoft OneDrive can be connected with a delegated read-only Graph scope;
+  connected users can browse the drive root and import a selected file into
+  the normal TaxVault OCR and review flow.
+- Documents carry provider-neutral external identity, version and sync-status
+  metadata so future OneDrive, Google Drive, Dropbox and S3 connectors can be
+  added without changing tax, OCR or accountant-pack workflows.
+- Provider-specific sync and authorization are intentionally separate from the
+  document's financial-year, review and evidence metadata.
+
+The deployment operator registers the callback URL from `.env.example` in
+Microsoft Entra ID and configures the Microsoft Graph application once. Users
+never enter these values: each user connects their own OneDrive account from
+Settings, and the resulting tokens are encrypted in that user's storage
+connection record.
+
 ## Accountant pack
 
 - Per financial year: evidence totals by tax return item, a transaction ledger, source documents and a prior-year comparison.

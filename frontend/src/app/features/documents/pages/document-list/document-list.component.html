@@ -120,6 +120,7 @@
                   <small class="original-filename">Original: {{ document.original_filename }}</small>
                 }
                 <span>{{ getDocumentTypeName(document) }}</span>
+                <span class="document-storage-provider">{{ getStorageProviderLabel(document) }}</span>
                 <span class="document-financial-year">
                   {{ getFinancialYearLabel(document) }}
                 </span>
@@ -135,6 +136,9 @@
             <div class="document-processing">
               <div class="status-summary">
                 <span [class]="getStatusClass(document.status)">{{ getStatusLabel(document.status) }}</span>
+                @if (getSyncStatusLabel(document.sync_status); as syncStatusLabel) {
+                  <span class="status status-neutral">{{ syncStatusLabel }}</span>
+                }
                 @if (document.payment_status === 'paid') {
                   <span class="status payment-paid">Paid</span>
                 }
@@ -150,6 +154,26 @@
                 <span class="processing-error">
                   {{ document.latest_extraction?.error_metadata?.message || 'Text extraction did not complete.' }}
                 </span>
+                @if (editingIssueDateDocumentId === document.id) {
+                  <div class="issue-date-correction">
+                    <label>
+                      <span>Correct issue date</span>
+                      <input type="date" [(ngModel)]="issueDateDraft" [disabled]="correctingIssueDateDocumentId === document.id" />
+                    </label>
+                    <div class="correction-actions">
+                      <button type="button" class="retry-processing" [disabled]="!issueDateDraft || correctingIssueDateDocumentId === document.id" (click)="saveIssueDateCorrection(document)">
+                        {{ correctingIssueDateDocumentId === document.id ? 'Saving…' : 'Save date' }}
+                      </button>
+                      <button type="button" class="secondary-action" [disabled]="correctingIssueDateDocumentId === document.id" (click)="cancelIssueDateCorrection()">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <button type="button" class="retry-processing" (click)="startIssueDateCorrection(document)">
+                    Fix issue date
+                  </button>
+                }
                 <button type="button" class="retry-processing" (click)="retryProcessing(document)">
                   Retry
                 </button>

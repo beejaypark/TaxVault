@@ -46,6 +46,7 @@ export class TaxReturnComponent implements OnInit {
   isExporting = false;
   isDownloadingCsv = false;
   isDownloadingPack = false;
+  showAdvancedExports = false;
   packFormat: 'json' | 'excel' | 'pdf' | 'csv' = 'json';
   transactions: TransactionDto[] = [];
   errorMessage = '';
@@ -211,15 +212,11 @@ export class TaxReturnComponent implements OnInit {
           this.successMessage = 'Accountant pack generated and saved.';
           this.isExporting = false;
           this.cdr.markForCheck();
-        } else if (this.packFormat === 'pdf') {
-          this.isExporting = false;
-          this.successMessage = 'PDF print view opened. Choose Save as PDF in the print dialog.';
-          this.printPack(result.payload);
-          this.cdr.markForCheck();
         } else {
           this.workspaceApi.downloadAccountantPack(this.selectedFinancialYearId, this.packFormat).subscribe({
             next: (blob) => {
-              this.downloadBlob(blob, `taxvault-${this.exportedYearCode}-accountant-pack.${this.packFormat === 'excel' ? 'xlsx' : 'csv'}`);
+              const extension = this.packFormat === 'excel' ? 'xlsx' : this.packFormat;
+              this.downloadBlob(blob, `taxvault-${this.exportedYearCode}-accountant-pack.${extension}`);
               this.successMessage = 'Accountant pack generated and downloaded.';
               this.isExporting = false;
               this.cdr.markForCheck();

@@ -46,9 +46,17 @@
         <button type="button" class="primary-button" [disabled]="isExporting || !selectedFinancialYearId" (click)="generateExport()">
           {{ isExporting ? ('TaxReturn.PreparingPack' | translate) : ('TaxReturn.GenerateSelectedPack' | translate) }}
         </button>
-        <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
-          <tv-icon name="download" /> {{ isDownloadingCsv ? ('TaxReturn.PreparingCsv' | translate) : ('TaxReturn.DownloadCsv' | translate) }}
+        <button type="button" class="secondary-button advanced-toggle" (click)="showAdvancedExports = !showAdvancedExports">
+          {{ showAdvancedExports ? ('TaxReturn.HideAdvancedExports' | translate) : ('TaxReturn.MoreExportOptions' | translate) }}
         </button>
+        @if (showAdvancedExports) {
+          <div class="advanced-export">
+            <p>{{ 'TaxReturn.CsvExportDescription' | translate }}</p>
+            <button type="button" class="secondary-button" [disabled]="isDownloadingCsv || !selectedFinancialYearId" (click)="downloadCsv()">
+              <tv-icon name="download" /> {{ isDownloadingCsv ? ('TaxReturn.PreparingCsv' | translate) : ('TaxReturn.DownloadCsv' | translate) }}
+            </button>
+          </div>
+        }
       }
     </article>
 

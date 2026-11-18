@@ -27,7 +27,19 @@ final class UploadDocument
         string $documentTypeId,
         UploadedFile $file,
         array $provenance = ['source' => 'web_upload'],
+        string $storageProvider = 'taxvault',
+        string $syncStatus = 'local',
+        ?string $externalAccountId = null,
+        ?string $externalDriveId = null,
+        ?string $externalItemId = null,
+        ?string $externalUrl = null,
+        ?string $externalVersion = null,
+        ?string $lastSyncedAt = null,
     ): Document {
+        $storageProvider = $storageProvider !== ''
+            ? $storageProvider
+            : (string) config('documents.default_provider', 'taxvault');
+
         $extension = strtolower(
             $file->guessExtension() ?: $file->getClientOriginalExtension()
         );
@@ -55,6 +67,14 @@ final class UploadDocument
                 $sha256,
                 $disk,
                 $provenance,
+                $storageProvider,
+                $syncStatus,
+                $externalAccountId,
+                $externalDriveId,
+                $externalItemId,
+                $externalUrl,
+                $externalVersion,
+                $lastSyncedAt,
                 &$storedPath,
             ): Document {
                 User::query()
@@ -122,6 +142,14 @@ final class UploadDocument
                     uploadedAt: now()->toISOString(),
                     provenance: $provenance,
                     status: 'processing',
+                    storageProvider: $storageProvider,
+                    syncStatus: $syncStatus,
+                    externalAccountId: $externalAccountId,
+                    externalDriveId: $externalDriveId,
+                    externalItemId: $externalItemId,
+                    externalUrl: $externalUrl,
+                    externalVersion: $externalVersion,
+                    lastSyncedAt: $lastSyncedAt,
                 );
             });
         } catch (Throwable $exception) {

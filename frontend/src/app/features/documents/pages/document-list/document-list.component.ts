@@ -67,6 +67,9 @@ export class DocumentListComponent implements OnInit {
   paymentErrorMessage = '';
   editingDescriptionDocumentId: string | null = null;
   descriptionDraft = '';
+  editingIssueDateDocumentId: string | null = null;
+  issueDateDraft = '';
+  correctingIssueDateDocumentId: string | null = null;
   private readonly deletedDocumentIds = new Set<string>();
 
   readonly paymentMethods = [
@@ -368,6 +371,46 @@ export class DocumentListComponent implements OnInit {
     });
   }
 
+  startIssueDateCorrection(document: DocumentDto): void {
+    this.editingIssueDateDocumentId = document.id;
+    const extracted = document.latest_extraction?.output?.normalized?.fields?.['invoice_date']?.value;
+    this.issueDateDraft = typeof extracted === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(extracted)
+      ? extracted
+      : '';
+    this.errorMessage = '';
+    this.cdr.markForCheck();
+  }
+
+  cancelIssueDateCorrection(): void {
+    this.editingIssueDateDocumentId = null;
+    this.issueDateDraft = '';
+    this.correctingIssueDateDocumentId = null;
+    this.cdr.markForCheck();
+  }
+
+  saveIssueDateCorrection(document: DocumentDto): void {
+    if (!this.issueDateDraft || this.correctingIssueDateDocumentId !== null) {
+      return;
+    }
+
+    this.correctingIssueDateDocumentId = document.id;
+    this.errorMessage = '';
+    this.api.correctDocumentExtractionDate(document.id, this.issueDateDraft).subscribe({
+      next: (updatedDocument) => {
+        this.replaceDocument(updatedDocument);
+        this.cancelIssueDateCorrection();
+        this.cdr.markForCheck();
+      },
+      error: (error: { error?: { message?: string; errors?: { value?: string[] } } }) => {
+        this.correctingIssueDateDocumentId = null;
+        this.errorMessage = error.error?.errors?.value?.[0]
+          ?? error.error?.message
+          ?? 'Unable to save the issue date. Please check the date and try again.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
   openPaymentConfirmation(document: DocumentDto): void {
     if (
       document.financial_year_id === null
@@ -584,6 +627,29 @@ export class DocumentListComponent implements OnInit {
     };
 
     return `status ${statusClass[status] ?? 'status-neutral'}`;
+  }
+
+  getStorageProviderLabel(document: DocumentDto): string {
+    if (!document.storage_provider || document.storage_provider === 'taxvault') {
+      return 'TaxVault storage';
+    }
+
+    return document.storage_provider.replace(/[_-]+/g, ' ');
+  }
+
+  getSyncStatusLabel(status: string | undefined): string | null {
+    if (!status || status === 'local') {
+      return null;
+    }
+
+    const labels: Record<string, string> = {
+      synced: 'Synced',
+      changed: 'Source changed',
+      deleted: 'Source deleted',
+      error: 'Sync error',
+    };
+
+    return labels[status] ?? status.replace(/[_-]+/g, ' ');
   }
 
   private pollProcessingDocuments(): void {

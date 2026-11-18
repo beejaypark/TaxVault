@@ -46,12 +46,34 @@
     "AnalysisLoadFailed": "No se puede cargar el análisis financiero de este año.",
     "DocumentRefreshFailed": "No se pueden actualizar los estados de los documentos.",
     "ReviewRefreshFailed": "No se pueden actualizar los estados de las revisiones.",
-    "AnalysisRefreshFailed": "No se puede actualizar el análisis financiero."
+    "AnalysisRefreshFailed": "No se puede actualizar el análisis financiero.",
+    "ReadinessLoadFailed": "No se puede cargar la preparación fiscal de este año.",
+    "ReadinessRefreshFailed": "No se puede actualizar la preparación fiscal.",
+    "ReadinessKicker": "Preparación fiscal",
+    "ReadinessTitle": "Prepara tu declaración con confianza",
+    "ReadinessDescription": "Basado en documentos revisados, transacciones categorizadas y comprobantes vinculados.",
+    "PointsVsPreviousYear": "puntos frente al año anterior",
+    "ResolveIssues": "Resolver problemas",
+    "NotStarted": "Sin empezar",
+    "ReadinessDocuments": "Documentos revisados",
+    "ReadinessTransactions": "Transacciones categorizadas",
+    "ReadinessEvidence": "Comprobantes vinculados",
+    "ReadinessRequiredData": "Datos obligatorios",
+    "ReadinessStatus": { "ready": "Listo", "needs_attention": "Requiere atención", "not_started": "Sin empezar" },
+    "ReadinessIssues": {
+      "failed_extraction": "Documentos con extracción de texto fallida",
+      "unreviewed_documents": "Documentos pendientes de revisión",
+      "uncategorised_transactions": "Transacciones sin categoría fiscal",
+      "missing_evidence": "Transacciones sin comprobante vinculado",
+      "incomplete_required_data": "Faltan datos fiscales obligatorios"
+    }
   },
   "TaxWorkspace": {
     "Title": "Espacio fiscal"
   },
   "TaxNews": {
+    "AISummary": "Resumen de IA",
+    "AIRelevance": "Por qué puede ser relevante",
     "Title": "Noticias fiscales",
     "Eyebrow": "Actualizaciones fiscales australianas",
     "Description": "Actualizaciones importantes de fuentes oficiales de la ATO. Consulta siempre el aviso original antes de actuar.",
@@ -92,6 +114,13 @@
     "Title": "Ingresos y gastos"
   },
   "Assets": {
+    "TotalPropertyValue": "Valor total de propiedades",
+    "TotalInvestmentValue": "Valor total de inversiones",
+    "TotalDebt": "Deuda total",
+    "PortfolioReadiness": "Preparación de cartera",
+    "LoanRecords": "Saldos hipotecarios registrados",
+    "RecordedCostBase": "Coste base registrado",
+    "MissingValues": "activos sin valor actual",
     "Title": "Activos",
     "PropertyDeductions": "Deducciones de la propiedad",
     "PropertyDeductionsDescription": "Deducciones anuales de tu informe de asignaciones de capital y depreciación fiscal.",
@@ -102,6 +131,11 @@
     "Amount": "Importe (AUD)",
     "NotesOptional": "Notas (opcional)",
     "SaveDeduction": "Guardar deducción"
+  },
+  "TaxReturn": {
+    "MoreExportOptions": "Más opciones de exportación",
+    "HideAdvancedExports": "Ocultar opciones avanzadas",
+    "CsvExportDescription": "Exporta los datos de transacciones para analizarlos o importarlos en otro sistema contable. No incluye comprobantes."
   },
   "Properties": {
     "Title": "Propiedades"
@@ -119,6 +153,10 @@
     "Title": "Administrar"
   },
   "Accountants": {
+    "PackReadiness": "Preparación del paquete",
+    "DocumentsReviewed": "documentos revisados",
+    "TransactionsCategorised": "transacciones categorizadas",
+    "UnresolvedIssues": "problemas sin resolver",
     "Title": "Contables"
   },
   "Settings": {

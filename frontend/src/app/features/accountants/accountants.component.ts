@@ -13,6 +13,7 @@ import {
   FinancialYearDto,
 } from '../../shared/services/documents/document-api.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { TaxReadinessDto, TaxWorkspaceApiService } from '../../shared/services/tax-workspace-api.service';
 
 const SECTION_LABELS: Record<AccessSection, string> = {
   documents: 'Documents',
@@ -114,9 +115,16 @@ interface AccountantForm {
       @if (packFor) {
         <form class="panel form" (ngSubmit)="sendPack()">
           <h2>{{ 'Accountants.SendPackTo' | translate }} {{ packFor.name }}</h2>
+          @if (packReadiness) {
+            <div class="pack-preview" aria-label="Accountant pack readiness preview">
+              <div><span>{{ 'Accountants.PackReadiness' | translate }}</span><strong>{{ packReadiness.score === null ? ('Dashboard.NotStarted' | translate) : packReadiness.score + '%' }}</strong></div>
+              <p>{{ packReadiness.components.documents.completed }}/{{ packReadiness.components.documents.total }} {{ 'Accountants.DocumentsReviewed' | translate }} · {{ packReadiness.components.transactions.completed }}/{{ packReadiness.components.transactions.total }} {{ 'Accountants.TransactionsCategorised' | translate }}</p>
+              @if (packReadiness.issues.length > 0) { <p class="pack-warning">{{ packReadiness.issues.length }} {{ 'Accountants.UnresolvedIssues' | translate }}</p> }
+            </div>
+          }
           <label>
             {{ 'Accountants.FinancialYears' | translate }}
-            <select name="packYear" [(ngModel)]="packYear">
+            <select name="packYear" [(ngModel)]="packYear" (ngModelChange)="loadPackPreview()">
               <option value="">{{ 'Accountants.LatestAvailable' | translate }}</option>
               @for (year of packYears(packFor); track year.id) {
                 <option [value]="year.id">{{ year.year_code }}</option>
@@ -198,6 +206,11 @@ interface AccountantForm {
     .notice.error { background: #fde8e6; color: #b42318; }
     .notice.password { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #fff7e0; }
     .notice code { font-size: 15px; padding: 2px 8px; background: #fff; border-radius: 4px; }
+    .pack-preview { display: grid; gap: 6px; padding: 12px; border: 1px solid #c9d8ec; border-radius: 5px; background: #f4f8ff; }
+    .pack-preview > div { display: flex; justify-content: space-between; gap: 12px; }
+    .pack-preview span, .pack-preview p { color: #5b6b7f; font-size: 12px; }
+    .pack-preview strong { color: var(--tv-color-primary); font-size: 20px; }
+    .pack-preview .pack-warning { color: #9b5f00; font-weight: 700; }
     @media (max-width: 900px) { table { display: block; overflow-x: auto; } }
     @media (max-width: 700px) { .page { padding: 28px 16px 48px; } }
   `],
@@ -206,6 +219,7 @@ export class AccountantsComponent implements OnInit {
   private readonly api = inject(AccountantsApiService);
   private readonly documents = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly workspaceApi = inject(TaxWorkspaceApiService);
 
   readonly sectionKeys = Object.keys(SECTION_LABELS) as AccessSection[];
   readonly sectionLabels = SECTION_LABELS;
@@ -217,11 +231,12 @@ export class AccountantsComponent implements OnInit {
   packFor: AccountantDto | null = null;
   packYear = '';
   packNote = '';
-  packFrom = 'taxvault@localhost';
+  packFrom = '';
   packFromName = 'TaxVault';
   packTo = '';
   packSubject = '';
   packContent = '';
+  packReadiness: TaxReadinessDto | null = null;
   temporaryPassword = '';
   temporaryFor = '';
   message = '';
@@ -283,13 +298,25 @@ export class AccountantsComponent implements OnInit {
   startPack(item: AccountantDto): void {
     this.reset();
     this.packFor = item;
-    this.packYear = '';
+    this.packYear = this.packYears(item)[0]?.id ?? '';
     this.packNote = '';
-    this.packFrom = 'taxvault@localhost';
+    this.packFrom = '';
     this.packFromName = 'TaxVault';
     this.packTo = item.email;
     this.packSubject = 'Accountant pack from TaxVault';
     this.packContent = 'Please find the accountant pack attached. You can also open TaxVault using the link below.';
+    this.loadPackPreview();
+  }
+
+  loadPackPreview(): void {
+    if (!this.packFor) return;
+    const yearId = this.packYear || this.packYears(this.packFor)[0]?.id;
+    this.packReadiness = null;
+    if (!yearId) return;
+    this.workspaceApi.getTaxReadiness(yearId).subscribe({
+      next: (readiness) => { this.packReadiness = readiness; this.cdr.markForCheck(); },
+      error: () => { this.packReadiness = null; this.cdr.markForCheck(); },
+    });
   }
 
   toggleSection(section: AccessSection): void {
@@ -408,6 +435,7 @@ export class AccountantsComponent implements OnInit {
     this.error = '';
     this.form = null;
     this.packFor = null;
+    this.packReadiness = null;
   }
 
   private fail(e: { error?: { message?: string } }, fallback: string): void {

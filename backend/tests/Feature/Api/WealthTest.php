@@ -95,6 +95,29 @@ class WealthTest extends TestCase
         $this->assertEquals(1000, collect($data['cash_flow'])->firstWhere('month', '2024-10')['income']);
     }
 
+    public function test_matured_mortgages_are_excluded_from_current_liabilities(): void
+    {
+        $property = $this->property();
+        Mortgage::query()->create(['user_id' => $this->user->id, 'property_id' => $property->id, 'bank_name' => 'Commonwealth Bank', 'loan_type' => 'variable', 'loan_amount' => 502000, 'interest_rate' => 6.5, 'start_date' => '2020-01-01', 'maturity_date' => '2026-01-11']);
+        Mortgage::query()->create(['user_id' => $this->user->id, 'property_id' => $property->id, 'bank_name' => 'Westpac', 'loan_type' => 'variable', 'loan_amount' => 405459.92, 'interest_rate' => 6.3, 'start_date' => '2026-01-12', 'maturity_date' => '2056-01-07']);
+
+        $data = $this->actingAs($this->user)->getJson('/api/wealth')->assertOk()->json('data');
+
+        $this->assertLessThan(405459.92, $data['total_liabilities']);
+        $this->assertGreaterThan(0, $data['total_liabilities']);
+    }
+
+    public function test_current_liabilities_use_an_amortised_estimate_for_dated_loans(): void
+    {
+        $property = $this->property();
+        Mortgage::query()->create(['user_id' => $this->user->id, 'property_id' => $property->id, 'bank_name' => 'Westpac', 'loan_type' => 'variable', 'loan_amount' => 500000, 'interest_rate' => 6, 'start_date' => '2024-01-01', 'maturity_date' => '2054-01-01']);
+
+        $data = $this->actingAs($this->user)->getJson('/api/wealth')->assertOk()->json('data');
+
+        $this->assertLessThan(500000, $data['total_liabilities']);
+        $this->assertGreaterThan(0, $data['total_liabilities']);
+    }
+
     public function test_summary_is_scoped_to_the_current_user(): void
     {
         $other = User::factory()->create();

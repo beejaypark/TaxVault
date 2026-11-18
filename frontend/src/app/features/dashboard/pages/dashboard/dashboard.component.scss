@@ -127,6 +127,34 @@ h1 {
   margin-bottom: 32px;
 }
 
+.readiness-panel { display: grid; grid-template-columns: 150px 1fr; gap: 20px; margin-bottom: 24px; padding: 20px; border: 1px solid #c9d8ec; border-radius: var(--tv-radius-lg); background: #f6f9ff; box-shadow: var(--tv-shadow-card); }
+.readiness-score { display: grid; align-content: center; gap: 7px; padding-right: 20px; border-right: 1px solid var(--tv-color-border); }
+.readiness-kicker { color: var(--tv-color-text-secondary); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.readiness-score strong { color: var(--tv-color-primary); font-size: 38px; line-height: 1; }
+.readiness-status { justify-self: start; padding: 4px 8px; border-radius: 999px; background: #fff4dc; color: #8a5700; font-size: 11px; font-weight: 700; }
+.readiness-status.ready { background: #e5f6ed; color: #167044; }
+.readiness-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.readiness-heading h2 { font-size: 18px; }
+.readiness-heading p { margin-top: 4px; color: var(--tv-color-text-secondary); font-size: 13px; }
+.readiness-change { display: block; margin-top: 5px; color: #167044; font-size: 11px; font-weight: 700; }
+.readiness-change.negative { color: var(--tv-color-danger); }
+.readiness-components { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.readiness-component-label { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; }
+.readiness-component-label span { color: var(--tv-color-text-secondary); }
+.readiness-component-label strong { color: var(--tv-color-primary); }
+.readiness-track { height: 5px; margin: 7px 0 4px; overflow: hidden; border-radius: 99px; background: #dfe8f4; }
+.readiness-track span { display: block; height: 100%; border-radius: inherit; background: var(--tv-color-primary); }
+.readiness-component small { color: var(--tv-color-text-secondary); font-size: 11px; }
+.readiness-issues { display: grid; gap: 6px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--tv-color-border); }
+.readiness-panel-loading { min-height: 132px; align-items: center; }
+.readiness-loading-copy { display: grid; gap: 7px; }
+.readiness-loading-copy h2 { margin: 0; font-size: 18px; }
+.readiness-loading-copy p { margin: 0; color: var(--tv-color-text-secondary); font-size: 12px; }
+.readiness-issue { display: flex; align-items: center; gap: 7px; color: var(--tv-color-text); font-size: 12px; }
+.readiness-issue strong { margin-left: auto; color: var(--tv-color-danger); }
+.issue-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #d28a16; }
+.readiness-issue.blocked .issue-dot { background: var(--tv-color-danger); }
+
 .analysis-section {
   margin-bottom: 32px;
 }
@@ -741,6 +769,8 @@ h1 {
 .tax-news-mark { width: 7px; height: 7px; border-radius: 50%; background: var(--tv-color-primary); }
 .tax-news-mark.important { background: var(--tv-color-warning); }
 .tax-news-title { overflow: hidden; color: var(--tv-color-primary); font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.tax-news-ai-badge { display: inline-block; margin-left: 5px; padding: 2px 5px; border-radius: 999px; background: #e8f0fb; color: var(--tv-color-primary); font-size: 9px; font-weight: 700; vertical-align: 2px; }
+.tax-news-ai-summary { display: block; overflow: hidden; margin-top: 2px; color: var(--tv-color-text-secondary); font-size: 10px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .tax-news-row time { color: var(--tv-color-text-muted); font-size: 10px; white-space: nowrap; }
 .widget-empty { padding: 18px 16px; color: var(--tv-color-text-secondary); font-size: 12px; }
 
@@ -786,6 +816,10 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .readiness-panel { grid-template-columns: 1fr; }
+  .readiness-score { padding-right: 0; padding-bottom: 18px; border-right: 0; border-bottom: 1px solid var(--tv-color-border); }
+  .readiness-components { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   .analysis-metrics {
     grid-template-columns: 1fr;
   }
@@ -826,6 +860,10 @@ h1 {
   .empty-panel > .text-link {
     margin-left: 54px;
   }
+}
+
+@media (max-width: 520px) {
+  .readiness-components { grid-template-columns: 1fr; }
 }
 
 .document-row { transition: background-color 0.15s ease; }

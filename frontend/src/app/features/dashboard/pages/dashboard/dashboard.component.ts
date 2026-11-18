@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Observable, of } from 'rxjs';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
 import { CashFlowAnalysisComponent } from '../../../../shared/components/cash-flow-analysis/cash-flow-analysis.component';
@@ -23,6 +24,8 @@ import {
 } from '../../../../shared/services/documents/document-api.service';
 import {
   TaxWorkspaceApiService,
+  TaxReadinessDto,
+  TaxReadinessIssueDto,
   TaxNewsDto,
   TransactionDto,
 } from '../../../../shared/services/tax-workspace-api.service';
@@ -82,6 +85,9 @@ export class DashboardComponent implements OnInit {
   documents: DocumentDto[] = [];
   transactions: TransactionDto[] = [];
   reviews: Review[] = [];
+  taxReadiness: TaxReadinessDto | null = null;
+  previousTaxReadiness: TaxReadinessDto | null = null;
+  taxReadinessLoading = false;
   taxNews: TaxNewsDto[] = [];
   financialYears: FinancialYearDto[] = [];
   isLoading = true;
@@ -353,6 +359,29 @@ export class DashboardComponent implements OnInit {
     return this.filteredReviews.filter((review) => review.status === 'completed').length;
   }
 
+  get readinessComponents(): Array<{ key: keyof TaxReadinessDto['components']; label: string; value: TaxReadinessDto['components'][keyof TaxReadinessDto['components']] }> {
+    if (!this.taxReadiness) return [];
+
+    return [
+      { key: 'documents', label: 'Dashboard.ReadinessDocuments', value: this.taxReadiness.components.documents },
+      { key: 'transactions', label: 'Dashboard.ReadinessTransactions', value: this.taxReadiness.components.transactions },
+      { key: 'evidence', label: 'Dashboard.ReadinessEvidence', value: this.taxReadiness.components.evidence },
+      { key: 'required_data', label: 'Dashboard.ReadinessRequiredData', value: this.taxReadiness.components.required_data },
+    ];
+  }
+
+  get readinessDelta(): number | null {
+    if (this.taxReadiness?.score === null || this.taxReadiness?.score === undefined || this.previousTaxReadiness?.score === null || this.previousTaxReadiness?.score === undefined) return null;
+    return this.taxReadiness.score - this.previousTaxReadiness.score;
+  }
+
+  readinessIssueMessage(issue: TaxReadinessIssueDto): string {
+    const key = `Dashboard.ReadinessIssues.${issue.code}`;
+    const translated = this.translations.translate(key);
+
+    return translated === key ? issue.message : translated;
+  }
+
   get recentDocuments(): DocumentDto[] {
     return this.filteredDocuments.slice(0, 5);
   }
@@ -375,6 +404,7 @@ export class DashboardComponent implements OnInit {
     this.documentsApi.listFinancialYears().subscribe({
       next: (years) => {
         this.financialYears = years;
+        this.loadTaxReadiness();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -449,6 +479,67 @@ export class DashboardComponent implements OnInit {
       this.clearRefreshError('transactions');
       this.cdr.markForCheck();
     });
+
+    refreshEvery(
+      () => this.taxReadinessRequest(),
+      () => this.setRefreshError(
+        'readiness',
+        this.translations.translate('Dashboard.ReadinessRefreshFailed'),
+      ),
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((readiness) => {
+      if (readiness) {
+        this.taxReadiness = readiness;
+        this.clearRefreshError('readiness');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadTaxReadiness(): void {
+    const yearId = this.documentsApi.selectedFinancialYearId();
+    if (!yearId) {
+      this.taxReadiness = null;
+      this.previousTaxReadiness = null;
+      return;
+    }
+
+    this.taxReadinessLoading = true;
+    const currentYear = this.financialYears.find((year) => year.id === yearId);
+    const previousYear = currentYear
+      ? this.financialYears
+        .filter((year) => year.end_date < currentYear.end_date)
+        .sort((a, b) => b.end_date.localeCompare(a.end_date))[0]
+      : undefined;
+
+    this.workspaceApi.getTaxReadiness(yearId).subscribe({
+      next: (current) => {
+        this.taxReadiness = current;
+        this.taxReadinessLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.taxReadiness = null;
+        this.taxReadinessLoading = false;
+        this.setRefreshError('readiness', this.translations.translate('Dashboard.ReadinessLoadFailed'));
+      },
+    });
+
+    if (previousYear) {
+      this.workspaceApi.getTaxReadiness(previousYear.id).subscribe({
+        next: (previous) => {
+          this.previousTaxReadiness = previous;
+          this.cdr.markForCheck();
+        },
+      });
+    } else {
+      this.previousTaxReadiness = null;
+    }
+  }
+
+  private taxReadinessRequest(): Observable<TaxReadinessDto | null> {
+    const yearId = this.documentsApi.selectedFinancialYearId();
+
+    return yearId ? this.workspaceApi.getTaxReadiness(yearId) : of(null);
   }
 
   private setRefreshError(resource: string, message: string): void {

@@ -101,6 +101,35 @@ export class AssetsComponent implements OnInit {
       : 'properties';
   }
 
+  get totalPropertyValue(): number {
+    return this.properties.reduce((sum, property) => sum + Number(property.current_value ?? 0), 0);
+  }
+
+  get totalInvestmentValue(): number {
+    return this.investments.reduce((sum, investment) => sum + Number(investment.current_value ?? investment.cost_base ?? 0), 0);
+  }
+
+  get totalDebt(): number {
+    return this.properties.reduce((sum, property) =>
+      sum + (property.mortgages ?? [])
+        .filter((mortgage) => !mortgage.maturity_date || mortgage.maturity_date.slice(0, 10) >= new Date().toISOString().slice(0, 10))
+        .reduce((mortgageSum, mortgage) => mortgageSum + Number(mortgage.verified_balance ?? mortgage.estimated_balance ?? mortgage.loan_amount ?? 0), 0), 0);
+  }
+
+  get assetsMissingValues(): number {
+    return this.properties.filter((property) => property.current_value === null || property.current_value === undefined).length
+      + this.investments.filter((investment) => investment.current_value === null || investment.current_value === undefined).length;
+  }
+
+  get assetsWithValues(): number {
+    return this.properties.filter((property) => property.current_value !== null && property.current_value !== undefined).length
+      + this.investments.filter((investment) => investment.current_value !== null && investment.current_value !== undefined).length;
+  }
+
+  get totalInvestmentCostBase(): number {
+    return this.investments.reduce((sum, item) => sum + Number(item.cost_base ?? 0), 0);
+  }
+
   ngOnInit(): void {
     forkJoin({
       properties: this.api.listProperties(),

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domain\TaxNews\Models\TaxNews;
-use App\Domain\TaxNews\Services\TaxNewsAiRecommender;
 use App\Domain\Investments\Models\Investment;
 use App\Domain\Properties\Models\Property;
+use App\Domain\TaxNews\Models\TaxNews;
+use App\Domain\TaxNews\Services\TaxNewsAiRecommender;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,13 +32,23 @@ class TaxNewsController extends Controller
             ->orderByDesc('published_at')
             ->limit(100);
 
-        if ($request->boolean('recommended')) {
-            $recommended = $this->recommended($request);
-            $ai = $request->boolean('ai')
-                ? $aiRecommender->enhance($recommended, $this->profileTags($request), $request->user()->ai_settings)
-                : [];
+        $category = $request->string('category')->toString();
+        if ($category !== '' && $category !== 'all' && ! $request->boolean('recommended')) {
+            $query->where('category', $category);
+        }
 
-            return response()->json(['data' => collect($recommended)->map(function (TaxNews $item) use ($ai): array {
+        $news = $request->boolean('recommended')
+            ? $this->recommended($request)
+            : $query->get()->all();
+
+        if ($category !== '' && $category !== 'all' && $request->boolean('recommended')) {
+            $news = array_values(array_filter($news, fn (TaxNews $item): bool => $item->category === $category));
+        }
+
+        if ($request->boolean('ai')) {
+            $ai = $aiRecommender->enhance($news, $this->profileTags($request), $request->user()->ai_settings);
+
+            return response()->json(['data' => collect($news)->map(function (TaxNews $item) use ($ai): array {
                 $data = $item->toArray();
                 $data['ai_summary'] = $ai[$item->getKey()]['summary'] ?? null;
                 $data['ai_reason'] = $ai[$item->getKey()]['reason'] ?? null;
@@ -47,11 +57,7 @@ class TaxNewsController extends Controller
             })->values()]);
         }
 
-        if ($request->filled('category') && $request->string('category')->toString() !== 'all') {
-            $query->where('category', $request->string('category')->toString());
-        }
-
-        return response()->json(['data' => $query->get()]);
+        return response()->json(['data' => $news]);
     }
 
     /** @return list<TaxNews> */
@@ -134,9 +140,15 @@ class TaxNewsController extends Controller
             ->pluck('investment_type')
             ->each(function (string $type) use (&$tags): void {
                 $normalised = strtolower($type);
-                if ($this->containsAny($normalised, ['super', 'superannuation'])) $tags[] = 'superannuation';
-                if ($this->containsAny($normalised, ['share', 'stock', 'equity', 'managed fund', 'etf'])) $tags[] = 'shares and investments';
-                if ($this->containsAny($normalised, ['property', 'real estate'])) $tags[] = 'property investment';
+                if ($this->containsAny($normalised, ['super', 'superannuation'])) {
+                    $tags[] = 'superannuation';
+                }
+                if ($this->containsAny($normalised, ['share', 'stock', 'equity', 'managed fund', 'etf'])) {
+                    $tags[] = 'shares and investments';
+                }
+                if ($this->containsAny($normalised, ['property', 'real estate'])) {
+                    $tags[] = 'property investment';
+                }
             });
 
         return array_values(array_unique($tags));

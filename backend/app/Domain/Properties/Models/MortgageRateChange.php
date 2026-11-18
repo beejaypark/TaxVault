@@ -13,7 +13,17 @@ class MortgageRateChange extends UuidModel
         'mortgage_id',
         'effective_date',
         'rate',
+        'bank_repayment_amount',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'rate' => 'decimal:3',
+            'bank_repayment_amount' => 'decimal:2',
+            'effective_date' => 'date:Y-m-d',
+        ];
+    }
 
     public function mortgage(): BelongsTo
     {

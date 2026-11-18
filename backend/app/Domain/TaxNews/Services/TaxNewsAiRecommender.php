@@ -4,6 +4,7 @@ namespace App\Domain\TaxNews\Services;
 
 use App\Domain\TaxNews\Models\TaxNews;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 final class TaxNewsAiRecommender
 {
@@ -17,7 +18,7 @@ final class TaxNewsAiRecommender
         if ($apiKey === '' || $news === []) {
             return [];
         }
-        if (!$enabled) {
+        if (! $enabled) {
             return [];
         }
 
@@ -88,11 +89,21 @@ final class TaxNewsAiRecommender
                             ],
                         ],
                     ],
-                ])
-                ->throw()
-                ->json();
+                ]);
 
-            $text = $response['output_text'] ?? data_get($response, 'output.0.content.0.text');
+            if ($response->failed()) {
+                Log::warning('Tax news AI request failed.', [
+                    'provider' => 'openai',
+                    'status' => $response->status(),
+                    'error' => (string) data_get($response->json(), 'error.message', 'Unknown provider error'),
+                ]);
+
+                return [];
+            }
+
+            $payload = $response->json();
+
+            $text = $this->extractResponseText($payload);
             $decoded = is_string($text) ? json_decode($text, true, 512, JSON_THROW_ON_ERROR) : null;
 
             return collect($decoded['items'] ?? [])
@@ -102,16 +113,41 @@ final class TaxNewsAiRecommender
                     'reason' => (string) $item['reason'],
                 ]])
                 ->all();
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            Log::warning('Tax news AI response could not be parsed.', [
+                'provider' => 'openai',
+                'error' => $exception->getMessage(),
+            ]);
+
             return [];
         }
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function extractResponseText(array $payload): ?string
+    {
+        if (is_string($payload['output_text'] ?? null)) {
+            return $payload['output_text'];
+        }
+
+        foreach ($payload['output'] ?? [] as $output) {
+            foreach ($output['content'] ?? [] as $content) {
+                if (is_string($content['text'] ?? null)) {
+                    return $content['text'];
+                }
+            }
+        }
+
+        return null;
     }
 
     /** @param list<array<string, mixed>> $items @param list<string> $profileTags @return array<string, array{summary: string, reason: string}> */
     private function callAnthropic(array $items, array $profileTags, array $settings): array
     {
         $apiKey = (string) ($settings['api_key'] ?? config('services.anthropic.api_key'));
-        if ($apiKey === '') return [];
+        if ($apiKey === '') {
+            return [];
+        }
 
         try {
             $response = Http::withHeaders([
@@ -137,7 +173,9 @@ final class TaxNewsAiRecommender
     private function callGemini(array $items, array $profileTags, array $settings): array
     {
         $apiKey = (string) ($settings['api_key'] ?? config('services.gemini.api_key'));
-        if ($apiKey === '') return [];
+        if ($apiKey === '') {
+            return [];
+        }
 
         try {
             $model = $settings['model'] ?? config('services.gemini.tax_news_model');
@@ -159,9 +197,12 @@ final class TaxNewsAiRecommender
     /** @return array<string, array{summary: string, reason: string}> */
     private function parse(mixed $text): array
     {
-        if (!is_string($text) || $text === '') return [];
+        if (! is_string($text) || $text === '') {
+            return [];
+        }
         try {
             $decoded = json_decode($text, true, 512, JSON_THROW_ON_ERROR);
+
             return collect($decoded['items'] ?? [])
                 ->filter(fn ($item): bool => is_array($item) && isset($item['id'], $item['summary'], $item['reason']))
                 ->mapWithKeys(fn (array $item): array => [(string) $item['id'] => [

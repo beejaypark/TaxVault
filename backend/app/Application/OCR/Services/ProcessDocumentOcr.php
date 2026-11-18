@@ -6,6 +6,7 @@ use App\Application\OCR\Confidence\ConfidenceEvaluator;
 use App\Application\OCR\Contracts\OcrProvider;
 use App\Application\OCR\Data\NormalizedExtraction;
 use App\Application\OCR\Data\OcrRequest;
+use App\Application\OCR\Data\OcrResult;
 use App\Application\OCR\Validation\NormalizedExtractionValidator;
 use App\Application\Reviews\Services\CreateReviewForDocumentExtraction;
 use App\Domain\Documents\Models\Document;
@@ -68,7 +69,20 @@ final class ProcessDocumentOcr
                     : [],
             );
 
-            $this->validator->validate($normalizedExtraction);
+            $normalizedExtraction = $this->validator->validate($normalizedExtraction);
+
+            $normalizedOutput = $result->output;
+            $normalizedOutput['normalized'] = $normalizedExtraction->toArray();
+            $result = new OcrResult(
+                provider: $result->provider,
+                model: $result->model,
+                modelVersion: $result->modelVersion,
+                extractionVersion: $result->extractionVersion,
+                status: $result->status,
+                output: $normalizedOutput,
+                qualityMetadata: $result->qualityMetadata,
+                errorMetadata: $result->errorMetadata,
+            );
 
             $confidenceEvaluation = $this->confidenceEvaluator->evaluate(
                 $normalizedExtraction

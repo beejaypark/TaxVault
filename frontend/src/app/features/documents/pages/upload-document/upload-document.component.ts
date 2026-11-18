@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { EMPTY, from } from 'rxjs';
+import { EMPTY, firstValueFrom, from } from 'rxjs';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 
 import { TaxIconComponent } from '../../../../shared/components/tax-icon/tax-icon.component';
@@ -16,6 +16,9 @@ import {
   DocumentApiService,
   DocumentTypeDto,
   FinancialYearDto,
+  StorageProviderDto,
+  StorageConnectionDto,
+  StorageItemDto,
 } from '../../../../shared/services/documents/document-api.service';
 import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 
@@ -33,6 +36,17 @@ export class UploadDocumentComponent implements OnInit {
 
   financialYears: FinancialYearDto[] = [];
   documentTypes: DocumentTypeDto[] = [];
+  storageProviders: StorageProviderDto[] = [];
+  defaultStorageProvider = 'taxvault';
+  oneDriveConnections: StorageConnectionDto[] = [];
+  oneDriveItems: StorageItemDto[] = [];
+  oneDriveOpen = false;
+  oneDriveLoading = false;
+  oneDriveImportingItemId: string | null = null;
+  oneDriveFolderImportingId: string | null = null;
+  oneDriveFolderImportLabel = 'Importing…';
+  oneDriveImportMessage = '';
+  oneDrivePath: { id: string; name: string }[] = [{ id: 'root', name: 'OneDrive' }];
 
   selectedFinancialYearId = '';
   selectedDocumentTypeId = '';
@@ -71,6 +85,12 @@ export class UploadDocumentComponent implements OnInit {
       : 'Financial year pending';
   }
 
+  get defaultStorageProviderLabel(): string {
+    return this.storageProviders.find(
+      (provider) => provider.key === this.defaultStorageProvider,
+    )?.label ?? this.defaultStorageProvider;
+  }
+
   formatYearCode(yearCode: string): string {
     return formatFinancialYear(yearCode);
   }
@@ -90,6 +110,20 @@ export class UploadDocumentComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.api.listStorageProviders().subscribe({
+      next: (result) => {
+        this.storageProviders = result.providers;
+        this.defaultStorageProvider = result.default;
+        this.cdr.markForCheck();
+      },
+    });
+    this.api.listStorageConnections().subscribe({
+      next: (connections) => {
+        this.oneDriveConnections = connections.filter((connection) => connection.provider === 'onedrive' && connection.status === 'connected');
+        this.cdr.markForCheck();
+      },
+    });
+
     this.api.getInboundEmailAddress().subscribe({
       next: (address) => {
         this.inboundEmail = address;
@@ -132,6 +166,119 @@ export class UploadDocumentComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  browseOneDrive(): void {
+    const connection = this.oneDriveConnections[0];
+    if (!connection || this.oneDriveLoading) return;
+    this.oneDriveOpen = true;
+    this.loadOneDriveItems(this.oneDrivePath[this.oneDrivePath.length - 1]?.id ?? 'root');
+  }
+
+  openOneDriveFolder(item: StorageItemDto): void {
+    if (!item.folder || this.oneDriveLoading) return;
+    this.oneDrivePath = [...this.oneDrivePath, { id: item.id, name: item.name }];
+    this.loadOneDriveItems(item.id);
+  }
+
+  openOneDrivePath(id: string, index: number): void {
+    if (this.oneDriveLoading) return;
+    this.oneDrivePath = this.oneDrivePath.slice(0, index + 1);
+    this.loadOneDriveItems(id);
+  }
+
+  private loadOneDriveItems(parent: string): void {
+    const connection = this.oneDriveConnections[0];
+    if (!connection) return;
+    this.oneDriveLoading = true;
+    this.api.listOneDriveItems(connection.id, parent).subscribe({
+      next: (items) => { this.oneDriveItems = items; this.oneDriveLoading = false; this.cdr.markForCheck(); },
+      error: () => { this.oneDriveLoading = false; this.errorMessage = 'Unable to load OneDrive files.'; this.cdr.markForCheck(); },
+    });
+  }
+
+  importOneDriveItem(item: StorageItemDto): void {
+    const connection = this.oneDriveConnections[0];
+    if (!connection || item.folder || !this.selectedDocumentTypeId || this.oneDriveImportingItemId) return;
+    this.oneDriveImportingItemId = item.id;
+    this.oneDriveImportMessage = '';
+    this.api.importOneDriveDocument(connection.id, item.id, this.selectedFinancialYearId || null, this.selectedDocumentTypeId).subscribe({
+      next: () => {
+        this.oneDriveImportingItemId = null;
+        this.errorMessage = '';
+        this.oneDriveImportMessage = 'File imported. You can continue selecting files from OneDrive.';
+        this.cdr.markForCheck();
+      },
+      error: (error: { status?: number; error?: { message?: string } }) => {
+        this.oneDriveImportingItemId = null;
+        this.errorMessage = '';
+        this.oneDriveImportMessage = error.status === 409
+          ? 'This file is already in TaxVault. You can continue with another file.'
+          : error.error?.message ?? 'Unable to import the OneDrive file.';
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  async importOneDriveFolder(folder: StorageItemDto): Promise<void> {
+    const connection = this.oneDriveConnections[0];
+    if (!connection || !folder.folder || !this.selectedDocumentTypeId || this.oneDriveFolderImportingId) return;
+
+    this.oneDriveFolderImportingId = folder.id;
+    this.oneDriveImportMessage = 'Scanning folder…';
+    this.errorMessage = '';
+    this.cdr.markForCheck();
+
+    try {
+      const files = await this.collectOneDriveFiles(connection.id, folder.id);
+      let imported = 0;
+      let skipped = 0;
+      let failed = 0;
+
+      for (const file of files) {
+        this.oneDriveFolderImportLabel = `${imported + failed}/${files.length}`;
+        this.oneDriveImportMessage = `Importing ${imported + failed + 1} of ${files.length}: ${file.name}`;
+        this.cdr.markForCheck();
+        try {
+          await firstValueFrom(this.api.importOneDriveDocument(
+            connection.id,
+            file.id,
+            this.selectedFinancialYearId || null,
+            this.selectedDocumentTypeId,
+          ));
+          imported += 1;
+        } catch (error: unknown) {
+          if (typeof error === 'object' && error !== null && 'status' in error && error.status === 409) {
+            skipped += 1;
+          } else {
+            failed += 1;
+          }
+        }
+      }
+
+      this.oneDriveImportMessage = files.length === 0
+        ? 'No files were found in this folder or its subfolders.'
+        : `${imported} imported${skipped > 0 ? `, ${skipped} already existed` : ''}${failed > 0 ? `, ${failed} failed` : ''}.`;
+    } catch {
+      this.oneDriveImportMessage = 'Unable to scan this OneDrive folder.';
+    } finally {
+      this.oneDriveFolderImportingId = null;
+      this.oneDriveFolderImportLabel = 'Importing…';
+      this.cdr.markForCheck();
+    }
+  }
+
+  private async collectOneDriveFiles(connectionId: string, parentId: string): Promise<StorageItemDto[]> {
+    const items = await firstValueFrom(this.api.listOneDriveItems(connectionId, parentId));
+    const files: StorageItemDto[] = [];
+    for (const item of items) {
+      if (item.folder) {
+        files.push(...await this.collectOneDriveFiles(connectionId, item.id));
+      } else {
+        files.push(item);
+      }
+    }
+    return files;
   }
 
   onFinancialYearChange(event: Event): void {

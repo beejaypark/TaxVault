@@ -263,4 +263,22 @@ class NormalizedExtractionValidatorTest extends TestCase
             (new NormalizedExtractionValidator())->validate($extraction),
         );
     }
+
+    public function test_two_digit_slash_date_is_normalized_to_four_digit_year(): void
+    {
+        $validated = (new NormalizedExtractionValidator())->validate(
+            new NormalizedExtraction(
+                schemaVersion: 'ocr-extraction-v1',
+                fields: [
+                    'invoice_date' => [
+                        'value' => '01/09/26',
+                        'confidence' => 65.0,
+                        'source' => 'ocr',
+                    ],
+                ],
+            ),
+        );
+
+        $this->assertSame('2026-09-01', $validated->fields['invoice_date']['value']);
+    }
 }

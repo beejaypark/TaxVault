@@ -26,8 +26,41 @@ export interface DocumentTypeDto {
   status: string;
 }
 
+export interface StorageProviderDto {
+  key: string;
+  label: string;
+  mode: 'managed' | 'external';
+  supports_import: boolean;
+  supports_sync: boolean;
+  configured?: boolean;
+}
+
+export interface StorageConnectionDto {
+  id: string;
+  provider: string;
+  external_account_id: string;
+  display_name?: string | null;
+  status: string;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface StorageItemDto {
+  id: string;
+  name: string;
+  size?: number;
+  file?: { mimeType?: string } | null;
+  folder?: { childCount?: number } | null;
+  webUrl?: string | null;
+  eTag?: string | null;
+}
+
 export interface DocumentDto {
   id: string;
+  storage_provider?: string;
+  external_url?: string | null;
+  external_version?: string | null;
+  sync_status?: 'local' | 'synced' | 'changed' | 'deleted' | 'error' | string;
+  last_synced_at?: string | null;
   financial_year_id: string | null;
   document_type_id: string;
   original_filename: string;
@@ -178,6 +211,39 @@ export class DocumentApiService {
       .pipe(map((response) => response.data));
   }
 
+  listStorageProviders(): Observable<{ providers: StorageProviderDto[]; default: string }> {
+    return this.http
+      .get<{ data: StorageProviderDto[]; default: string }>('/api/document-storage/providers')
+      .pipe(map((response) => ({ providers: response.data, default: response.default })));
+  }
+
+  listStorageConnections(): Observable<StorageConnectionDto[]> {
+    return this.http
+      .get<{ data: StorageConnectionDto[] }>('/api/document-storage/connections')
+      .pipe(map((response) => response.data));
+  }
+
+  listOneDriveItems(connectionId: string, parent = 'root'): Observable<StorageItemDto[]> {
+    return this.http
+      .get<{ data: StorageItemDto[] }>(`/api/document-storage/connections/${connectionId}/items`, { params: { parent } })
+      .pipe(map((response) => response.data));
+  }
+
+  importOneDriveDocument(
+    connectionId: string,
+    itemId: string,
+    financialYearId: string | null,
+    documentTypeId: string,
+  ): Observable<DocumentDto> {
+    return this.http
+      .post<ApiItem<DocumentDto>>(`/api/document-storage/connections/${connectionId}/import`, {
+        item_id: itemId,
+        financial_year_id: financialYearId,
+        document_type_id: documentTypeId,
+      })
+      .pipe(map((response) => response.data));
+  }
+
   listDocuments(): Observable<DocumentDto[]> {
     return this.http
       .get<ApiList<DocumentDto>>('/api/documents')
@@ -204,6 +270,15 @@ export class DocumentApiService {
   retryDocumentProcessing(documentId: string): Observable<DocumentDto> {
     return this.http
       .post<ApiItem<DocumentDto>>(`/api/documents/${documentId}/retry`, {})
+      .pipe(map((response) => response.data));
+  }
+
+  correctDocumentExtractionDate(documentId: string, value: string): Observable<DocumentDto> {
+    return this.http
+      .post<ApiItem<DocumentDto>>(`/api/documents/${documentId}/extraction-correction`, {
+        field_path: 'invoice_date',
+        value,
+      })
       .pipe(map((response) => response.data));
   }
 

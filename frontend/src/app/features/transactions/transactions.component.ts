@@ -3,7 +3,9 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -68,6 +70,7 @@ export class TransactionsComponent implements OnInit {
   editingId: string | null = null;
   errorMessage = '';
   successMessage = '';
+  attentionFilter = '';
   showImport = false;
   showWfh = false;
   selectedIds = new Set<string>();
@@ -81,6 +84,8 @@ export class TransactionsComponent implements OnInit {
   incomeSource = 'manual';
 
   form = this.emptyForm();
+
+  @ViewChild('transactionEditor') transactionEditor?: ElementRef<HTMLElement>;
 
   get bulkOptions(): AtoCategoryOption[] {
     return [...atoCategoriesFor('income'), ...atoCategoriesFor('expense')];
@@ -326,10 +331,22 @@ export class TransactionsComponent implements OnInit {
     return property ? property.reference_code || property.address_line_1 || 'Property' : '';
   }
 
+  hasAttention(transaction: TransactionDto): boolean {
+    return this.transactionAttention(transaction) !== '';
+  }
+
+  transactionAttention(transaction: TransactionDto): '' | 'missing_evidence' | 'uncategorised_transactions' {
+    if (this.attentionFilter === 'missing_evidence' && !transaction.document_id) return 'missing_evidence';
+    if (this.attentionFilter === 'uncategorised_transactions' && !transaction.ato_category) return 'uncategorised_transactions';
+
+    return '';
+  }
+
   ngOnInit(): void {
     if (this.auth.canEdit) this.loadRecurringIncome();
     this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.searchText = params.get('q') ?? this.searchText;
+      this.attentionFilter = params.get('attention') ?? '';
       this.cdr.markForCheck();
     });
     this.api.listProperties().subscribe({
@@ -503,6 +520,7 @@ export class TransactionsComponent implements OnInit {
     };
     this.incomeSource = 'manual';
     this.showForm = true;
+    setTimeout(() => this.transactionEditor?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }
 
   closeForm(): void {

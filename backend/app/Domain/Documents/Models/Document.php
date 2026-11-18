@@ -18,6 +18,14 @@ class Document extends UuidModel
         'user_id',
         'financial_year_id',
         'document_type_id',
+        'storage_provider',
+        'external_account_id',
+        'external_drive_id',
+        'external_item_id',
+        'external_url',
+        'external_version',
+        'sync_status',
+        'last_synced_at',
         'storage_disk',
         'object_key',
         'content_sha256',
@@ -49,6 +57,7 @@ class Document extends UuidModel
             'size_bytes' => 'integer',
             'captured_at' => 'datetime',
             'uploaded_at' => 'datetime',
+            'last_synced_at' => 'datetime',
             'provenance' => 'array',
             'payment_date' => 'date:Y-m-d',
             'payment_amount' => 'decimal:2',
@@ -63,6 +72,10 @@ class Document extends UuidModel
             $immutableAttributes = [
                 'user_id',
                 'document_type_id',
+                'storage_provider',
+                'external_account_id',
+                'external_drive_id',
+                'external_item_id',
                 'storage_disk',
                 'object_key',
                 'content_sha256',
@@ -93,6 +106,30 @@ class Document extends UuidModel
             }
         });
 
+    }
+
+    public const PROVIDER_TAXVAULT = 'taxvault';
+
+    public const SYNC_LOCAL = 'local';
+
+    public const SYNC_SYNCED = 'synced';
+
+    public const SYNC_CHANGED = 'changed';
+
+    public const SYNC_DELETED = 'deleted';
+
+    public const SYNC_ERROR = 'error';
+
+    public function isExternal(): bool
+    {
+        return $this->storage_provider !== self::PROVIDER_TAXVAULT;
+    }
+
+    public function hasExternalIdentity(): bool
+    {
+        return $this->isExternal()
+            && is_string($this->external_item_id)
+            && $this->external_item_id !== '';
     }
 
     public function user(): BelongsTo
@@ -126,6 +163,7 @@ class Document extends UuidModel
             ->orderByDesc('created_at')
             ->orderByDesc('id');
     }
+
 
     /** @return HasMany<Transaction, $this> */
     public function transactions(): HasMany

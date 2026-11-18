@@ -23,6 +23,8 @@ class AccountantAccessMail extends Mailable
         public readonly ?string $fromName = null,
         public readonly ?string $subjectOverride = null,
         public readonly ?string $contentOverride = null,
+        /** @var list<array{data: string, name: string, mime: string}> */
+        public readonly array $attachments = [],
     ) {}
 
     public function envelope(): Envelope
@@ -53,5 +55,4 @@ class AccountantAccessMail extends Mailable
             ."<p><a href=\"{$link}\">Open TaxVault</a></p>"
             .'<p>Your sign-in details are provided separately by the sender. This link does not contain a password.</p>');
     }
-
 }

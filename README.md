@@ -48,6 +48,11 @@ uploaded files are kept in Docker volumes. Local development uses the backend's
 persistent local file storage.
 The backend also seeds a small, versioned set of general document types for
 receipt uploads; it does not apply tax classifications or tax treatment.
+Documents use a storage-provider-neutral model. Direct uploads are stored with
+the `taxvault` provider by default, while the document record also has optional
+external provider identity, version and sync-status fields for future OneDrive,
+Google Drive, Dropbox or S3 connectors. Tax workflows should depend on the
+document metadata rather than on a particular drive vendor.
 The upload screen supports selecting multiple files or a whole folder, and
 uploads documents sequentially with per-file validation and retry for failures.
 Each file is subject to the 20 MB limit and uses the selected financial year

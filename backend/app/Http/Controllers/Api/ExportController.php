@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Reporting\Models\FinancialYearExportArchive;
+use App\Domain\Reporting\Services\AccountantPackAttachmentService;
 use App\Domain\Reporting\Services\FinancialYearExportService;
 use App\Domain\Reporting\Services\TransactionCsvExport;
 use App\Http\Controllers\Controller;
@@ -75,10 +76,11 @@ final class ExportController extends Controller
     public function packDownload(
         Request $request,
         FinancialYearExportService $exportService,
+        AccountantPackAttachmentService $attachmentService,
     ): StreamedResponse {
         $validated = $request->validate([
             'financial_year_id' => ['required', 'uuid'],
-            'format' => ['required', 'in:csv,excel'],
+            'format' => ['required', 'in:csv,excel,pdf'],
         ]);
         $export = $exportService->export($request->user(), $validated['financial_year_id']);
         $payload = $export->payload;
@@ -89,9 +91,23 @@ final class ExportController extends Controller
             $xlsx = $this->spreadsheetXlsx($payload);
 
             return response()->streamDownload(
-                function () use ($xlsx): void { echo $xlsx; },
+                function () use ($xlsx): void {
+                    echo $xlsx;
+                },
                 sprintf('taxvault-%s-accountant-pack.xlsx', $year),
                 ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+            );
+        }
+
+        if ($format === 'pdf') {
+            $pdf = $attachmentService->pdf($payload);
+
+            return response()->streamDownload(
+                function () use ($pdf): void {
+                    echo $pdf;
+                },
+                sprintf('taxvault-%s-accountant-pack.pdf', $year),
+                ['Content-Type' => 'application/pdf'],
             );
         }
 
@@ -242,7 +258,7 @@ final class ExportController extends Controller
         $styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" applyFont="1"/></cellXfs></styleSheet>';
 
         $temporary = tempnam(sys_get_temp_dir(), 'taxvault-xlsx-');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($temporary === false || $zip->open($temporary, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             throw new \RuntimeException('Unable to create the XLSX accountant pack.');
         }
@@ -265,4 +281,3 @@ final class ExportController extends Controller
         return $binary;
     }
 }
-

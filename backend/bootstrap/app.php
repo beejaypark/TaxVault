@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\ActAsGrantedOwner;
+use App\Http\Middleware\AuditRequest;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,11 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        $middleware->redirectGuestsTo(
+            fn (Request $request): ?string => $request->is('api/*') ? null : '/login',
+        );
         // TLS is terminated by nginx on the private docker network.
         $middleware->trustProxies(at: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
         $middleware->alias([
-            'audit' => \App\Http\Middleware\AuditRequest::class,
-            'acting' => \App\Http\Middleware\ActAsGrantedOwner::class,
+            'audit' => AuditRequest::class,
+            'acting' => ActAsGrantedOwner::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

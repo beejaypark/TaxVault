@@ -46,12 +46,34 @@
     "AnalysisLoadFailed": "无法加载本财年的财务分析。",
     "DocumentRefreshFailed": "无法刷新文件状态。",
     "ReviewRefreshFailed": "无法刷新审核状态。",
-    "AnalysisRefreshFailed": "无法刷新财务分析。"
+    "AnalysisRefreshFailed": "无法刷新财务分析。",
+    "ReadinessLoadFailed": "无法加载本财年的税务准备状态。",
+    "ReadinessRefreshFailed": "无法刷新税务准备状态。",
+    "ReadinessKicker": "税务准备度",
+    "ReadinessTitle": "自信地准备您的纳税申报",
+    "ReadinessDescription": "根据已审核文件、已分类交易和已关联凭证计算。",
+    "PointsVsPreviousYear": "较上一财年分数",
+    "ResolveIssues": "解决问题",
+    "NotStarted": "尚未开始",
+    "ReadinessDocuments": "已审核文件",
+    "ReadinessTransactions": "已分类交易",
+    "ReadinessEvidence": "已关联凭证",
+    "ReadinessRequiredData": "必填数据",
+    "ReadinessStatus": { "ready": "已准备好", "needs_attention": "需要关注", "not_started": "尚未开始" },
+    "ReadinessIssues": {
+      "failed_extraction": "文件文本提取失败",
+      "unreviewed_documents": "文件仍需审核",
+      "uncategorised_transactions": "交易需要税务分类",
+      "missing_evidence": "交易没有关联凭证",
+      "incomplete_required_data": "必填税务数据不完整"
+    }
   },
   "TaxWorkspace": {
     "Title": "税务工作区"
   },
   "TaxNews": {
+    "AISummary": "AI 摘要",
+    "AIRelevance": "可能相关的原因",
     "Title": "税务新闻",
     "Eyebrow": "澳大利亚税务更新",
     "Description": "来自ATO官方来源的重要更新。采取行动前请务必查看原始通知。",
@@ -92,6 +114,13 @@
     "Title": "收入与支出"
   },
   "Assets": {
+    "TotalPropertyValue": "房产总价值",
+    "TotalInvestmentValue": "投资总价值",
+    "TotalDebt": "总债务",
+    "PortfolioReadiness": "投资组合准备度",
+    "LoanRecords": "已记录的抵押贷款余额",
+    "RecordedCostBase": "已记录的成本基础",
+    "MissingValues": "项资产缺少当前价值",
     "Title": "资产",
     "PropertyDeductions": "房产扣除",
     "PropertyDeductionsDescription": "来自资本折旧和税务折旧表的年度扣除额。",
@@ -102,6 +131,11 @@
     "Amount": "金额（AUD）",
     "NotesOptional": "备注（可选）",
     "SaveDeduction": "保存扣除"
+  },
+  "TaxReturn": {
+    "MoreExportOptions": "更多导出选项",
+    "HideAdvancedExports": "隐藏高级导出选项",
+    "CsvExportDescription": "导出交易数据，用于电子表格分析或导入其他会计系统。不包含凭证。"
   },
   "Properties": {
     "Title": "房产"
@@ -119,6 +153,10 @@
     "Title": "管理"
   },
   "Accountants": {
+    "PackReadiness": "资料包准备度",
+    "DocumentsReviewed": "已审核文件",
+    "TransactionsCategorised": "已分类交易",
+    "UnresolvedIssues": "未解决问题",
     "Title": "会计师"
   },
   "Settings": {

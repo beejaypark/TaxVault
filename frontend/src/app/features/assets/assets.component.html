@@ -33,6 +33,11 @@
   @if (isLoading) {
     <div class="content-card loading" role="status">{{ 'Assets.Loading' | translate }}</div>
   } @else if (activeTab === 'properties') {
+    <section class="asset-summary" aria-label="Asset portfolio summary">
+      <article><span>{{ 'Assets.TotalPropertyValue' | translate }}</span><strong>{{ formatCurrency(totalPropertyValue) }}</strong><small>{{ properties.length }} {{ 'Assets.Properties' | translate }}</small></article>
+      <article><span>{{ 'Assets.TotalDebt' | translate }}</span><strong>{{ formatCurrency(totalDebt) }}</strong><small>{{ 'Assets.LoanRecords' | translate }}</small></article>
+      <article><span>{{ 'Assets.PortfolioReadiness' | translate }}</span><strong>{{ assetsWithValues }} / {{ properties.length + investments.length }}</strong><small>{{ assetsMissingValues }} {{ 'Assets.MissingValues' | translate }}</small></article>
+    </section>
     @if (showPropertyForm) {
       <form class="content-card editor" (ngSubmit)="saveProperty()">
         <div class="card-heading">
@@ -126,6 +131,11 @@
       </section>
     }
   } @else {
+    <section class="asset-summary" aria-label="Investment portfolio summary">
+      <article><span>{{ 'Assets.TotalInvestmentValue' | translate }}</span><strong>{{ formatCurrency(totalInvestmentValue) }}</strong><small>{{ investments.length }} {{ 'Assets.Investments' | translate }}</small></article>
+      <article><span>{{ 'Assets.CostBase' | translate }}</span><strong>{{ formatCurrency(totalInvestmentCostBase) }}</strong><small>{{ 'Assets.RecordedCostBase' | translate }}</small></article>
+      <article><span>{{ 'Assets.PortfolioReadiness' | translate }}</span><strong>{{ assetsWithValues }} / {{ properties.length + investments.length }}</strong><small>{{ assetsMissingValues }} {{ 'Assets.MissingValues' | translate }}</small></article>
+    </section>
     @if (showInvestmentForm) {
       <form class="content-card editor" (ngSubmit)="saveInvestment()">
         <div class="card-heading">

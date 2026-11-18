@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Properties\Models\Property;
+use App\Domain\Documents\Models\StorageConnection;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Domain\Documents\Models\StorageProviderSetting;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -64,5 +66,15 @@ class User extends Authenticatable
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class);
+    }
+
+    public function storageConnections(): HasMany
+    {
+        return $this->hasMany(StorageConnection::class);
+    }
+
+    public function storageProviderSettings(): HasMany
+    {
+        return $this->hasMany(StorageProviderSetting::class);
     }
 }

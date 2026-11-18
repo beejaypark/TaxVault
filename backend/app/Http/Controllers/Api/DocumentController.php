@@ -9,6 +9,7 @@ use App\Application\Documents\DocumentDeletionConflict;
 use App\Application\Documents\DuplicateDocumentException;
 use App\Application\Documents\FinancialYearSuggestionUnavailable;
 use App\Application\Documents\UploadDocument;
+use App\Application\OCR\Services\RepairFailedDocumentExtraction;
 use App\Application\Reviews\DeleteReview;
 use App\Domain\Documents\Models\Document;
 use App\Domain\Reviews\Models\Review;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Documents\AssignDocumentFinancialYearRequest;
 use App\Http\Requests\Documents\ConfirmDocumentPaymentRequest;
 use App\Http\Requests\Documents\StoreDocumentRequest;
+use App\Http\Requests\Documents\StoreDocumentExtractionCorrectionRequest;
 use App\Jobs\ProcessUploadedDocument;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -249,5 +251,31 @@ final class DocumentController extends Controller
         ProcessUploadedDocument::dispatch($document->getKey())->afterCommit();
 
         return response()->json(['data' => $document->fresh('latestExtraction')], 202);
+    }
+
+    public function correctExtraction(
+        StoreDocumentExtractionCorrectionRequest $request,
+        string $id,
+        RepairFailedDocumentExtraction $repairFailedDocumentExtraction,
+    ): JsonResponse {
+        $document = Document::query()
+            ->whereKey($id)
+            ->where('user_id', $request->user()->getKey())
+            ->first();
+
+        if ($document === null) {
+            throw (new ModelNotFoundException)->setModel(Document::class, [$id]);
+        }
+
+        $validated = $request->validated();
+        $repairFailedDocumentExtraction->execute(
+            $document,
+            $validated['field_path'],
+            $validated['value'],
+        );
+
+        return response()->json([
+            'data' => $document->fresh(['latestExtraction']),
+        ]);
     }
 }
