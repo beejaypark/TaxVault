@@ -79,7 +79,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
     </main>
   `,
   styles: [`
-    :host { display: block; min-height: 100vh; }
+    :host { display: block; width: 100%; min-height: 100vh; }
     .login-page { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 420px); align-items: center; gap: 72px; width: min(100%, 1180px); margin: 0 auto; padding: 48px 32px; box-sizing: border-box; background: var(--tv-color-background, #f5f7fb); }
     .welcome-panel { max-width: 600px; padding: 24px 0; }
     .eyebrow { margin: 52px 0 16px; color: #1f7ac4; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -139,8 +139,8 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
     button:disabled { cursor: not-allowed; opacity: .55; }
     @media (max-width: 820px) { .login-page { grid-template-columns: 1fr; gap: 28px; max-width: 520px; padding: 32px 20px; } .welcome-panel { padding: 0; } .eyebrow { margin-top: 32px; } .welcome-panel h1 { font-size: 44px; } }
     @media (max-width: 480px) { .login-page { padding: 24px 16px; } .login-card { padding: 28px 24px; } .welcome-panel h1 { font-size: 38px; } }
-    .login-page.embedded { min-height: auto; width: auto; display: block; padding: 24px; background: transparent; }
-    .login-page.embedded .login-card { width: 100%; padding: 24px 20px 20px; box-shadow: none; }
+    .login-page.embedded { min-height: 0; width: 100%; max-width: none; display: block; box-sizing: border-box; padding: 48px 28px 28px; background: transparent; }
+    .login-page.embedded .login-card { display: block; box-sizing: border-box; width: 100%; max-width: none; padding: 28px 24px 24px; box-shadow: none; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
