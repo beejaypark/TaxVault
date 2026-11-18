@@ -9,7 +9,7 @@ import { LoginComponent } from '../auth/pages/login/login.component';
     <main class="landing-page">
       <header class="site-header">
         <nav class="site-nav" aria-label="Primary navigation">
-          <a class="brand" href="#top" aria-label="TaxVault home"><tv-brand-logo [size]="34" /></a>
+          <a class="brand" href="#top" aria-label="TaxVault home"><tv-brand-logo [size]="42" /></a>
           <div class="nav-links">
             <a href="#how-it-works">How it works</a>
             <a href="#benefits">Why TaxVault</a>
@@ -33,7 +33,7 @@ import { LoginComponent } from '../auth/pages/login/login.component';
           <form class="contact-form" (submit)="submitContact($event)"><label for="contact-name">Name</label><input id="contact-name" name="name" type="text" autocomplete="name" required /><label for="contact-email">Email</label><input id="contact-email" name="email" type="email" autocomplete="email" required /><label for="contact-message">How can we help?</label><textarea id="contact-message" name="message" rows="5" required></textarea><button type="submit">Send message</button></form>
         }
       </section>
-      <footer><tv-brand-logo [size]="28" /><span>TaxVault · Keep your tax evidence together.</span></footer>
+      <footer><tv-brand-logo [size]="34" /><span>TaxVault · Keep your tax evidence together.</span></footer>
       @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" /></section></div> }
     </main>
   `,
