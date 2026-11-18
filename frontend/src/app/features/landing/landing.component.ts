@@ -16,7 +16,7 @@ import { LoginComponent } from '../auth/pages/login/login.component';
             <a href="#contact">Contact us</a>
           </div>
           <div class="nav-actions">
-            <button type="button" class="updates" (click)="openLogin()">Get free tax updates</button>
+            <button type="button" class="updates" (click)="openTrial()">Get free tax updates</button>
             <button type="button" class="login-link" (click)="openLogin()">Log in</button>
           </div>
         </nav>
@@ -34,7 +34,7 @@ import { LoginComponent } from '../auth/pages/login/login.component';
         }
       </section>
       <footer><tv-brand-logo [size]="34" /><span>TaxVault · Keep your tax evidence together.</span></footer>
-      @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" /></section></div> }
+      @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" [trialMode]="trialMode" /></section></div> }
     </main>
   `,
   styles: [`
@@ -44,9 +44,11 @@ import { LoginComponent } from '../auth/pages/login/login.component';
 })
 export class LandingComponent {
   loginOpen = false;
+  trialMode = false;
   contactSubmitted = false;
 
   openLogin(): void { this.loginOpen = true; }
+  openTrial(): void { this.trialMode = true; this.loginOpen = true; }
   closeLogin(): void { this.loginOpen = false; }
 
   submitContact(event: SubmitEvent): void {

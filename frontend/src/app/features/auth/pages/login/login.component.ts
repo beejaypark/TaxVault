@@ -28,12 +28,15 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
       </section>
       }
       <section class="login-card" aria-labelledby="login-title">
+        @if (trialMode) {
+          <div class="trial-banner"><strong>Start with a 30-day free trial</strong><span>No payment details are required to get started. Decide whether TaxVault is right for you after your free month.</span></div>
+        }
         <h1 id="login-title">{{ 'Auth.WelcomeBack' | translate }}</h1>
         <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
 
         <a class="oidc-button" [href]="keycloakLoginUrl">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
         <a class="google-button" [href]="googleLoginUrl">Continue with Google</a>
-        <a class="register-link" [href]="registrationUrl">Create a new account</a>
+        <a class="register-link" [class.trial-register]="trialMode" [href]="registrationUrl">{{ trialMode ? 'Start my 30-day free trial' : 'Create a new account' }}</a>
         @if (developmentLoginEnabled) {
           <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
 
@@ -101,6 +104,8 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
       box-shadow: 0 16px 48px rgb(15 23 42 / 8%);
     }
     .login-card h1 { margin: 0 0 8px; font-size: 27px; }
+    .trial-banner { display: grid; gap: 6px; margin: -4px 0 22px; padding: 12px 14px; border: 1px solid #b9dcca; border-radius: 9px; color: #286345; background: #effaf3; font-size: 12px; line-height: 1.45; }
+    .trial-banner strong { font-size: 13px; }
     .intro { margin: 0 0 24px; color: #64748b; line-height: 1.5; }
     .oidc-button {
       min-height: 46px; display: grid; place-items: center; border-radius: 8px;
@@ -112,6 +117,8 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
     .google-button:hover { background: #f8fafc; }
     .register-link { display: block; margin-top: 14px; color: var(--tv-color-primary, #1d4ed8); font-size: 13px; text-align: center; text-decoration: none; }
     .register-link:hover { text-decoration: underline; }
+    .trial-register { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 14px; border-radius: 8px; color: #123f78; background: #eaf3fb; font-weight: 700; text-decoration: none; }
+    .trial-register:hover { background: #dcebf8; text-decoration: none; }
     .separator {
       display: flex; align-items: center; gap: 12px; margin: 20px 0;
       color: #64748b; font-size: 12px;
@@ -146,6 +153,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
 })
 export class LoginComponent implements OnInit {
   @Input() embedded = false;
+  @Input() trialMode = false;
   login = '';
   password = '';
   loading = false;
