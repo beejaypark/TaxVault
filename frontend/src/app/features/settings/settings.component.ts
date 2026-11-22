@@ -413,7 +413,7 @@ export class SettingsComponent {
           && (plan === 'immediate' || plan === 'trial');
         if (checkoutRequested && !this.billingCheckoutStarted && !response.data.active) {
           this.billingCheckoutStarted = true;
-          this.startCheckout(plan === 'trial');
+          this.startCheckout(true);
         }
         this.changeDetector.markForCheck();
       },

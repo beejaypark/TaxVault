@@ -70,7 +70,7 @@ import { ProductChatComponent } from './product-chat.component';
           <article class="pricing-card">
             <span class="pricing-label">Start now</span><h3>First month free</h3><strong>A$7.99 <small>/ month</small></strong>
             <p>Join today and use TaxVault immediately. Your first month is free, then billing starts automatically.</p>
-            <button type="button" class="primary" (click)="openPricingSignup('immediate')">Start with first month free</button>
+            <button type="button" class="primary" (click)="openPricingSignup('trial')">Start with first month free</button>
           </article>
           <article class="pricing-card featured">
             <span class="pricing-label">Most flexible</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
@@ -162,7 +162,38 @@ import { ProductChatComponent } from './product-chat.component';
     <app-product-chat #productChat />
   `,
   styles: [`
-    .pricing-section { max-width:1180px; margin:auto; padding:0 32px 100px; }
+    :host { display:block; min-height:100vh; }
+    .landing-page { min-height:100vh; color:#172b4d; background:#f6f8fb; scroll-behavior:smooth; }
+    .site-header { border-top:2px solid #172b4d; border-bottom:1px solid #dfe5ec; background:#fff; }
+    .site-nav { display:flex; align-items:center; gap:32px; max-width:1180px; margin:auto; padding:16px 32px; }
+    .brand { display:flex; margin-right:8px; color:inherit; text-decoration:none; }
+    .nav-links { display:flex; align-items:center; gap:34px; margin-right:auto; }
+    .nav-links a,.login-link { color:#1d2735; font:inherit; font-size:14px; font-weight:600; text-decoration:none; }
+    .nav-links a:hover,.login-link:hover { color:#1269d3; }
+    .nav-actions { display:flex; align-items:center; gap:28px; }
+    .nav-actions button { border:0; font:inherit; cursor:pointer; }
+    .updates { min-height:44px; padding:0 24px; border-radius:8px; color:#fff; background:#087369; font-size:14px; font-weight:700; }
+    .login-link { padding:8px 0; background:transparent; }
+    .hero { display:grid; grid-template-columns:minmax(0,.92fr) minmax(440px,1.08fr); align-items:center; gap:72px; max-width:1180px; margin:auto; padding:76px 32px 112px; }
+    .copy { max-width:540px; }
+    .eyebrow { margin:0 0 16px; color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:0; color:#12345d; font-size:clamp(42px,5vw,68px); font-weight:500; letter-spacing:-.055em; line-height:1.02; }
+    .copy > p:not(.eyebrow) { margin:24px 0 0; color:#58708f; font-size:17px; line-height:1.65; }
+    .primary { display:inline-flex; align-items:center; min-height:46px; margin-top:32px; padding:0 20px; border:0; border-radius:8px; color:white; background:#123f78; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+    .preview { padding:20px; border:1px solid #d9e2ed; border-radius:18px; background:white; box-shadow:0 24px 60px rgb(31 63 101 / 12%); }
+    .benefits,.pricing-section,.fit-section,.flow-section { max-width:1180px; margin:auto; padding:0 32px 100px; }
+    .benefits h2,.trust-strip h2,.fit-heading h2,.flow-heading h2,.pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
+    .benefit-grid,.fit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; }
+    article { min-height:150px; padding:24px; border:1px solid #dce5ee; border-radius:12px; background:white; }
+    article h3 { margin:28px 0 10px; color:#234466; font-size:17px; }
+    article p { margin:0; color:#6d8197; font-size:13px; line-height:1.6; }
+    footer { display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:auto; padding:26px 32px 34px; border-top:1px solid #dce5ee; color:#7b8da1; font-size:12px; }
+    .backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:24px; background:rgb(15 35 58 / 42%); overflow-y:auto; }
+    .modal { position:relative; width:min(100%,520px); max-height:calc(100vh - 48px); overflow-y:auto; border-radius:18px; background:#f5f7fb; box-shadow:0 24px 80px rgb(15 35 58 / 28%); }
+    .close { position:absolute; z-index:2; top:12px; right:14px; width:32px; height:32px; border:0; border-radius:50%; color:#52677f; background:transparent; font-size:24px; cursor:pointer; }
+    .pricing-section { padding-top:72px; }
+    @media (max-width:850px) { .site-nav { gap:20px; } .nav-links { gap:18px; } .hero { grid-template-columns:1fr; gap:48px; padding-top:48px; } .fit-grid { grid-template-columns:1fr; } }
+    @media (max-width:620px) { .site-nav { flex-wrap:wrap; padding:14px 20px; } .nav-links { order:3; width:100%; justify-content:space-between; } .hero,.benefits,.pricing-section,.fit-section,.flow-section,footer { padding-left:20px; padding-right:20px; } .benefit-grid,.pricing-grid { grid-template-columns:1fr; } footer { align-items:start; flex-direction:column; gap:16px; } }
     .pricing-heading { max-width:620px; }
     .pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
     .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
