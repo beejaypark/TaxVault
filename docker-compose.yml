@@ -146,6 +146,7 @@ services:
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-taxvault-web}
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
       KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-https://localhost:8443/api/auth/oidc/callback}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
       <<: *mail-env
     ports:
       - "127.0.0.1:8000:8000"
