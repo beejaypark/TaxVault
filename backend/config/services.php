@@ -91,6 +91,8 @@ return [
         'secret' => env('STRIPE_SECRET_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
         'price_id' => env('STRIPE_PRICE_ID'),
+        'monthly_price_id' => env('STRIPE_MONTHLY_PRICE_ID', env('STRIPE_PRICE_ID')),
+        'yearly_price_id' => env('STRIPE_YEARLY_PRICE_ID'),
         'public_url' => env('APP_URL', 'http://localhost:4200'),
     ],
 

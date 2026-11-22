@@ -49,8 +49,14 @@ class BillingController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $plan = $request->string('plan')->toString() ?: 'monthly';
         $trial = $request->boolean('trial', true);
         $this->ensureConfigured();
+
+        $priceId = $plan === 'yearly'
+            ? config('services.stripe.yearly_price_id')
+            : config('services.stripe.monthly_price_id');
+        abort_unless(is_string($priceId) && $priceId !== '', 503, 'The selected Stripe plan is not configured.');
 
         $customerId = $user->stripe_customer_id;
         if (! is_string($customerId) || $customerId === '') {
@@ -68,7 +74,7 @@ class BillingController extends Controller
         $checkoutData = [
             'mode' => 'subscription',
             'customer' => $customerId,
-            'line_items[0][price]' => config('services.stripe.price_id'),
+            'line_items[0][price]' => $priceId,
             'line_items[0][quantity]' => 1,
             'subscription_data[metadata][taxvault_user_id]' => $user->getKey(),
             'success_url' => $url.'/settings?billing=success',

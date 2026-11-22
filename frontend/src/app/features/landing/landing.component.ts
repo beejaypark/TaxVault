@@ -77,6 +77,11 @@ import { ProductChatComponent } from './product-chat.component';
             <p>Try every feature for 30 days. Add your card now; automatic billing begins after the trial unless cancelled.</p>
             <button type="button" class="primary" (click)="openPricingSignup('trial')">Start 30-day free trial</button>
           </article>
+          <article class="pricing-card annual-card">
+            <span class="pricing-label">Best value</span><h3>Annual plan</h3><strong>A$79.90 <small>/ year</small></strong>
+            <p>Save compared with monthly billing. Your card is collected securely and the annual plan starts after your free month.</p>
+            <button type="button" class="primary" (click)="openPricingSignup('yearly')">Choose annual plan</button>
+          </article>
         </div>
         <p class="pricing-note">Cancel anytime before the next billing date. No long-term contract. Payments are securely processed by Stripe.</p>
       </section>
@@ -197,7 +202,8 @@ import { ProductChatComponent } from './product-chat.component';
     .pricing-heading { max-width:620px; }
     .pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
     .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
-    .pricing-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:32px; }
+    .pricing-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; margin-top:32px; }
+    @media (max-width:1050px) { .pricing-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
     .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; }
     .pricing-card.featured { border:2px solid #2b8f88; box-shadow:0 14px 34px rgb(31 63 101 / 8%); }
     .pricing-label { color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
@@ -396,7 +402,7 @@ export class LandingComponent {
 
   openLogin(): void { this.trialMode = false; this.loginReturnUrl = '/dashboard'; this.loginOpen = true; }
   openTrial(): void { this.trialMode = true; this.loginReturnUrl = '/settings?billing=checkout&plan=trial'; this.loginOpen = true; }
-  openPricingSignup(plan: 'trial' | 'immediate'): void {
+  openPricingSignup(plan: 'trial' | 'immediate' | 'yearly'): void {
     this.trialMode = true;
     this.loginReturnUrl = `/settings?billing=checkout&plan=${plan}`;
     this.loginOpen = true;

@@ -410,10 +410,10 @@ export class SettingsComponent {
         this.billingStatus = response.data;
         const plan = this.route.snapshot.queryParamMap.get('plan');
         const checkoutRequested = this.route.snapshot.queryParamMap.get('billing') === 'checkout'
-          && (plan === 'immediate' || plan === 'trial');
+          && (plan === 'immediate' || plan === 'trial' || plan === 'yearly');
         if (checkoutRequested && !this.billingCheckoutStarted && !response.data.active) {
           this.billingCheckoutStarted = true;
-          this.startCheckout(true);
+          this.startCheckout(true, plan === 'yearly' ? 'yearly' : 'monthly');
         }
         this.changeDetector.markForCheck();
       },
@@ -421,10 +421,10 @@ export class SettingsComponent {
     });
   }
 
-  startCheckout(trial: boolean): void {
+  startCheckout(trial: boolean, plan: 'monthly' | 'yearly' = 'monthly'): void {
     this.billingLoading = true;
     this.billingMessage = '';
-    this.http.post<{ data: { url: string } }>('/api/billing/checkout', { trial }).subscribe({
+    this.http.post<{ data: { url: string } }>('/api/billing/checkout', { trial, plan }).subscribe({
       next: (response) => window.location.assign(response.data.url),
       error: (error) => {
         this.billingLoading = false;
