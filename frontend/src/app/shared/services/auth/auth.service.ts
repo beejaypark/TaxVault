@@ -167,6 +167,16 @@ export class AuthService {
     return `${backendOrigin}/api/auth/oidc/redirect?${params.toString()}`;
   }
 
+  oidcLogoutThenStartUrl(start: 'keycloak' | 'google' | 'register'): string {
+    const returnUrl = `${window.location.origin}/login?authStart=${encodeURIComponent(start)}`;
+    const params = new URLSearchParams({
+      client_id: 'taxvault-web',
+      post_logout_redirect_uri: returnUrl,
+    });
+
+    return `${window.location.origin}/auth/realms/taxvault/protocol/openid-connect/logout?${params.toString()}`;
+  }
+
   logout(): Observable<string | null> {
     return this.http
       .post<ApiResponse<LogoutResponse>>(

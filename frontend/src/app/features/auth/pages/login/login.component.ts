@@ -34,9 +34,9 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
         <h1 id="login-title">{{ 'Auth.WelcomeBack' | translate }}</h1>
         <p class="intro">{{ 'Auth.SignInIntro' | translate }}</p>
 
-        <a class="oidc-button" [href]="keycloakLoginUrl">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
-        <a class="google-button" [href]="googleLoginUrl">Continue with Google</a>
-        <a class="register-link" [class.trial-register]="trialMode" [href]="registrationUrl">{{ trialMode ? 'Start my 30-day free trial' : 'Create a new account' }}</a>
+        <a class="oidc-button" [href]="keycloakLoginUrl" (click)="startAuth($event, 'keycloak')">{{ 'Auth.ContinueWithKeycloak' | translate }}</a>
+        <a class="google-button" [href]="googleLoginUrl" (click)="startAuth($event, 'google')">Continue with Google</a>
+        <a class="register-link" [class.trial-register]="trialMode" [href]="registrationUrl" (click)="startAuth($event, 'register')">{{ trialMode ? 'Start my 30-day free trial' : 'Create a new account' }}</a>
         @if (developmentLoginEnabled) {
           <div class="separator" aria-hidden="true"><span>{{ 'Auth.DevelopmentLogin' | translate }}</span></div>
 
@@ -181,6 +181,17 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const authStart = this.route.snapshot.queryParamMap.get('authStart');
+    if (authStart === 'keycloak' || authStart === 'google' || authStart === 'register') {
+      const target = authStart === 'keycloak'
+        ? this.keycloakLoginUrl
+        : authStart === 'google'
+          ? this.googleLoginUrl
+          : this.registrationUrl;
+      window.location.assign(target);
+      return;
+    }
+
     if (this.route.snapshot.queryParamMap.get('loggedOut') === '1') {
       window.location.assign('http://localhost:8025');
       return;
@@ -236,6 +247,11 @@ export class LoginComponent implements OnInit {
               : this.translations.translate('Auth.SignInFailed');
       },
     });
+  }
+
+  startAuth(event: MouseEvent, start: 'keycloak' | 'google' | 'register'): void {
+    event.preventDefault();
+    window.location.assign(this.auth.oidcLogoutThenStartUrl(start));
   }
 
   private getReturnUrl(): string {

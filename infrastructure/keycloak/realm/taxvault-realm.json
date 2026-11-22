@@ -27,7 +27,7 @@
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "https://taxvaultapp.com.au/"
+        "post.logout.redirect.uris": "https://taxvaultapp.com.au/##https://taxvaultapp.com.au/login?authStart=keycloak##https://taxvaultapp.com.au/login?authStart=google##https://taxvaultapp.com.au/login?authStart=register"
       },
       "defaultClientScopes": [
         "profile",
