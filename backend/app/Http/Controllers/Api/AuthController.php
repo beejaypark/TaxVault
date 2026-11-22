@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewUserRegisteredMail;
 use App\Models\DevelopmentAdminCredential;
 use App\Models\User;
 use App\Support\SessionActivity;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Laravel\Socialite\Facades\Socialite;
@@ -214,7 +216,25 @@ class AuthController extends Controller
             $user->status = 'active';
         }
 
+        $isNewUser = ! $user->exists;
         $user->save();
+
+        if ($isNewUser && is_string(config('admin.notification_email'))
+            && filter_var(config('admin.notification_email'), FILTER_VALIDATE_EMAIL)) {
+            try {
+                Mail::to(config('admin.notification_email'))->send(new NewUserRegisteredMail(
+                    displayName: (string) ($user->display_name ?: $user->email ?: 'New customer'),
+                    email: (string) ($user->email ?: 'Not provided'),
+                    provider: (string) $user->identity_provider,
+                    registeredAt: (string) $user->created_at,
+                ));
+            } catch (\Throwable $exception) {
+                Log::warning('New customer notification email failed.', [
+                    'user_id' => $user->getKey(),
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
