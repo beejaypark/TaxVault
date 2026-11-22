@@ -28,12 +28,25 @@
 }
 
 #keycloak-bg #kc-header-wrapper {
-  color: var(--taxvault-text);
-  font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
-  font-size: 1.08em;
-  font-weight: 650;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: max-content;
+  color: transparent;
+  font-size: 0;
+}
+
+#keycloak-bg #kc-header-wrapper::before {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+#keycloak-bg #kc-header-wrapper::after {
+  content: "";
+  display: block;
+  width: 118px;
+  height: 26px;
+  background: url("../img/taxvault-wordmark.svg") center / contain no-repeat;
 }
 
 #keycloak-bg .pf-v5-c-login__main {
