@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 
 interface AdminOverview {
   total_users: number;
@@ -42,13 +42,20 @@ interface AdminOverview {
 })
 export class AdminComponent {
   private readonly http = inject(HttpClient);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   data: AdminOverview | null = null;
   error = '';
 
   constructor() {
     this.http.get<{ data: AdminOverview }>('/api/admin/overview').subscribe({
-      next: response => { this.data = response.data; },
-      error: () => { this.error = 'Unable to load the administrator overview.'; },
+      next: response => {
+        this.data = response.data;
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.error = 'Unable to load the administrator overview.';
+        this.changeDetector.markForCheck();
+      },
     });
   }
 }
