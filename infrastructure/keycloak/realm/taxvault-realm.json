@@ -20,16 +20,14 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "redirectUris": [
-        "https://localhost:8443/api/auth/oidc/callback",
-        "https://desktop-fn3ojjj.tailc14f46.ts.net/api/auth/oidc/callback"
+        "https://taxvaultapp.online/api/auth/oidc/callback"
       ],
       "webOrigins": [
-        "https://localhost:8443",
-        "https://desktop-fn3ojjj.tailc14f46.ts.net"
+        "https://taxvaultapp.online"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "https://localhost:8443/##https://desktop-fn3ojjj.tailc14f46.ts.net/"
+        "post.logout.redirect.uris": "https://taxvaultapp.online/"
       },
       "defaultClientScopes": [
         "profile",
