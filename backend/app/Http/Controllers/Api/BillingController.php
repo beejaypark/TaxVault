@@ -130,8 +130,18 @@ class BillingController extends Controller
     {
         $response = Http::asForm()
             ->withBasicAuth((string) config('services.stripe.secret'), '')
-            ->send($method, self::STRIPE_URL.$path, ['form_params' => $data])
-            ->throw();
+            ->post(self::STRIPE_URL.$path, $data);
+
+        if ($response->failed()) {
+            Log::error('Stripe API request failed.', [
+                'method' => $method,
+                'path' => $path,
+                'status' => $response->status(),
+                'body' => $response->json() ?: $response->body(),
+            ]);
+        }
+
+        $response->throw();
 
         return $response->json();
     }
