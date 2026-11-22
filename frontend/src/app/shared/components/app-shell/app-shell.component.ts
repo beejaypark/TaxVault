@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
   inject,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import { NotificationsComponent } from '../notifications/notifications.component
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { formatFinancialYear } from '../../utils/financial-year';
 import { AuthService } from '../../services/auth/auth.service';
+import { SessionActivityService } from '../../services/auth/session-activity.service';
 import { NavigationHistoryService } from '../../services/navigation-history.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import {
@@ -34,6 +36,8 @@ export class AppShellComponent implements OnInit {
   readonly navigationHistory = inject(NavigationHistoryService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly preferences = inject(UserPreferencesService);
+  private readonly activity = inject(SessionActivityService);
+  private readonly destroyRef = inject(DestroyRef);
 
   logoutError = false;
   menuOpen = false;
@@ -74,6 +78,7 @@ export class AppShellComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.activity.track(this.destroyRef);
     this.documentsApi.listFinancialYears().subscribe({
       next: (years) => {
         const selectedYearId = this.documentsApi.selectedFinancialYearId();

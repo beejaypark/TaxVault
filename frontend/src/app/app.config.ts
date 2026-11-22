@@ -1,17 +1,18 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
 import { ReviewService } from './shared/services/reviews/review.service';
 import { ReviewHttpService } from './shared/services/reviews/review-http.service';
+import { sessionExpirationInterceptor } from './shared/services/auth/session-expiration.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([sessionExpirationInterceptor])),
 
     {
       provide: ReviewService,

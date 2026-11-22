@@ -24,6 +24,7 @@ class StoreReviewDecisionRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+            'existing_income_id' => ['sometimes', 'required', 'uuid', 'prohibits:expense,transactions'],
             'expense' => [
                 'sometimes',
                 'array',

@@ -48,6 +48,8 @@ class KeycloakOidcAuthTest extends TestCase
         $response = $this->get('/api/auth/oidc/callback?code=authorization-code');
 
         $response->assertRedirectContains('/documents');
+        $cookie = config('session.cookie');
+        $this->withCredentials()->withCookie($cookie, $response->getCookie($cookie)->getValue());
         $user = User::query()
             ->where('identity_provider', 'keycloak')
             ->where('provider_subject', $subject)
@@ -73,7 +75,7 @@ class KeycloakOidcAuthTest extends TestCase
         parse_str((string) parse_url($logoutUrl, PHP_URL_QUERY), $logoutParameters);
         $this->assertSame($idToken, $logoutParameters['id_token_hint']);
         $this->assertSame(
-            rtrim((string) config('app.url'), '/').'/login',
+            rtrim((string) config('app.url'), '/').'/',
             $logoutParameters['post_logout_redirect_uri'],
         );
         $this->assertGuest('web');

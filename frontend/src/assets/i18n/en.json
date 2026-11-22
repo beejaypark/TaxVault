@@ -27,6 +27,7 @@
     "InactiveAccount": "This account is inactive. Contact your administrator.",
     "OidcIncomplete": "Keycloak sign-in was not completed. Please try again.",
     "StatusCheckFailed": "Unable to check your sign-in status. Please try again.",
+    "SessionExpired": "Your session expired after a period of inactivity. Sign in again to continue.",
     "DevelopmentLoginDisabled": "Development login is disabled on this backend.",
     "InvalidCredentials": "The supplied credentials are invalid.",
     "SignInFailed": "Unable to sign in. Check the server connection and try again."
@@ -341,6 +342,36 @@
     "Actions": "Actions",
     "EditAction": "Edit",
     "DeleteAction": "Delete",
+    "RecurringIncome": "Recurring income",
+    "RecurringIncomeHint": "Automatically create monthly income transactions without duplicates.",
+    "BackfillPreview": "Check missing payments",
+    "BackfillWorking": "Checking recurring income…",
+    "BackfillSelect": "Select the payments you received. Check any year-to-date or annual income already recorded before adding monthly entries.",
+    "BackfillNoMissing": "There are no missing payment dates to add for this rule.",
+    "BackfillExisting": "Skipped because income is already recorded",
+    "BackfillConfirm": "Confirm and add payments",
+    "BackfillCreated": "Payments created",
+    "BackfillSkipped": "Payments skipped",
+    "BackfillNoYear": "Add the current financial year to check missed payments.",
+    "BackfillPreviewFailed": "Unable to check missed payments. Try again.",
+    "BackfillSaveFailed": "Unable to add payments. Check the dates again before confirming.",
+    "AddIncomeRule": "Add income rule",
+    "CompanySource": "Company / source",
+    "RecurringDescriptionPlaceholder": "Optional — company name will be used",
+    "GrossAmount": "Gross amount (before tax)",
+    "GrossAmountHint": "Use gross salary or GST-exclusive business income.",
+    "DayOfMonth": "Day of month",
+    "DayOfMonthShort": "day",
+    "StartDate": "Start date",
+    "EndDate": "End date",
+    "UpdateRule": "Update rule",
+    "SaveRule": "Save rule",
+    "EditAction": "Edit",
+    "Pause": "Pause",
+    "Resume": "Resume",
+    "NoRecurringIncome": "No recurring income rules yet.",
+    "IncomeSource": "Income source",
+    "ManualIncome": "Manual income",
     "ImportTitle": "Import bank transactions",
     "ImportDescription": "Upload a CSV or OFX export from your bank's online banking. Review the rows, then import. Re-importing the same file will not create duplicates. Nothing is sent to a third party.",
     "Close": "Close",
@@ -505,11 +536,29 @@
     "Email": "Email",
     "Firm": "Firm",
     "CanView": "Can view",
+    "SectionDocuments": "Documents",
+    "SectionTransactions": "Transactions",
+    "SectionReviews": "Reviews",
+    "SectionAssets": "Properties & investments",
     "FinancialYears": "Financial years",
     "AllYears": "All years",
     "Save": "Save",
     "Cancel": "Cancel",
     "SendPackTo": "Send Accountant pack to",
+    "SendPackDescription": "Choose the year, check the pack, then send the evidence by email.",
+    "PackDetails": "Pack details",
+    "PackDetailsHint": "Select which financial year to include and add context for your accountant.",
+    "NoteHint": "Optional context included with the pack",
+    "EmailDetails": "Email details",
+    "EmailDetailsHint": "The pack will be attached to this message.",
+    "FromName": "From name",
+    "FromEmail": "From email",
+    "To": "To",
+    "Subject": "Subject",
+    "Message": "Message",
+    "IncludedInPack": "Included in this pack",
+    "ReadOnlyHint": "Your accountant's access remains read-only.",
+    "SendPackNow": "Send pack now",
     "LatestAvailable": "Latest available",
     "Note": "Note",
     "SendEmail": "Send email",
@@ -570,6 +619,7 @@
     "Language": "Language",
     "FinancialYearOnSignIn": "Financial year when you sign in",
     "CurrentFinancialYear": "Current financial year",
+    "AllFinancialYears": "All financial years",
     "GeneralHint": "You can still change the financial year at any time from the header.",
     "Notifications": "Notifications",
     "NotificationsHint": "Choose what appears under the bell in the header.",
@@ -591,5 +641,67 @@
     "Access": "Access",
     "AccessHint": "Invite your accountant to view your records, or remove their access.",
     "ManageAccountants": "Manage accountants"
+    ,"DocumentStorage": "Document storage"
+    ,"DocumentStorageHint": "Choose where your originals live. TaxVault keeps document metadata, OCR results and review history independent of the storage provider."
+    ,"StorageUnavailable": "Storage providers are unavailable."
+    ,"StorageProvider": "Storage provider"
+    ,"ManagedByTaxVault": "Managed by TaxVault"
+    ,"ExternalProvider": "External provider"
+    ,"ConnectOneDrive": "Connect your OneDrive"
+    ,"SaveOneDriveFirst": "Save your OneDrive app settings below to enable this connection."
+    ,"DefaultStorage": "Default storage"
+    ,"ComingSoon": "Coming soon"
+    ,"OneDriveAppSettings": "Your OneDrive app settings"
+    ,"OneDriveAppSettingsHint": "Enter the Microsoft Entra app registration that belongs to you. TaxVault encrypts these values per user."
+    ,"ApplicationClientId": "Application (client) ID"
+    ,"ClientSecret": "Client secret"
+    ,"KeepSavedSecret": "Leave blank to keep the saved secret"
+    ,"DirectoryTenantId": "Directory (tenant) ID"
+    ,"RedirectUriHint": "Redirect URI to register in Microsoft Entra:"
+    ,"Loading": "Loading…"
+    ,"Saving": "Saving…"
+    ,"SaveOneDriveSettings": "Save OneDrive settings"
+    ,"TaxVaultStorageHint": "TaxVault secure storage is managed by TaxVault. Uploaded documents are stored here by default."
+    ,"ProviderComingSoonHint": "Settings for this storage provider will be available when its connector is enabled."
+    ,"NoStorageConnections": "No external storage accounts are connected yet. External drive connectors can be added without changing your document records."
+    ,"Disconnect": "Disconnect"
+    ,"AccountantStorageHint": "Storage connections are managed by the account owner. Your accountant access does not include personal drive connections."
+    ,"AiFeatures": "AI features"
+    ,"AiFeaturesHint": "Use AI to summarise personalised Tax News. Your key is stored encrypted and is never displayed again."
+    ,"EnableAiSummaries": "Enable AI summaries"
+    ,"DisableAiSummariesHint": "Disable this to use rule-based recommendations only."
+    ,"Provider": "Provider"
+    ,"Model": "Model"
+    ,"OpenAiApiKey": "OpenAI API key"
+    ,"KeepSavedKey": "Leave blank to keep the saved key"
+    ,"ApiKeyConfigured": "An API key is configured."
+    ,"NoUserApiKey": "No user API key is configured; the server key will be used if available."
+    ,"SaveAiSettings": "Save AI settings"
+    ,"RemoveSavedKey": "Remove saved key"
+    ,"ImportantTaxNews": "Important tax news"
+    ,"ImportantTaxNewsHint": "Show important ATO and Treasury updates in the notification bell."
+    ,"EmailSubscription": "Email subscription"
+    ,"Subscribed": "Subscribed"
+    ,"Unsubscribed": "Unsubscribed"
+    ,"SubscribedHint": "You can receive review and deadline reminders."
+    ,"UnsubscribedHint": "Email reminders are currently turned off."
+    ,"Subscribe": "Subscribe"
+    ,"Unsubscribe": "Unsubscribe"
+    ,"LoadOneDriveFailed": "Unable to load your OneDrive settings."
+    ,"OneDriveSaved": "OneDrive settings saved securely for your account."
+    ,"SaveOneDriveFailed": "Unable to save your OneDrive settings."
+    ,"StorageOptionsFailed": "Storage options are currently unavailable."
+    ,"LoadConnectionsFailed": "Unable to load your storage connections."
+    ,"StorageDisconnected": "Storage connection disconnected."
+    ,"DisconnectStorageFailed": "Unable to disconnect storage connection."
+    ,"SubscriptionEnabled": "You are subscribed to TaxVault email reminders."
+    ,"SubscriptionDisabled": "You have been unsubscribed from TaxVault email reminders."
+    ,"SubscriptionUpdateFailed": "Unable to update your email subscription."
+    ,"TestEmailSent": "Test email sent. Check your inbox."
+    ,"TestEmailFailed": "Could not send the test email. Check the mail settings on the server."
+    ,"AiSettingsSaved": "AI settings saved."
+    ,"AiSettingsFailed": "Unable to save AI settings."
+    ,"ApiKeyRemoved": "Saved API key removed."
+    ,"ApiKeyRemoveFailed": "Unable to remove the saved key."
   }
 }

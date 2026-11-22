@@ -1,6 +1,28 @@
 .app-shell {
+  --tv-color-background: #f3f5f6;
+  --tv-color-text: #213344;
+  --tv-color-text-secondary: #4e6171;
+  --tv-color-text-muted: #596e7e;
+  --tv-color-border: #d7e0e5;
+  --tv-color-primary: #146460;
+  --tv-color-primary-dark: #104a48;
+  --tv-color-primary-hover: #104a48;
+  --tv-color-primary-soft: #e7f1ef;
+  --tv-color-secondary-hover: #edf4f3;
+  --tv-color-accent: #187b72;
+  --tv-color-navy: #1d374d;
+  --tv-color-navy-deep: #10273a;
+  --tv-color-table-stripe: #f6f8f9;
+  --tv-radius-sm: 5px;
+  --tv-radius-md: 7px;
+  --tv-radius-lg: 9px;
+  --tv-shadow-card: none;
+  --tv-font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tv-font-heading: var(--tv-font-family);
   min-height: 100vh;
   background: var(--tv-color-background);
+  color: var(--tv-color-text);
+  font-family: var(--tv-font-family);
 }
 
 .topbar {
@@ -246,6 +268,7 @@
   height: var(--tv-header-height);
   padding: 0 8px;
   color: #fff;
+  border-bottom: 1px solid #ffffff26;
 }
 
 .navigation {
@@ -260,7 +283,7 @@
 
 .nav-section-label {
   margin: 20px 12px 6px;
-  color: rgba(255, 255, 255, 0.52);
+  color: #a9bdca;
   font-size: 11px;
   font-weight: 600;
 }
@@ -276,7 +299,7 @@
   min-height: 36px;
   padding: 0 12px;
   border-left: 3px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--tv-radius-sm);
   color: rgba(255, 255, 255, 0.75);
   font-size: 14px;
   font-weight: 500;
@@ -291,16 +314,21 @@
 }
 
 .nav-item.active {
-  border-left-color: var(--tv-color-accent);
-  background: rgba(31, 122, 196, 0.18);
+  border-left-color: #79d6c6;
+  background: #234451;
   color: #fff;
   font-weight: 600;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #92e0d2;
+  outline-offset: -2px;
 }
 
 .nav-icon {
   width: 20px;
   text-align: center;
-  font-size: 17px;
+  font-size: 15px;
 }
 
 .main-content {

@@ -34,8 +34,8 @@ interface StorageConnectionDto {
   imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="settings-page">
-      <header>
+    <div class="settings-page tv-workspace-page">
+      <header class="page-header">
         <div class="eyebrow">{{ 'Settings.Account' | translate }}</div>
         <h1>{{ 'Settings.Title' | translate }}</h1>
         <p>{{ 'Settings.Description' | translate }}</p>
@@ -65,7 +65,7 @@ interface StorageConnectionDto {
           <span>{{ 'Settings.FinancialYearOnSignIn' | translate }}</span>
           <select name="defaultYear" [ngModel]="prefs().defaultFinancialYear" (ngModelChange)="update({ defaultFinancialYear: $event })">
             <option value="current">{{ 'Settings.CurrentFinancialYear' | translate }}</option>
-            <option value="all">All financial years</option>
+            <option value="all">{{ 'Settings.AllFinancialYears' | translate }}</option>
           </select>
         </label>
         <p class="hint">{{ 'Settings.GeneralHint' | translate }}</p>
@@ -73,13 +73,13 @@ interface StorageConnectionDto {
 
       @if (!auth.isAccountant) {
       <section class="card" aria-labelledby="storage-heading">
-        <h2 id="storage-heading">Document storage</h2>
-        <p class="hint">Choose where your originals live. TaxVault keeps the document metadata, OCR results and review history independent of the storage provider.</p>
+        <h2 id="storage-heading">{{ 'Settings.DocumentStorage' | translate }}</h2>
+        <p class="hint">{{ 'Settings.DocumentStorageHint' | translate }}</p>
         @if (storageProviders.length === 0) {
-          <p class="hint">Storage providers are unavailable.</p>
+          <p class="hint">{{ 'Settings.StorageUnavailable' | translate }}</p>
         } @else {
           <label class="field storage-provider-select">
-            <span>Storage provider</span>
+            <span>{{ 'Settings.StorageProvider' | translate }}</span>
             <select name="storageProvider" [(ngModel)]="selectedStorageProviderKey" (ngModelChange)="selectStorageProvider($event)">
               @for (provider of storageProviders; track provider.key) {
                 <option [value]="provider.key">{{ provider.label }}</option>
@@ -90,49 +90,49 @@ interface StorageConnectionDto {
             <div class="storage-provider-row">
               <div>
                 <strong>{{ provider.label }}</strong>
-                <small>{{ provider.mode === 'managed' ? 'Managed by TaxVault' : 'External provider' }}</small>
+                <small>{{ provider.mode === 'managed' ? ('Settings.ManagedByTaxVault' | translate) : ('Settings.ExternalProvider' | translate) }}</small>
               </div>
               @if (provider.key === 'onedrive') {
                 <button type="button" class="link-button" (click)="connectOneDrive()" [disabled]="provider.configured === false">
-                  Connect your OneDrive
+                  {{ 'Settings.ConnectOneDrive' | translate }}
                 </button>
                 @if (provider.configured === false) {
-                  <small class="status-pill">Save your OneDrive app settings below to enable this connection.</small>
+                  <small class="status-pill">{{ 'Settings.SaveOneDriveFirst' | translate }}</small>
                 }
               } @else {
-                <span class="status-pill">{{ provider.key === 'taxvault' ? 'Default storage' : 'Coming soon' }}</span>
+                <span class="status-pill">{{ provider.key === 'taxvault' ? ('Settings.DefaultStorage' | translate) : ('Settings.ComingSoon' | translate) }}</span>
               }
             </div>
           }
         }
         @if (selectedStorageProviderKey === 'onedrive') {
         <div class="storage-settings">
-          <strong>Your OneDrive app settings</strong>
-          <p class="hint">Enter the Microsoft Entra app registration that belongs to you. TaxVault encrypts these values per user.</p>
+          <strong>{{ 'Settings.OneDriveAppSettings' | translate }}</strong>
+          <p class="hint">{{ 'Settings.OneDriveAppSettingsHint' | translate }}</p>
           <label class="field">
-            <span>Application (client) ID</span>
+            <span>{{ 'Settings.ApplicationClientId' | translate }}</span>
             <input type="text" name="onedriveClientId" [(ngModel)]="onedriveClientId" autocomplete="off" />
           </label>
           <label class="field">
-            <span>Client secret</span>
-            <input type="password" name="onedriveClientSecret" [(ngModel)]="onedriveClientSecret" autocomplete="new-password" placeholder="Leave blank to keep the saved secret" />
+            <span>{{ 'Settings.ClientSecret' | translate }}</span>
+            <input type="password" name="onedriveClientSecret" [(ngModel)]="onedriveClientSecret" autocomplete="new-password" [placeholder]="'Settings.KeepSavedSecret' | translate" />
           </label>
           <label class="field">
-            <span>Directory (tenant) ID</span>
+            <span>{{ 'Settings.DirectoryTenantId' | translate }}</span>
             <input type="text" name="onedriveTenant" [(ngModel)]="onedriveTenant" autocomplete="off" />
           </label>
-          <p class="hint">Redirect URI to register in Microsoft Entra: {{ onedriveRedirectUri || 'Loading…' }}</p>
+          <p class="hint">{{ 'Settings.RedirectUriHint' | translate }} {{ onedriveRedirectUri || ('Settings.Loading' | translate) }}</p>
           <div class="actions">
-            <button type="button" class="link-button" (click)="saveOneDriveSettings()" [disabled]="storageSaving || !onedriveClientId.trim()">{{ storageSaving ? 'Saving…' : 'Save OneDrive settings' }}</button>
+            <button type="button" class="link-button" (click)="saveOneDriveSettings()" [disabled]="storageSaving || !onedriveClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : ('Settings.SaveOneDriveSettings' | translate) }}</button>
           </div>
         </div>
         } @else if (selectedStorageProviderKey === 'taxvault') {
-          <p class="hint storage-provider-description">TaxVault secure storage is managed by TaxVault. Uploaded documents are stored here by default.</p>
+          <p class="hint storage-provider-description">{{ 'Settings.TaxVaultStorageHint' | translate }}</p>
         } @else if (selectedStorageProviderKey) {
-          <p class="hint storage-provider-description">Settings for this storage provider will be available when its connector is enabled.</p>
+          <p class="hint storage-provider-description">{{ 'Settings.ProviderComingSoonHint' | translate }}</p>
         }
         @if (storageConnections.length === 0) {
-          <p class="hint">No external storage accounts are connected yet. External drive connectors can be added without changing your document records.</p>
+          <p class="hint">{{ 'Settings.NoStorageConnections' | translate }}</p>
         } @else {
           @for (connection of storageConnections; track connection.id) {
             <div class="storage-provider-row">
@@ -140,28 +140,28 @@ interface StorageConnectionDto {
                 <strong>{{ connection.display_name || connection.provider }}</strong>
                 <small>{{ connection.external_account_id }} · {{ connection.status }}</small>
               </div>
-              <button type="button" class="link-button danger-link" (click)="disconnectStorage(connection.id)">Disconnect</button>
+              <button type="button" class="link-button danger-link" (click)="disconnectStorage(connection.id)">{{ 'Settings.Disconnect' | translate }}</button>
             </div>
           }
         }
-        @if (storageMessage) { <p class="hint" role="status">{{ storageMessage }}</p> }
+        @if (storageMessage) { <p class="hint" role="status">{{ storageMessage | translate }}</p> }
       </section>
       } @else {
         <section class="card" aria-labelledby="storage-heading">
-          <h2 id="storage-heading">Document storage</h2>
-          <p class="hint">Storage connections are managed by the account owner. Your accountant access does not include personal drive connections.</p>
+          <h2 id="storage-heading">{{ 'Settings.DocumentStorage' | translate }}</h2>
+          <p class="hint">{{ 'Settings.AccountantStorageHint' | translate }}</p>
         </section>
       }
 
       <section class="card" aria-labelledby="ai-heading">
-        <h2 id="ai-heading">AI features</h2>
-        <p class="hint">Use AI to summarise personalised Tax News. Your key is stored encrypted and is never displayed again.</p>
+        <h2 id="ai-heading">{{ 'Settings.AiFeatures' | translate }}</h2>
+        <p class="hint">{{ 'Settings.AiFeaturesHint' | translate }}</p>
         <label class="toggle">
           <input type="checkbox" name="aiEnabled" [ngModel]="prefs().ai.enabled" (ngModelChange)="aiEnabled = $event" />
-          <span><strong>Enable AI summaries</strong><small>Disable this to use rule-based recommendations only.</small></span>
+          <span><strong>{{ 'Settings.EnableAiSummaries' | translate }}</strong><small>{{ 'Settings.DisableAiSummariesHint' | translate }}</small></span>
         </label>
         <label class="field">
-          <span>Provider</span>
+          <span>{{ 'Settings.Provider' | translate }}</span>
           <select name="aiProvider" [(ngModel)]="aiProvider" (ngModelChange)="selectAiProvider($event)">
             <option value="openai">ChatGPT / OpenAI</option>
             <option value="anthropic">Claude</option>
@@ -169,7 +169,7 @@ interface StorageConnectionDto {
           </select>
         </label>
         <label class="field">
-          <span>Model</span>
+          <span>{{ 'Settings.Model' | translate }}</span>
           <select name="aiModel" [(ngModel)]="aiModel">
             @for (model of availableAiModels; track model.value) {
               <option [value]="model.value">{{ model.label }}</option>
@@ -177,17 +177,17 @@ interface StorageConnectionDto {
           </select>
         </label>
         <label class="field">
-          <span>OpenAI API key</span>
-          <input type="password" name="aiKey" [(ngModel)]="aiKeyDraft" autocomplete="new-password" placeholder="Leave blank to keep the saved key" />
+          <span>{{ 'Settings.OpenAiApiKey' | translate }}</span>
+          <input type="password" name="aiKey" [(ngModel)]="aiKeyDraft" autocomplete="new-password" [placeholder]="'Settings.KeepSavedKey' | translate" />
         </label>
-        <p class="hint">{{ prefs().ai.api_key_configured ? 'An API key is configured.' : 'No user API key is configured; the server key will be used if available.' }}</p>
+        <p class="hint">{{ prefs().ai.api_key_configured ? ('Settings.ApiKeyConfigured' | translate) : ('Settings.NoUserApiKey' | translate) }}</p>
         <div class="actions">
-          <button type="button" class="link-button" (click)="saveAiSettings()" [disabled]="aiSaving">{{ aiSaving ? 'Saving…' : 'Save AI settings' }}</button>
+          <button type="button" class="link-button" (click)="saveAiSettings()" [disabled]="aiSaving">{{ aiSaving ? ('Settings.Saving' | translate) : ('Settings.SaveAiSettings' | translate) }}</button>
           @if (prefs().ai.api_key_configured) {
-            <button type="button" class="link-button danger-link" (click)="clearAiKey()" [disabled]="aiSaving">Remove saved key</button>
+            <button type="button" class="link-button danger-link" (click)="clearAiKey()" [disabled]="aiSaving">{{ 'Settings.RemoveSavedKey' | translate }}</button>
           }
         </div>
-        @if (aiMessage) { <p class="hint" role="status">{{ aiMessage }}</p> }
+        @if (aiMessage) { <p class="hint" role="status">{{ aiMessage | translate }}</p> }
       </section>
 
       <section class="card" aria-labelledby="notify-heading">
@@ -203,7 +203,7 @@ interface StorageConnectionDto {
         </label>
         <label class="toggle">
           <input type="checkbox" name="notifyTaxNews" [ngModel]="prefs().notifyTaxNews" (ngModelChange)="update({ notifyTaxNews: $event })" />
-          <span><strong>Important tax news</strong><small>Show important ATO and Treasury updates in the notification bell.</small></span>
+          <span><strong>{{ 'Settings.ImportantTaxNews' | translate }}</strong><small>{{ 'Settings.ImportantTaxNewsHint' | translate }}</small></span>
         </label>
       </section>
 
@@ -213,17 +213,17 @@ interface StorageConnectionDto {
           <p class="hint">{{ 'Settings.EmailRemindersHint' | translate }}</p>
           <div class="subscription-summary">
             <div>
-              <span class="subscription-label">Email subscription</span>
-              <strong>{{ emailSubscriptionActive ? 'Subscribed' : 'Unsubscribed' }}</strong>
-              <small>{{ emailSubscriptionActive ? 'You can receive review and deadline reminders.' : 'Email reminders are currently turned off.' }}</small>
+              <span class="subscription-label">{{ 'Settings.EmailSubscription' | translate }}</span>
+              <strong>{{ emailSubscriptionActive ? ('Settings.Subscribed' | translate) : ('Settings.Unsubscribed' | translate) }}</strong>
+              <small>{{ emailSubscriptionActive ? ('Settings.SubscribedHint' | translate) : ('Settings.UnsubscribedHint' | translate) }}</small>
             </div>
             @if (emailSubscriptionActive) {
-              <button type="button" class="link-button danger-link" (click)="setEmailSubscription(false)">Unsubscribe</button>
+              <button type="button" class="link-button danger-link" (click)="setEmailSubscription(false)">{{ 'Settings.Unsubscribe' | translate }}</button>
             } @else {
-              <button type="button" class="link-button" (click)="setEmailSubscription(true)">Subscribe</button>
+              <button type="button" class="link-button" (click)="setEmailSubscription(true)">{{ 'Settings.Subscribe' | translate }}</button>
             }
           </div>
-          @if (subscriptionMessage) { <p class="hint" role="status">{{ subscriptionMessage }}</p> }
+          @if (subscriptionMessage) { <p class="hint" role="status">{{ subscriptionMessage | translate }}</p> }
           <label class="toggle">
             <input type="checkbox" name="emailReviewDigest" [ngModel]="prefs().emailReviewDigest" (ngModelChange)="update({ emailReviewDigest: $event })" />
             <span><strong>{{ 'Settings.WeeklyReviewDigest' | translate }}</strong><small>{{ 'Settings.WeeklyReviewDigestHint' | translate }}</small></span>
@@ -242,7 +242,7 @@ interface StorageConnectionDto {
             <button type="button" class="link-button" (click)="downloadIcs()">{{ 'Settings.AddToCalendar' | translate }}</button>
           </div>
           @if (testMessage()) {
-            <p class="hint" role="status">{{ testMessage() }}</p>
+            <p class="hint" role="status">{{ testMessage() | translate }}</p>
           }
         </section>
 
@@ -255,13 +255,17 @@ interface StorageConnectionDto {
     </div>
   `,
   styles: [`
-    .settings-page { display: grid; gap: 24px; width: min(100%, 960px); margin: 0 auto; padding: 40px 32px 56px; box-sizing: border-box; }
+    .settings-page { display: grid; gap: 12px; width: min(100%, 1100px); margin: 0 auto; padding: 40px 32px 56px; box-sizing: border-box; }
     @media (max-width: 700px) { .settings-page { gap: 16px; padding: 24px 16px 40px; } }
     .eyebrow { color: var(--tv-color-primary); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
     h1 { margin: 8px 0 8px; font-size: 34px; font-weight: 500; letter-spacing: -0.02em; }
     header p, .hint { margin: 0; color: var(--tv-color-text-secondary); font-size: 14px; line-height: 1.55; }
-    .card { display: grid; gap: 20px; padding: 28px; border: 1px solid var(--tv-color-border); border-radius: 16px; background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
-    .card[aria-labelledby="storage-heading"] { border-color: color-mix(in srgb, var(--tv-color-primary) 22%, var(--tv-color-border)); }
+    .card { display: grid; align-items: start; gap: 16px; padding: 24px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); }
+    @media (min-width: 1024px) {
+      .card { grid-template-columns: minmax(150px, 1fr) minmax(0, 3fr); column-gap: 24px; }
+      .card > h2 { grid-column: 1; grid-row: 1; }
+      .card > :not(h2) { grid-column: 2; }
+    }
     h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
     dl { display: grid; gap: 10px; margin: 0; }
     dl div { display: grid; grid-template-columns: 100px 1fr; gap: 12px; }
@@ -272,8 +276,8 @@ interface StorageConnectionDto {
     select { min-height: 44px; padding: 0 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; background: var(--tv-color-surface); color: var(--tv-color-text); font-size: 14px; }
     input[type=text], input[type=password] { min-height: 44px; padding: 0 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; background: var(--tv-color-surface); color: var(--tv-color-text); font-size: 14px; }
     select:focus-visible, input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid color-mix(in srgb, var(--tv-color-primary) 24%, transparent); outline-offset: 2px; }
-    .toggle { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: 10px; cursor: pointer; transition: border-color 120ms ease, background-color 120ms ease; }
-    .toggle:hover { border-color: color-mix(in srgb, var(--tv-color-primary) 35%, var(--tv-color-border)); background: var(--tv-color-primary-soft); }
+    .toggle { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--tv-color-border); cursor: pointer; }
+    .toggle:hover { color: var(--tv-color-primary); }
     .toggle input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--tv-color-primary); }
     .toggle span { display: grid; gap: 2px; }
     .toggle small { color: var(--tv-color-text-secondary); font-size: 12px; }
@@ -354,7 +358,7 @@ export class SettingsComponent {
         this.onedriveRedirectUri = response.data.redirect_uri;
         this.changeDetector.markForCheck();
       },
-      error: () => { this.storageMessage = 'Unable to load your OneDrive settings.'; this.changeDetector.markForCheck(); },
+      error: () => { this.storageMessage = 'Settings.LoadOneDriveFailed'; this.changeDetector.markForCheck(); },
     });
   }
 
@@ -370,13 +374,13 @@ export class SettingsComponent {
         this.onedriveClientSecret = '';
         this.onedriveRedirectUri = response.data.redirect_uri;
         this.storageSaving = false;
-        this.storageMessage = 'OneDrive settings saved securely for your account.';
+        this.storageMessage = 'Settings.OneDriveSaved';
         this.loadStorageProviders();
         this.changeDetector.markForCheck();
       },
       error: () => {
         this.storageSaving = false;
-        this.storageMessage = 'Unable to save your OneDrive settings.';
+        this.storageMessage = 'Settings.SaveOneDriveFailed';
         this.changeDetector.markForCheck();
       },
     });
@@ -394,7 +398,7 @@ export class SettingsComponent {
         this.changeDetector.markForCheck();
       },
       error: () => {
-        this.storageMessage = 'Storage options are currently unavailable.';
+        this.storageMessage = 'Settings.StorageOptionsFailed';
         this.changeDetector.markForCheck();
       },
     });
@@ -417,7 +421,7 @@ export class SettingsComponent {
         this.changeDetector.markForCheck();
       },
       error: () => {
-        this.storageMessage = 'Unable to load your storage connections.';
+        this.storageMessage = 'Settings.LoadConnectionsFailed';
         this.changeDetector.markForCheck();
       },
     });
@@ -429,9 +433,9 @@ export class SettingsComponent {
         this.storageConnections = this.storageConnections.map((connection) => connection.id === connectionId
           ? { ...connection, status: 'disconnected' }
           : connection);
-        this.storageMessage = 'Storage connection disconnected.';
+        this.storageMessage = 'Settings.StorageDisconnected';
       },
-      error: () => { this.storageMessage = 'Unable to disconnect storage connection.'; },
+      error: () => { this.storageMessage = 'Settings.DisconnectStorageFailed'; },
     });
   }
 
@@ -472,12 +476,12 @@ export class SettingsComponent {
     }).subscribe({
       next: () => {
         this.subscriptionMessage = subscribed
-          ? 'You are subscribed to TaxVault email reminders.'
-          : 'You have been unsubscribed from TaxVault email reminders.';
+          ? 'Settings.SubscriptionEnabled'
+          : 'Settings.SubscriptionDisabled';
         this.changeDetector.markForCheck();
       },
       error: () => {
-        this.subscriptionMessage = 'Unable to update your email subscription.';
+        this.subscriptionMessage = 'Settings.SubscriptionUpdateFailed';
         this.changeDetector.markForCheck();
       },
     });
@@ -489,11 +493,11 @@ export class SettingsComponent {
     this.http.post('/api/auth/preferences/test-email', {}).subscribe({
       next: () => {
         this.sending.set(false);
-        this.testMessage.set('Test email sent. Check your inbox.');
+        this.testMessage.set('Settings.TestEmailSent');
       },
       error: () => {
         this.sending.set(false);
-        this.testMessage.set('Could not send the test email. Check the mail settings on the server.');
+        this.testMessage.set('Settings.TestEmailFailed');
       },
     });
   }
@@ -535,11 +539,11 @@ export class SettingsComponent {
         this.aiModel = ai.model;
         this.aiKeyDraft = '';
         this.aiSaving = false;
-        this.aiMessage = 'AI settings saved.';
+        this.aiMessage = 'Settings.AiSettingsSaved';
       },
       error: () => {
         this.aiSaving = false;
-        this.aiMessage = 'Unable to save AI settings.';
+        this.aiMessage = 'Settings.AiSettingsFailed';
       },
     });
   }
@@ -553,11 +557,11 @@ export class SettingsComponent {
         this.aiProvider = ai.provider;
         this.aiModel = ai.model;
         this.aiSaving = false;
-        this.aiMessage = 'Saved API key removed.';
+        this.aiMessage = 'Settings.ApiKeyRemoved';
       },
       error: () => {
         this.aiSaving = false;
-        this.aiMessage = 'Unable to remove the saved key.';
+        this.aiMessage = 'Settings.ApiKeyRemoveFailed';
       },
     });
   }

@@ -211,6 +211,13 @@ export interface RecurringIncomeRuleRequest {
   ato_category?: string | null;
 }
 
+export interface RecurringIncomePreview {
+  year: string | null;
+  amount: string;
+  missing: string[];
+  existing: string[];
+}
+
 export interface RentalSummaryLine {
   category: string;
   label: string;
@@ -521,6 +528,15 @@ export class TaxWorkspaceApiService {
 
   deleteRecurringIncome(id: string): Observable<unknown> {
     return this.http.delete(`/api/recurring-income/${id}`);
+  }
+
+  previewMissingIncome(id: string): Observable<RecurringIncomePreview> {
+    return this.http.get<ApiItem<RecurringIncomePreview>>(`/api/recurring-income/${id}/missing`).pipe(map(response => response.data));
+  }
+
+  generateMissingIncome(id: string, year: string, amount: string, dates: string[]): Observable<{ created: number; skipped: number }> {
+    return this.http.post<ApiItem<{ created: number; skipped: number }>>(`/api/recurring-income/${id}/missing`, { year, amount, dates })
+      .pipe(map(response => response.data));
   }
 
   bulkCategorise(

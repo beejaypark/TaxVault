@@ -175,16 +175,20 @@ final class DocumentController extends Controller
             throw (new ModelNotFoundException)->setModel(Document::class, [$id]);
         }
 
+        $mimeType = $document->mime_type ?? 'application/octet-stream';
+        $inline = $request->boolean('inline')
+            && in_array($mimeType, ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/tiff'], true);
+
         return response()->streamDownload(
             static function () use ($document): void {
                 echo Storage::disk($document->storage_disk)->get($document->object_key);
             },
             $document->original_filename ?? 'tax-document',
             [
-                'Content-Type' => $document->mime_type ?? 'application/octet-stream',
+                'Content-Type' => $mimeType,
                 'X-Content-Type-Options' => 'nosniff',
             ],
-            $request->boolean('inline') ? 'inline' : 'attachment',
+            $inline ? 'inline' : 'attachment',
         );
     }
 

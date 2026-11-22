@@ -85,6 +85,7 @@ services:
       KC_PROXY_HEADERS: xforwarded
     volumes:
       - ./infrastructure/keycloak/realm:/opt/keycloak/data/import:ro
+      - ./infrastructure/keycloak/themes/taxvault:/opt/keycloak/themes/taxvault:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -113,6 +114,8 @@ services:
       APP_DEBUG: "true"
       APP_URL: ${APP_URL:-https://localhost:8443}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-30}
+      TAXVAULT_SUPPORT_EMAIL: ${TAXVAULT_SUPPORT_EMAIL:-}
       APP_KEY: ${APP_KEY:-}
       DB_CONNECTION: pgsql
       DB_HOST: postgres

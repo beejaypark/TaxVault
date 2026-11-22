@@ -1,4 +1,4 @@
-<div class="transactions-page">
+<div class="transactions-page tv-workspace-page">
   <tv-back-navigation />
   <header class="page-header">
     <div>
@@ -28,26 +28,6 @@
     <app-work-from-home />
   }
 
-  @if (auth.canEdit) {
-    <section class="recurring-card" tvCollapsibleCard>
-      <div class="toolbar"><div><h2>Recurring income</h2><p>Automatically create monthly income transactions without duplicates.</p></div><button type="button" class="secondary-button" (click)="showRecurringForm ? resetRecurringForm() : showRecurringForm = true">{{ showRecurringForm ? 'Cancel' : 'Add income rule' }}</button></div>
-      @if (showRecurringForm) {
-        <form class="recurring-form" (ngSubmit)="saveRecurringIncome()">
-          <label>Company / source <input name="recurringName" [(ngModel)]="recurringForm.name" required [class.input-invalid]="recurringFieldError('name')" /> @if (recurringFieldError('name'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
-          <label>Description <input name="recurringDescription" [(ngModel)]="recurringForm.description" placeholder="Optional — company name will be used" /></label>
-          <label>Gross amount (before tax) <input name="recurringAmount" type="number" min="0.01" step="0.01" [(ngModel)]="recurringForm.amount" required [class.input-invalid]="recurringFieldError('amount')" /> @if (recurringFieldError('amount'); as error) { <small class="field-validation-error">{{ error }}</small> }<small>Use gross salary or GST-exclusive business income.</small></label>
-          <label>Day of month <input name="recurringDay" type="number" min="1" max="28" [(ngModel)]="recurringForm.day_of_month" required [class.input-invalid]="recurringFieldError('day')" /> @if (recurringFieldError('day'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
-          <label>Start date <input name="recurringStart" type="date" [(ngModel)]="recurringForm.start_date" required [class.input-invalid]="recurringFieldError('start')" /> @if (recurringFieldError('start'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
-          <label>End date <input name="recurringEnd" type="date" [(ngModel)]="recurringForm.end_date" [class.input-invalid]="recurringFieldError('end')" /> @if (recurringFieldError('end'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
-          <button type="submit" class="primary-button" [disabled]="!!recurringFieldError('name') || !!recurringFieldError('amount') || !!recurringFieldError('day') || !!recurringFieldError('start') || !!recurringFieldError('end')">{{ editingRecurringId ? 'Update rule' : 'Save rule' }}</button>
-        </form>
-      }
-      @for (rule of recurringIncome; track rule.id) {
-        <div class="recurring-row"><div><strong>{{ rule.name }}</strong><span>{{ rule.description }} · day {{ rule.day_of_month }}</span></div><strong>{{ formatCurrency(rule.amount) }}</strong><div class="row-actions"><button type="button" class="secondary-button" (click)="editRecurringIncome(rule)">Edit</button><button type="button" class="secondary-button" (click)="toggleRecurringIncome(rule)">{{ rule.active ? 'Pause' : 'Resume' }}</button><button type="button" class="danger-button" (click)="deleteRecurringIncome(rule)">Delete</button></div></div>
-      } @empty { <p class="empty-state">No recurring income rules yet.</p> }
-    </section>
-  }
-
   @if (showForm) {
     <form #transactionEditor class="transaction-form" (ngSubmit)="saveTransaction()">
       <div class="form-heading">
@@ -62,9 +42,9 @@
           </select>
         </label>
         @if (form.direction === 'income') {
-          <label>Income source
+          <label>{{ 'Transactions.IncomeSource' | translate }}
             <select name="incomeSource" [(ngModel)]="incomeSource" (ngModelChange)="selectIncomeSource($event)">
-              <option value="manual">Manual income</option>
+              <option value="manual">{{ 'Transactions.ManualIncome' | translate }}</option>
               @for (rule of recurringIncome; track rule.id) {
                 <option [value]="rule.id">{{ rule.name }} · {{ formatCurrency(rule.amount) }}</option>
               }
@@ -101,7 +81,7 @@
     </form>
   }
 
-  <section class="summary-grid" [attr.aria-label]="'Transactions.Summary' | translate">
+  <section class="summary-grid tv-metric-strip" [attr.aria-label]="'Transactions.Summary' | translate">
     <article class="summary-card" title="Total income transactions in the selected financial year"><span>{{ 'Transactions.Income' | translate }}</span><strong>{{ formatCurrency(totalIncome) }}</strong></article>
     <article class="summary-card" title="Total expense transactions in the selected financial year"><span>{{ 'Transactions.Expenses' | translate }}</span><strong>{{ formatCurrency(totalExpenses) }}</strong></article>
     <article class="summary-card" title="Income minus expenses in the selected financial year"><span>{{ 'Transactions.NetRecords' | translate }}</span><strong>{{ formatCurrency(totalIncome - totalExpenses) }}</strong></article>
@@ -114,15 +94,22 @@
         <p>{{ filteredTransactions.length }} {{ 'Transactions.Records' | translate }}</p>
       </div>
       <div class="filters">
-        <label class="sr-only" for="direction-filter">{{ 'Transactions.TransactionType' | translate }}</label>
-        <select id="direction-filter" [(ngModel)]="selectedDirection" name="directionFilter">
-          <option value="all">{{ 'Transactions.AllTypes' | translate }}</option>
-          <option value="income">{{ 'Transactions.Income' | translate }}</option>
-          <option value="expense">{{ 'Transactions.Expenses' | translate }}</option>
-        </select>
         <label class="sr-only" for="transaction-search">{{ 'Transactions.SearchTransactions' | translate }}</label>
         <input id="transaction-search" name="search" [(ngModel)]="searchText" [placeholder]="'Transactions.SearchDescriptions' | translate" />
       </div>
+    </div>
+
+    <div class="workspace-quick-filters" role="group" [attr.aria-label]="'Transactions.TransactionType' | translate">
+      @let counts = directionCounts;
+      <button type="button" [attr.aria-pressed]="selectedDirection === 'all'" (click)="changeDirection('all')">
+        {{ 'Transactions.AllTypes' | translate }} <span>{{ counts.all }}</span>
+      </button>
+      <button type="button" [attr.aria-pressed]="selectedDirection === 'income'" (click)="changeDirection('income')">
+        {{ 'Transactions.Income' | translate }} <span>{{ counts.income }}</span>
+      </button>
+      <button type="button" [attr.aria-pressed]="selectedDirection === 'expense'" (click)="changeDirection('expense')">
+        {{ 'Transactions.Expenses' | translate }} <span>{{ counts.expense }}</span>
+      </button>
     </div>
 
     @if (auth.canEdit && selectedIds.size > 0) {
@@ -191,4 +178,80 @@
       </div>
     }
   </section>
+
+  @if (auth.canEdit) {
+    <section class="recurring-card" tvCollapsibleCard>
+      <div class="toolbar"><div><h2>{{ 'Transactions.RecurringIncome' | translate }}</h2><p>{{ 'Transactions.RecurringIncomeHint' | translate }}</p></div><button type="button" class="secondary-button" (click)="showRecurringForm ? resetRecurringForm() : showRecurringForm = true">{{ showRecurringForm ? ('Transactions.Cancel' | translate) : ('Transactions.AddIncomeRule' | translate) }}</button></div>
+      @if (showRecurringForm) {
+        <form class="recurring-form" (ngSubmit)="saveRecurringIncome()">
+          <label>{{ 'Transactions.CompanySource' | translate }} <input name="recurringName" [(ngModel)]="recurringForm.name" required [class.input-invalid]="recurringFieldError('name')" /> @if (recurringFieldError('name'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Transactions.DescriptionField' | translate }} <input name="recurringDescription" [(ngModel)]="recurringForm.description" [placeholder]="'Transactions.RecurringDescriptionPlaceholder' | translate" /></label>
+          <label>{{ 'Transactions.GrossAmount' | translate }} <input name="recurringAmount" type="number" min="0.01" step="0.01" [(ngModel)]="recurringForm.amount" required [class.input-invalid]="recurringFieldError('amount')" /> @if (recurringFieldError('amount'); as error) { <small class="field-validation-error">{{ error }}</small> }<small>{{ 'Transactions.GrossAmountHint' | translate }}</small></label>
+          <label>{{ 'Transactions.DayOfMonth' | translate }} <input name="recurringDay" type="number" min="1" max="28" [(ngModel)]="recurringForm.day_of_month" required [class.input-invalid]="recurringFieldError('day')" /> @if (recurringFieldError('day'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Transactions.StartDate' | translate }} <input name="recurringStart" type="date" [(ngModel)]="recurringForm.start_date" required [class.input-invalid]="recurringFieldError('start')" /> @if (recurringFieldError('start'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <label>{{ 'Transactions.EndDate' | translate }} <input name="recurringEnd" type="date" [(ngModel)]="recurringForm.end_date" [class.input-invalid]="recurringFieldError('end')" /> @if (recurringFieldError('end'); as error) { <small class="field-validation-error">{{ error }}</small> }</label>
+          <button type="submit" class="primary-button" [disabled]="!!recurringFieldError('name') || !!recurringFieldError('amount') || !!recurringFieldError('day') || !!recurringFieldError('start') || !!recurringFieldError('end')">{{ editingRecurringId ? ('Transactions.UpdateRule' | translate) : ('Transactions.SaveRule' | translate) }}</button>
+        </form>
+      }
+      @for (rule of recurringIncome; track rule.id) {
+        <div class="recurring-row">
+          <div><strong>{{ rule.name }}</strong><span>{{ rule.description }} · {{ 'Transactions.DayOfMonthShort' | translate }} {{ rule.day_of_month }}</span></div>
+          <strong>{{ formatCurrency(rule.amount) }}</strong>
+          <div class="row-actions">
+            @if (rule.active) {
+              <button type="button" class="secondary-button" [disabled]="backfillBusy" (click)="previewMissingIncome(rule.id)">
+                {{ 'Transactions.BackfillPreview' | translate }}
+              </button>
+            }
+            <button type="button" class="secondary-button" (click)="editRecurringIncome(rule)">{{ 'Transactions.EditAction' | translate }}</button>
+            <button type="button" class="secondary-button" (click)="toggleRecurringIncome(rule)">{{ rule.active ? ('Transactions.Pause' | translate) : ('Transactions.Resume' | translate) }}</button>
+            <button type="button" class="danger-button" (click)="deleteRecurringIncome(rule)">{{ 'Transactions.DeleteAction' | translate }}</button>
+          </div>
+        </div>
+        @if (backfillRuleId === rule.id) {
+          <section class="recurring-backfill" [attr.aria-label]="'Transactions.BackfillPreview' | translate">
+            @if (backfillBusy) { <p role="status">{{ 'Transactions.BackfillWorking' | translate }}</p> }
+            @if (backfillError) { <p class="notice error" role="alert">{{ backfillError | translate }}</p> }
+            @if (backfillResult; as result) {
+              <p role="status">{{ 'Transactions.BackfillCreated' | translate }} {{ result.created }}
+                · {{ 'Transactions.BackfillSkipped' | translate }} {{ result.skipped }}</p>
+            }
+            @if (backfillPreview; as preview) {
+              @if (preview.year) {
+                <h3>FY {{ preview.year }}</h3>
+                @if (preview.missing.length) {
+                  <p>{{ 'Transactions.BackfillSelect' | translate }}</p>
+                  <ul class="backfill-dates">
+                    @for (date of preview.missing; track date) {
+                      <li><label>
+                        <input type="checkbox" [checked]="backfillDates.has(date)" [disabled]="backfillBusy"
+                          (change)="toggleBackfillDate(date, $any($event.target).checked)" />
+                        <time [attr.datetime]="date">{{ formatDate(date) }}</time>
+                        <strong>{{ formatCurrency(preview.amount) }}</strong>
+                      </label></li>
+                    }
+                  </ul>
+                } @else {
+                  <p>{{ 'Transactions.BackfillNoMissing' | translate }}</p>
+                }
+                @if (preview.existing.length) {
+                  <p>{{ 'Transactions.BackfillExisting' | translate }}
+                    @for (date of preview.existing; track date; let last = $last) {
+                      <time [attr.datetime]="date">{{ formatDate(date) }}</time>{{ last ? '' : ', ' }}
+                    }
+                  </p>
+                }
+                @if (preview.missing.length) {
+                  <button type="button" class="primary-button" [disabled]="backfillBusy || !backfillDates.size"
+                    (click)="generateMissingIncome()">{{ 'Transactions.BackfillConfirm' | translate }} ({{ backfillDates.size }})</button>
+                }
+              } @else {
+                <p>{{ 'Transactions.BackfillNoYear' | translate }}</p>
+              }
+            }
+          </section>
+        }
+      } @empty { <p class="empty-state">{{ 'Transactions.NoRecurringIncome' | translate }}</p> }
+    </section>
+  }
 </div>

@@ -1,7 +1,8 @@
 {
   "realm": "taxvault",
   "enabled": true,
-  "displayName": "TaxVault Local",
+  "displayName": "TaxVault",
+  "loginTheme": "taxvault",
   "sslRequired": "external",
   "registrationAllowed": true,
   "loginWithEmailAllowed": true,
@@ -28,7 +29,7 @@
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "https://localhost:8443/login##https://desktop-fn3ojjj.tailc14f46.ts.net/login"
+        "post.logout.redirect.uris": "https://localhost:8443/##https://desktop-fn3ojjj.tailc14f46.ts.net/"
       },
       "defaultClientScopes": [
         "profile",

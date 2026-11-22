@@ -1,10 +1,9 @@
-<div class="dashboard-page" [class.widget-editing]="editWidgets">
+<div class="dashboard-page tv-workspace-page" [class.widget-editing]="editWidgets">
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ financialYear }}</div>
       <h1>{{ 'Dashboard.Title' | translate }}</h1>
       <p>{{ 'Dashboard.Description' | translate }}</p>
-      <p class="refresh-indicator">{{ 'Dashboard.RefreshStatus' | translate }}</p>
     </div>
 
     @if (auth.canEdit) {
@@ -50,6 +49,26 @@
   @if (isLoading) {
     <p class="dashboard-loading" role="status">{{ 'Dashboard.Loading' | translate }}</p>
   } @else {
+    <section class="summary-grid tv-metric-strip" [attr.aria-label]="'Dashboard.Summary' | translate">
+      <a routerLink="/reviews" class="summary-card attention">
+        <span class="summary-label">{{ 'Dashboard.NeedsAttention' | translate }}</span>
+        <strong class="summary-value">{{ openReviews.length }}</strong>
+        <span class="summary-description">{{ 'Dashboard.ReviewsWaiting' | translate }}</span>
+      </a>
+
+      <a routerLink="/documents" class="summary-card">
+        <span class="summary-label">{{ 'Dashboard.Documents' | translate }}</span>
+        <strong class="summary-value">{{ filteredDocuments.length }}</strong>
+        <span class="summary-description">{{ 'Dashboard.TaxRecordsUploaded' | translate }}</span>
+      </a>
+
+      <a routerLink="/reviews" class="summary-card">
+        <span class="summary-label">{{ 'Dashboard.Reviewed' | translate }}</span>
+        <strong class="summary-value">{{ completedReviews }}</strong>
+        <span class="summary-description">{{ 'Dashboard.CompletedReviewItems' | translate }}</span>
+      </a>
+    </section>
+
     @if (taxReadiness) {
       <section class="readiness-panel" aria-labelledby="readiness-heading">
         <div class="readiness-score">
@@ -102,25 +121,6 @@
         </div>
       </section>
     }
-    <section class="summary-grid" [attr.aria-label]="'Dashboard.Summary' | translate">
-      <a routerLink="/documents" class="summary-card">
-        <span class="summary-label">{{ 'Dashboard.Documents' | translate }}</span>
-        <strong class="summary-value">{{ filteredDocuments.length }}</strong>
-        <span class="summary-description">{{ 'Dashboard.TaxRecordsUploaded' | translate }}</span>
-      </a>
-
-      <a routerLink="/reviews" class="summary-card attention">
-        <span class="summary-label">{{ 'Dashboard.NeedsAttention' | translate }}</span>
-        <strong class="summary-value">{{ openReviews.length }}</strong>
-        <span class="summary-description">{{ 'Dashboard.ReviewsWaiting' | translate }}</span>
-      </a>
-
-      <a routerLink="/reviews" class="summary-card">
-        <span class="summary-label">{{ 'Dashboard.Reviewed' | translate }}</span>
-        <strong class="summary-value">{{ completedReviews }}</strong>
-        <span class="summary-description">{{ 'Dashboard.CompletedReviewItems' | translate }}</span>
-      </a>
-    </section>
 
     <div class="dashboard-columns">
     <div class="dashboard-main">

@@ -10,7 +10,7 @@ import { TranslationService } from '../../shared/i18n/translation.service';
   selector: 'app-tax-news',
   imports: [TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective, TranslatePipe],
   template: `
-    <div class="news-page">
+    <div class="news-page tv-workspace-page">
       <tv-back-navigation />
       <header class="page-header">
         <div>
@@ -74,12 +74,12 @@ import { TranslationService } from '../../shared/i18n/translation.service';
     .sync-button:hover:not(:disabled) { background: var(--tv-color-primary-dark); }
     .sync-button:disabled { cursor: wait; opacity: .65; }
     .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .filters button { padding: 7px 12px; border: 1px solid var(--tv-color-border); border-radius: 999px; background: var(--tv-color-surface); color: var(--tv-color-primary); cursor: pointer; transition: background-color .14s, border-color .14s, color .14s; }
-    .filters button:hover, .filters button.active { border-color: var(--tv-color-primary); background: var(--tv-color-primary); color: #fff; }
+    .filters button { padding: 7px 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); background: var(--tv-color-surface); color: var(--tv-color-text); cursor: pointer; }
+    .filters button:hover, .filters button.active { border-color: var(--tv-color-primary); background: var(--tv-color-primary-soft); color: var(--tv-color-primary-dark); }
     .news-card { overflow: hidden; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); }
     .loading, .empty { padding: 24px; }
     .news-table-header, .news-row { display: grid; grid-template-columns: minmax(0, 2.6fr) minmax(130px, 1fr) minmax(100px, .7fr) minmax(110px, .75fr); gap: 18px; align-items: center; padding: 14px 20px; }
-    .news-table-header { background: var(--tv-color-primary-soft); color: var(--tv-color-primary); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .news-table-header { background: var(--tv-color-table-stripe); color: var(--tv-color-text-secondary); font-size: 12px; font-weight: 650; }
     .news-row { border-top: 1px solid var(--tv-color-border); font-size: 12px; }
     .news-row.important { background: #fffaf0; }
     .news-main { display: flex; gap: 10px; min-width: 0; }

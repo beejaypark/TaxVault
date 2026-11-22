@@ -1,0 +1,103 @@
+.login-pf body#keycloak-bg {
+  background: #071421 url("../img/taxvault-login.jpg?v=3") center / cover no-repeat fixed;
+}
+
+#kc-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+}
+
+#kc-header-wrapper::before {
+  content: "";
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  background: url("../img/taxvault-compass.svg") center / contain no-repeat;
+}
+
+#keycloak-bg {
+  --taxvault-panel: #102437;
+  --taxvault-field: #1b344b;
+  --taxvault-text: #f2f7fb;
+  --taxvault-link: #8ce5d6;
+  --taxvault-accent: #4bc7b4;
+  --taxvault-action: #087369;
+  --taxvault-action-hover: #065b54;
+}
+
+#keycloak-bg #kc-header-wrapper {
+  color: var(--taxvault-text);
+}
+
+#keycloak-bg .pf-v5-c-login__main {
+  --keycloak-card-top-color: var(--taxvault-accent);
+  --pf-v5-global--Color--100: var(--taxvault-text);
+  --pf-v5-global--Color--200: #b8cad8;
+  --pf-v5-global--BorderColor--100: #55738b;
+  --pf-v5-global--link--Color: var(--taxvault-link);
+  --pf-v5-global--link--Color--hover: #bcf4eb;
+  color-scheme: dark;
+  color: var(--taxvault-text);
+  background-color: var(--taxvault-panel);
+}
+
+#keycloak-bg .pf-v5-c-login__main a:focus-visible,
+#keycloak-bg .pf-v5-c-login__main .pf-v5-c-button:focus-visible {
+  outline: 2px solid var(--taxvault-link);
+  outline-offset: 3px;
+}
+
+#keycloak-bg .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: var(--taxvault-field);
+  --pf-v5-c-form-control--Color: var(--taxvault-text);
+  --pf-v5-c-form-control--after--BorderBottomColor: #7795aa;
+  --pf-v5-c-form-control--hover--after--BorderBottomColor: var(--taxvault-accent);
+  --pf-v5-c-form-control--focus--after--BorderBottomColor: var(--taxvault-link);
+}
+
+#keycloak-bg .pf-v5-c-button.pf-m-control {
+  --pf-v5-c-button--m-control--BackgroundColor: var(--taxvault-field);
+  --pf-v5-c-button--m-control--hover--BackgroundColor: #27465f;
+  --pf-v5-c-button--m-control--after--BorderBottomColor: #7795aa;
+  --pf-v5-c-button--m-control--hover--after--BorderBottomColor: var(--taxvault-accent);
+}
+
+#keycloak-bg .pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--Color: #fff;
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--taxvault-action);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--taxvault-action-hover);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--taxvault-action-hover);
+  --pf-v5-c-button--m-primary--active--BackgroundColor: var(--taxvault-action-hover);
+}
+
+#keycloak-bg .pf-v5-c-button.pf-m-secondary {
+  --pf-v5-c-button--m-secondary--Color: var(--taxvault-link);
+  --pf-v5-c-button--m-secondary--hover--Color: var(--taxvault-text);
+  --pf-v5-c-button--m-secondary--after--BorderColor: var(--taxvault-accent);
+  --pf-v5-c-button--m-secondary--hover--after--BorderColor: var(--taxvault-link);
+}
+
+.taxvault-login-footer {
+  display: flex;
+  justify-content: center;
+  padding: 0 16px 20px;
+}
+
+#keycloak-bg .taxvault-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  color: var(--taxvault-link);
+  text-decoration: none;
+}
+
+#keycloak-bg .taxvault-home-link:hover {
+  background: var(--taxvault-field);
+  color: var(--taxvault-text);
+}

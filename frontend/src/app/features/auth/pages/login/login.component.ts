@@ -191,7 +191,9 @@ export class LoginComponent implements OnInit {
       ? authError === 'inactive'
         ? this.translations.translate('Auth.InactiveAccount')
         : this.translations.translate('Auth.OidcIncomplete')
-      : '';
+      : this.route.snapshot.queryParamMap.get('sessionExpired') === '1'
+        ? this.translations.translate('Auth.SessionExpired')
+        : '';
 
     this.auth.initialize().subscribe({
       next: (user) => {

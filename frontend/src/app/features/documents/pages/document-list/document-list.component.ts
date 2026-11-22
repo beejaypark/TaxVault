@@ -98,6 +98,19 @@ export class DocumentListComponent implements OnInit {
   }
 
   get filteredDocuments(): DocumentDto[] {
+    return this.documentsMatchingOtherFilters.filter(document => !this.statusFilter || document.status === this.statusFilter);
+  }
+
+  get statusCounts(): Map<string, number> {
+    const documents = this.documentsMatchingOtherFilters;
+    const counts = new Map<string, number>([['', documents.length]]);
+    for (const document of documents) {
+      counts.set(document.status, (counts.get(document.status) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  private get documentsMatchingOtherFilters(): DocumentDto[] {
     const selectedYearId = this.api.selectedFinancialYearId();
 
     const byYear = selectedYearId
@@ -146,10 +159,6 @@ export class DocumentListComponent implements OnInit {
 
   private matchesFilters(document: DocumentDto): boolean {
     if (this.typeFilter && document.document_type_id !== this.typeFilter) {
-      return false;
-    }
-
-    if (this.statusFilter && document.status !== this.statusFilter) {
       return false;
     }
 

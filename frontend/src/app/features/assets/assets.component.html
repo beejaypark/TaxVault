@@ -1,9 +1,9 @@
-<div class="workspace-page">
+<div class="workspace-page tv-workspace-page">
   <tv-back-navigation />
   <header class="page-header">
     <div>
       <div class="eyebrow">{{ 'TaxWorkspace.Title' | translate }}</div>
-      <h1>{{ 'Assets.Title' | translate }}</h1>
+      <h1>{{ (activeTab === 'properties' ? 'Properties.Title' : 'Investments.Title') | translate }}</h1>
       <p>{{ 'Assets.Description' | translate }}</p>
     </div>
     @if (!auth.canEdit) {

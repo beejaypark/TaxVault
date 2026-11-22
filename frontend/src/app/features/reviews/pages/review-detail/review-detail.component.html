@@ -1,12 +1,12 @@
 @if (isLoading) {
-  <main class="review-detail-page">
+  <main class="review-detail-page tv-workspace-page">
     <div class="detail-state" role="status">
       <span class="state-spinner" aria-hidden="true"></span>
       Loading review...
     </div>
   </main>
 } @else if (loadError) {
-  <main class="review-detail-page">
+  <main class="review-detail-page tv-workspace-page">
     <tv-back-navigation />
     <section class="detail-state error-state" role="alert">
       <h1>Review unavailable</h1>
@@ -15,7 +15,7 @@
     </section>
   </main>
 } @else if (review) {
-  <main class="review-detail-page">
+  <main class="review-detail-page tv-workspace-page">
     <tv-back-navigation />
 
     <header class="detail-header">
@@ -58,56 +58,68 @@
     }
 
     <div class="detail-layout">
-      <div class="detail-main-column">
-        <section class="detail-card source-card" tvCollapsibleCard aria-label="Source document">
-          <div class="section-title-row">
-            <div class="section-icon document-icon"><tv-icon name="document" /></div>
-            <div>
-              <p class="eyebrow">Evidence</p>
-              <h2>Source document</h2>
+      <section class="detail-card source-card" aria-label="Source document">
+        <div class="section-title-row">
+          <div class="section-icon document-icon"><tv-icon name="document" /></div>
+          <div>
+            <p class="eyebrow">Evidence</p>
+            <h2>Source document</h2>
+          </div>
+        </div>
+        @if (review.document) {
+          <div class="source-document">
+            <div class="file-icon" aria-hidden="true"><tv-icon name="document" /></div>
+            <div class="source-file-copy">
+              <strong>{{ review.document.description || review.document.originalFilename }}</strong>
+              <span>
+                @if (review.document.mimeType) { {{ review.document.mimeType }} }
+                @if (review.document.sizeBytes !== null) {
+                  @if (review.document.mimeType) { · }
+                  {{ review.document.sizeBytes | number }} bytes
+                }
+              </span>
+              <a [href]="'/api/documents/' + review.document.id + '/content'" target="_blank" rel="noopener" class="no-print">
+                Download original document
+              </a>
+              <a [href]="'/api/documents/' + review.document.id + '/content?inline=1'" target="_blank" rel="noopener" class="no-print">
+                Open original to print
+              </a>
             </div>
           </div>
-          @if (review.document) {
-            <div class="source-document">
-              <div class="file-icon" aria-hidden="true">PDF</div>
-              <div class="source-file-copy">
-                <strong>{{ review.document.description || review.document.originalFilename }}</strong>
-                <span>
-                  @if (review.document.mimeType) { {{ review.document.mimeType }} }
-                  @if (review.document.sizeBytes !== null) {
-                    @if (review.document.mimeType) { · }
-                    {{ review.document.sizeBytes | number }} bytes
-                  }
-                </span>
-                <a [href]="'/api/documents/' + review.document.id + '/content'" target="_blank" rel="noopener" class="no-print">
-                  Download original document
-                </a>
-                <a [href]="'/api/documents/' + review.document.id + '/content?inline=1'" target="_blank" rel="noopener" class="no-print">
-                  Open original to print
-                </a>
-              </div>
-            </div>
-            <div class="source-facts">
-              <div>
-                <span>Uploaded</span>
-                <strong>{{ formatDate(review.document.uploadedAt) }}</strong>
-              </div>
-              <div>
-                <span>Document reference</span>
-                <strong class="reference-value">{{ review.target.documentId || 'Not available' }}</strong>
-              </div>
-            </div>
-          } @else {
-            <div class="source-document">
-              <div class="file-icon missing-file"><tv-icon name="warning" /></div>
-              <div class="source-file-copy">
-                <strong>Source document details unavailable</strong>
-                <span>Document reference: {{ review.target.documentId || 'Not available' }}</span>
-              </div>
-            </div>
+          @if (canPreviewSource) {
+            <button type="button" class="secondary-button no-print source-preview-toggle"
+              [attr.aria-expanded]="sourcePreview?.documentId === review.document.id"
+              (click)="toggleSourcePreview(review.document.id)">
+              {{ sourcePreview?.documentId === review.document.id ? 'Hide preview' : 'Preview source document' }}
+            </button>
+            @if (sourcePreview; as preview) {
+              @if (preview.documentId === review.document.id) {
+                <iframe class="source-preview no-print" [src]="preview.url" title="Original document preview"></iframe>
+              }
+            }
           }
-        </section>
+          <div class="source-facts">
+            <div>
+              <span>Uploaded</span>
+              <strong>{{ formatDate(review.document.uploadedAt) }}</strong>
+            </div>
+            <div>
+              <span>Document reference</span>
+              <strong class="reference-value">{{ review.target.documentId || 'Not available' }}</strong>
+            </div>
+          </div>
+        } @else {
+          <div class="source-document">
+            <div class="file-icon missing-file"><tv-icon name="warning" /></div>
+            <div class="source-file-copy">
+              <strong>Source document details unavailable</strong>
+              <span>Document reference: {{ review.target.documentId || 'Not available' }}</span>
+            </div>
+          </div>
+        }
+      </section>
 
+      <div class="detail-main-column">
         @if (review.extraction) {
           <section class="detail-card extraction-card" tvCollapsibleCard aria-label="Document extraction">
             <div class="section-title-row extraction-heading">
@@ -296,9 +308,14 @@
             @if (review.document) {
               <label class="expense-toggle">
                 <input type="checkbox" [(ngModel)]="recordExpense" [ngModelOptions]="{ standalone: true }"
-                  [disabled]="isSubmitting" />
+                  (ngModelChange)="resetIncomeSelection()" [disabled]="isSubmitting" />
                 Also save transactions in Income &amp; expenses
               </label>
+              @if (!incomeCheckOpen) {
+                <button type="button" class="secondary-button" (click)="openIncomeCheck()" [disabled]="isSubmitting">
+                  Check existing income
+                </button>
+              }
             }
             @if (recordExpense) {
               <div class="transaction-drafts">
@@ -313,6 +330,7 @@
                     </div>
                     <label [for]="'expense-date-' + i">Transaction date</label>
                     <input [id]="'expense-date-' + i" type="date" [(ngModel)]="draft.transaction_date"
+                      (ngModelChange)="resetIncomeSelection()"
                       [ngModelOptions]="{ standalone: true }" [class.input-invalid]="isTransactionDateInvalid(draft.transaction_date)"
                       [attr.aria-invalid]="isTransactionDateInvalid(draft.transaction_date)" [disabled]="isSubmitting" />
                     @if (isTransactionDateInvalid(draft.transaction_date)) {
@@ -320,6 +338,7 @@
                     }
                     <label [for]="'expense-direction-' + i">Record as</label>
                     <select [id]="'expense-direction-' + i" [(ngModel)]="draft.direction"
+                      (ngModelChange)="$event === 'income' ? openIncomeCheck() : resetIncomeSelection()"
                       [ngModelOptions]="{ standalone: true }" [disabled]="isSubmitting">
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
@@ -343,6 +362,61 @@
                 Add income and expenses from the same statement as separate transactions. Each date determines its financial year, and every transaction is linked to the source document. Review tax treatment separately.
               </p>
             }
+            @if (incomeCheckOpen) {
+              <fieldset class="income-check" [disabled]="isSubmitting">
+                <legend>Check existing income</legend>
+                <label for="income-period-kind">Amount on the statement</label>
+                <select id="income-period-kind" [(ngModel)]="incomePeriod" (ngModelChange)="resetIncomeSelection()">
+                  <option value="payment">This payment</option>
+                  <option value="cumulative">Year-to-date or annual total</option>
+                </select>
+                <label for="income-period-start">{{ incomePeriod === 'payment' ? 'Payment date' : 'Period start' }}</label>
+                <input id="income-period-start" type="date" [(ngModel)]="incomePeriodStart" (ngModelChange)="resetIncomeSelection()" />
+                @if (incomePeriod === 'cumulative') {
+                  <label for="income-period-end">Period end</label>
+                  <input id="income-period-end" type="date" [(ngModel)]="incomePeriodEnd" (ngModelChange)="resetIncomeSelection()" />
+                  <p>Year-to-date amounts may include income already recorded. To keep this document as evidence only, approve with transaction saving unchecked.</p>
+                } @else if (recordExpense && !incomePeriodStart) {
+                  <p>The check uses the income transaction dates above. You can also enter a payment date here.</p>
+                }
+                @if (incomeCheckLoading) {
+                  <p role="status">Checking income transactions…</p>
+                } @else if (incomeCheckError) {
+                  <p role="alert">Could not load income transactions.</p>
+                  <button class="secondary-button" type="button" (click)="openIncomeCheck()">Try again</button>
+                } @else if (checkedIncomeDates) {
+                  @if (incomeMatches.length) {
+                    <p role="status">{{ incomeMatches.length }} existing income transaction(s) totalling {{ incomeMatchesTotal | currency:'AUD':'symbol-narrow' }}. Check the description and amount against the statement.</p>
+                    <ul class="income-matches">
+                      @for (match of incomeMatches; track match.id) {
+                        <li>
+                          <span><strong>{{ match.description }}</strong> · {{ formatDate(match.transaction_date) }} · {{ match.amount | currency:'AUD':'symbol-narrow' }}</span>
+                          @if (incomePeriod === 'payment') {
+                            @if (existingIncomeId === match.id) {
+                              <button class="secondary-button" type="button" (click)="resetIncomeSelection()">Clear selection</button>
+                            } @else if (!match.document_id || match.document_id === review.document?.id) {
+                              <button class="secondary-button" type="button" (click)="selectExistingIncome(match)">Use this transaction</button>
+                            } @else {
+                              <small>Has a source document</small>
+                            }
+                          }
+                        </li>
+                      }
+                    </ul>
+                    @if (existingIncomeId) {
+                      <p role="status">Approving will link the document to the selected transaction.</p>
+                    } @else if (recordExpense) {
+                      <label class="expense-toggle">
+                        <input type="checkbox" [(ngModel)]="confirmAdditionalIncome" />
+                        I checked the existing transactions and this is additional income.
+                      </label>
+                    }
+                  } @else {
+                    <p role="status">No existing income transactions matched the selected dates.</p>
+                  }
+                }
+              </fieldset>
+            }
             <label for="review-notes">Reviewer notes <span>(optional)</span></label>
             <textarea
               id="review-notes"
@@ -358,7 +432,7 @@
                 [disabled]="isSubmitting || (recordExpense && hasInvalidTransactionDates())"
                 (click)="submitDecision('approved', reviewNotes.value)"
               >
-                {{ isSubmitting ? 'Submitting...' : 'Approve' }}
+                {{ isSubmitting ? 'Submitting...' : existingIncomeId ? 'Approve and link evidence' : 'Approve' }}
               </button>
               <button
                 type="button"

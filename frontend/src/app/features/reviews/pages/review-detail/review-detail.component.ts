@@ -7,7 +7,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { takeWhile } from 'rxjs';
 
@@ -28,12 +29,12 @@ import {
 
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { documentDisplayName } from '../../../../shared/utils/document-display-name';
-import { TaxWorkspaceApiService } from '../../../../shared/services/tax-workspace-api.service';
+import { TaxWorkspaceApiService, TransactionDto } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewDocumentTransaction } from '../../../../shared/models/reviews/review-extraction.model';
 import { TranslationService } from '../../../../shared/i18n/translation.service';
 
 @Component({
-  imports: [DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective],
   selector: 'app-review-detail',
   styleUrl: './review-detail.component.scss',
   templateUrl: './review-detail.component.html',
@@ -51,6 +52,7 @@ export class ReviewDetailComponent
   private readonly i18n = inject(TranslationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly workspaceApi = inject(TaxWorkspaceApiService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly Object = Object;
   private statusRefreshStarted = false;
@@ -59,6 +61,22 @@ export class ReviewDetailComponent
   isLoading = true;
   loadError: string | null = null;
   refreshError: string | null = null;
+  sourcePreview: { documentId: string; url: SafeResourceUrl } | null = null;
+
+  get canPreviewSource(): boolean {
+    const mimeType = this.review?.document?.mimeType;
+    return this.auth.can('documents') && !!mimeType
+      && ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(mimeType);
+  }
+
+  toggleSourcePreview(documentId: string): void {
+    this.sourcePreview = this.sourcePreview?.documentId === documentId ? null : {
+      documentId,
+      url: this.sanitizer.bypassSecurityTrustResourceUrl(
+        '/api/documents/' + encodeURIComponent(documentId) + '/content?inline=1',
+      ),
+    };
+  }
 
   isSubmitting = false;
   decisionError: string | null = null;
@@ -77,6 +95,15 @@ export class ReviewDetailComponent
   transactionSavingId: string | null = null;
   transactionEditError: string | null = null;
   recordExpense = false;
+  incomeCheckOpen = false;
+  incomeCheckLoading = false;
+  incomeCheckError = false;
+  incomePeriodStart = '';
+  incomePeriodEnd = '';
+  incomePeriod: 'payment' | 'cumulative' = 'payment';
+  existingIncomeId: string | null = null;
+  confirmAdditionalIncome = false;
+  private incomeTransactions: TransactionDto[] | null = null;
   transactionDrafts: {
     transaction_date: string;
     direction: 'income' | 'expense';
@@ -96,6 +123,64 @@ export class ReviewDetailComponent
     description: string;
   }) {
     this.transactionDrafts[0] = value;
+  }
+
+  get incomeMatches(): TransactionDto[] {
+    const dates = this.recordExpense
+      ? this.transactionDrafts.filter(draft => draft.direction === 'income').map(draft => draft.transaction_date)
+      : [];
+
+    return (this.incomeTransactions ?? []).filter(transaction => {
+      const date = transaction.transaction_date.slice(0, 10);
+      if (this.incomePeriod === 'payment') {
+        return date === this.incomePeriodStart || dates.includes(date);
+      }
+      return dates.includes(date) || (this.incomePeriodStart && this.incomePeriodEnd
+        && date >= this.incomePeriodStart && date <= this.incomePeriodEnd);
+    });
+  }
+
+  get incomeMatchesTotal(): number {
+    return this.incomeMatches.reduce((total, transaction) => total + Number(transaction.amount), 0);
+  }
+
+  get checkedIncomeDates(): boolean {
+    return this.incomePeriod === 'cumulative'
+      ? !!this.incomePeriodStart && !!this.incomePeriodEnd && this.incomePeriodStart <= this.incomePeriodEnd
+      : !!this.incomePeriodStart || (this.recordExpense
+        && this.transactionDrafts.some(draft => draft.direction === 'income' && !!draft.transaction_date));
+  }
+
+  openIncomeCheck(): void {
+    this.incomeCheckOpen = true;
+    this.confirmAdditionalIncome = false;
+    if (this.incomeTransactions !== null || this.incomeCheckLoading) return;
+
+    this.incomeCheckLoading = true;
+    this.incomeCheckError = false;
+    this.workspaceApi.listTransactions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: transactions => {
+        this.incomeTransactions = transactions.filter(transaction => transaction.direction === 'income');
+        this.incomeCheckLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.incomeCheckLoading = false;
+        this.incomeCheckError = true;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  selectExistingIncome(transaction: TransactionDto): void {
+    this.incomePeriodStart = transaction.transaction_date.slice(0, 10);
+    this.existingIncomeId = transaction.id;
+    this.recordExpense = false;
+  }
+
+  resetIncomeSelection(): void {
+    this.existingIncomeId = null;
+    this.confirmAdditionalIncome = false;
   }
 
   ngOnInit(): void {
@@ -343,11 +428,26 @@ export class ReviewDetailComponent
       return;
     }
 
+    if (decision === 'approved' && this.recordExpense && this.incomeCheckOpen
+      && this.transactionDrafts.some(draft => draft.direction === 'income')) {
+      if (!this.checkedIncomeDates || this.incomeTransactions === null) {
+        this.decisionError = 'Check existing income for the payment date or statement period before adding a transaction.';
+        return;
+      }
+      if (this.incomeMatches.length && !this.confirmAdditionalIncome) {
+        this.decisionError = 'Choose an existing income transaction, keep the document as evidence only, or confirm that this amount is additional income.';
+        return;
+      }
+    }
+
     const request:
       import('../../../../shared/services/reviews/review.service')
         .ReviewDecisionRequest = {
       decision,
       notes,
+      ...(decision === 'approved' && !this.recordExpense && this.existingIncomeId
+        ? { existingIncomeId: this.existingIncomeId }
+        : {}),
       ...(decision === 'approved' && this.recordExpense
         ? this.transactionDrafts.length === 1
           ? {
@@ -386,10 +486,11 @@ export class ReviewDetailComponent
           this.cdr.markForCheck();
         },
 
-        error: () => {
+        error: (error: { status?: number; error?: { message?: string } }) => {
           this.isSubmitting = false;
-          this.decisionError =
-            'Failed to submit review decision.';
+          this.decisionError = (error.status === 409 || error.status === 422 ? error.error?.message : null)
+            ?? 'Failed to submit review decision.';
+          this.cdr.markForCheck();
         },
       });
   }
@@ -603,10 +704,12 @@ export class ReviewDetailComponent
   }
 
   addTransactionDraft(): void {
+    this.confirmAdditionalIncome = false;
     this.transactionDrafts.push(this.emptyExpenseDraft());
   }
 
   removeTransactionDraft(index: number): void {
+    this.confirmAdditionalIncome = false;
     if (this.transactionDrafts.length > 1) {
       this.transactionDrafts.splice(index, 1);
     }

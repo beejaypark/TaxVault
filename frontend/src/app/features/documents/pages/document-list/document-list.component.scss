@@ -72,12 +72,11 @@
 .card-header {
   padding: 16px 24px;
   padding-right: 64px;
-  background: var(--tv-color-navy);
-  color: #fff;
+  border-bottom: 1px solid var(--tv-color-border);
+  background: var(--tv-color-surface);
+  color: var(--tv-color-text);
 }
 
-.documents-card .tv-collapse-toggle { color: #fff; }
-.documents-card .tv-collapse-toggle:hover { color: rgba(255, 255, 255, 0.72); }
 .original-filename { display: inline-block; margin-left: 8px; color: var(--tv-color-text-muted); font-size: 11px; }
 .description-edit { width: fit-content; padding: 0; border: 0; background: transparent; color: var(--tv-color-primary); font-size: 11px; cursor: pointer; text-align: left; }
 .description-editor { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -88,13 +87,11 @@
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .card-header p {
   margin: 5px 0 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--tv-color-text-secondary);
   font-size: 13px;
 }
 
@@ -114,16 +111,14 @@
 .table-header {
   min-height: 44px;
   border-bottom: 1px solid var(--tv-color-border);
-  background: var(--tv-color-primary-soft);
-  color: var(--tv-color-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  background: var(--tv-color-table-stripe);
+  color: var(--tv-color-text-secondary);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .document-row {
-  min-height: 96px;
+  min-height: 80px;
   border-bottom: 1px solid var(--tv-color-border);
   color: var(--tv-color-text);
   transition:

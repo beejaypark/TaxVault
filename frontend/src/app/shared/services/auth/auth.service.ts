@@ -176,11 +176,13 @@ export class AuthService {
       )
       .pipe(
         map((response) => response.data.logout_url),
-        tap(() => {
-          this.user.set(null);
-          this.initialized = true;
-          this.initialization = of(null);
-        }),
+        tap(() => this.clearSession()),
       );
+  }
+
+  clearSession(): void {
+    this.user.set(null);
+    this.initialized = true;
+    this.initialization = of(null);
   }
 }

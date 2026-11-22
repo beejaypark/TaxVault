@@ -244,6 +244,7 @@ export class ReviewHttpService extends ReviewService {
             request.notes ?? null,
           ...(request.transactions ? { transactions: request.transactions } : {}),
           ...(request.expense ? { expense: request.expense } : {}),
+          ...(request.existingIncomeId ? { existing_income_id: request.existingIncomeId } : {}),
         },
       )
       .pipe(

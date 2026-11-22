@@ -201,9 +201,7 @@ select:focus {
 
 .record-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
-  align-items: start;
-  gap: 16px;
+  gap: 12px;
 }
 
 .record-card,
@@ -368,7 +366,6 @@ select:focus {
     flex-direction: column;
   }
 
-  .record-grid,
   .form-grid {
     grid-template-columns: 1fr;
   }

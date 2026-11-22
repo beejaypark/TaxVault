@@ -70,6 +70,8 @@ class DevelopmentAdminAuthTest extends TestCase
             ->assertJsonPath('data.id', $user->id)
             ->assertJsonPath('data.email', $user->email);
 
+        $cookie = config('session.cookie');
+        $this->withCredentials()->withCookie($cookie, $response->getCookie($cookie)->getValue());
         $this->assertAuthenticatedAs($user, 'web');
 
         $this->getJson('/api/auth/user')
@@ -113,6 +115,35 @@ class DevelopmentAdminAuthTest extends TestCase
             ->assertJsonPath('data.id', $credential->user_id);
 
         $this->assertAuthenticatedAs($credential->user, 'web');
+    }
+
+    public function test_authenticated_session_expires_after_30_minutes_without_user_activity(): void
+    {
+        config(['session.lifetime' => 30, 'sanctum.stateful' => ['localhost:4200']]);
+        $startedAt = now()->startOfMinute();
+        $this->travelTo($startedAt);
+        $user = User::factory()->create(['status' => 'active', 'deactivated_at' => null]);
+        DevelopmentAdminCredential::query()->create([
+            'user_id' => $user->getKey(),
+            'login_name' => 'idle-test',
+            'password_hash' => Hash::make('test-only-idle-password'),
+            'enabled' => true,
+        ]);
+        $login = $this->postJson('/api/auth/login', [
+            'login' => 'idle-test',
+            'password' => 'test-only-idle-password',
+        ])->assertOk();
+        $cookie = config('session.cookie');
+        $this->withCredentials()->withCookie($cookie, $login->getCookie($cookie)->getValue());
+        $this->withHeader('X-CSRF-TOKEN', $this->app['session.store']->token());
+
+        $this->travelTo($startedAt->copy()->addMinutes(20));
+        $this->postJson('/api/auth/activity')->assertNoContent();
+        $this->travelTo($startedAt->copy()->addMinutes(40));
+        $this->getJson('/api/auth/user')->assertOk();
+        $this->travelTo($startedAt->copy()->addMinutes(50));
+        $this->getJson('/api/financial-years')->assertUnauthorized()
+            ->assertJsonPath('code', 'session_expired');
     }
 
     public function test_default_admin_provisioning_skips_invalid_environment_without_failing(): void

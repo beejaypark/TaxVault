@@ -13,13 +13,14 @@ import {
   FinancialYearDto,
 } from '../../shared/services/documents/document-api.service';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { TranslationService } from '../../shared/i18n/translation.service';
 import { TaxReadinessDto, TaxWorkspaceApiService } from '../../shared/services/tax-workspace-api.service';
 
-const SECTION_LABELS: Record<AccessSection, string> = {
-  documents: 'Documents',
-  transactions: 'Transactions',
-  reviews: 'Reviews',
-  assets: 'Properties & investments',
+const SECTION_LABEL_KEYS: Record<AccessSection, string> = {
+  documents: 'Accountants.SectionDocuments',
+  transactions: 'Accountants.SectionTransactions',
+  reviews: 'Accountants.SectionReviews',
+  assets: 'Accountants.SectionAssets',
 };
 
 interface AccountantForm {
@@ -36,7 +37,7 @@ interface AccountantForm {
   imports: [FormsModule, DatePipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="page">
+    <section class="page tv-workspace-page">
       <header class="head">
         <div>
           <h1>{{ 'Accountants.Title' | translate }}</h1>
@@ -80,7 +81,7 @@ interface AccountantForm {
                   [checked]="form.sections.includes(section)"
                   (change)="toggleSection(section)"
                 />
-                {{ sectionLabels[section] }}
+                {{ sectionLabel(section) | translate }}
               </label>
             }
           </fieldset>
@@ -132,13 +133,13 @@ interface AccountantForm {
             </select>
           </label>
           <label>{{ 'Accountants.Note' | translate }} <textarea name="packNote" [(ngModel)]="packNote" maxlength="1000"></textarea></label>
-          <label>From name <input name="packFromName" [(ngModel)]="packFromName" maxlength="120" required /></label>
-          <label>From email <input name="packFrom" type="email" [(ngModel)]="packFrom" required /></label>
-          <label>To <input name="packTo" type="email" [(ngModel)]="packTo" required /></label>
-          <label>Subject <input name="packSubject" [(ngModel)]="packSubject" maxlength="255" required /></label>
-          <label>Content <textarea name="packContent" [(ngModel)]="packContent" rows="7" maxlength="10000" required></textarea></label>
+          <label>{{ 'Accountants.FromName' | translate }} <input name="packFromName" [(ngModel)]="packFromName" maxlength="120" required /></label>
+          <label>{{ 'Accountants.FromEmail' | translate }} <input name="packFrom" type="email" [(ngModel)]="packFrom" required /></label>
+          <label>{{ 'Accountants.To' | translate }} <input name="packTo" type="email" [(ngModel)]="packTo" required /></label>
+          <label>{{ 'Accountants.Subject' | translate }} <input name="packSubject" [(ngModel)]="packSubject" maxlength="255" required /></label>
+          <label>{{ 'Accountants.Message' | translate }} <textarea name="packContent" [(ngModel)]="packContent" rows="7" maxlength="10000" required></textarea></label>
           <div class="actions">
-            <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.SendEmail' | translate }}</button>
+            <button type="submit" class="primary-button" [disabled]="busy">{{ 'Accountants.SendPackNow' | translate }}</button>
             <button type="button" class="secondary-button" (click)="packFor = null">{{ 'Accountants.Cancel' | translate }}</button>
           </div>
         </form>
@@ -188,10 +189,10 @@ interface AccountantForm {
     .head h1 { margin: 0; }
     .head p { margin: 4px 0 0; color: #5b6b7f; }
     .panel { background: #fff; border: 1px solid #d9e0ea; border-radius: 6px; overflow: hidden; }
-    .panel-title { background: #1b2f4e; color: #fff; padding: 10px 16px; font-weight: 700; }
+    .panel-title { background: var(--tv-color-surface); color: var(--tv-color-text); border-bottom: 1px solid var(--tv-color-border); padding: 14px 16px; font-weight: 650; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e6ebf2; vertical-align: middle; }
-    tbody tr:nth-child(even) { background: #f6f8fb; }
+    thead, tbody tr:nth-child(even) { background: var(--tv-color-table-stripe); }
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
     .row-actions .danger { color: #b42318; }
     .empty { text-align: center; color: #5b6b7f; }
@@ -220,9 +221,10 @@ export class AccountantsComponent implements OnInit {
   private readonly documents = inject(DocumentApiService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly workspaceApi = inject(TaxWorkspaceApiService);
+  private readonly i18n = inject(TranslationService);
 
-  readonly sectionKeys = Object.keys(SECTION_LABELS) as AccessSection[];
-  readonly sectionLabels = SECTION_LABELS;
+  readonly sectionKeys = Object.keys(SECTION_LABEL_KEYS) as AccessSection[];
+  readonly sectionLabels = SECTION_LABEL_KEYS;
 
   accountants: AccountantDto[] = [];
   financialYears: FinancialYearDto[] = [];
@@ -252,7 +254,7 @@ export class AccountantsComponent implements OnInit {
   }
 
   scopeSummary(item: AccountantDto): string {
-    const sections = item.sections.map((s) => SECTION_LABELS[s]).join(', ');
+    const sections = item.sections.map((s) => this.i18n.translate(SECTION_LABEL_KEYS[s])).join(', ');
     const years = item.financial_year_ids === null
       ? 'all years'
       : this.financialYears
@@ -267,6 +269,10 @@ export class AccountantsComponent implements OnInit {
     return item.financial_year_ids === null
       ? this.financialYears
       : this.financialYears.filter((y) => item.financial_year_ids?.includes(y.id));
+  }
+
+  sectionLabel(section: AccessSection): string {
+    return SECTION_LABEL_KEYS[section];
   }
 
   startCreate(): void {

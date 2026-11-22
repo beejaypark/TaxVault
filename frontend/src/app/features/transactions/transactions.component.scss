@@ -231,12 +231,10 @@ td {
 }
 
 th {
-  background: var(--tv-color-primary-soft);
-  color: var(--tv-color-primary);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  background: var(--tv-color-table-stripe);
+  color: var(--tv-color-text-secondary);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 tbody tr:nth-child(even) td {
@@ -249,6 +247,10 @@ tbody tr:hover td {
 
 td {
   color: var(--tv-color-text-secondary);
+}
+
+td.amount {
+  font-variant-numeric: tabular-nums;
 }
 
 td strong {
@@ -384,10 +386,15 @@ tbody tr:last-child td {
 .header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .bulk-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--tv-color-border); border-radius: 8px; background: var(--tv-color-background); }
 .bulk-bar select { max-width: 280px; min-height: 36px; border: 1px solid var(--tv-color-border); border-radius: 6px; }
-.recurring-card { margin-bottom: 16px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); }
+.recurring-card { margin-top: 20px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); }
 .recurring-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 16px 0; }
 .recurring-form label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; }
 .recurring-form input { padding: 8px; border: 1px solid var(--tv-color-border); border-radius: 4px; font: inherit; }
 .recurring-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid var(--tv-color-border); }
 .recurring-row span { display: block; margin-top: 4px; color: var(--tv-color-text-secondary); font-size: 12px; }
+.recurring-backfill { padding: 16px; background: var(--tv-color-table-stripe); border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); }
+.recurring-backfill p { margin: 8px 0; color: var(--tv-color-text-secondary); }
+.backfill-dates { display: grid; gap: 8px; padding: 0; list-style: none; }
+.backfill-dates label { display: flex; align-items: center; gap: 8px; max-width: 280px; }
+.backfill-dates strong { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) { .recurring-form { grid-template-columns: 1fr 1fr; } .recurring-row { grid-template-columns: 1fr auto; } .recurring-row .row-actions { grid-column: 1 / -1; } }

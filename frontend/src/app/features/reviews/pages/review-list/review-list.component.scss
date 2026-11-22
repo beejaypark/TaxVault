@@ -19,14 +19,14 @@ h1 { font-size: 30px; letter-spacing: -.025em; }
 .filters { display: flex; gap: 12px; }
 .filters label { display: grid; gap: 5px; color: var(--tv-color-text-secondary); font-size: 11px; font-weight: 650; }
 .filters select { min-width: 154px; min-height: 38px; padding: 0 30px 0 11px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-md); background: var(--tv-color-surface); color: var(--tv-color-text); font: inherit; font-size: 12px; }
-.review-list { display: grid; gap: 10px; }
-.review-card { align-items: center; gap: 18px; min-width: 0; padding: 18px 20px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: var(--tv-shadow-card); transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease; }
-.review-card:hover { transform: translateY(-1px); border-color: #cbd5e1; box-shadow: 0 8px 20px rgb(15 23 42 / 7%); }
+.review-list { display: grid; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); }
+.review-card { align-items: center; gap: 16px; min-width: 0; padding: 16px 20px; border-left: 3px solid transparent; }
+.review-card + .review-card { border-top: 1px solid var(--tv-color-border); }
+.review-card:hover, .review-card:focus-within { background: var(--tv-color-table-stripe); }
 .review-card.needs-attention { border-left: 3px solid var(--tv-color-warning); }
 .review-card-main { align-items: center; gap: 14px; min-width: 0; }
 .review-type-icon { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: 12px; background: var(--tv-color-primary-soft); color: var(--tv-color-primary); font-size: 19px; font-weight: 700; }
 .type-confidence { background: var(--tv-color-warning-soft); color: var(--tv-color-warning); }
-.type-classification { background: #f0eefe; color: #635bca; }
 .type-deductibility { background: var(--tv-color-success-soft); color: var(--tv-color-success); }
 .review-copy { min-width: 0; }
 .review-card-heading { align-items: center; flex-wrap: wrap; gap: 9px; }

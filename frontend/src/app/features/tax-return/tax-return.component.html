@@ -1,4 +1,4 @@
-<div class="tax-return-page">
+<div class="tax-return-page tv-workspace-page">
   <tv-back-navigation />
   <header class="page-header">
     <div>
@@ -15,9 +15,43 @@
     <p class="notice success" role="status">{{ successMessage }}</p>
   }
 
+  @if (!isLoading && selectedFinancialYearId) {
+    <section class="result-card summary-card" tvCollapsibleCard aria-label="Financial year summary">
+      <div class="result-heading">
+        <div>
+          <div class="eyebrow">{{ 'TaxReturn.Summary' | translate }}</div>
+          <h2>FY {{ selectedYearLabel }} {{ 'TaxReturn.TransactionsSummary' | translate }}</h2>
+        </div>
+        <button type="button" class="secondary-button no-print" (click)="printSummary()">{{ 'TaxReturn.PrintSummary' | translate }}</button>
+      </div>
+      <dl>
+        <div><dt>{{ 'TaxReturn.Income' | translate }}</dt><dd>{{ formatMoney(totalIncome) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Expenses' | translate }}</dt><dd>{{ formatMoney(totalExpenses) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Net' | translate }}</dt><dd>{{ formatMoney(totalIncome - totalExpenses) }}</dd></div>
+        <div><dt>{{ 'TaxReturn.Transactions' | translate }}</dt><dd>{{ yearTransactions.length }}</dd></div>
+      </dl>
+      @if (yearTransactions.length > 0) {
+        <div class="summary-table-wrap" tabindex="0" role="region" [attr.aria-label]="'TaxReturn.TransactionsSummary' | translate">
+          <table class="summary-table">
+          <thead><tr><th>{{ 'TaxReturn.Date' | translate }}</th><th>{{ 'TaxReturn.DescriptionField' | translate }}</th><th>{{ 'TaxReturn.Type' | translate }}</th><th class="amount">{{ 'Transactions.Amount' | translate }}</th></tr></thead>
+          <tbody>
+            @for (item of yearTransactions; track item.id) {
+              <tr>
+                <td>{{ item.transaction_date | date: 'd MMM y' : 'UTC' }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.direction }}</td>
+                <td class="amount">{{ formatMoney(item.amount) }}</td>
+              </tr>
+            }
+          </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+
   <section class="export-layout">
     <article class="export-card" tvCollapsibleCard>
-      <div class="step-number">01</div>
       <h2>{{ 'TaxReturn.SelectYear' | translate }}</h2>
       <p>{{ 'TaxReturn.PackageDescription' | translate }}</p>
 
@@ -61,7 +95,6 @@
     </article>
 
     <article class="export-card included-card" tvCollapsibleCard>
-      <div class="step-number">02</div>
       <h2>{{ 'TaxReturn.Included' | translate }}</h2>
       <ul>
         <li><span><tv-icon name="check" /></span> {{ 'TaxReturn.Manifest' | translate }}</li>
@@ -74,37 +107,6 @@
   </section>
 
   @if (!isLoading && selectedFinancialYearId) {
-    <section class="result-card summary-card" tvCollapsibleCard aria-label="Financial year summary">
-      <div class="result-heading">
-        <div>
-          <div class="eyebrow">{{ 'TaxReturn.Summary' | translate }}</div>
-          <h2>FY {{ selectedYearLabel }} {{ 'TaxReturn.TransactionsSummary' | translate }}</h2>
-        </div>
-        <button type="button" class="secondary-button no-print" (click)="printSummary()">{{ 'TaxReturn.PrintSummary' | translate }}</button>
-      </div>
-      <dl>
-        <div><dt>{{ 'TaxReturn.Income' | translate }}</dt><dd>{{ formatMoney(totalIncome) }}</dd></div>
-        <div><dt>{{ 'TaxReturn.Expenses' | translate }}</dt><dd>{{ formatMoney(totalExpenses) }}</dd></div>
-        <div><dt>{{ 'TaxReturn.Net' | translate }}</dt><dd>{{ formatMoney(totalIncome - totalExpenses) }}</dd></div>
-        <div><dt>{{ 'TaxReturn.Transactions' | translate }}</dt><dd>{{ yearTransactions.length }}</dd></div>
-      </dl>
-      @if (yearTransactions.length > 0) {
-        <table class="summary-table">
-          <thead><tr><th>{{ 'TaxReturn.Date' | translate }}</th><th>{{ 'TaxReturn.DescriptionField' | translate }}</th><th>{{ 'TaxReturn.Type' | translate }}</th><th class="amount">{{ 'Transactions.Amount' | translate }}</th></tr></thead>
-          <tbody>
-            @for (item of yearTransactions; track item.id) {
-              <tr>
-                <td>{{ item.transaction_date | date: 'd MMM y' : 'UTC' }}</td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.direction }}</td>
-                <td class="amount">{{ formatMoney(item.amount) }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
-    </section>
-
     <app-return-summary [financialYearId]="selectedFinancialYearId" [years]="financialYears" />
 
     @if (selectedYear; as year) {

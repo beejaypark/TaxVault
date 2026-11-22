@@ -20,6 +20,7 @@ import {
 } from '../../../../shared/services/reviews/review.service';
 
 import { ReviewDetailComponent } from './review-detail.component';
+import { TaxWorkspaceApiService, TransactionDto } from '../../../../shared/services/tax-workspace-api.service';
 
 describe('ReviewDetailComponent', () => {
   let fixture: ComponentFixture<ReviewDetailComponent>;
@@ -117,6 +118,69 @@ describe('ReviewDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('checks only income in the statement period and links a selected payment without creating a transaction', () => {
+    const payment: TransactionDto = {
+      id: 'income-1',
+      financial_year_id: 'year-1',
+      document_id: null,
+      transaction_date: '2026-07-14',
+      description: 'Monthly salary',
+      direction: 'income',
+      amount: '11000.00',
+      currency: 'AUD',
+      source_system: 'recurring_income',
+    };
+    const listTransactions = vi.spyOn(TestBed.inject(TaxWorkspaceApiService), 'listTransactions')
+      .mockReturnValue(of([payment, { ...payment, id: 'expense-1', direction: 'expense' }]));
+    reviewService.submitDecision.mockReturnValue(of({ ...review, status: 'completed' }));
+
+    component.openIncomeCheck();
+    component.incomePeriod = 'cumulative';
+    component.incomePeriodStart = '2026-07-01';
+    component.incomePeriodEnd = '2026-07-31';
+    expect(component.incomeMatches.map(match => match.id)).toEqual(['income-1']);
+    expect(component.incomeMatchesTotal).toBe(11000);
+
+    component.incomePeriod = 'payment';
+    component.selectExistingIncome(payment);
+    component.submitDecision('approved');
+    expect(reviewService.submitDecision).toHaveBeenCalledWith('review-1', {
+      decision: 'approved',
+      notes: undefined,
+      existingIncomeId: 'income-1',
+    });
+    listTransactions.mockRestore();
+  });
+
+  it('opens the source document alongside the extracted data on request', () => {
+    reviewService.getReview.mockReturnValue(of({
+      ...reviewWithExtraction,
+      document: {
+        id: 'document-1',
+        originalFilename: 'receipt.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 100,
+        uploadedAt: null,
+      },
+    }));
+    component.retryLoad();
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const button = element.querySelector<HTMLButtonElement>('.source-preview-toggle')!;
+    expect(element.querySelector('.source-preview')).toBeNull();
+
+    button.click();
+    fixture.detectChanges();
+    expect(element.querySelector('.source-preview')?.getAttribute('src'))
+      .toBe('/api/documents/document-1/content?inline=1');
+    expect(element.querySelector('.extraction-card')).toBeTruthy();
+
+    button.click();
+    fixture.detectChanges();
+    expect(element.querySelector('.source-preview')).toBeNull();
   });
 
   it('should load the review from the route id', () => {

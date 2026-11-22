@@ -167,7 +167,34 @@ final class ReviewController extends Controller
             $createIncome,
             $createExpense,
         ): void {
+            $review = Review::query()->lockForUpdate()->findOrFail($review->getKey());
+            abort_if($review->status !== 'pending', 409, 'Review is not pending.');
+
             $transactionId = $review->transaction_id;
+            $existingIncomeId = $request->validated('existing_income_id');
+            if ($existingIncomeId !== null) {
+                abort_unless(
+                    $request->string('decision')->toString() === 'approve' && $review->document !== null,
+                    422,
+                    'Approve a review with a source document to link existing income.',
+                );
+
+                $income = Transaction::query()
+                    ->where('user_id', $request->user()->getKey())
+                    ->where('direction', 'income')
+                    ->lockForUpdate()
+                    ->find($existingIncomeId);
+                abort_if($income === null, 422, 'Choose an existing income transaction.');
+                abort_if(
+                    $income->document_id !== null && $income->document_id !== $review->document_id,
+                    409,
+                    'This income already has a different source document.',
+                );
+
+                $income->update(['document_id' => $review->document_id]);
+                $transactionId = $income->getKey();
+            }
+
             $transactions = $request->validated('transactions');
             if (! is_array($transactions) && is_array($request->validated('expense'))) {
                 $transactions = [$request->validated('expense')];

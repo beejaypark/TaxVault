@@ -25,6 +25,7 @@ export interface ReviewListResponse {
 export interface ReviewDecisionRequest {
   decision: ReviewDecision;
   notes?: string;
+  existingIncomeId?: string;
   transactions?: ReviewTransactionDraft[];
   expense?: {
     transaction_date: string;

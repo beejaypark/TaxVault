@@ -8,6 +8,7 @@ use App\Domain\Documents\Models\DocumentType;
 use App\Domain\Evidence\Models\TaxEvidence;
 use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Reviews\Models\Review;
+use App\Domain\Transactions\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -239,6 +240,37 @@ class ReviewApiTest extends TestCase
                 'data.reviewer_notes',
                 'OCR confidence review required for fields: amount'
             );
+    }
+
+    public function test_approving_review_links_existing_income_without_creating_a_duplicate(): void
+    {
+        $user = User::factory()->create();
+        $review = $this->createReview($user);
+        $details = [
+            'user_id' => $user->getKey(),
+            'financial_year_id' => $review->document->financial_year_id,
+            'transaction_date' => '2026-07-14',
+            'amount' => '11000.00',
+            'currency' => 'AUD',
+            'description' => 'Monthly salary',
+        ];
+        $income = Transaction::query()->create($details + ['direction' => 'income']);
+        $expense = Transaction::query()->create($details + ['direction' => 'expense']);
+        $endpoint = "/api/reviews/{$review->getKey()}/decision";
+
+        $this->actingAs($user)->postJson($endpoint, [
+            'decision' => 'approve',
+            'existing_income_id' => $expense->getKey(),
+        ])->assertUnprocessable();
+
+        $this->actingAs($user)->postJson($endpoint, [
+            'decision' => 'approve',
+            'existing_income_id' => $income->getKey(),
+        ])->assertOk()->assertJsonPath('data.transaction_id', $income->getKey());
+
+        $this->assertSame($review->document_id, $income->fresh()->document_id);
+        $this->assertSame('11000.00', $income->fresh()->amount);
+        $this->assertDatabaseCount('transactions', 2);
     }
 
     public function test_approving_review_can_create_a_linked_expense_transaction(): void

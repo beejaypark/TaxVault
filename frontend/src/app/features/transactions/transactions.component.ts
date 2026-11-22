@@ -25,6 +25,7 @@ import {
   PropertyDto,
   TransactionDto,
   RecurringIncomeRuleDto,
+  RecurringIncomePreview,
 } from '../../shared/services/tax-workspace-api.service';
 import {
   AtoCategoryOption,
@@ -78,6 +79,12 @@ export class TransactionsComponent implements OnInit {
   bulkProperty = '';
   isBulkSaving = false;
   recurringIncome: RecurringIncomeRuleDto[] = [];
+  backfillRuleId: string | null = null;
+  backfillPreview: RecurringIncomePreview | null = null;
+  backfillDates = new Set<string>();
+  backfillBusy = false;
+  backfillError = '';
+  backfillResult: { created: number; skipped: number } | null = null;
   recurringForm = { name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
   showRecurringForm = false;
   editingRecurringId: string | null = null;
@@ -200,19 +207,11 @@ export class TransactionsComponent implements OnInit {
   }
 
   get filteredTransactions(): TransactionDto[] {
-    const search = this.searchText.trim().toLowerCase();
-    const selectedFinancialYearId =
-      this.documentsApi.selectedFinancialYearId();
-
-    const filtered = this.transactions.filter((transaction) =>
-      (!selectedFinancialYearId
-        || transaction.financial_year_id === selectedFinancialYearId)
-      && (this.selectedDirection === 'all'
-        || transaction.direction === this.selectedDirection)
-      && (!search || transaction.description.toLowerCase().includes(search)),
+    const filtered = this.transactionsMatchingSearch.filter(transaction =>
+      this.selectedDirection === 'all' || transaction.direction === this.selectedDirection,
     );
 
-    return [...filtered].sort((left, right) => {
+    return filtered.sort((left, right) => {
       const a = this.sortValue(left, this.sortKey);
       const b = this.sortValue(right, this.sortKey);
       const comparison = typeof a === 'number' && typeof b === 'number'
@@ -221,6 +220,31 @@ export class TransactionsComponent implements OnInit {
 
       return this.sortDirection === 'asc' ? comparison : -comparison;
     });
+  }
+
+  get directionCounts(): { all: number; income: number; expense: number } {
+    const transactions = this.transactionsMatchingSearch;
+    const counts = { all: transactions.length, income: 0, expense: 0 };
+    for (const transaction of transactions) counts[transaction.direction]++;
+    return counts;
+  }
+
+  changeDirection(direction: 'all' | 'income' | 'expense'): void {
+    if (this.selectedDirection === direction) return;
+    this.selectedDirection = direction;
+    this.selectedIds.clear();
+  }
+
+  private get transactionsMatchingSearch(): TransactionDto[] {
+    const search = this.searchText.trim().toLowerCase();
+    const selectedFinancialYearId =
+      this.documentsApi.selectedFinancialYearId();
+
+    return this.transactions.filter((transaction) =>
+      (!selectedFinancialYearId
+        || transaction.financial_year_id === selectedFinancialYearId)
+      && (!search || transaction.description.toLowerCase().includes(search)),
+    );
   }
 
   sortTransactions(key: typeof this.sortKey): void {
@@ -382,6 +406,57 @@ export class TransactionsComponent implements OnInit {
 
   loadRecurringIncome(): void {
     this.api.listRecurringIncome().subscribe({ next: (items) => { this.recurringIncome = items; this.cdr.markForCheck(); } });
+  }
+
+  previewMissingIncome(ruleId: string): void {
+    if (this.backfillBusy) return;
+    this.backfillRuleId = ruleId;
+    this.backfillPreview = null;
+    this.backfillResult = null;
+    this.backfillError = '';
+    this.backfillBusy = true;
+
+    this.api.previewMissingIncome(ruleId).subscribe({
+      next: preview => {
+        this.backfillPreview = preview;
+        this.backfillDates = new Set(preview.missing);
+        this.backfillBusy = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.backfillError = 'Transactions.BackfillPreviewFailed';
+        this.backfillBusy = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  toggleBackfillDate(date: string, checked: boolean): void {
+    if (checked) this.backfillDates.add(date);
+    else this.backfillDates.delete(date);
+  }
+
+  generateMissingIncome(): void {
+    const { backfillRuleId: id, backfillPreview: preview } = this;
+    if (!id || !preview?.year || !this.backfillDates.size || this.backfillBusy) return;
+    this.backfillBusy = true;
+    this.backfillError = '';
+
+    this.api.generateMissingIncome(id, preview.year, preview.amount, [...this.backfillDates]).subscribe({
+      next: result => {
+        this.backfillResult = result;
+        this.backfillPreview = null;
+        this.backfillBusy = false;
+        this.loadTransactions();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.backfillPreview = null;
+        this.backfillError = 'Transactions.BackfillSaveFailed';
+        this.backfillBusy = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   saveRecurringIncome(): void {

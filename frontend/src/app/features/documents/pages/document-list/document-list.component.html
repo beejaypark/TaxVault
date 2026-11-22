@@ -1,4 +1,4 @@
-<div class="documents-page">
+<div class="documents-page tv-workspace-page">
   <tv-back-navigation />
   <header class="page-header">
     <div>
@@ -31,6 +31,17 @@
       <p class="options-notice" role="status">{{ optionsErrorMessage }}</p>
     }
 
+    <div class="workspace-quick-filters" role="group" [attr.aria-label]="'Documents.Status' | translate">
+      @let counts = statusCounts;
+      <button type="button" [attr.aria-pressed]="!statusFilter" (click)="statusFilter = ''">
+        {{ 'Documents.AllStatuses' | translate }} <span>{{ counts.get('') }}</span>
+      </button>
+      @for (status of statusOptions; track status) {
+        <button type="button" [attr.aria-pressed]="statusFilter === status" (click)="statusFilter = status">
+          {{ getStatusLabel(status) }} <span>{{ counts.get(status) ?? 0 }}</span>
+        </button>
+      }
+    </div>
     <div class="filter-bar" role="search" [attr.aria-label]="'Documents.FilterDocuments' | translate">
       <label class="filter-keyword">
         <span>{{ 'Documents.Keyword' | translate }}</span>
@@ -41,13 +52,6 @@
         <select name="typeFilter" [(ngModel)]="typeFilter">
           <option value="">{{ 'Documents.AllTypes' | translate }}</option>
           @for (type of documentTypes; track type.id) { <option [value]="type.id">{{ type.name }}</option> }
-        </select>
-      </label>
-      <label>
-        <span>{{ 'Documents.Status' | translate }}</span>
-        <select name="statusFilter" [(ngModel)]="statusFilter">
-          <option value="">{{ 'Documents.AllStatuses' | translate }}</option>
-          @for (status of statusOptions; track status) { <option [value]="status">{{ getStatusLabel(status) }}</option> }
         </select>
       </label>
       <label>

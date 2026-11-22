@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DeadlineController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\DocumentTypeController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\DocumentStorageProviderController;
 use App\Http\Controllers\Api\StorageConnectionController;
 use App\Http\Controllers\Api\StorageProviderSettingController;
 use App\Http\Controllers\Api\OneDriveController;
+use App\Http\Controllers\Api\ProductChatController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FinancialYearController;
 use App\Http\Controllers\Api\InboundEmailController;
@@ -43,26 +45,37 @@ Route::middleware('web')->group(function (): void {
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->name('auth.oidc.callback');
     Route::get('/document-storage/onedrive/callback', [OneDriveController::class, 'callback'])
-        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class);
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->middleware('session.active');
     Route::post('/auth/logout', [AuthController::class, 'logout'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('auth');
     Route::get('/auth/user', [AuthController::class, 'user'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
-        ->middleware('auth');
+        ->middleware(['auth', 'session.active']);
+    Route::post('/auth/activity', [AuthController::class, 'activity'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->middleware(['auth', 'session.active', 'throttle:30,1']);
     Route::put('/auth/preferences', [AuthController::class, 'updatePreferences'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
-        ->middleware('auth');
+        ->middleware(['auth', 'session.active']);
     Route::post('/auth/preferences/test-email', [NotificationEmailController::class, 'sendTest'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
-        ->middleware(['auth', 'throttle:5,1']);
+        ->middleware(['auth', 'session.active', 'throttle:5,1']);
 });
 Route::get('/email/unsubscribe/{user}', [NotificationEmailController::class, 'unsubscribe'])
     ->name('email.unsubscribe')
     ->middleware('signed');
 Route::post('/inbound-email/webhook', [InboundEmailController::class, 'webhook']);
+Route::post('/contact', ContactController::class)
+    ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+    ->middleware('throttle:5,10');
+Route::get('/product-chat/suggestions', [ProductChatController::class, 'suggestions'])->middleware('throttle:30,1');
+Route::post('/product-chat', ProductChatController::class)
+    ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+    ->middleware('throttle:8,1');
 
-Route::middleware(['auth', 'acting'])->group(function (): void {
+Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void {
     Route::get('/accountants', [AccountantController::class, 'index']);
     Route::post('/accountants', [AccountantController::class, 'store'])->middleware('audit:accountant.invite,accountant');
     Route::patch('/accountants/{id}', [AccountantController::class, 'update'])->middleware('audit:accountant.update,accountant');
@@ -114,6 +127,9 @@ Route::middleware(['auth', 'acting'])->group(function (): void {
     Route::post('/recurring-income', [RecurringIncomeController::class, 'store']);
     Route::put('/recurring-income/{id}', [RecurringIncomeController::class, 'update']);
     Route::delete('/recurring-income/{id}', [RecurringIncomeController::class, 'destroy']);
+    Route::get('/recurring-income/{id}/missing', [RecurringIncomeController::class, 'previewMissing']);
+    Route::post('/recurring-income/{id}/missing', [RecurringIncomeController::class, 'generateMissing'])
+        ->middleware('audit:recurring_income.backfill,transaction');
     Route::post('/transactions', [TransactionController::class, 'store']);
     Route::put('/transactions/{id}', [TransactionController::class, 'update'])->middleware('audit:transaction.update,transaction');
     Route::post('/transactions/bulk-categorise', [TransactionBulkController::class, 'categorise'])->middleware('audit:transaction.bulk_categorise,transaction');

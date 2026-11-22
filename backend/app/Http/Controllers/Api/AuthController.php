@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DevelopmentAdminCredential;
 use App\Models\User;
+use App\Support\SessionActivity;
 use DomainException;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
@@ -14,6 +15,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
@@ -28,6 +30,8 @@ class AuthController extends Controller
 {
     private const PENDING_ID_TOKEN_SESSION_KEY = 'keycloak.oidc.pending_id_token';
     private const ID_TOKEN_SESSION_KEY = 'keycloak.oidc.id_token';
+
+    public function __construct(private readonly SessionActivity $activity) {}
 
     private function developmentLoginEnabled(): bool
     {
@@ -83,6 +87,7 @@ class AuthController extends Controller
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
+        $this->activity->touch($request->session());
 
         return response()->json(['data' => $this->present($user)]);
     }
@@ -100,6 +105,9 @@ class AuthController extends Controller
         $provider = Socialite::driver('keycloak');
         $provider->scopes(['openid', 'profile', 'email']);
         $providerParameters = ['nonce' => $nonce];
+        if (! $request->boolean('register')) {
+            $providerParameters['prompt'] = 'login';
+        }
         if ($request->query('provider') === 'google') {
             $providerParameters['kc_idp_hint'] = 'google';
         }
@@ -220,6 +228,7 @@ class AuthController extends Controller
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
+        $this->activity->touch($request->session());
         $request->session()->put(
             self::ID_TOKEN_SESSION_KEY,
             Crypt::encryptString($idToken),
@@ -232,9 +241,10 @@ class AuthController extends Controller
     {
         $idToken = $request->session()->get(self::ID_TOKEN_SESSION_KEY);
         $logoutUrl = is_string($idToken)
-            ? $this->keycloakLogoutUrl(Crypt::decryptString($idToken))
-            : (string) config('services.mail_preview_url');
+            ? $this->keycloakLogoutUrl(Crypt::decryptString($idToken), $request)
+            : rtrim($request->getSchemeAndHttpHost(), '/').'/';
 
+        $this->activity->forget($request->session());
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -243,6 +253,15 @@ class AuthController extends Controller
             'message' => 'Logged out.',
             'data' => ['logout_url' => $logoutUrl],
         ]);
+    }
+
+    public function activity(Request $request): Response|JsonResponse
+    {
+        if (! $this->activity->renew($request->session())) {
+            return response()->json(['message' => 'Your session has expired.', 'code' => 'session_expired'], 401);
+        }
+
+        return response()->noContent();
     }
 
     public function user(): JsonResponse
@@ -412,13 +431,13 @@ class AuthController extends Controller
         return $claims;
     }
 
-    private function keycloakLogoutUrl(string $idToken): string
+    private function keycloakLogoutUrl(string $idToken, Request $request): string
     {
         $baseUrl = rtrim((string) config('services.keycloak.public_url'), '/');
         $realm = rawurlencode((string) config('services.keycloak.realms'));
         $query = http_build_query([
             'client_id' => config('services.keycloak.client_id'),
-            'post_logout_redirect_uri' => rtrim((string) config('app.url'), '/').'/login?loggedOut=1',
+            'post_logout_redirect_uri' => rtrim($request->getSchemeAndHttpHost(), '/').'/',
             'id_token_hint' => $idToken,
         ], '', '&', PHP_QUERY_RFC3986);
 
