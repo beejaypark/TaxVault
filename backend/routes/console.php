@@ -22,3 +22,8 @@ Schedule::command('income:generate-recurring')
     ->dailyAt('00:10')
     ->timezone(config('notifications.timezone'))
     ->withoutOverlapping();
+
+Schedule::command('keycloak:sync-users')
+    ->everyFifteenMinutes()
+    ->timezone(config('notifications.timezone'))
+    ->withoutOverlapping();
