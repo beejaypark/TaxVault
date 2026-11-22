@@ -410,7 +410,7 @@ export class SettingsComponent {
         this.billingStatus = response.data;
         const plan = this.route.snapshot.queryParamMap.get('plan');
         const checkoutRequested = this.route.snapshot.queryParamMap.get('billing') === 'checkout'
-          && (plan === 'immediate' || plan === 'trial' || plan === 'yearly');
+          && (plan === 'monthly' || plan === 'trial' || plan === 'yearly');
         if (checkoutRequested && !this.billingCheckoutStarted && !response.data.active) {
           this.billingCheckoutStarted = true;
           this.startCheckout(true, plan === 'yearly' ? 'yearly' : 'monthly');

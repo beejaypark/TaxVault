@@ -67,17 +67,17 @@ import { ProductChatComponent } from './product-chat.component';
       <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
         <div class="pricing-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-title">Choose how you want to start</h2><p>Both options include full TaxVault access at A$7.99 per month. Your card is securely collected by Stripe.</p></div>
         <div class="pricing-grid">
-          <article class="pricing-card">
+          <article class="pricing-card" [class.selected]="selectedPricingPlan === 'monthly'" (mouseenter)="selectedPricingPlan = 'monthly'" (focusin)="selectedPricingPlan = 'monthly'">
             <span class="pricing-label">Start now</span><h3>First month free</h3><strong>A$7.99 <small>/ month</small></strong>
             <p>Join today and use TaxVault immediately. Your first month is free, then billing starts automatically.</p>
-            <button type="button" class="primary" (click)="openPricingSignup('trial')">Start with first month free</button>
+            <button type="button" class="primary" (click)="openPricingSignup('monthly')">Start with first month free</button>
           </article>
-          <article class="pricing-card featured">
+          <article class="pricing-card featured" [class.selected]="selectedPricingPlan === 'trial'" (mouseenter)="selectedPricingPlan = 'trial'" (focusin)="selectedPricingPlan = 'trial'">
             <span class="pricing-label">Most flexible</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
             <p>Try every feature for 30 days. Add your card now; automatic billing begins after the trial unless cancelled.</p>
             <button type="button" class="primary" (click)="openPricingSignup('trial')">Start 30-day free trial</button>
           </article>
-          <article class="pricing-card annual-card">
+          <article class="pricing-card annual-card" [class.selected]="selectedPricingPlan === 'yearly'" (mouseenter)="selectedPricingPlan = 'yearly'" (focusin)="selectedPricingPlan = 'yearly'">
             <span class="pricing-label">Best value</span><h3>Annual plan</h3><strong>A$79.90 <small>/ year</small></strong>
             <p>Save compared with monthly billing. Your card is collected securely and the annual plan starts after your free month.</p>
             <button type="button" class="primary" (click)="openPricingSignup('yearly')">Choose annual plan</button>
@@ -204,8 +204,10 @@ import { ProductChatComponent } from './product-chat.component';
     .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
     .pricing-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; margin-top:32px; }
     @media (max-width:1050px) { .pricing-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
-    .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; }
-    .pricing-card.featured { border:2px solid #2b8f88; box-shadow:0 14px 34px rgb(31 63 101 / 8%); }
+    .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+    .pricing-card:hover { transform:translateY(-5px); box-shadow:0 14px 34px rgb(31 63 101 / 10%); }
+    .pricing-card.selected { border-color:#2b8f88; outline:3px solid rgb(43 143 136 / 22%); outline-offset:4px; transform:translateY(-9px); box-shadow:0 20px 42px rgb(31 63 101 / 16%); }
+    .pricing-card.featured { border-width:1px; }
     .pricing-label { color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
     .pricing-card h3 { margin:16px 0 10px; color:#234466; font-size:21px; }
     .pricing-card > strong { color:#123f78; font-size:28px; }
@@ -371,6 +373,7 @@ export class LandingComponent {
   loginOpen = false;
   trialMode = false;
   loginReturnUrl = '/dashboard';
+  selectedPricingPlan: 'monthly' | 'trial' | 'yearly' = 'trial';
   readonly contactSubmitted = signal(false);
   readonly contactPending = signal(false);
   readonly contactError = signal('');
@@ -402,7 +405,8 @@ export class LandingComponent {
 
   openLogin(): void { this.trialMode = false; this.loginReturnUrl = '/dashboard'; this.loginOpen = true; }
   openTrial(): void { this.trialMode = true; this.loginReturnUrl = '/settings?billing=checkout&plan=trial'; this.loginOpen = true; }
-  openPricingSignup(plan: 'trial' | 'immediate' | 'yearly'): void {
+  openPricingSignup(plan: 'monthly' | 'trial' | 'yearly'): void {
+    this.selectedPricingPlan = plan;
     this.trialMode = true;
     this.loginReturnUrl = `/settings?billing=checkout&plan=${plan}`;
     this.loginOpen = true;
