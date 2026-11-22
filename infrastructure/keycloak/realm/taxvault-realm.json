@@ -20,14 +20,14 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "redirectUris": [
-        "https://taxvaultapp.online/api/auth/oidc/callback"
+        "https://taxvaultapp.com.au/api/auth/oidc/callback"
       ],
       "webOrigins": [
-        "https://taxvaultapp.online"
+        "https://taxvaultapp.com.au"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "https://taxvaultapp.online/"
+        "post.logout.redirect.uris": "https://taxvaultapp.com.au/"
       },
       "defaultClientScopes": [
         "profile",

@@ -83,7 +83,9 @@
             "allowedHosts": [
               "desktop-fn3ojjj.tailc14f46.ts.net",
               "taxvaultapp.online",
-              "www.taxvaultapp.online"
+              "www.taxvaultapp.online",
+              "taxvaultapp.com.au",
+              "www.taxvaultapp.com.au"
             ]
           },
           "configurations": {
