@@ -155,8 +155,6 @@ class AuthController extends Controller
         }
 
         try {
-            $request->session()->forget(self::PENDING_ID_TOKEN_SESSION_KEY);
-
             $provider = Socialite::driver('keycloak');
             $provider->enablePKCE();
             $oauthUser = $provider->user();
