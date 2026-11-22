@@ -40,7 +40,7 @@ export interface AuthUser {
   email: string;
   display_name: string;
   identity_provider: string;
-  role?: 'owner' | 'accountant';
+  role?: 'owner' | 'accountant' | 'platform_admin';
   preferences?: {
     language?: 'en' | 'kr' | 'cn' | 'es';
     notifyDocuments?: boolean;
@@ -80,6 +80,10 @@ export class AuthService {
   /** Accountants are invited read-only viewers of someone else's records. */
   get isAccountant(): boolean {
     return this.user()?.role === 'accountant';
+  }
+
+  get isPlatformAdmin(): boolean {
+    return this.user()?.role === 'platform_admin';
   }
 
   get canEdit(): boolean {

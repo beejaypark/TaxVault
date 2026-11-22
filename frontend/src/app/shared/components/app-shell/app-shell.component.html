@@ -37,6 +37,7 @@
 
     <app-notifications />
     <a routerLink="/settings" class="icon-link" [attr.aria-label]="'Settings.Title' | translate" [title]="'Settings.Title' | translate"><tv-icon name="settings" /></a>
+      @if (auth.isPlatformAdmin) { <a routerLink="/admin" class="icon-link" aria-label="Administrator" title="Administrator">Admin</a> }
 
     <div class="user-menu">
       <button type="button" class="user-button" aria-haspopup="menu"

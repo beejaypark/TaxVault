@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\NewUserRegisteredMail;
+use App\Models\AdminNotificationLog;
 use App\Models\DevelopmentAdminCredential;
 use App\Models\User;
 use App\Support\SessionActivity;
@@ -221,6 +222,13 @@ class AuthController extends Controller
 
         if ($isNewUser && is_string(config('admin.notification_email'))
             && filter_var(config('admin.notification_email'), FILTER_VALIDATE_EMAIL)) {
+            $notification = [
+                'user_id' => $user->getKey(),
+                'recipient' => config('admin.notification_email'),
+                'notification_type' => 'new_user_registered',
+                'status' => 'sent',
+                'created_at' => now(),
+            ];
             try {
                 Mail::to(config('admin.notification_email'))->send(new NewUserRegisteredMail(
                     displayName: (string) ($user->display_name ?: $user->email ?: 'New customer'),
@@ -228,7 +236,11 @@ class AuthController extends Controller
                     provider: (string) $user->identity_provider,
                     registeredAt: (string) $user->created_at,
                 ));
+                $this->writeAdminNotificationLog($notification);
             } catch (\Throwable $exception) {
+                $notification['status'] = 'failed';
+                $notification['error'] = $exception->getMessage();
+                $this->writeAdminNotificationLog($notification);
                 Log::warning('New customer notification email failed.', [
                     'user_id' => $user->getKey(),
                     'error' => $exception->getMessage(),
@@ -245,6 +257,18 @@ class AuthController extends Controller
         );
 
         return redirect()->to($returnUrl);
+    }
+
+    /** @param array<string, mixed> $notification */
+    private function writeAdminNotificationLog(array $notification): void
+    {
+        try {
+            AdminNotificationLog::query()->create($notification);
+        } catch (\Throwable $exception) {
+            Log::warning('Unable to write administrator notification log.', [
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     public function logout(Request $request): JsonResponse
@@ -352,7 +376,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'display_name' => $user->display_name,
             'identity_provider' => $user->identity_provider,
-            'role' => $user->role,
+            'role' => $user->isPlatformAdmin() ? 'platform_admin' : $user->role,
             'preferences' => array_merge($user->preferences ?? [], [
                 'ai' => [
                     'enabled' => (bool) (($user->ai_settings ?? [])['enabled'] ?? true),

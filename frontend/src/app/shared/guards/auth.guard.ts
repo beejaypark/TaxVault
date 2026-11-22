@@ -25,3 +25,9 @@ export const ownerGuard: CanActivateFn = () => {
 
   return auth.canEdit ? true : router.createUrlTree(['/dashboard']);
 };
+
+export const platformAdminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.isPlatformAdmin ? true : router.createUrlTree(['/dashboard']);
+};

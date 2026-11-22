@@ -1,7 +1,8 @@
 ﻿import { Routes } from '@angular/router';
 
 import { AppShellComponent } from './shared/components/app-shell/app-shell.component';
-import { authGuard, ownerGuard } from './shared/guards/auth.guard';
+import { authGuard, ownerGuard, platformAdminGuard } from './shared/guards/auth.guard';
+import { AdminComponent } from './features/admin/admin.component';
 import { AccountantsComponent } from './features/accountants/accountants.component';
 import { LoginComponent } from './features/auth/pages/login/login.component';
 import { DashboardComponent } from './features/dashboard/pages/dashboard/dashboard.component';
@@ -60,6 +61,7 @@ export const routes: Routes = [
       { path: 'tax-news', component: TaxNewsComponent },
       { path: 'accountants', component: AccountantsComponent, canActivate: [ownerGuard] },
       { path: 'settings', component: SettingsComponent },
+      { path: 'admin', component: AdminComponent, canActivate: [platformAdminGuard] },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

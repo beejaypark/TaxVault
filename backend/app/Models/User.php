@@ -44,6 +44,12 @@ class User extends Authenticatable
         return $this->role === 'accountant';
     }
 
+    public function isPlatformAdmin(): bool
+    {
+        return $this->role === 'platform_admin'
+            || in_array(strtolower((string) $this->email), array_map('strtolower', config('admin.emails', [])), true);
+    }
+
     public function preference(string $key): mixed
     {
         return ($this->preferences ?? [])[$key] ?? null;

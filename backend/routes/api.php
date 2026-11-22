@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AccountantController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
 use App\Http\Controllers\Api\BillingController;
@@ -193,4 +194,8 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
         '/reviews/{id}/correction',
         [ReviewController::class, 'correction']
     )->middleware('audit:review.correction,review');
+});
+
+Route::middleware(['auth', 'session.active', 'require.platform.admin'])->group(function (): void {
+    Route::get('/admin/overview', [AdminController::class, 'overview']);
 });

@@ -3,6 +3,7 @@
 use App\Http\Middleware\ActAsGrantedOwner;
 use App\Http\Middleware\AuditRequest;
 use App\Http\Middleware\RequireActiveSession;
+use App\Http\Middleware\RequirePlatformAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'audit' => AuditRequest::class,
             'acting' => ActAsGrantedOwner::class,
             'session.active' => RequireActiveSession::class,
+            'require.platform.admin' => RequirePlatformAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
