@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { buildReminderIcs } from '../../shared/utils/calendar';
@@ -40,7 +40,7 @@ interface BillingStatusDto {
 
 @Component({
   selector: 'app-settings',
-  imports: [DatePipe, DecimalPipe, FormsModule, RouterLink, TranslatePipe],
+  imports: [DatePipe, FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-page tv-workspace-page">
@@ -220,16 +220,6 @@ interface BillingStatusDto {
         <section class="card" aria-labelledby="billing-heading">
           <h2 id="billing-heading">TaxVault subscription</h2>
           <p class="hint">Choose a plan that works for you. Cancel anytime from the Stripe customer portal.</p>
-          @if (billingStatus?.price; as price) {
-            <div class="pricing-card">
-              <div>
-                <span class="subscription-label">TaxVault plan</span>
-                <strong>{{ price.amount !== null ? ((price.amount / 100) | number:'1.2-2') : '—' }} {{ price.currency }}</strong>
-                <small>per {{ price.interval_count > 1 ? price.interval_count + ' ' : '' }}{{ price.interval || 'month' }}</small>
-              </div>
-              <span class="price-note">30-day free trial available</span>
-            </div>
-          }
           <div class="subscription-summary">
             <div>
               <span class="subscription-label">Current plan</span>
@@ -239,7 +229,12 @@ interface BillingStatusDto {
               }
             </div>
             @if (billingStatus?.active) {
-              <button type="button" class="link-button" (click)="openBillingPortal()" [disabled]="billingLoading">{{ billingLoading ? 'Opening…' : 'Manage subscription' }}</button>
+              <div class="billing-actions">
+                @if (!billingCancellationRequested) {
+                  <button type="button" class="link-button danger-link" (click)="cancelSubscription()" [disabled]="billingLoading">{{ billingLoading ? 'Updating…' : 'Cancel subscription' }}</button>
+                }
+                <button type="button" class="link-button" (click)="openBillingPortal()" [disabled]="billingLoading">Manage payment details</button>
+              </div>
             } @else {
               <div class="billing-actions">
                 <button type="button" class="link-button" (click)="startCheckout(true)" [disabled]="billingLoading">Start 30-day free trial</button>
@@ -359,6 +354,7 @@ export class SettingsComponent {
 
   private readonly http = inject(HttpClient);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
 
   readonly prefs = this.preferences.preferences;
   readonly sending = signal(false);
@@ -382,6 +378,8 @@ export class SettingsComponent {
   billingStatus: BillingStatusDto | null = null;
   billingLoading = false;
   billingMessage = '';
+  billingCheckoutStarted = false;
+  billingCancellationRequested = false;
   readonly aiModels = [
     { value: 'gpt-4o-mini', label: 'GPT-4o mini' },
     { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini' },
@@ -408,7 +406,17 @@ export class SettingsComponent {
 
   loadBillingStatus(): void {
     this.http.get<{ data: BillingStatusDto }>('/api/billing/status').subscribe({
-      next: (response) => { this.billingStatus = response.data; this.changeDetector.markForCheck(); },
+      next: (response) => {
+        this.billingStatus = response.data;
+        const plan = this.route.snapshot.queryParamMap.get('plan');
+        const checkoutRequested = this.route.snapshot.queryParamMap.get('billing') === 'checkout'
+          && (plan === 'immediate' || plan === 'trial');
+        if (checkoutRequested && !this.billingCheckoutStarted && !response.data.active) {
+          this.billingCheckoutStarted = true;
+          this.startCheckout(plan === 'trial');
+        }
+        this.changeDetector.markForCheck();
+      },
       error: () => { this.billingMessage = 'Unable to load subscription status.'; this.changeDetector.markForCheck(); },
     });
   }
@@ -434,6 +442,34 @@ export class SettingsComponent {
       error: (error) => {
         this.billingLoading = false;
         this.billingMessage = error?.error?.message || 'Unable to open subscription management.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  cancelSubscription(): void {
+    if (! window.confirm('Cancel your TaxVault subscription at the end of the current billing period?')) return;
+
+    this.billingLoading = true;
+    this.billingMessage = '';
+    this.http.post<{ data: { subscription_ends_at: string | null } }>('/api/billing/cancel', {}).subscribe({
+      next: (response) => {
+        if (this.billingStatus) {
+          this.billingStatus = {
+            ...this.billingStatus,
+            subscription_ends_at: response.data.subscription_ends_at,
+          };
+        }
+        this.billingLoading = false;
+        this.billingCancellationRequested = true;
+        this.billingMessage = response.data.subscription_ends_at
+          ? `Subscription cancelled. Access remains available until ${new Date(response.data.subscription_ends_at).toLocaleDateString('en-AU')}.`
+          : 'Subscription cancelled.';
+        this.changeDetector.markForCheck();
+      },
+      error: (error) => {
+        this.billingLoading = false;
+        this.billingMessage = error?.error?.message || 'Unable to cancel subscription.';
         this.changeDetector.markForCheck();
       },
     });

@@ -101,6 +101,27 @@ class BillingController extends Controller
         return response()->json(['data' => ['url' => $session['url']]]);
     }
 
+    public function cancel(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $this->ensureConfigured();
+        abort_unless(is_string($user->stripe_subscription_id) && $user->stripe_subscription_id !== '', 422, 'No active subscription is linked.');
+
+        $subscription = $this->stripe('post', '/subscriptions/'.rawurlencode($user->stripe_subscription_id), [
+            'cancel_at_period_end' => 'true',
+        ]);
+        $user->stripe_subscription_status = $subscription['status'] ?? $user->stripe_subscription_status;
+        $user->subscription_ends_at = $this->timestamp($subscription['current_period_end'] ?? null);
+        $user->save();
+
+        return response()->json(['data' => [
+            'status' => $user->stripe_subscription_status,
+            'subscription_ends_at' => $user->subscription_ends_at?->toISOString(),
+            'cancel_at_period_end' => (bool) ($subscription['cancel_at_period_end'] ?? true),
+        ]]);
+    }
+
     public function webhook(Request $request): JsonResponse
     {
         $secret = (string) config('services.stripe.webhook_secret');

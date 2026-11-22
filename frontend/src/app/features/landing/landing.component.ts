@@ -64,6 +64,22 @@ import { ProductChatComponent } from './product-chat.component';
           </figure>
         </div>
       </section>
+      <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
+        <div class="pricing-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-title">Choose how you want to start</h2><p>Both options include full TaxVault access at A$7.99 per month. Your card is securely collected by Stripe.</p></div>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <span class="pricing-label">Start now</span><h3>First month free</h3><strong>A$7.99 <small>/ month</small></strong>
+            <p>Join today and use TaxVault immediately. Your first month is free, then billing starts automatically.</p>
+            <button type="button" class="primary" (click)="openPricingSignup('immediate')">Start with first month free</button>
+          </article>
+          <article class="pricing-card featured">
+            <span class="pricing-label">Most flexible</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
+            <p>Try every feature for 30 days. Add your card now; automatic billing begins after the trial unless cancelled.</p>
+            <button type="button" class="primary" (click)="openPricingSignup('trial')">Start 30-day free trial</button>
+          </article>
+        </div>
+        <p class="pricing-note">Cancel anytime before the next billing date. No long-term contract. Payments are securely processed by Stripe.</p>
+      </section>
       <section class="benefits" id="benefits"><p class="eyebrow">A clearer tax season</p><h2>Keep the evidence together</h2><div class="benefit-grid"><article><b>01</b><h3>Bring documents in</h3><p>Upload files in bulk or import folders from connected storage.</p></article><article class="accent"><b>02</b><h3>Find the important details</h3><p>OCR-assisted extraction surfaces dates and amounts for review.</p></article><article><b>03</b><h3>Review with confidence</h3><p>Keep source documents, corrections and review history connected.</p></article></div></section>
       <section class="fit-section" aria-labelledby="fit-title">
         <div class="section-intro">
@@ -141,12 +157,25 @@ import { ProductChatComponent } from './product-chat.component';
         </nav>
         <div class="footer-bottom"><span>© 2026 TaxVault</span><span>TaxVault organises evidence. It does not prepare or lodge tax returns or provide tax advice.</span></div>
       </footer>
-      @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" [trialMode]="trialMode" /></section></div> }
+      @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" [trialMode]="trialMode" [returnUrl]="loginReturnUrl" /></section></div> }
     </main>
     <app-product-chat #productChat />
   `,
   styles: [`
-    :host { display:block; min-height:100vh; } .landing-page { min-height:100vh; color:#172b4d; background:#f6f8fb; scroll-behavior:smooth; } .site-header { border-top:2px solid #172b4d; border-bottom:1px solid #dfe5ec; background:#fff; } .site-nav { display:flex; align-items:center; gap:32px; max-width:1180px; margin:auto; padding:16px 32px; } .brand { display:flex; margin-right:8px; color:inherit; text-decoration:none; } .nav-links { display:flex; align-items:center; gap:34px; margin-right:auto; } .nav-links a,.login-link { color:#1d2735; font:inherit; font-size:14px; font-weight:600; text-decoration:none; } .nav-links a:hover,.login-link:hover { color:#1269d3; } .nav-actions { display:flex; align-items:center; gap:28px; } .nav-actions button { border:0; font:inherit; cursor:pointer; } .updates { min-height:44px; padding:0 24px; border-radius:8px; color:#fff; background:#087369; font-size:14px; font-weight:700; text-transform:none; } .updates:hover { background:#065b54; } .login-link { padding:8px 0; background:transparent; } .hero { display:grid; grid-template-columns:minmax(0,.92fr) minmax(440px,1.08fr); align-items:center; gap:72px; max-width:1180px; margin:auto; padding:76px 32px 112px; } .copy { max-width:540px; } .eyebrow { margin:0 0 16px; color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; } h1 { margin:0; color:#12345d; font-size:clamp(42px,5vw,68px); font-weight:500; letter-spacing:-.055em; line-height:1.02; } .copy > p:not(.eyebrow) { margin:24px 0 0; color:#58708f; font-size:17px; line-height:1.65; } .primary { display:inline-flex; align-items:center; min-height:46px; margin-top:32px; padding:0 20px; border:0; border-radius:8px; color:white; background:#123f78; font:inherit; font-size:14px; font-weight:700; cursor:pointer; } .preview { padding:20px; border:1px solid #d9e2ed; border-radius:18px; background:white; box-shadow:0 24px 60px rgb(31 63 101 / 12%); transform:rotate(1.2deg); } .preview-top { color:#8392a7; font-size:11px; } .preview h2 { margin:36px 0 24px; color:#18385f; font-size:24px; font-weight:500; } .benefits { max-width:1180px; margin:auto; padding:0 32px 100px; } .benefits h2,.trust-strip h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; } .benefit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; } article { min-height:150px; padding:24px; border:1px solid #dce5ee; border-radius:12px; background:white; } article.accent { border-color:#b9d4ec; background:#eef6fd; } article > b { color:#1f7ac4; font-size:12px; } article h3 { margin:28px 0 10px; color:#234466; font-size:17px; } article p { margin:0; color:#6d8197; font-size:13px; line-height:1.6; } .fit-section { max-width:1180px; margin:auto; padding:0 32px 100px; } .fit-heading { max-width:620px; } .fit-heading h2,.flow-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; } .fit-heading > p:not(.eyebrow) { margin:18px 0 0; color:#6d8197; font-size:15px; line-height:1.7; } .fit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; } .fit-grid article { min-height:175px; } .fit-icon { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; color:#fff; background:#123f78; font-size:12px; font-weight:700; } .fit-grid h3 { margin-top:24px; } .flow-section { max-width:1180px; margin:0 auto; padding:0 32px 100px; } .flow-heading { max-width:620px; } .flow { display:flex; align-items:center; gap:12px; margin-top:34px; padding:28px; border:1px solid #d8e5ef; border-radius:16px; background:#eef6fd; } .flow-step { display:flex; align-items:center; gap:12px; min-width:0; flex:1; } .flow-number { display:grid; place-items:center; flex:none; width:42px; height:42px; border:2px solid #8db7d8; border-radius:50%; color:#123f78; background:#fff; font-weight:700; } .flow-step.complete .flow-number { border-color:#2c9a67; color:#fff; background:#2c9a67; } .flow-step div { display:grid; gap:5px; } .flow-step strong { color:#234466; font-size:13px; } .flow-step small { color:#6d8197; font-size:11px; line-height:1.4; } .flow-arrow { flex:none; color:#6e9cc0; font-size:24px; } .trust-strip { display:flex; align-items:end; justify-content:space-between; gap:48px; max-width:1180px; margin:0 auto; padding:28px 32px 90px; border-top:1px solid #dce5ee; } .trust-strip > p { max-width:480px; margin:0; color:#6d8197; font-size:15px; line-height:1.7; } .contact-section { display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,460px); gap:64px; max-width:1180px; margin:0 auto; padding:74px 32px 86px; border-top:1px solid #dce5ee; } .contact-copy h2 { margin:0; color:#18385f; font-size:42px; font-weight:500; } .contact-copy > p:not(.eyebrow) { max-width:480px; margin:20px 0 0; color:#6d8197; font-size:15px; line-height:1.7; } .contact-form { display:grid; gap:8px; padding:26px; border:1px solid #dce5ee; border-radius:14px; background:#fff; box-shadow:0 14px 34px rgb(31 63 101 / 8%); } .contact-form label { margin-top:6px; color:#294563; font-size:13px; font-weight:650; } .contact-form input,.contact-form textarea { box-sizing:border-box; width:100%; padding:11px 12px; border:1px solid #cbd8e5; border-radius:7px; color:#233d59; background:#fff; font:inherit; } .contact-form textarea { resize:vertical; } .contact-form input:focus,.contact-form textarea:focus { outline:2px solid #8bb9df; outline-offset:1px; } .contact-form button { min-height:44px; margin-top:10px; border:0; border-radius:7px; color:#fff; background:#146be0; font:inherit; font-weight:700; cursor:pointer; } .contact-form button:hover { background:#0d5dc9; } .contact-success { display:grid; align-content:center; gap:10px; min-height:220px; padding:28px; border:1px solid #b9dcca; border-radius:14px; color:#286345; background:#effaf3; } .contact-success span { color:#4f7861; font-size:14px; line-height:1.6; } footer { display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:auto; padding:26px 32px 34px; border-top:1px solid #dce5ee; color:#7b8da1; font-size:12px; } .backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:24px; background:rgb(15 35 58 / 42%); overflow-y:auto; } .modal { position:relative; width:min(100%,520px); max-height:calc(100vh - 48px); overflow-y:auto; border-radius:18px; background:#f5f7fb; box-shadow:0 24px 80px rgb(15 35 58 / 28%); } .close { position:absolute; z-index:2; top:12px; right:14px; width:32px; height:32px; border:0; border-radius:50%; color:#52677f; background:transparent; font-size:24px; cursor:pointer; } .close:hover { background:#e8eef5; } @media (max-width:850px) { .site-nav { gap:20px; } .nav-links { gap:18px; } .nav-actions { gap:16px; } .hero { grid-template-columns:1fr; gap:48px; padding-top:48px; } .fit-grid { grid-template-columns:1fr; } .flow { align-items:stretch; flex-direction:column; } .flow-arrow { display:block; align-self:center; transform:rotate(90deg); } .trust-strip,.contact-section { align-items:start; flex-direction:column; } .contact-section { display:flex; } } @media (max-width:620px) { .site-nav { flex-wrap:wrap; padding:14px 20px; } .nav-links { order:3; width:100%; justify-content:space-between; } .nav-links a { font-size:12px; } .updates { padding:0 14px; font-size:12px; } .hero,.benefits,.fit-section,.flow-section,.trust-strip,.contact-section,footer { padding-left:20px; padding-right:20px; } .benefit-grid { grid-template-columns:1fr; } footer { align-items:start; flex-direction:column; gap:16px; } }
+    .pricing-section { max-width:1180px; margin:auto; padding:0 32px 100px; }
+    .pricing-heading { max-width:620px; }
+    .pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
+    .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
+    .pricing-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:32px; }
+    .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; }
+    .pricing-card.featured { border:2px solid #2b8f88; box-shadow:0 14px 34px rgb(31 63 101 / 8%); }
+    .pricing-label { color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .pricing-card h3 { margin:16px 0 10px; color:#234466; font-size:21px; }
+    .pricing-card > strong { color:#123f78; font-size:28px; }
+    .pricing-card > strong small { color:#6d8197; font-size:14px; font-weight:500; }
+    .pricing-card p { margin:18px 0 0; color:#6d8197; font-size:14px; line-height:1.6; }
+    .pricing-card .primary { align-self:flex-start; margin-top:auto; }
+    .pricing-note { margin:18px 0 0; color:#6d8197; font-size:12px; text-align:center; }
   `, `.modal > app-login { display:block; width:100%; } .process-flow { display:flex; align-items:stretch; gap:12px; margin-top:34px; padding:28px; border:1px solid #d8e5ef; border-radius:16px; background:#eef6fd; } .process-node { display:grid; flex:1; gap:7px; min-width:0; } .process-node > span { display:grid; place-items:center; width:38px; height:38px; border:2px solid #8db7d8; border-radius:50%; color:#123f78; background:#fff; font-size:12px; font-weight:700; } .process-node strong { color:#234466; font-size:14px; } .process-node small { color:#6d8197; font-size:11px; line-height:1.4; } .process-node.complete > span { border-color:#2c9a67; color:#fff; background:#2c9a67; } .process-arrow { align-self:center; flex:none; color:#6e9cc0; font-size:24px; } .accountant-branch { display:flex; align-items:flex-start; gap:12px; max-width:360px; margin:18px 0 0 auto; padding:16px 18px; border:1px dashed #9cc3df; border-radius:12px; background:#fff; } .branch-line { color:#6e9cc0; font-size:24px; line-height:1; } .accountant-branch div { display:grid; gap:5px; } .accountant-branch small { color:#1f7ac4; font-size:11px; font-weight:700; text-transform:uppercase; } .accountant-branch strong { color:#234466; font-size:14px; } .accountant-branch p { margin:0; color:#6d8197; font-size:12px; line-height:1.5; } @media (max-width:850px) { .process-flow { align-items:stretch; flex-direction:column; } .process-arrow { align-self:center; transform:rotate(90deg); } .accountant-branch { margin-left:0; } }`,
   `.site-nav, .hero, .benefits, .fit-section, .flow-section, .trust-strip, .contact-section, footer { max-width:1320px; }`,
   `
@@ -304,6 +333,7 @@ export class LandingComponent {
   readonly receipt = { supplier: 'Harbour Stationery', date: '1 Sep 2026', amount: '$86.40' };
   loginOpen = false;
   trialMode = false;
+  loginReturnUrl = '/dashboard';
   readonly contactSubmitted = signal(false);
   readonly contactPending = signal(false);
   readonly contactError = signal('');
@@ -333,8 +363,13 @@ export class LandingComponent {
     });
   }
 
-  openLogin(): void { this.loginOpen = true; }
-  openTrial(): void { this.trialMode = true; this.loginOpen = true; }
+  openLogin(): void { this.trialMode = false; this.loginReturnUrl = '/dashboard'; this.loginOpen = true; }
+  openTrial(): void { this.trialMode = true; this.loginReturnUrl = '/settings?billing=checkout&plan=trial'; this.loginOpen = true; }
+  openPricingSignup(plan: 'trial' | 'immediate'): void {
+    this.trialMode = true;
+    this.loginReturnUrl = `/settings?billing=checkout&plan=${plan}`;
+    this.loginOpen = true;
+  }
   closeLogin(): void { this.loginOpen = false; }
 
   submitContact(event: SubmitEvent): void {

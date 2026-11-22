@@ -154,6 +154,7 @@ import { TranslationService } from '../../../../shared/i18n/translation.service'
 export class LoginComponent implements OnInit {
   @Input() embedded = false;
   @Input() trialMode = false;
+  @Input() returnUrl = '/dashboard';
   login = '';
   password = '';
   loading = false;
@@ -259,6 +260,6 @@ export class LoginComponent implements OnInit {
 
     return value && value.startsWith('/') && !value.startsWith('//')
       ? value
-      : '/dashboard';
+      : this.returnUrl;
   }
 }

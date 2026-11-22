@@ -81,6 +81,7 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
     Route::get('/billing/status', [BillingController::class, 'status']);
     Route::post('/billing/checkout', [BillingController::class, 'checkout']);
     Route::post('/billing/portal', [BillingController::class, 'portal']);
+    Route::post('/billing/cancel', [BillingController::class, 'cancel']);
     Route::get('/accountants', [AccountantController::class, 'index']);
     Route::post('/accountants', [AccountantController::class, 'store'])->middleware('audit:accountant.invite,accountant');
     Route::patch('/accountants/{id}', [AccountantController::class, 'update'])->middleware('audit:accountant.update,accountant');
