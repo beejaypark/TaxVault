@@ -65,15 +65,10 @@ import { ProductChatComponent } from './product-chat.component';
         </div>
       </section>
       <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
-        <div class="pricing-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-title">Choose how you want to start</h2><p>Both options include full TaxVault access at A$7.99 per month. Your card is securely collected by Stripe.</p></div>
+        <div class="pricing-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-title">Choose how you want to start</h2><p>Choose monthly or annual billing. Your card is securely collected by Stripe, and the 30-day trial is available on both plans.</p></div>
         <div class="pricing-grid">
-          <article class="pricing-card" [class.selected]="selectedPricingPlan === 'monthly'" (mouseenter)="selectedPricingPlan = 'monthly'" (focusin)="selectedPricingPlan = 'monthly'">
-            <span class="pricing-label">Start now</span><h3>First month free</h3><strong>A$7.99 <small>/ month</small></strong>
-            <p>Join today and use TaxVault immediately. Your first month is free, then billing starts automatically.</p>
-            <button type="button" class="primary" (click)="openPricingSignup('monthly')">Start with first month free</button>
-          </article>
           <article class="pricing-card featured" [class.selected]="selectedPricingPlan === 'trial'" (mouseenter)="selectedPricingPlan = 'trial'" (focusin)="selectedPricingPlan = 'trial'">
-            <span class="pricing-label">Most flexible</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
+            <span class="pricing-label">Monthly plan</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
             <p>Try every feature for 30 days. Add your card now; automatic billing begins after the trial unless cancelled.</p>
             <button type="button" class="primary" (click)="openPricingSignup('trial')">Start 30-day free trial</button>
           </article>
@@ -228,8 +223,7 @@ import { ProductChatComponent } from './product-chat.component';
     .pricing-heading { max-width:620px; }
     .pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
     .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
-    .pricing-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; margin-top:32px; }
-    @media (max-width:1050px) { .pricing-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+    .pricing-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:32px; }
     .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
     .pricing-card:hover { transform:translateY(-5px); box-shadow:0 14px 34px rgb(31 63 101 / 10%); }
     .pricing-card.selected { border-color:#2b8f88; outline:3px solid rgb(43 143 136 / 22%); outline-offset:4px; transform:translateY(-9px); box-shadow:0 20px 42px rgb(31 63 101 / 16%); }
