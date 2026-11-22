@@ -19,6 +19,20 @@ class BillingController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $price = null;
+        if (config('services.stripe.secret') && config('services.stripe.price_id')) {
+            try {
+                $stripePrice = $this->stripe('get', '/prices/'.config('services.stripe.price_id'), []);
+                $price = [
+                    'amount' => $stripePrice['unit_amount'] ?? null,
+                    'currency' => strtoupper((string) ($stripePrice['currency'] ?? 'AUD')),
+                    'interval' => $stripePrice['recurring']['interval'] ?? null,
+                    'interval_count' => $stripePrice['recurring']['interval_count'] ?? 1,
+                ];
+            } catch (\Throwable $exception) {
+                Log::warning('Unable to load Stripe price.', ['error' => $exception->getMessage()]);
+            }
+        }
 
         return response()->json(['data' => [
             'status' => $user->stripe_subscription_status,
@@ -27,6 +41,7 @@ class BillingController extends Controller
             'active' => in_array($user->stripe_subscription_status, [
                 'trialing', 'active', 'past_due',
             ], true),
+            'price' => $price,
         ]]);
     }
 
@@ -150,9 +165,10 @@ class BillingController extends Controller
 
     private function stripe(string $method, string $path, array $data): array
     {
-        $response = Http::asForm()
-            ->withBasicAuth((string) config('services.stripe.secret'), '')
-            ->post(self::STRIPE_URL.$path, $data);
+        $client = Http::asForm()->withBasicAuth((string) config('services.stripe.secret'), '');
+        $response = strtolower($method) === 'get'
+            ? $client->get(self::STRIPE_URL.$path, $data)
+            : $client->post(self::STRIPE_URL.$path, $data);
 
         if ($response->failed()) {
             Log::error('Stripe API request failed.', [

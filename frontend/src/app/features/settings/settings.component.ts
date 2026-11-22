@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -35,11 +35,12 @@ interface BillingStatusDto {
   trial_ends_at: string | null;
   subscription_ends_at: string | null;
   active: boolean;
+  price: { amount: number | null; currency: string; interval: string | null; interval_count: number } | null;
 }
 
 @Component({
   selector: 'app-settings',
-  imports: [DatePipe, FormsModule, RouterLink, TranslatePipe],
+  imports: [DatePipe, DecimalPipe, FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-page tv-workspace-page">
@@ -218,7 +219,17 @@ interface BillingStatusDto {
       @if (!auth.isAccountant) {
         <section class="card" aria-labelledby="billing-heading">
           <h2 id="billing-heading">TaxVault subscription</h2>
-          <p class="hint">Start a 30-day free trial. Your subscription begins automatically after the trial unless cancelled.</p>
+          <p class="hint">Choose a plan that works for you. Cancel anytime from the Stripe customer portal.</p>
+          @if (billingStatus?.price; as price) {
+            <div class="pricing-card">
+              <div>
+                <span class="subscription-label">TaxVault plan</span>
+                <strong>{{ price.amount !== null ? ((price.amount / 100) | number:'1.2-2') : '—' }} {{ price.currency }}</strong>
+                <small>per {{ price.interval_count > 1 ? price.interval_count + ' ' : '' }}{{ price.interval || 'month' }}</small>
+              </div>
+              <span class="price-note">30-day free trial available</span>
+            </div>
+          }
           <div class="subscription-summary">
             <div>
               <span class="subscription-label">Current plan</span>
@@ -332,6 +343,10 @@ interface BillingStatusDto {
     .subscription-summary > div { display: grid; gap: 3px; }
     .billing-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
     .secondary-button { background: transparent; }
+    .pricing-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 12px 0; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: 10px; background: var(--tv-color-background); }
+    .pricing-card > div { display: grid; gap: 3px; }
+    .pricing-card strong { font-size: 22px; }
+    .price-note { color: var(--tv-color-primary); font-size: 13px; font-weight: 600; }
     .subscription-summary strong { font-size: 15px; }
     .subscription-summary small { color: var(--tv-color-text-secondary); font-size: 12px; }
     .subscription-label { color: var(--tv-color-text-secondary); font-size: 12px; font-weight: 600; }
