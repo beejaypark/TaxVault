@@ -73,7 +73,9 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "allowedHosts": [
-              "desktop-fn3ojjj.tailc14f46.ts.net"
+              "desktop-fn3ojjj.tailc14f46.ts.net",
+              "taxvaultapp.online",
+              "www.taxvaultapp.online"
             ]
           },
           "configurations": {
