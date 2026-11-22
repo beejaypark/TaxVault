@@ -6,7 +6,7 @@ interface AdminOverview {
   total_users: number;
   new_users_7_days: number;
   new_users_30_days: number;
-  recent_users: Array<{ display_name: string | null; email: string | null; identity_provider: string; created_at: string }>;
+  recent_users: Array<{ id: string; display_name: string | null; email: string | null; identity_provider: string; billing_exempt: boolean; created_at: string }>;
   notification_logs: Array<{ recipient: string; status: string; created_at: string; error: string | null }>;
 }
 
@@ -24,7 +24,7 @@ interface AdminOverview {
           <article><span>New in 7 days</span><strong>{{ overview.new_users_7_days }}</strong></article>
           <article><span>New in 30 days</span><strong>{{ overview.new_users_30_days }}</strong></article>
         </section>
-        <section class="panel"><h2>Recent customers</h2><table><thead><tr><th>Name</th><th>Email</th><th>Provider</th><th>Registered</th></tr></thead><tbody>@for (user of overview.recent_users; track user.email) {<tr><td>{{ user.display_name || '—' }}</td><td>{{ user.email || '—' }}</td><td>{{ user.identity_provider }}</td><td>{{ user.created_at | date:'medium' }}</td></tr>}</tbody></table></section>
+        <section class="panel"><h2>Recent customers</h2><table><thead><tr><th>Name</th><th>Email</th><th>Provider</th><th>Registered</th><th>Billing</th></tr></thead><tbody>@for (user of overview.recent_users; track user.id) {<tr><td>{{ user.display_name || '—' }}</td><td>{{ user.email || '—' }}</td><td>{{ user.identity_provider }}</td><td>{{ user.created_at | date:'medium' }}</td><td><button type="button" class="exemption-button" (click)="toggleBillingExemption(user)">{{ user.billing_exempt ? 'Remove exemption' : 'Exempt from billing' }}</button></td></tr>}</tbody></table></section>
         <section class="panel"><h2>Registration notifications</h2><table><thead><tr><th>Recipient</th><th>Status</th><th>Sent</th><th>Error</th></tr></thead><tbody>@for (log of overview.notification_logs; track log.created_at) {<tr><td>{{ log.recipient }}</td><td>{{ log.status }}</td><td>{{ log.created_at | date:'medium' }}</td><td>{{ log.error || '—' }}</td></tr>}</tbody></table></section>
       }
     </main>
@@ -54,6 +54,20 @@ export class AdminComponent {
       },
       error: () => {
         this.error = 'Unable to load the administrator overview.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  toggleBillingExemption(user: AdminOverview['recent_users'][number]): void {
+    const exempt = !user.billing_exempt;
+    this.http.patch<{ data: { billing_exempt: boolean } }>(`/api/admin/users/${user.id}/billing-exemption`, { billing_exempt: exempt }).subscribe({
+      next: response => {
+        user.billing_exempt = response.data.billing_exempt;
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.error = 'Unable to update billing exemption.';
         this.changeDetector.markForCheck();
       },
     });

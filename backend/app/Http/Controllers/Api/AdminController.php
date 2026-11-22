@@ -22,9 +22,22 @@ class AdminController extends Controller
             'new_users_7_days' => User::query()->where('created_at', '>=', $now->copy()->subDays(7))->count(),
             'new_users_30_days' => User::query()->where('created_at', '>=', $now->copy()->subDays(30))->count(),
             'recent_users' => $customers(User::query())->latest()->limit(20)->get([
-                'id', 'email', 'display_name', 'identity_provider', 'status', 'created_at',
+                'id', 'email', 'display_name', 'identity_provider', 'status', 'billing_exempt', 'created_at',
             ]),
             'notification_logs' => AdminNotificationLog::query()->latest('created_at')->limit(20)->get(),
+        ]]);
+    }
+
+    public function setBillingExemption(Request $request, User $user): JsonResponse
+    {
+        abort_if($user->isPlatformAdmin(), 422, 'Platform administrators cannot be changed here.');
+
+        $user->billing_exempt = $request->boolean('billing_exempt');
+        $user->save();
+
+        return response()->json(['data' => [
+            'user_id' => $user->getKey(),
+            'billing_exempt' => $user->billing_exempt,
         ]]);
     }
 }

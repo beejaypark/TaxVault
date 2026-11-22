@@ -37,6 +37,7 @@ class User extends Authenticatable
         'stripe_subscription_status',
         'trial_ends_at',
         'subscription_ends_at',
+        'billing_exempt',
     ];
 
     public function isAccountant(): bool
@@ -68,6 +69,7 @@ class User extends Authenticatable
             'ai_settings' => 'encrypted:array',
             'trial_ends_at' => 'datetime',
             'subscription_ends_at' => 'datetime',
+            'billing_exempt' => 'boolean',
         ];
     }
 

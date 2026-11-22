@@ -198,4 +198,5 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
 
 Route::middleware(['auth', 'session.active', 'require.platform.admin'])->group(function (): void {
     Route::get('/admin/overview', [AdminController::class, 'overview']);
+    Route::patch('/admin/users/{user}/billing-exemption', [AdminController::class, 'setBillingExemption']);
 });

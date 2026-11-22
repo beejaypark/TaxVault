@@ -41,6 +41,7 @@ export interface AuthUser {
   display_name: string;
   identity_provider: string;
   role?: 'owner' | 'accountant' | 'platform_admin';
+  billing_exempt?: boolean;
   preferences?: {
     language?: 'en' | 'kr' | 'cn' | 'es';
     notifyDocuments?: boolean;

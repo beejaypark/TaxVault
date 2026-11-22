@@ -377,6 +377,7 @@ class AuthController extends Controller
             'display_name' => $user->display_name,
             'identity_provider' => $user->identity_provider,
             'role' => $user->isPlatformAdmin() ? 'platform_admin' : $user->role,
+            'billing_exempt' => (bool) $user->billing_exempt,
             'preferences' => array_merge($user->preferences ?? [], [
                 'ai' => [
                     'enabled' => (bool) (($user->ai_settings ?? [])['enabled'] ?? true),

@@ -216,7 +216,7 @@ interface BillingStatusDto {
         </label>
       </section>
 
-      @if (!auth.isAccountant && !auth.isPlatformAdmin) {
+      @if (!auth.isAccountant && !auth.isPlatformAdmin && !auth.user()?.billing_exempt) {
         <section class="card" aria-labelledby="billing-heading">
           <h2 id="billing-heading">TaxVault subscription</h2>
           <p class="hint">Choose a plan that works for you. Cancel anytime from the Stripe customer portal.</p>
@@ -393,7 +393,7 @@ export class SettingsComponent {
     // user role has been loaded, otherwise accountant viewers make a forbidden
     // storage request and see a misleading "unavailable" message.
     this.auth.initialize().subscribe((user) => {
-      if (user?.role !== 'accountant' && user?.role !== 'platform_admin') {
+      if (user?.role !== 'accountant' && user?.role !== 'platform_admin' && !user?.billing_exempt) {
         this.loadBillingStatus();
       }
       this.loadStorageProviders();

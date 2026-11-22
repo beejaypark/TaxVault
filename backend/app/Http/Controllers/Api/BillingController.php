@@ -41,6 +41,7 @@ class BillingController extends Controller
             'active' => in_array($user->stripe_subscription_status, [
                 'trialing', 'active', 'past_due',
             ], true),
+            'billing_exempt' => (bool) $user->billing_exempt,
             'price' => $price,
         ]]);
     }
@@ -49,6 +50,7 @@ class BillingController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        abort_if($user->billing_exempt, 403, 'This account is exempt from subscription billing.');
         $plan = $request->string('plan')->toString() ?: 'monthly';
         $trial = $request->boolean('trial', true);
         $this->ensureConfigured();
