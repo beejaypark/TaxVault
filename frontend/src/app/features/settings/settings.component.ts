@@ -80,7 +80,7 @@ interface BillingStatusDto {
         <p class="hint">{{ 'Settings.GeneralHint' | translate }}</p>
       </section>
 
-      @if (!auth.isAccountant && !auth.isPlatformAdmin) {
+      @if (!auth.isAccountant) {
       <section class="card" aria-labelledby="storage-heading">
         <h2 id="storage-heading">{{ 'Settings.DocumentStorage' | translate }}</h2>
         <p class="hint">{{ 'Settings.DocumentStorageHint' | translate }}</p>
@@ -216,7 +216,7 @@ interface BillingStatusDto {
         </label>
       </section>
 
-      @if (!auth.isAccountant) {
+      @if (!auth.isAccountant && !auth.isPlatformAdmin) {
         <section class="card" aria-labelledby="billing-heading">
           <h2 id="billing-heading">TaxVault subscription</h2>
           <p class="hint">Choose a plan that works for you. Cancel anytime from the Stripe customer portal.</p>
