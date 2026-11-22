@@ -5,120 +5,124 @@ import { finalize } from 'rxjs';
 import { BrandLogoComponent } from '../../shared/components/brand-logo/brand-logo.component';
 import { LoginComponent } from '../auth/pages/login/login.component';
 import { ProductChatComponent } from './product-chat.component';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
+import { angularLocale, activeLocale, isLocaleCode } from '../../i18n/locale';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 
 @Component({
   selector: 'app-landing',
-  imports: [BrandLogoComponent, LoginComponent, ProductChatComponent],
+  imports: [BrandLogoComponent, LoginComponent, ProductChatComponent, TranslatePipe],
   template: `
     <main class="landing-page">
       <header class="site-header">
         <nav class="site-nav" aria-label="Primary navigation">
           <a class="brand" href="#top" aria-label="TaxVault home"><tv-brand-logo [size]="42" /></a>
           <div class="nav-links">
-            <a href="#how-it-works">How it works</a>
-            <a href="#benefits">Why TaxVault</a>
-            <a href="#contact">Contact us</a>
+            <a href="#how-it-works">{{ 'Landing.HowItWorks' | translate }}</a>
+            <a href="#benefits">{{ 'Landing.WhyTaxVault' | translate }}</a>
+            <a href="#contact">{{ 'Landing.ContactUs' | translate }}</a>
           </div>
           <div class="nav-actions">
-            <button type="button" class="updates" (click)="openTrial()">Get free tax updates</button>
-            <button type="button" class="login-link" (click)="openLogin()">Log in</button>
+            <label class="language-picker"><span class="sr-only">Language</span><select [value]="activeLocale()" (change)="changeLanguage($any($event.target).value)"><option value="en">English</option><option value="kr">한국어</option><option value="cn">简体中文</option><option value="es">Español</option></select></label>
+            <button type="button" class="updates" (click)="openTrial()">{{ 'Landing.GetStarted' | translate }}</button>
+            <button type="button" class="login-link" (click)="openLogin()">{{ 'Landing.LogIn' | translate }}</button>
           </div>
         </nav>
       </header>
       <section class="hero-scene" id="top">
         <div class="hero">
           <div class="copy">
-            <h1>Your tax documents,<br class="hero-break" /> <em>ready when you are</em></h1>
-            <p>Bring receipts, statements and tax evidence together. Review the details in one place and share a clearer record with your accountant.</p>
+            <h1>{{ 'Landing.HeroTitle' | translate }}<br class="hero-break" /> <em>{{ 'Landing.HeroAccent' | translate }}</em></h1>
+            <p>{{ 'Landing.HeroDescription' | translate }}</p>
             <div class="hero-actions">
-              <button type="button" class="primary" (click)="openLogin()">Get started</button>
-              <a href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a>
+              <button type="button" class="primary" (click)="openLogin()">{{ 'Landing.GetStarted' | translate }}</button>
+              <a href="#how-it-works">{{ 'Landing.SeeHowItWorks' | translate }} <span aria-hidden="true">↓</span></a>
             </div>
           </div>
           <figure class="preview" aria-labelledby="example-title">
-            <figcaption class="preview-top"><span>Example workspace</span><span>FY 2026–27</span></figcaption>
-            <h2 id="example-title">Document review</h2>
+            <figcaption class="preview-top"><span>{{ 'Landing.ExampleWorkspace' | translate }}</span><span>FY 2026–27</span></figcaption>
+            <h2 id="example-title">{{ 'Landing.DocumentReview' | translate }}</h2>
             <div class="review-example">
               <section class="example-source" aria-labelledby="example-source-title">
-                <h3 id="example-source-title">Source document</h3>
+                <h3 id="example-source-title">{{ 'Landing.SourceDocument' | translate }}</h3>
                 <div class="sample-receipt">
                   <strong>{{ receipt.supplier }}</strong>
                   <time datetime="2026-09-01">{{ receipt.date }}</time>
                   <dl>
-                    <div><dt>Printer paper</dt><dd>$24.40</dd></div>
-                    <div><dt>Ink cartridge</dt><dd>$62.00</dd></div>
-                    <div class="receipt-total"><dt>Total</dt><dd>{{ receipt.amount }}</dd></div>
+                    <div><dt>{{ 'Landing.PrinterPaper' | translate }}</dt><dd>$24.40</dd></div>
+                    <div><dt>{{ 'Landing.InkCartridge' | translate }}</dt><dd>$62.00</dd></div>
+                    <div class="receipt-total"><dt>{{ 'Landing.Total' | translate }}</dt><dd>{{ receipt.amount }}</dd></div>
                   </dl>
                 </div>
               </section>
               <section class="example-fields" aria-labelledby="example-fields-title">
-                <h3 id="example-fields-title">Extracted details</h3>
+                <h3 id="example-fields-title">{{ 'Landing.ExtractedDetails' | translate }}</h3>
                 <dl>
-                  <div><dt>Supplier</dt><dd>{{ receipt.supplier }}</dd></div>
-                  <div><dt>Issue date</dt><dd>{{ receipt.date }}</dd></div>
-                  <div><dt>Total amount</dt><dd>{{ receipt.amount }}</dd></div>
+                  <div><dt>{{ 'Landing.Supplier' | translate }}</dt><dd>{{ receipt.supplier }}</dd></div>
+                  <div><dt>{{ 'Landing.IssueDate' | translate }}</dt><dd>{{ receipt.date }}</dd></div>
+                  <div><dt>{{ 'Landing.TotalAmount' | translate }}</dt><dd>{{ receipt.amount }}</dd></div>
                 </dl>
-                <span class="example-status">✓ Reviewed</span>
+                <span class="example-status">✓ {{ 'Landing.Reviewed' | translate }}</span>
               </section>
             </div>
           </figure>
         </div>
       </section>
       <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
-        <div class="pricing-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-title">Choose how you want to start</h2><p>Choose monthly or annual billing. Your card is securely collected by Stripe, and the 30-day trial is available on both plans.</p></div>
+        <div class="pricing-heading"><p class="eyebrow">{{ 'Landing.SimplePricing' | translate }}</p><h2 id="pricing-title">{{ 'Landing.ChooseHowToStart' | translate }}</h2><p>{{ 'Landing.PricingDescription' | translate }}</p></div>
         <div class="pricing-grid">
           <article class="pricing-card featured" [class.selected]="selectedPricingPlan === 'trial'" (mouseenter)="selectedPricingPlan = 'trial'" (focusin)="selectedPricingPlan = 'trial'">
-            <span class="pricing-label">Monthly plan</span><h3>30-day free trial</h3><strong>A$7.99 <small>/ month</small></strong>
-            <p>Try every feature for 30 days. Add your card now; automatic billing begins after the trial unless cancelled.</p>
-            <button type="button" class="primary" (click)="openPricingSignup('trial')">Start 30-day free trial</button>
+            <span class="pricing-label">{{ 'Landing.MonthlyPlan' | translate }}</span><h3>{{ 'Landing.ThirtyDayTrial' | translate }}</h3><strong>A$7.99 <small>{{ 'Landing.PerMonth' | translate }}</small></strong>
+            <p>{{ 'Landing.MonthlyDescription' | translate }}</p>
+            <button type="button" class="primary" (click)="openPricingSignup('trial')">{{ 'Landing.StartTrial' | translate }}</button>
           </article>
           <article class="pricing-card annual-card" [class.selected]="selectedPricingPlan === 'yearly'" (mouseenter)="selectedPricingPlan = 'yearly'" (focusin)="selectedPricingPlan = 'yearly'">
-            <span class="pricing-label">Best value</span><h3>Annual plan</h3><strong>A$79.90 <small>/ year</small></strong>
-            <p>Save compared with monthly billing. Your card is collected securely and the annual plan starts after your free month.</p>
-            <button type="button" class="primary" (click)="openPricingSignup('yearly')">Choose annual plan</button>
+            <span class="pricing-label">{{ 'Landing.BestValue' | translate }}</span><h3>{{ 'Landing.AnnualPlan' | translate }}</h3><strong>A$79.90 <small>{{ 'Landing.PerYear' | translate }}</small></strong>
+            <p>{{ 'Landing.AnnualDescription' | translate }}</p>
+            <button type="button" class="primary" (click)="openPricingSignup('yearly')">{{ 'Landing.ChooseAnnual' | translate }}</button>
           </article>
         </div>
-        <p class="pricing-note">Cancel anytime before the next billing date. No long-term contract. Payments are securely processed by Stripe.</p>
+        <p class="pricing-note">{{ 'Landing.PricingNote' | translate }}</p>
       </section>
-      <section class="benefits" id="benefits"><p class="eyebrow">A clearer tax season</p><h2>Keep the evidence together</h2><div class="benefit-grid"><article><b>01</b><h3>Bring documents in</h3><p>Upload files in bulk or import folders from connected storage.</p></article><article class="accent"><b>02</b><h3>Find the important details</h3><p>OCR-assisted extraction surfaces dates and amounts for review.</p></article><article><b>03</b><h3>Review with confidence</h3><p>Keep source documents, corrections and review history connected.</p></article></div></section>
+      <section class="benefits" id="benefits"><p class="eyebrow">{{ 'Landing.ClearerTaxSeason' | translate }}</p><h2>{{ 'Landing.KeepEvidenceTogether' | translate }}</h2><div class="benefit-grid"><article><b>01</b><h3>{{ 'Landing.BringDocuments' | translate }}</h3><p>{{ 'Landing.BringDocumentsDescription' | translate }}</p></article><article class="accent"><b>02</b><h3>{{ 'Landing.FindDetails' | translate }}</h3><p>{{ 'Landing.FindDetailsDescription' | translate }}</p></article><article><b>03</b><h3>{{ 'Landing.ReviewConfidence' | translate }}</h3><p>{{ 'Landing.ReviewConfidenceDescription' | translate }}</p></article></div></section>
       <section class="fit-section" aria-labelledby="fit-title">
         <div class="section-intro">
-          <div class="fit-heading"><p class="eyebrow">Made for your tax workflow</p><h2 id="fit-title">Who is TaxVault for?</h2><p>TaxVault is useful when tax evidence arrives from more than one place and you want a clearer record before lodgement.</p></div>
+          <div class="fit-heading"><p class="eyebrow">{{ 'Landing.MadeForWorkflow' | translate }}</p><h2 id="fit-title">{{ 'Landing.WhoIsItFor' | translate }}</h2><p>{{ 'Landing.FitDescription' | translate }}</p></div>
           <img class="section-photo" src="assets/branding/taxvault-audience.jpg" width="1672" height="941" loading="lazy" decoding="async" alt="Two people sorting receipts and tax paperwork at a table" />
         </div>
-        <div class="fit-grid"><article><span class="fit-icon">01</span><h3>Individuals and families</h3><p>Keep receipts, statements and property documents together throughout the year.</p></article><article><span class="fit-icon">02</span><h3>Sole traders and small businesses</h3><p>Bring work expenses and business records into one reviewable workspace.</p></article><article><span class="fit-icon">03</span><h3>People working with an accountant</h3><p>Share a more complete, traceable record with the professional helping you.</p></article></div>
+        <div class="fit-grid"><article><span class="fit-icon">01</span><h3>{{ 'Landing.Individuals' | translate }}</h3><p>{{ 'Landing.IndividualsDescription' | translate }}</p></article><article><span class="fit-icon">02</span><h3>{{ 'Landing.SmallBusiness' | translate }}</h3><p>{{ 'Landing.SmallBusinessDescription' | translate }}</p></article><article><span class="fit-icon">03</span><h3>{{ 'Landing.WithAccountant' | translate }}</h3><p>{{ 'Landing.WithAccountantDescription' | translate }}</p></article></div>
       </section>
       <section class="workspace-section" aria-labelledby="workspace-title"><div class="workspace-heading"><p class="eyebrow">One workspace, fewer loose ends</p><h2 id="workspace-title">Everything you need to stay tax-ready</h2><p>Each part of TaxVault has a clear job, so you can move from finding a document to understanding your position without jumping between tools.</p></div><div class="workspace-grid"><article><span class="workspace-tag">OVERVIEW</span><h3>Dashboard</h3><p>See your tax readiness, recent activity and important next steps at a glance.</p></article><article><span class="workspace-tag">DOCUMENTS</span><h3>Documents and financial years</h3><p>Keep source files grouped by year, type and storage provider so they are easy to find again.</p></article><article><span class="workspace-tag">REVIEW</span><h3>Reviews and extraction</h3><p>Check OCR results, correct missing details and keep a history of what changed.</p></article><article><span class="workspace-tag">MONEY</span><h3>Income, expenses and assets</h3><p>Connect transactions, properties and investments to the evidence that supports them.</p></article><article><span class="workspace-tag">REPORTS</span><h3>Tax news and tax return pack</h3><p>Stay informed and prepare a clearer summary to use when it is time to lodge.</p></article><article><span class="workspace-tag">COLLABORATE</span><h3>Accountant sharing and settings</h3><p>Give an accountant the right access and control storage, notifications and preferences in one place.</p></article></div></section>
       <section class="flow-section" id="how-it-works" aria-labelledby="flow-title">
         <div class="section-intro">
           <div class="flow-heading">
-            <p class="eyebrow">How it works</p>
-            <h2 id="flow-title">From receipt to tax record</h2>
-            <p>Follow the {{ receipt.supplier }} receipt through TaxVault.</p>
+            <p class="eyebrow">{{ 'Landing.HowItWorks' | translate }}</p>
+            <h2 id="flow-title">{{ 'Landing.FromReceiptToRecord' | translate }}</h2>
+            <p>{{ 'Landing.FollowReceipt' | translate }} {{ receipt.supplier }}.</p>
           </div>
           <img class="section-photo" src="assets/branding/taxvault-receipt-review.jpg" width="1672" height="941" loading="lazy" decoding="async" alt="A person comparing a paper receipt with document details on a laptop" />
         </div>
         <div class="process-flow" role="list">
-          <div class="process-node" role="listitem"><span>1</span><strong>Upload the receipt</strong><small>Add the original PDF to Documents.</small></div>
+          <div class="process-node" role="listitem"><span>1</span><strong>{{ 'Landing.UploadReceipt' | translate }}</strong><small>{{ 'Landing.UploadReceiptDescription' | translate }}</small></div>
           <span class="process-arrow" aria-hidden="true">→</span>
-          <div class="process-node" role="listitem"><span>2</span><strong>Extract the details</strong><small>TaxVault finds the supplier, issue date and {{ receipt.amount }} total.</small></div>
+          <div class="process-node" role="listitem"><span>2</span><strong>{{ 'Landing.ExtractDetails' | translate }}</strong><small>{{ 'Landing.ExtractDetailsDescription' | translate }} {{ receipt.amount }}.</small></div>
           <span class="process-arrow" aria-hidden="true">→</span>
-          <div class="process-node" role="listitem"><span>3</span><strong>Check the original</strong><small>Compare the extracted details with the PDF and correct anything that’s off.</small></div>
+          <div class="process-node" role="listitem"><span>3</span><strong>{{ 'Landing.CheckOriginal' | translate }}</strong><small>{{ 'Landing.CheckOriginalDescription' | translate }}</small></div>
           <span class="process-arrow" aria-hidden="true">→</span>
-          <div class="process-node complete" role="listitem"><span>✓</span><strong>Save the record</strong><small>Record the {{ receipt.amount }} expense with the receipt attached.</small></div>
+          <div class="process-node complete" role="listitem"><span>✓</span><strong>{{ 'Landing.SaveRecord' | translate }}</strong><small>{{ 'Landing.SaveRecordDescription' | translate }} {{ receipt.amount }}.</small></div>
         </div>
-        <div class="accountant-branch"><span class="branch-line" aria-hidden="true">↘</span><div><small>Optional</small><strong>Share with your accountant</strong><p>Include the record and its supporting receipt in an accountant pack.</p></div></div>
+        <div class="accountant-branch"><span class="branch-line" aria-hidden="true">↘</span><div><small>{{ 'Landing.Optional' | translate }}</small><strong>{{ 'Landing.ShareAccountant' | translate }}</strong><p>{{ 'Landing.ShareAccountantDescription' | translate }}</p></div></div>
       </section>
-      <section class="trust-strip"><div><p class="eyebrow">Built for real tax records</p><h2>Simple enough to use every week.</h2></div><p>TaxVault keeps your original files, extracted details and review history connected, so you always know where a number came from.</p></section>
+      <section class="trust-strip"><div><p class="eyebrow">{{ 'Landing.BuiltForRecords' | translate }}</p><h2>{{ 'Landing.SimpleEveryWeek' | translate }}</h2></div><p>{{ 'Landing.TrustDescription' | translate }}</p></section>
       <section class="faq-section" id="faq" aria-labelledby="faq-title">
         <div>
-          <h2 id="faq-title">Frequently asked questions</h2>
-          <button #faqChatButton type="button" class="faq-chat" (click)="productChat.openChat(faqChatButton)">Ask TaxVault <span aria-hidden="true">↗</span></button>
+          <h2 id="faq-title">{{ 'Landing.FaqTitle' | translate }}</h2>
+          <button #faqChatButton type="button" class="faq-chat" (click)="productChat.openChat(faqChatButton)">{{ 'Landing.AskTaxVault' | translate }} <span aria-hidden="true">↗</span></button>
         </div>
         <div class="faq-list">
-          <details><summary>What files can I upload?</summary><p>You can upload PDF, JPEG, PNG, WebP and TIFF files in Documents.</p></details>
-          <details><summary>Can I connect OneDrive?</summary><p>Yes. Connect OneDrive in the document storage settings to import files and folders.</p></details>
-          <details><summary>How do I share records with my accountant?</summary><p>Open Accountants to invite your accountant and manage their access, or prepare an accountant pack to share your records.</p></details>
+          <details><summary>{{ 'Landing.FaqFiles' | translate }}</summary><p>{{ 'Landing.FaqFilesAnswer' | translate }}</p></details>
+          <details><summary>{{ 'Landing.FaqOneDrive' | translate }}</summary><p>{{ 'Landing.FaqOneDriveAnswer' | translate }}</p></details>
+          <details><summary>{{ 'Landing.FaqAccountant' | translate }}</summary><p>{{ 'Landing.FaqAccountantAnswer' | translate }}</p></details>
         </div>
       </section>
       <section class="contact-section" id="contact" aria-labelledby="contact-title">
@@ -174,6 +178,8 @@ import { ProductChatComponent } from './product-chat.component';
     .nav-actions button { border:0; font:inherit; cursor:pointer; }
     .updates { min-height:44px; padding:0 24px; border-radius:8px; color:#fff; background:#087369; font-size:14px; font-weight:700; }
     .login-link { padding:8px 0; background:transparent; }
+    .language-picker select { padding:8px 10px; border:1px solid #d7e0e9; border-radius:6px; color:#1d2735; background:#fff; font:inherit; font-size:13px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     .hero { display:grid; grid-template-columns:minmax(0,.92fr) minmax(440px,1.08fr); align-items:center; gap:72px; max-width:1180px; margin:auto; padding:76px 32px 112px; }
     .copy { max-width:540px; }
     .eyebrow { margin:0 0 16px; color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
@@ -389,6 +395,8 @@ import { ProductChatComponent } from './product-chat.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingComponent {
+  private readonly preferences = inject(UserPreferencesService);
+  readonly activeLocale = activeLocale;
   readonly receipt = { supplier: 'Harbour Stationery', date: '1 Sep 2026', amount: '$86.40' };
   loginOpen = false;
   trialMode = false;
@@ -432,6 +440,13 @@ export class LandingComponent {
     this.loginOpen = true;
   }
   closeLogin(): void { this.loginOpen = false; }
+
+  changeLanguage(value: string): void {
+    if (!isLocaleCode(value)) return;
+    activeLocale.set(value);
+    document.documentElement.lang = angularLocale(value);
+    this.preferences.update({ language: value });
+  }
 
   submitContact(event: SubmitEvent): void {
     event.preventDefault();
