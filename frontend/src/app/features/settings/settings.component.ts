@@ -227,7 +227,7 @@ interface BillingStatusDto {
                 <small>Free trial ends {{ billingStatus?.trial_ends_at | date:'mediumDate' }}</small>
               }
             </div>
-            <button type="button" class="link-button" (click)="startCheckout()" [disabled]="billingLoading">
+            <button type="button" class="link-button" (click)="billingStatus?.active ? openBillingPortal() : startCheckout()" [disabled]="billingLoading">
               {{ billingLoading ? 'Opening…' : (billingStatus?.active ? 'Manage subscription' : 'Start 30-day free trial') }}
             </button>
           </div>
@@ -399,6 +399,19 @@ export class SettingsComponent {
       error: (error) => {
         this.billingLoading = false;
         this.billingMessage = error?.error?.message || 'Unable to start checkout.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  openBillingPortal(): void {
+    this.billingLoading = true;
+    this.billingMessage = '';
+    this.http.post<{ data: { url: string } }>('/api/billing/portal', {}).subscribe({
+      next: (response) => window.location.assign(response.data.url),
+      error: (error) => {
+        this.billingLoading = false;
+        this.billingMessage = error?.error?.message || 'Unable to open subscription management.';
         this.changeDetector.markForCheck();
       },
     });

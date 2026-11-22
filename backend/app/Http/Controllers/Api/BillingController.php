@@ -64,6 +64,23 @@ class BillingController extends Controller
         return response()->json(['data' => ['url' => $session['url']]]);
     }
 
+    public function portal(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $this->ensureConfigured();
+
+        abort_unless(is_string($user->stripe_customer_id) && $user->stripe_customer_id !== '', 422, 'No Stripe customer is linked.');
+
+        $url = rtrim((string) config('services.stripe.public_url'), '/');
+        $session = $this->stripe('post', '/billing_portal/sessions', [
+            'customer' => $user->stripe_customer_id,
+            'return_url' => $url.'/settings',
+        ]);
+
+        return response()->json(['data' => ['url' => $session['url']]]);
+    }
+
     public function webhook(Request $request): JsonResponse
     {
         $secret = (string) config('services.stripe.webhook_secret');
