@@ -87,4 +87,11 @@ return [
         'tax_news_model' => env('GEMINI_TAX_NEWS_MODEL', 'gemini-2.0-flash'),
     ],
 
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'price_id' => env('STRIPE_PRICE_ID'),
+        'public_url' => env('APP_URL', 'http://localhost:4200'),
+    ],
+
 ];

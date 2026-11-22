@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DatePipe, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -29,9 +29,16 @@ interface StorageConnectionDto {
   last_error?: string | null;
 }
 
+interface BillingStatusDto {
+  status: string | null;
+  trial_ends_at: string | null;
+  subscription_ends_at: string | null;
+  active: boolean;
+}
+
 @Component({
   selector: 'app-settings',
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [DatePipe, FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-page tv-workspace-page">
@@ -208,6 +215,26 @@ interface StorageConnectionDto {
       </section>
 
       @if (!auth.isAccountant) {
+        <section class="card" aria-labelledby="billing-heading">
+          <h2 id="billing-heading">TaxVault subscription</h2>
+          <p class="hint">Start a 30-day free trial. Your subscription begins automatically after the trial unless cancelled.</p>
+          <div class="subscription-summary">
+            <div>
+              <span class="subscription-label">Current plan</span>
+              <strong>{{ billingStatus?.active ? (billingStatus?.status || 'Active') : 'Not started' }}</strong>
+              @if (billingStatus?.trial_ends_at) {
+                <small>Free trial ends {{ billingStatus?.trial_ends_at | date:'mediumDate' }}</small>
+              }
+            </div>
+            <button type="button" class="link-button" (click)="startCheckout()" [disabled]="billingLoading">
+              {{ billingLoading ? 'Opening…' : (billingStatus?.active ? 'Manage subscription' : 'Start 30-day free trial') }}
+            </button>
+          </div>
+          @if (billingMessage) { <p class="hint" role="status">{{ billingMessage }}</p> }
+        </section>
+      }
+
+      @if (!auth.isAccountant) {
         <section class="card" aria-labelledby="email-heading">
           <h2 id="email-heading">{{ 'Settings.EmailReminders' | translate }}</h2>
           <p class="hint">{{ 'Settings.EmailRemindersHint' | translate }}</p>
@@ -329,6 +356,9 @@ export class SettingsComponent {
   onedriveTenant = 'common';
   onedriveRedirectUri = '';
   storageSaving = false;
+  billingStatus: BillingStatusDto | null = null;
+  billingLoading = false;
+  billingMessage = '';
   readonly aiModels = [
     { value: 'gpt-4o-mini', label: 'GPT-4o mini' },
     { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini' },
@@ -342,11 +372,34 @@ export class SettingsComponent {
     // user role has been loaded, otherwise accountant viewers make a forbidden
     // storage request and see a misleading "unavailable" message.
     this.auth.initialize().subscribe((user) => {
+      if (user?.role !== 'accountant') {
+        this.loadBillingStatus();
+      }
       this.loadStorageProviders();
       if (user?.role !== 'accountant') {
         this.loadOneDriveSettings();
         this.loadStorageConnections();
       }
+    });
+  }
+
+  loadBillingStatus(): void {
+    this.http.get<{ data: BillingStatusDto }>('/api/billing/status').subscribe({
+      next: (response) => { this.billingStatus = response.data; this.changeDetector.markForCheck(); },
+      error: () => { this.billingMessage = 'Unable to load subscription status.'; this.changeDetector.markForCheck(); },
+    });
+  }
+
+  startCheckout(): void {
+    this.billingLoading = true;
+    this.billingMessage = '';
+    this.http.post<{ data: { url: string } }>('/api/billing/checkout', {}).subscribe({
+      next: (response) => window.location.assign(response.data.url),
+      error: (error) => {
+        this.billingLoading = false;
+        this.billingMessage = error?.error?.message || 'Unable to start checkout.';
+        this.changeDetector.markForCheck();
+      },
     });
   }
 

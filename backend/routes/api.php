@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AccountantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
+use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DeadlineController;
 use App\Http\Controllers\Api\DocumentController;
@@ -63,6 +64,7 @@ Route::middleware('web')->group(function (): void {
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware(['auth', 'session.active', 'throttle:5,1']);
 });
+Route::post('/billing/webhook', [BillingController::class, 'webhook']);
 Route::get('/email/unsubscribe/{user}', [NotificationEmailController::class, 'unsubscribe'])
     ->name('email.unsubscribe')
     ->middleware('signed');
@@ -76,6 +78,8 @@ Route::post('/product-chat', ProductChatController::class)
     ->middleware('throttle:8,1');
 
 Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void {
+    Route::get('/billing/status', [BillingController::class, 'status']);
+    Route::post('/billing/checkout', [BillingController::class, 'checkout']);
     Route::get('/accountants', [AccountantController::class, 'index']);
     Route::post('/accountants', [AccountantController::class, 'store'])->middleware('audit:accountant.invite,accountant');
     Route::patch('/accountants/{id}', [AccountantController::class, 'update'])->middleware('audit:accountant.update,accountant');

@@ -1,0 +1,172 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+class BillingController extends Controller
+{
+    private const STRIPE_URL = 'https://api.stripe.com/v1';
+
+    public function status(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        return response()->json(['data' => [
+            'status' => $user->stripe_subscription_status,
+            'trial_ends_at' => $user->trial_ends_at?->toISOString(),
+            'subscription_ends_at' => $user->subscription_ends_at?->toISOString(),
+            'active' => in_array($user->stripe_subscription_status, [
+                'trialing', 'active', 'past_due',
+            ], true),
+        ]]);
+    }
+
+    public function checkout(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $this->ensureConfigured();
+
+        $customerId = $user->stripe_customer_id;
+        if (! is_string($customerId) || $customerId === '') {
+            $customer = $this->stripe('post', '/customers', [
+                'email' => $user->email,
+                'name' => $user->display_name,
+                'metadata[taxvault_user_id]' => $user->getKey(),
+            ]);
+            $customerId = (string) $customer['id'];
+            $user->stripe_customer_id = $customerId;
+            $user->save();
+        }
+
+        $url = rtrim((string) config('services.stripe.public_url'), '/');
+        $session = $this->stripe('post', '/checkout/sessions', [
+            'mode' => 'subscription',
+            'customer' => $customerId,
+            'line_items[0][price]' => config('services.stripe.price_id'),
+            'line_items[0][quantity]' => 1,
+            'subscription_data[trial_period_days]' => 30,
+            'subscription_data[metadata][taxvault_user_id]' => $user->getKey(),
+            'success_url' => $url.'/settings?billing=success',
+            'cancel_url' => $url.'/settings?billing=cancelled',
+            'client_reference_id' => $user->getKey(),
+        ]);
+
+        return response()->json(['data' => ['url' => $session['url']]]);
+    }
+
+    public function webhook(Request $request): JsonResponse
+    {
+        $secret = (string) config('services.stripe.webhook_secret');
+        $signature = (string) $request->header('Stripe-Signature');
+        if ($secret === '' || ! $this->validSignature($request->getContent(), $signature, $secret)) {
+            return response()->json(['message' => 'Invalid webhook signature.'], 400);
+        }
+
+        $event = $request->json()->all();
+        $type = (string) ($event['type'] ?? '');
+        $object = $event['data']['object'] ?? [];
+
+        try {
+            match ($type) {
+                'checkout.session.completed' => $this->checkoutCompleted($object),
+                'customer.subscription.created',
+                'customer.subscription.updated',
+                'customer.subscription.deleted' => $this->subscriptionUpdated($object),
+                default => null,
+            };
+        } catch (\Throwable $exception) {
+            Log::error('Stripe webhook processing failed.', [
+                'event_type' => $type,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json(['message' => 'Webhook processing failed.'], 500);
+        }
+
+        return response()->json(['received' => true]);
+    }
+
+    private function checkoutCompleted(array $session): void
+    {
+        $user = User::query()->find($session['client_reference_id'] ?? null);
+        if (! $user) {
+            return;
+        }
+
+        $user->stripe_customer_id = $session['customer'] ?? $user->stripe_customer_id;
+        $user->stripe_subscription_id = $session['subscription'] ?? $user->stripe_subscription_id;
+        $user->save();
+    }
+
+    private function subscriptionUpdated(array $subscription): void
+    {
+        $userId = $subscription['metadata']['taxvault_user_id'] ?? null;
+        $user = $userId
+            ? User::query()->find($userId)
+            : User::query()->where('stripe_customer_id', $subscription['customer'] ?? null)->first();
+        if (! $user) {
+            return;
+        }
+
+        $user->stripe_customer_id = $subscription['customer'] ?? $user->stripe_customer_id;
+        $user->stripe_subscription_id = $subscription['id'] ?? $user->stripe_subscription_id;
+        $user->stripe_subscription_status = $subscription['status'] ?? null;
+        $user->trial_ends_at = $this->timestamp($subscription['trial_end'] ?? null);
+        $user->subscription_ends_at = $this->timestamp($subscription['cancel_at'] ?? $subscription['ended_at'] ?? null);
+        $user->save();
+    }
+
+    private function stripe(string $method, string $path, array $data): array
+    {
+        $response = Http::asForm()
+            ->withBasicAuth((string) config('services.stripe.secret'), '')
+            ->send($method, self::STRIPE_URL.$path, ['form_params' => $data])
+            ->throw();
+
+        return $response->json();
+    }
+
+    private function ensureConfigured(): void
+    {
+        abort_unless(
+            is_string(config('services.stripe.secret'))
+                && config('services.stripe.secret') !== ''
+                && is_string(config('services.stripe.price_id'))
+                && config('services.stripe.price_id') !== '',
+            503,
+            'Stripe billing is not configured.',
+        );
+    }
+
+    private function validSignature(string $payload, string $header, string $secret): bool
+    {
+        $parts = collect(explode(',', $header))->mapWithKeys(function (string $part): array {
+            [$key, $value] = array_pad(explode('=', $part, 2), 2, null);
+            return [$key => $value];
+        });
+        $timestamp = (int) $parts->get('t', 0);
+        $signature = (string) $parts->get('v1', '');
+        if ($timestamp <= 0 || $signature === '' || abs(time() - $timestamp) > 300) {
+            return false;
+        }
+
+        return hash_equals($signature, hash_hmac('sha256', $timestamp.'.'.$payload, $secret));
+    }
+
+    private function timestamp(mixed $value): ?CarbonImmutable
+    {
+        return is_numeric($value) && (int) $value > 0
+            ? CarbonImmutable::createFromTimestamp((int) $value)
+            : null;
+    }
+}

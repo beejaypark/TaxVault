@@ -32,6 +32,11 @@ class User extends Authenticatable
         'deactivated_at',
         'preferences',
         'ai_settings',
+        'stripe_customer_id',
+        'stripe_subscription_id',
+        'stripe_subscription_status',
+        'trial_ends_at',
+        'subscription_ends_at',
     ];
 
     public function isAccountant(): bool
@@ -55,6 +60,8 @@ class User extends Authenticatable
             'deactivated_at' => 'datetime',
             'preferences' => 'array',
             'ai_settings' => 'encrypted:array',
+            'trial_ends_at' => 'datetime',
+            'subscription_ends_at' => 'datetime',
         ];
     }
 
