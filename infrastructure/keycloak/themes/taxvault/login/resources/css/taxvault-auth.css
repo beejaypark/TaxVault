@@ -29,6 +29,11 @@
 
 #keycloak-bg #kc-header-wrapper {
   color: var(--taxvault-text);
+  font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+  font-size: 1.08em;
+  font-weight: 650;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
 }
 
 #keycloak-bg .pf-v5-c-login__main {
