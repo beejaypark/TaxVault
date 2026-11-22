@@ -80,7 +80,7 @@ interface BillingStatusDto {
         <p class="hint">{{ 'Settings.GeneralHint' | translate }}</p>
       </section>
 
-      @if (!auth.isAccountant) {
+      @if (!auth.isAccountant && !auth.isPlatformAdmin) {
       <section class="card" aria-labelledby="storage-heading">
         <h2 id="storage-heading">{{ 'Settings.DocumentStorage' | translate }}</h2>
         <p class="hint">{{ 'Settings.DocumentStorageHint' | translate }}</p>
@@ -393,7 +393,7 @@ export class SettingsComponent {
     // user role has been loaded, otherwise accountant viewers make a forbidden
     // storage request and see a misleading "unavailable" message.
     this.auth.initialize().subscribe((user) => {
-      if (user?.role !== 'accountant') {
+      if (user?.role !== 'accountant' && user?.role !== 'platform_admin') {
         this.loadBillingStatus();
       }
       this.loadStorageProviders();
