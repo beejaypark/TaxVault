@@ -34,6 +34,7 @@ class BillingController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $trial = $request->boolean('trial', true);
         $this->ensureConfigured();
 
         $customerId = $user->stripe_customer_id;
@@ -49,17 +50,21 @@ class BillingController extends Controller
         }
 
         $url = rtrim((string) config('services.stripe.public_url'), '/');
-        $session = $this->stripe('post', '/checkout/sessions', [
+        $checkoutData = [
             'mode' => 'subscription',
             'customer' => $customerId,
             'line_items[0][price]' => config('services.stripe.price_id'),
             'line_items[0][quantity]' => 1,
-            'subscription_data[trial_period_days]' => 30,
             'subscription_data[metadata][taxvault_user_id]' => $user->getKey(),
             'success_url' => $url.'/settings?billing=success',
             'cancel_url' => $url.'/settings?billing=cancelled',
             'client_reference_id' => $user->getKey(),
-        ]);
+        ];
+        if ($trial) {
+            $checkoutData['subscription_data[trial_period_days]'] = 30;
+        }
+
+        $session = $this->stripe('post', '/checkout/sessions', $checkoutData);
 
         return response()->json(['data' => ['url' => $session['url']]]);
     }

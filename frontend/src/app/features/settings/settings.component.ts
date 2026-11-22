@@ -227,9 +227,14 @@ interface BillingStatusDto {
                 <small>Free trial ends {{ billingStatus?.trial_ends_at | date:'mediumDate' }}</small>
               }
             </div>
-            <button type="button" class="link-button" (click)="billingStatus?.active ? openBillingPortal() : startCheckout()" [disabled]="billingLoading">
-              {{ billingLoading ? 'Opening…' : (billingStatus?.active ? 'Manage subscription' : 'Start 30-day free trial') }}
-            </button>
+            @if (billingStatus?.active) {
+              <button type="button" class="link-button" (click)="openBillingPortal()" [disabled]="billingLoading">{{ billingLoading ? 'Opening…' : 'Manage subscription' }}</button>
+            } @else {
+              <div class="billing-actions">
+                <button type="button" class="link-button" (click)="startCheckout(true)" [disabled]="billingLoading">Start 30-day free trial</button>
+                <button type="button" class="link-button secondary-button" (click)="startCheckout(false)" [disabled]="billingLoading">Subscribe now</button>
+              </div>
+            }
           </div>
           @if (billingMessage) { <p class="hint" role="status">{{ billingMessage }}</p> }
         </section>
@@ -325,6 +330,8 @@ interface BillingStatusDto {
     .storage-provider-description { margin: 0; padding: 12px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-sm); }
     .subscription-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: 10px; background: var(--tv-color-background); }
     .subscription-summary > div { display: grid; gap: 3px; }
+    .billing-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .secondary-button { background: transparent; }
     .subscription-summary strong { font-size: 15px; }
     .subscription-summary small { color: var(--tv-color-text-secondary); font-size: 12px; }
     .subscription-label { color: var(--tv-color-text-secondary); font-size: 12px; font-weight: 600; }
@@ -391,10 +398,10 @@ export class SettingsComponent {
     });
   }
 
-  startCheckout(): void {
+  startCheckout(trial: boolean): void {
     this.billingLoading = true;
     this.billingMessage = '';
-    this.http.post<{ data: { url: string } }>('/api/billing/checkout', {}).subscribe({
+    this.http.post<{ data: { url: string } }>('/api/billing/checkout', { trial }).subscribe({
       next: (response) => window.location.assign(response.data.url),
       error: (error) => {
         this.billingLoading = false;
