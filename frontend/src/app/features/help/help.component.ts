@@ -21,7 +21,7 @@ export class HelpComponent {
 
   @HostListener('window:scroll')
   updateActiveSection(): void {
-    const sections = ['workflow', 'financial-years', 'documents', 'reviews', 'money', 'reports', 'settings', 'send'];
+    const sections = ['dashboard', 'workflow', 'financial-years', 'documents', 'reviews', 'money', 'properties', 'reports', 'settings', 'send'];
     const marker = window.scrollY + 150;
     let current = sections[0];
     for (const sectionId of sections) {

@@ -11,17 +11,37 @@
   <div class="help-layout">
     <aside class="help-nav" aria-label="Help sections">
       <p class="help-nav-title">In this guide</p>
+      <a href="#dashboard" [class.active]="activeSection === 'dashboard'" (click)="scrollTo('dashboard', $event)">Dashboard</a>
       <a href="#workflow" [class.active]="activeSection === 'workflow'" (click)="scrollTo('workflow', $event)">The TaxVault flow</a>
       <a href="#financial-years" [class.active]="activeSection === 'financial-years'" (click)="scrollTo('financial-years', $event)">Financial years</a>
       <a href="#documents" [class.active]="activeSection === 'documents'" (click)="scrollTo('documents', $event)">Documents</a>
       <a href="#reviews" [class.active]="activeSection === 'reviews'" (click)="scrollTo('reviews', $event)">Reviews</a>
       <a href="#money" [class.active]="activeSection === 'money'" (click)="scrollTo('money', $event)">Income, expenses and assets</a>
+      <a href="#properties" [class.active]="activeSection === 'properties'" (click)="scrollTo('properties', $event)">Properties</a>
       <a href="#reports" [class.active]="activeSection === 'reports'" (click)="scrollTo('reports', $event)">Reports and accountant pack</a>
       <a href="#settings" [class.active]="activeSection === 'settings'" (click)="scrollTo('settings', $event)">Settings</a>
       <a href="#send" [class.active]="activeSection === 'send'" (click)="scrollTo('send', $event)">Send to your accountant</a>
     </aside>
 
     <main class="help-content">
+      <section id="dashboard" class="guide-section" aria-labelledby="dashboard-title">
+        <div class="section-heading"><div><p class="section-kicker">Your starting point</p><h2 id="dashboard-title">Dashboard: understand the year at a glance</h2></div><a routerLink="/dashboard">Open Dashboard <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">Dashboard is the control centre for the selected financial year. It tells you what is ready, what is blocking the year, and which screen to open next.</p>
+        <div class="dashboard-visual" aria-label="Example TaxVault Dashboard with readiness and summary cards">
+          <div class="dashboard-visual-header"><span>FY 2026 - 27 · Dashboard</span><b>＋ Upload document</b></div>
+          <div class="dashboard-visual-cards"><span><small>Needs attention</small><strong>4</strong><em>Reviews waiting</em></span><span><small>Documents</small><strong>18</strong><em>Tax records uploaded</em></span><span><small>Reviewed</small><strong>14</strong><em>Completed review items</em></span></div>
+          <div class="dashboard-visual-readiness"><div><small>YEAR READINESS</small><strong>78%</strong><em>In progress</em></div><div class="readiness-bars"><span>Evidence <i style="width: 86%"></i></span><span>Reviews <i style="width: 70%"></i></span><span>Transactions <i style="width: 62%"></i></span></div><div class="dashboard-visual-issues"><b>Next actions</b><span>4 documents need review</span><span>3 transactions are uncategorised</span></div></div>
+        </div>
+        <div class="feature-grid two-up">
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Read the readiness score</h3><p>The score and status summarise evidence, reviews and records for the selected year. It is a preparation signal, not a lodged tax return or professional advice.</p></article>
+          <article><span class="feature-icon"><tv-icon name="warning" /></span><h3>Follow blocking issues</h3><p>Select a readiness issue to jump to the relevant Documents or Income &amp; expenses filter. Resolve blocked items first, then work through warnings.</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Check income and expenses</h3><p>Financial Year at a Glance shows total income, total expenses and net records. The monthly chart helps you spot missing months or an unusually large amount.</p></article>
+          <article><span class="feature-icon"><tv-icon name="review" /></span><h3>Track review progress</h3><p>The review progress chart separates completed items, items needing attention and other states. Open Reviews to work through the queue.</p></article>
+          <article><span class="feature-icon"><tv-icon name="settings" /></span><h3>Customise the dashboard</h3><p>Choose Customize to show or hide widgets, move them up or down, drag them into a new order, or restore the default layout.</p></article>
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Use quick actions</h3><p>Upload a document from the header, open the attention list, or use the links in each widget to continue without searching through the navigation.</p></article>
+        </div>
+        <div class="how-to"><strong>Dashboard routine</strong><span>1. Select year</span><span>2. Read readiness</span><span>3. Resolve blockers</span><span>4. Check totals</span><span>5. Review again</span></div>
+      </section>
       <section id="workflow" class="guide-section workflow-section" aria-labelledby="workflow-title">
         <div class="section-heading">
           <div>
@@ -93,23 +113,35 @@
 
       <section id="documents" class="guide-section" aria-labelledby="documents-title">
         <div class="section-heading"><div><p class="section-kicker">Evidence</p><h2 id="documents-title">Documents</h2></div><a routerLink="/documents">Open Documents <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">Documents is the evidence list for the selected financial year. The status and action area tells you whether a file still needs review, whether payment has been confirmed, and what can safely happen next.</p>
+        <div class="documents-visual" aria-label="Example Documents list with review and payment actions">
+          <div class="documents-visual-header"><span>Documents · FY 2025 - 26</span><b>＋ Upload receipt</b></div>
+          <div class="documents-visual-filters"><span>All documents · 12</span><span>Review required · 12</span><span>Keyword</span><span>Payment: Any</span></div>
+          <div class="documents-visual-row"><div><strong>UrbanUtilities-Q4</strong><small>Receipt · OneDrive · FY 2025 - 26</small></div><span>22 Nov 2026</span><span>1.6 MB</span><div class="documents-visual-actions"><em>● Review required</em><button>Open review item</button><button>Mark as paid</button><u>Delete</u></div></div>
+        </div>
         <div class="feature-grid two-up">
           <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Upload from your device</h3><p>Choose files, a folder or a photo. Select the financial year and document type first so each file starts with the right context.</p></article>
           <article><span class="feature-icon"><tv-icon name="folder" /></span><h3>Import from OneDrive</h3><p>Connect OneDrive in Settings, then browse folders from the upload screen. Import one file or a folder without losing the original location.</p></article>
           <article><span class="feature-icon"><tv-icon name="receipt" /></span><h3>Keep the original</h3><p>TaxVault stores the original document with its evidence metadata. Do not replace a source file with a cropped image when the full document is available.</p></article>
           <article><span class="feature-icon"><tv-icon name="file" /></span><h3>Find it later</h3><p>Documents can be filtered by year, type and review state. Use Search when you remember a filename, supplier or document detail.</p></article>
         </div>
+        <div class="instruction-list document-actions-help">
+          <div><span>PAY</span><div><h3>When to use Mark as paid</h3><p>Use it after you have checked that the document represents a payment and you know the payment date, method and amount. It is useful for a receipt or bill that has not already been recorded as a transaction.</p><p>TaxVault opens a confirmation form. Check the suggested date and amount, choose the payment method, then select Confirm paid. The document changes to Paid and shows the recorded payment details. TaxVault also creates one linked, uncategorised expense, which you should review and categorise in Income &amp; expenses.</p></div></div>
+          <div><span>WAIT</span><div><h3>When Mark as paid is unavailable</h3><p>Assign a financial year first. If the document already has multiple or mixed transactions, use Income &amp; expenses instead so each transaction can be checked separately. Do not mark a year-to-date or statement total as a single payment.</p></div></div>
+          <div><span>DELETE</span><div><h3>What Delete does</h3><p>Delete is permanent and requires confirmation. It removes the original file, the document entry and its review items. Existing OCR extraction, evidence and transactions are kept, but detached from the deleted source document. This cannot be undone.</p><p>Before deleting, confirm that the file is a duplicate or was uploaded by mistake. If the document is still processing, wait for extraction to finish. If you only want to change its description, use Edit description instead.</p></div></div>
+        </div>
       </section>
 
       <section id="reviews" class="guide-section" aria-labelledby="reviews-title">
         <div class="section-heading"><div><p class="section-kicker">Accuracy</p><h2 id="reviews-title">Reviews and extraction</h2></div><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div>
         <p class="section-intro">Review is the checkpoint between a document and a financial record. TaxVault can read a document, but you confirm whether the value is correct before it becomes part of the year.</p>
-        <div class="review-workspace-visual" aria-label="Example Review workspace with source document and extracted fields">
-          <div class="review-visual-top"><span><tv-icon name="review" /> Review workspace</span><b>Needs attention</b></div>
+        <div class="review-workspace-visual" aria-label="Example Review detail workspace with source document, extraction and decision">
+          <div class="review-visual-top"><span><tv-icon name="review" /> Review queue → Review item</span><b>Pending review</b></div>
           <div class="review-visual-body">
             <div class="review-visual-source"><span class="mock-label">1 · Source document</span><div class="visual-paper"><strong>OFFICEWORKS</strong><span>Tax invoice · 12 Nov 2026</span><i></i><i></i><i class="short"></i><strong>$48.90</strong></div><small>Preview or download the original before deciding.</small></div>
-            <div class="review-visual-extraction"><span class="mock-label">2 · Extracted fields</span><div class="visual-field"><span>Supplier</span><b>Officeworks</b><em class="confidence-high">98%</em></div><div class="visual-field"><span>Issue date</span><b>12 Nov 2026</b><em class="confidence-high">96%</em></div><div class="visual-field attention"><span>Total</span><b>$48.90</b><em class="confidence-low">61%</em></div><div class="visual-field-actions"><span>3 · Correct if needed</span><button>Save correction</button></div></div>
+            <div class="review-visual-extraction"><span class="mock-label">2 · Extracted data</span><div class="visual-field"><span>Supplier</span><b>Officeworks</b><em class="confidence-high">98%</em></div><div class="visual-field"><span>Issue date</span><b>12 Nov 2026</b><em class="confidence-high">96%</em></div><div class="visual-field attention"><span>Total</span><b>$48.90</b><em class="confidence-low">61%</em></div><div class="visual-field-actions"><span>3 · Correct, then decide</span><button>Save correction</button></div></div>
           </div>
+          <div class="review-visual-decision"><span>4 · Complete review</span><small>Add notes, check existing income, then approve or reject.</small><button>Approve</button><button class="reject">Reject</button></div>
         </div>
         <div class="instruction-list">
           <div><span>01</span><div><h3>Start in the queue</h3><p>Open Reviews and set the correct financial year. Use Status to focus on pending items and Type to narrow the list. Each card shows the document, extracted-field count and low-confidence values.</p></div></div>
@@ -144,6 +176,27 @@
         </div>
         <div class="how-to"><strong>Recommended order</strong><span>1. Import or add</span><span>2. Check date and direction</span><span>3. Categorise</span><span>4. Resolve attention rows</span><span>5. Recheck totals</span></div>
         <p class="section-note">Use the Dashboard to see the combined picture. A complete year is not only a folder of receipts; it also explains the money and assets those receipts support.</p>
+      </section>
+
+      <section id="properties" class="guide-section" aria-labelledby="properties-title">
+        <div class="section-heading"><div><p class="section-kicker">Assets</p><h2 id="properties-title">Properties: what each part is for</h2></div><a routerLink="/assets">Open Properties <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">Properties keeps the information your accountant needs to understand rental income, ownership, debt and deductions. Complete the property card first, then connect the year’s transactions to it.</p>
+        <div class="property-visual" aria-label="Example property details screen">
+          <div class="property-visual-header"><span>Properties · 1 property</span><b>Portfolio readiness 0 / 1</b></div>
+          <div class="property-visual-body"><div><strong>U610/42</strong><small>610/42 Wyandra ST, Newstead, QLD, 4006</small></div><span class="property-value">Current value<br><b>Not set</b></span><span class="property-action">Edit</span></div>
+          <div class="property-visual-row"><strong>Property deductions</strong><span>Capital works deduction (Division 43)</span><span>FY 2025 - 26</span><span>Save deduction</span></div>
+          <div class="property-visual-row"><strong>Mortgages</strong><span>No mortgage on this property</span><span>Add mortgage</span></div>
+          <div class="property-visual-row"><strong>Rental summary</strong><span>No rental income or expenses recorded</span><span>Income &amp; expenses →</span></div>
+        </div>
+        <div class="feature-grid two-up">
+          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>Add or edit the property</h3><p>Enter the address, reference, ownership and other property details. Use Edit when the address or current information changes. Keep the property linked to the correct financial year when reviewing records.</p></article>
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Current value and readiness</h3><p>Current value contributes to the portfolio summary. If it shows Not set, look up a reasonable current value using the linked property.com.au check, then enter the value with Edit. Readiness highlights assets missing important information.</p></article>
+          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>Property deductions</h3><p>Record a deduction for a selected financial year, choose the deduction type such as Capital works deduction (Division 43), enter the amount and add notes. Keep the quantity and supporting schedule consistent with your accountant’s records.</p></article>
+          <article><span class="feature-icon"><tv-icon name="currency" /></span><h3>Mortgages</h3><p>Use Add mortgage to record loan details and balances for the property. The mortgage balance contributes to Total debt; update it when the statement or year-end balance changes.</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Rental summary</h3><p>The summary is built from transactions tagged with a rental tax item and this property. If it is empty, open Income &amp; expenses, edit the transaction, choose the rental category and select the property.</p></article>
+          <article><span class="feature-icon"><tv-icon name="delete" /></span><h3>Delete carefully</h3><p>Delete a property only when it was created by mistake or is no longer meant to be tracked. Before deleting, check linked rental transactions and records so the accountant understands any remaining evidence.</p></article>
+        </div>
+        <div class="how-to"><strong>Property workflow</strong><span>1. Add property</span><span>2. Set current value</span><span>3. Add mortgage</span><span>4. Record deductions</span><span>5. Tag rental transactions</span><span>6. Check rental summary</span></div>
       </section>
 
       <section id="reports" class="guide-section" aria-labelledby="reports-title">
