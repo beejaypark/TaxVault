@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /landing
+Disallow: /login
+Disallow: /dashboard
+Disallow: /documents
+Disallow: /reviews
+Disallow: /transactions
+Disallow: /properties
+Disallow: /investments
+Disallow: /financial-years
+Disallow: /tax-return
+Disallow: /tax-news
+Disallow: /accountants
+Disallow: /settings
+Disallow: /help
+
+Sitemap: https://taxvaultapp.com.au/sitemap.xml

@@ -8,6 +8,7 @@ import { ProductChatComponent } from './product-chat.component';
 import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 import { angularLocale, activeLocale, isLocaleCode } from '../../i18n/locale';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-landing',
@@ -409,6 +410,14 @@ export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+    const title = inject(Title);
+    const meta = inject(Meta);
+    title.setTitle('TaxVault | Organise Your Tax Records');
+    meta.updateTag({ name: 'description', content: 'Organise receipts, statements and tax records, review extracted details, and prepare a clear pack for your accountant.' });
+    meta.updateTag({ name: 'robots', content: 'index, follow' });
+    meta.updateTag({ property: 'og:title', content: 'TaxVault | Organise Your Tax Records' });
+    meta.updateTag({ property: 'og:description', content: 'Organise receipts, statements and tax records, review extracted details, and prepare a clear pack for your accountant.' });
+
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
     afterNextRender(() => {
