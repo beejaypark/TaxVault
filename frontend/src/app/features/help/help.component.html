@@ -43,6 +43,44 @@
         <div class="callout"><tv-icon name="check" /><p><strong>A good stopping point:</strong> every important figure has source evidence, reviewed fields are corrected, and the Dashboard no longer shows blocking preparation issues.</p></div>
       </section>
 
+      <section class="guide-section visual-guides" aria-labelledby="visual-guides-title">
+        <div class="section-heading">
+          <div><p class="section-kicker">Follow along</p><h2 id="visual-guides-title">What to click, in order</h2></div>
+          <p>These examples mirror the TaxVault workspace. Use the numbered markers as a quick visual map, then open the real screen with the button.</p>
+        </div>
+
+        <div class="visual-guide-grid">
+          <article class="visual-guide-card">
+            <div class="visual-guide-copy"><span class="guide-number">1</span><div><h3>Create or choose the financial year</h3><p>Start here when you first sign in, or whenever you need to work on a different tax year.</p><a routerLink="/financial-years">Open Financial years <tv-icon name="arrowRight" /></a></div></div>
+            <div class="mock-screen" aria-label="Example Financial years screen">
+              <div class="mock-sidebar"><span class="mock-brand">TaxVault</span><span class="mock-nav muted">Overview</span><span class="mock-nav active">Financial years</span><span class="mock-nav">Documents</span><span class="mock-nav">Reviews</span></div>
+              <div class="mock-main"><div class="mock-topline"><span>Financial years</span><b>+ New financial year</b></div><div class="mock-panel"><span class="mock-label">Financial year</span><strong>FY 2026 - 27</strong><small>1 July 2026 — 30 June 2027</small><i class="marker m1">1</i></div><div class="mock-panel short"><span class="mock-label">Status</span><strong class="good">Active</strong><i class="marker m2">2</i></div></div>
+            </div>
+          </article>
+
+          <article class="visual-guide-card">
+            <div class="visual-guide-copy"><span class="guide-number">2</span><div><h3>Add your evidence</h3><p>Choose the year and document type, then use the local upload card or the OneDrive card.</p><a routerLink="/documents/upload">Open Upload documents <tv-icon name="arrowRight" /></a></div></div>
+            <div class="mock-screen upload-mock" aria-label="Example Upload documents screen">
+              <div class="mock-toolbar"><span>Upload documents</span><small>FY 2026 - 27</small></div><div class="mock-choice"><span>Financial year</span><b>FY 2026 - 27</b><span>Document type</span><b>Receipt</b></div><div class="mock-columns"><div class="mock-card"><span class="mock-label">Connected storage</span><strong>OneDrive</strong><small>Browse OneDrive</small><i class="marker m1">1</i></div><div class="mock-card dashed"><span class="mock-label">This device</span><strong>Upload from your device</strong><small>Choose files · Choose folder · Take photo</small><i class="marker m2">2</i></div></div>
+            </div>
+          </article>
+
+          <article class="visual-guide-card">
+            <div class="visual-guide-copy"><span class="guide-number">3</span><div><h3>Review what TaxVault found</h3><p>Open Reviews, compare every important field with the original, and save corrections before moving on.</p><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div></div>
+            <div class="mock-screen review-mock" aria-label="Example Reviews screen">
+              <div class="mock-toolbar"><span>Review document</span><small>Needs attention</small></div><div class="mock-review-columns"><div class="mock-document"><span class="mock-label">Original document</span><div class="paper-lines"></div><div class="paper-lines short-line"></div><div class="paper-lines"></div></div><div class="mock-fields"><span class="mock-label">Extracted details</span><label>Supplier <b>Officeworks</b></label><label>Issue date <b>12 Nov 2026</b></label><label>Total <b>$48.90</b></label><button>Save review</button><i class="marker m3">3</i></div></div>
+            </div>
+          </article>
+
+          <article class="visual-guide-card">
+            <div class="visual-guide-copy"><span class="guide-number">4</span><div><h3>Prepare the accountant handoff</h3><p>Use the readiness preview, resolve blockers, then share the right access with your accountant.</p><a routerLink="/tax-return">Open Accountant Pack <tv-icon name="arrowRight" /></a></div></div>
+            <div class="mock-screen pack-mock" aria-label="Example Accountant Pack screen">
+              <div class="mock-toolbar"><span>Accountant Pack</span><small>FY 2026 - 27</small></div><div class="mock-score"><div><span class="mock-label">Year readiness</span><strong>Ready to review</strong><small>18 of 18 key items checked</small></div><div class="score-ring">92%</div><i class="marker m1">1</i></div><div class="mock-pack-row"><span>Evidence and corrections</span><b>Included</b></div><div class="mock-pack-row"><span>Accountant access</span><b>Manage access →</b><i class="marker m2">2</i></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="financial-years" class="guide-section" aria-labelledby="financial-years-title">
         <div class="section-heading"><div><p class="section-kicker">Foundation</p><h2 id="financial-years-title">Financial years</h2></div><a routerLink="/financial-years">Open Financial years <tv-icon name="arrowRight" /></a></div>
         <div class="feature-grid">
@@ -50,6 +88,7 @@
           <article><span class="feature-icon"><tv-icon name="check" /></span><h3>Use the header picker</h3><p>The financial year selector in the header is the shared context for the workspace. Change it before reviewing documents, transactions or reports.</p></article>
           <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Watch readiness</h3><p>Dashboard readiness signals missing evidence, incomplete records and next actions for the selected year.</p></article>
         </div>
+        <div class="how-to"><strong>Do this first</strong><span>1. Open Financial years</span><span>2. Choose New financial year</span><span>3. Enter the year dates</span><span>4. Save, then select the year in the header</span></div>
       </section>
 
       <section id="documents" class="guide-section" aria-labelledby="documents-title">
@@ -110,6 +149,7 @@
           <li><strong>Send a short note</strong><span>Tell your accountant which year is ready, what is unusual, and which questions still need their judgement.</span></li>
           <li><strong>Keep the source connected</strong><span>Do not delete originals after sending. TaxVault is designed to keep evidence, corrections and the handoff traceable.</span></li>
         </ol>
+        <div class="callout final-callout"><tv-icon name="check" /><p><strong>Finished?</strong> Open the Dashboard once more, confirm the correct financial year is selected, and keep the original files in TaxVault after sharing.</p></div>
       </section>
     </main>
   </div>
