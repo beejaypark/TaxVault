@@ -11,14 +11,14 @@
   <div class="help-layout">
     <aside class="help-nav" aria-label="Help sections">
       <p class="help-nav-title">In this guide</p>
-      <a href="#workflow" (click)="scrollTo('workflow', $event)">The TaxVault flow</a>
-      <a href="#financial-years" (click)="scrollTo('financial-years', $event)">Financial years</a>
-      <a href="#documents" (click)="scrollTo('documents', $event)">Documents</a>
-      <a href="#reviews" (click)="scrollTo('reviews', $event)">Reviews</a>
-      <a href="#money" (click)="scrollTo('money', $event)">Income, expenses and assets</a>
-      <a href="#reports" (click)="scrollTo('reports', $event)">Reports and accountant pack</a>
-      <a href="#settings" (click)="scrollTo('settings', $event)">Settings</a>
-      <a href="#send" (click)="scrollTo('send', $event)">Send to your accountant</a>
+      <a href="#workflow" [class.active]="activeSection === 'workflow'" (click)="scrollTo('workflow', $event)">The TaxVault flow</a>
+      <a href="#financial-years" [class.active]="activeSection === 'financial-years'" (click)="scrollTo('financial-years', $event)">Financial years</a>
+      <a href="#documents" [class.active]="activeSection === 'documents'" (click)="scrollTo('documents', $event)">Documents</a>
+      <a href="#reviews" [class.active]="activeSection === 'reviews'" (click)="scrollTo('reviews', $event)">Reviews</a>
+      <a href="#money" [class.active]="activeSection === 'money'" (click)="scrollTo('money', $event)">Income, expenses and assets</a>
+      <a href="#reports" [class.active]="activeSection === 'reports'" (click)="scrollTo('reports', $event)">Reports and accountant pack</a>
+      <a href="#settings" [class.active]="activeSection === 'settings'" (click)="scrollTo('settings', $event)">Settings</a>
+      <a href="#send" [class.active]="activeSection === 'send'" (click)="scrollTo('send', $event)">Send to your accountant</a>
     </aside>
 
     <main class="help-content">
@@ -103,20 +103,46 @@
 
       <section id="reviews" class="guide-section" aria-labelledby="reviews-title">
         <div class="section-heading"><div><p class="section-kicker">Accuracy</p><h2 id="reviews-title">Reviews and extraction</h2></div><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div>
-        <div class="instruction-list">
-          <div><span>01</span><div><h3>Open the review queue</h3><p>Start with items that need attention. The review page keeps the original document beside the extracted fields.</p></div></div>
-          <div><span>02</span><div><h3>Compare, then correct</h3><p>Check supplier, issue date, total, tax and category against the original. Save corrections rather than relying on memory.</p></div></div>
-          <div><span>03</span><div><h3>Keep a traceable decision</h3><p>Reviewed values remain connected to the source document and the history of corrections, which makes the accountant handoff easier to explain.</p></div></div>
+        <p class="section-intro">Review is the checkpoint between a document and a financial record. TaxVault can read a document, but you confirm whether the value is correct before it becomes part of the year.</p>
+        <div class="review-workspace-visual" aria-label="Example Review workspace with source document and extracted fields">
+          <div class="review-visual-top"><span><tv-icon name="review" /> Review workspace</span><b>Needs attention</b></div>
+          <div class="review-visual-body">
+            <div class="review-visual-source"><span class="mock-label">1 · Source document</span><div class="visual-paper"><strong>OFFICEWORKS</strong><span>Tax invoice · 12 Nov 2026</span><i></i><i></i><i class="short"></i><strong>$48.90</strong></div><small>Preview or download the original before deciding.</small></div>
+            <div class="review-visual-extraction"><span class="mock-label">2 · Extracted fields</span><div class="visual-field"><span>Supplier</span><b>Officeworks</b><em class="confidence-high">98%</em></div><div class="visual-field"><span>Issue date</span><b>12 Nov 2026</b><em class="confidence-high">96%</em></div><div class="visual-field attention"><span>Total</span><b>$48.90</b><em class="confidence-low">61%</em></div><div class="visual-field-actions"><span>3 · Correct if needed</span><button>Save correction</button></div></div>
+          </div>
         </div>
+        <div class="instruction-list">
+          <div><span>01</span><div><h3>Start in the queue</h3><p>Open Reviews and set the correct financial year. Use Status to focus on pending items and Type to narrow the list. Each card shows the document, extracted-field count and low-confidence values.</p></div></div>
+          <div><span>02</span><div><h3>Read the original first</h3><p>Open Source document, then preview it in TaxVault or download the original. Check the complete page, not only the text that OCR found.</p></div></div>
+          <div><span>03</span><div><h3>Work field by field</h3><p>In Document Extraction, compare every OCR value with the source. Confidence is a warning signal, not proof; low confidence means “look closely”.</p></div></div>
+          <div><span>04</span><div><h3>Fill gaps and save corrections</h3><p>If OCR missed a value, use Add missing details. If it is wrong, use Correct this value and Save Correction. The authoritative correction keeps the original OCR result traceable.</p></div></div>
+          <div><span>05</span><div><h3>Approve, reject or record money</h3><p>Add notes, then Approve or Reject. If the document should create records, enable Also save transactions in Income &amp; expenses and enter each payment as its own income or expense.</p></div></div>
+          <div><span>06</span><div><h3>Prevent duplicate income</h3><p>Use Check existing income to search by payment date or cumulative period. Link an existing transaction, or explicitly confirm that this is additional income.</p></div></div>
+          <div><span>07</span><div><h3>Know when it is complete</h3><p>A completed review has a decision and, when applicable, linked transactions. Reopen it later to inspect notes, corrections and linked transaction details.</p></div></div>
+        </div>
+        <div class="review-checklist"><strong>Before you approve</strong><span>☐ Original opened</span><span>☐ Date is in the right year</span><span>☐ Amount and tax agree</span><span>☐ Low-confidence fields checked</span><span>☐ Duplicate income ruled out</span><span>☐ Notes added for anything unusual</span></div>
       </section>
 
       <section id="money" class="guide-section" aria-labelledby="money-title">
         <div class="section-heading"><div><p class="section-kicker">Records</p><h2 id="money-title">Income, expenses and assets</h2></div><a routerLink="/transactions">Open Income &amp; expenses <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">This is the ledger for the selected financial year. Use it to explain the money behind your evidence, then check totals and categories before preparing the accountant pack.</p>
+        <div class="money-visual" aria-label="Example Income and expenses workspace">
+          <div class="money-visual-header"><span>Income &amp; expenses · FY 2026 - 27</span><b>+ Add</b></div>
+          <div class="money-metrics"><span><small>Income</small><strong>$42,800</strong></span><span><small>Expenses</small><strong>$8,460</strong></span><span><small>Net records</small><strong>$34,340</strong></span></div>
+          <div class="money-visual-row"><b>ATO category</b><span>Search description</span><span>All · Income · Expenses</span><em>Bulk actions</em></div>
+          <div class="money-visual-row"><strong>Office supplies</strong><span>12 Nov 2026</span><span class="expense-pill">expense</span><span>Not categorised</span></div>
+        </div>
         <div class="feature-grid three-up">
-          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Transactions</h3><p>Record income and expenses, import bank rows when connected, and categorise the items that support the year.</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Add a transaction</h3><p>Choose Add, enter a description, select Income or Expense, set the date and AUD amount, then choose the Tax return item. If a category needs a rental property, select it before saving.</p></article>
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Import and check bank rows</h3><p>Use Import bank file for a supported bank export. Check description, date, direction and amount; importing is not the same as categorising or proving the expense.</p></article>
+          <article><span class="feature-icon"><tv-icon name="classification" /></span><h3>Categorise confidently</h3><p>Apply a tax-return item to one row, or select several rows and apply a category in bulk. Verify Suggest from description before applying it.</p></article>
+          <article><span class="feature-icon"><tv-icon name="search" /></span><h3>Find and filter</h3><p>Search descriptions, switch between All, Income and Expenses, and sort by description, date, type, year or amount. Attention rows still need action.</p></article>
+          <article><span class="feature-icon"><tv-icon name="edit" /></span><h3>Edit or remove</h3><p>Use Edit to correct description, direction, date, amount, category or property. Delete only when the row is genuinely wrong.</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Track recurring income</h3><p>Add a recurring rule with source, gross amount, day and start/end dates. Preview missing income before backfilling, then pause or resume it.</p></article>
           <article><span class="feature-icon"><tv-icon name="property" /></span><h3>Properties</h3><p>Keep property details, ownership, loan information, rental evidence and relevant periods together.</p></article>
           <article><span class="feature-icon"><tv-icon name="investment" /></span><h3>Investments</h3><p>Capture holdings, disposals, income and cost-base information so capital gains records have their supporting context.</p></article>
         </div>
+        <div class="how-to"><strong>Recommended order</strong><span>1. Import or add</span><span>2. Check date and direction</span><span>3. Categorise</span><span>4. Resolve attention rows</span><span>5. Recheck totals</span></div>
         <p class="section-note">Use the Dashboard to see the combined picture. A complete year is not only a folder of receipts; it also explains the money and assets those receipts support.</p>
       </section>
 
