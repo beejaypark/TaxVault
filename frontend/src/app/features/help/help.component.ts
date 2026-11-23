@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, HostListener } from '@angular/core'
 import { RouterLink } from '@angular/router';
 
 import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.component';
+import { TranslatePipe } from '../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-help',
-  imports: [RouterLink, TaxIconComponent],
+  imports: [RouterLink, TaxIconComponent, TranslatePipe],
   templateUrl: './help.component.html',
   styleUrl: './help.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

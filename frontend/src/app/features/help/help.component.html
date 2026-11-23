@@ -1,99 +1,99 @@
 <div class="help-page tv-workspace-page">
   <header class="help-hero">
     <div>
-      <p class="eyebrow">TaxVault guide</p>
-      <h1>Make your financial year ready</h1>
-      <p class="hero-copy">Use this guide to collect evidence, review what was extracted, keep your records connected, and send a clear pack to your accountant.</p>
+      <p class="eyebrow">{{ 'Help.HeroKicker' | translate }}</p>
+      <h1>{{ 'Help.HeroTitle' | translate }}</h1>
+      <p class="hero-copy">{{ 'Help.HeroCopy' | translate }}</p>
     </div>
-    <a class="hero-action" routerLink="/financial-years">Start with a financial year <tv-icon name="arrowRight" /></a>
+    <a class="hero-action" routerLink="/financial-years">{{ 'Help.HeroAction' | translate }} <tv-icon name="arrowRight" /></a>
   </header>
 
   <div class="help-layout">
     <aside class="help-nav" aria-label="Help sections">
-      <p class="help-nav-title">In this guide</p>
-      <a href="#dashboard" [class.active]="activeSection === 'dashboard'" (click)="scrollTo('dashboard', $event)">Dashboard</a>
-      <a href="#workflow" [class.active]="activeSection === 'workflow'" (click)="scrollTo('workflow', $event)">The TaxVault flow</a>
-      <a href="#financial-years" [class.active]="activeSection === 'financial-years'" (click)="scrollTo('financial-years', $event)">Financial years</a>
-      <a href="#documents" [class.active]="activeSection === 'documents'" (click)="scrollTo('documents', $event)">Documents</a>
-      <a href="#reviews" [class.active]="activeSection === 'reviews'" (click)="scrollTo('reviews', $event)">Reviews</a>
-      <a href="#money" [class.active]="activeSection === 'money'" (click)="scrollTo('money', $event)">Income, expenses and assets</a>
-      <a href="#properties" [class.active]="activeSection === 'properties'" (click)="scrollTo('properties', $event)">Properties</a>
-      <a href="#reports" [class.active]="activeSection === 'reports'" (click)="scrollTo('reports', $event)">Reports and accountant pack</a>
-      <a href="#settings" [class.active]="activeSection === 'settings'" (click)="scrollTo('settings', $event)">Settings</a>
-      <a href="#send" [class.active]="activeSection === 'send'" (click)="scrollTo('send', $event)">Send to your accountant</a>
+      <p class="help-nav-title">{{ 'Help.NavTitle' | translate }}</p>
+      <a href="#dashboard" [class.active]="activeSection === 'dashboard'" (click)="scrollTo('dashboard', $event)">{{ 'Help.Dashboard' | translate }}</a>
+      <a href="#workflow" [class.active]="activeSection === 'workflow'" (click)="scrollTo('workflow', $event)">{{ 'Help.Workflow' | translate }}</a>
+      <a href="#financial-years" [class.active]="activeSection === 'financial-years'" (click)="scrollTo('financial-years', $event)">{{ 'Help.FinancialYears' | translate }}</a>
+      <a href="#documents" [class.active]="activeSection === 'documents'" (click)="scrollTo('documents', $event)">{{ 'Help.Documents' | translate }}</a>
+      <a href="#reviews" [class.active]="activeSection === 'reviews'" (click)="scrollTo('reviews', $event)">{{ 'Help.Reviews' | translate }}</a>
+      <a href="#money" [class.active]="activeSection === 'money'" (click)="scrollTo('money', $event)">{{ 'Help.Money' | translate }}</a>
+      <a href="#properties" [class.active]="activeSection === 'properties'" (click)="scrollTo('properties', $event)">{{ 'Help.Properties' | translate }}</a>
+      <a href="#reports" [class.active]="activeSection === 'reports'" (click)="scrollTo('reports', $event)">{{ 'Help.Reports' | translate }}</a>
+      <a href="#settings" [class.active]="activeSection === 'settings'" (click)="scrollTo('settings', $event)">{{ 'Help.Settings' | translate }}</a>
+      <a href="#send" [class.active]="activeSection === 'send'" (click)="scrollTo('send', $event)">{{ 'Help.Send' | translate }}</a>
     </aside>
 
     <main class="help-content">
       <section id="dashboard" class="guide-section" aria-labelledby="dashboard-title">
-        <div class="section-heading"><div><p class="section-kicker">Your starting point</p><h2 id="dashboard-title">Dashboard: understand the year at a glance</h2></div><a routerLink="/dashboard">Open Dashboard <tv-icon name="arrowRight" /></a></div>
-        <p class="section-intro">Dashboard is the control centre for the selected financial year. It tells you what is ready, what is blocking the year, and which screen to open next.</p>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.YourStartingPoint' | translate }}</p><h2 id="dashboard-title">{{ 'Help.DashboardTitle' | translate }}</h2></div><a routerLink="/dashboard">{{ 'Help.OpenDashboard' | translate }} <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">{{ 'Help.DashboardIntro' | translate }}</p>
         <div class="dashboard-visual" aria-label="Example TaxVault Dashboard with readiness and summary cards">
-          <div class="dashboard-visual-header"><span>FY 2026 - 27 · Dashboard</span><b>＋ Upload document</b></div>
-          <div class="dashboard-visual-cards"><span><small>Needs attention</small><strong>4</strong><em>Reviews waiting</em></span><span><small>Documents</small><strong>18</strong><em>Tax records uploaded</em></span><span><small>Reviewed</small><strong>14</strong><em>Completed review items</em></span></div>
-          <div class="dashboard-visual-readiness"><div><small>YEAR READINESS</small><strong>78%</strong><em>In progress</em></div><div class="readiness-bars"><span>Evidence <i style="width: 86%"></i></span><span>Reviews <i style="width: 70%"></i></span><span>Transactions <i style="width: 62%"></i></span></div><div class="dashboard-visual-issues"><b>Next actions</b><span>4 documents need review</span><span>3 transactions are uncategorised</span></div></div>
+          <div class="dashboard-visual-header"><span>FY 2026 - 27 · {{ 'Dashboard.Title' | translate }}</span><b>＋ {{ 'Dashboard.UploadDocument' | translate }}</b></div>
+          <div class="dashboard-visual-cards"><span><small>{{ 'Dashboard.NeedsAttention' | translate }}</small><strong>4</strong><em>{{ 'Dashboard.ReviewsWaiting' | translate }}</em></span><span><small>{{ 'Dashboard.Documents' | translate }}</small><strong>18</strong><em>{{ 'Dashboard.TaxRecordsUploaded' | translate }}</em></span><span><small>{{ 'Dashboard.Reviewed' | translate }}</small><strong>14</strong><em>{{ 'Dashboard.CompletedReviewItems' | translate }}</em></span></div>
+          <div class="dashboard-visual-readiness"><div><small>{{ 'Dashboard.ReadinessKicker' | translate }}</small><strong>78%</strong><em>{{ 'Dashboard.ReadinessStatus.needs_attention' | translate }}</em></div><div class="readiness-bars"><span>{{ 'Dashboard.ReadinessEvidence' | translate }} <i style="width: 86%"></i></span><span>{{ 'Dashboard.ReadinessDocuments' | translate }} <i style="width: 70%"></i></span><span>{{ 'Dashboard.ReadinessTransactions' | translate }} <i style="width: 62%"></i></span></div><div class="dashboard-visual-issues"><b>{{ 'Dashboard.ResolveIssues' | translate }}</b><span>4 {{ 'Documents.Title' | translate }} need review</span><span>3 {{ 'Transactions.Title' | translate }} are {{ 'Transactions.NotCategorised' | translate }}</span></div></div>
         </div>
         <div class="feature-grid two-up">
-          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Read the readiness score</h3><p>The score and status summarise evidence, reviews and records for the selected year. It is a preparation signal, not a lodged tax return or professional advice.</p></article>
-          <article><span class="feature-icon"><tv-icon name="warning" /></span><h3>Follow blocking issues</h3><p>Select a readiness issue to jump to the relevant Documents or Income &amp; expenses filter. Resolve blocked items first, then work through warnings.</p></article>
-          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Check income and expenses</h3><p>Financial Year at a Glance shows total income, total expenses and net records. The monthly chart helps you spot missing months or an unusually large amount.</p></article>
-          <article><span class="feature-icon"><tv-icon name="review" /></span><h3>Track review progress</h3><p>The review progress chart separates completed items, items needing attention and other states. Open Reviews to work through the queue.</p></article>
-          <article><span class="feature-icon"><tv-icon name="settings" /></span><h3>Customise the dashboard</h3><p>Choose Customize to show or hide widgets, move them up or down, drag them into a new order, or restore the default layout.</p></article>
-          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Use quick actions</h3><p>Upload a document from the header, open the attention list, or use the links in each widget to continue without searching through the navigation.</p></article>
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>{{ 'HelpDashboard.ReadinessTitle' | translate }}</h3><p>{{ 'HelpDashboard.ReadinessBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="warning" /></span><h3>{{ 'HelpDashboard.BlockersTitle' | translate }}</h3><p>{{ 'HelpDashboard.BlockersBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>{{ 'HelpDashboard.MoneyTitle' | translate }}</h3><p>{{ 'HelpDashboard.MoneyBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="review" /></span><h3>{{ 'HelpDashboard.ReviewsTitle' | translate }}</h3><p>{{ 'HelpDashboard.ReviewsBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="settings" /></span><h3>{{ 'HelpDashboard.CustomiseTitle' | translate }}</h3><p>{{ 'HelpDashboard.CustomiseBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>{{ 'HelpDashboard.ActionsTitle' | translate }}</h3><p>{{ 'HelpDashboard.ActionsBody' | translate }}</p></article>
         </div>
-        <div class="how-to"><strong>Dashboard routine</strong><span>1. Select year</span><span>2. Read readiness</span><span>3. Resolve blockers</span><span>4. Check totals</span><span>5. Review again</span></div>
+        <div class="how-to"><strong>{{ 'HelpDashboard.RoutineTitle' | translate }}</strong><span>1. {{ 'HelpDashboard.Routine1' | translate }}</span><span>2. {{ 'HelpDashboard.Routine2' | translate }}</span><span>3. {{ 'HelpDashboard.Routine3' | translate }}</span><span>4. {{ 'HelpDashboard.Routine4' | translate }}</span><span>5. {{ 'HelpDashboard.Routine5' | translate }}</span></div>
       </section>
       <section id="workflow" class="guide-section workflow-section" aria-labelledby="workflow-title">
         <div class="section-heading">
           <div>
-            <p class="section-kicker">Start here</p>
-            <h2 id="workflow-title">One connected path from receipt to review</h2>
+            <p class="section-kicker">{{ 'Help.WorkflowKicker' | translate }}</p>
+            <h2 id="workflow-title">{{ 'HelpFlow.WorkflowTitle' | translate }}</h2>
           </div>
-          <p>Choose the financial year first. Every document, transaction, correction and report should point back to the same year.</p>
+          <p>{{ 'HelpFlow.WorkflowIntro' | translate }}</p>
         </div>
 
         <div class="workflow" aria-label="TaxVault workflow">
-          <div class="flow-step"><span class="flow-number">1</span><tv-icon name="financialYear" /><strong>Set up the year</strong><small>Dates, label and starting point</small></div>
-          <div class="flow-step"><span class="flow-number">2</span><tv-icon name="document" /><strong>Bring in evidence</strong><small>Upload, OneDrive or email</small></div>
-          <div class="flow-step"><span class="flow-number">3</span><tv-icon name="review" /><strong>Review extraction</strong><small>Check dates, suppliers and totals</small></div>
-          <div class="flow-step"><span class="flow-number">4</span><tv-icon name="transactions" /><strong>Record the money</strong><small>Income, expenses and categories</small></div>
-          <div class="flow-step"><span class="flow-number">5</span><tv-icon name="property" /><strong>Complete assets</strong><small>Property and investment details</small></div>
-          <div class="flow-step"><span class="flow-number">6</span><tv-icon name="send" /><strong>Prepare and share</strong><small>Accountant pack and access</small></div>
+          <div class="flow-step"><span class="flow-number">1</span><tv-icon name="financialYear" /><strong>{{ 'HelpFlow.Step1' | translate }}</strong><small>{{ 'HelpFlow.Step1Hint' | translate }}</small></div>
+          <div class="flow-step"><span class="flow-number">2</span><tv-icon name="document" /><strong>{{ 'HelpFlow.Step2' | translate }}</strong><small>{{ 'HelpFlow.Step2Hint' | translate }}</small></div>
+          <div class="flow-step"><span class="flow-number">3</span><tv-icon name="review" /><strong>{{ 'HelpFlow.Step3' | translate }}</strong><small>{{ 'HelpFlow.Step3Hint' | translate }}</small></div>
+          <div class="flow-step"><span class="flow-number">4</span><tv-icon name="transactions" /><strong>{{ 'HelpFlow.Step4' | translate }}</strong><small>{{ 'HelpFlow.Step4Hint' | translate }}</small></div>
+          <div class="flow-step"><span class="flow-number">5</span><tv-icon name="property" /><strong>{{ 'HelpFlow.Step5' | translate }}</strong><small>{{ 'HelpFlow.Step5Hint' | translate }}</small></div>
+          <div class="flow-step"><span class="flow-number">6</span><tv-icon name="send" /><strong>{{ 'HelpFlow.Step6' | translate }}</strong><small>{{ 'HelpFlow.Step6Hint' | translate }}</small></div>
         </div>
 
-        <div class="callout"><tv-icon name="check" /><p><strong>A good stopping point:</strong> every important figure has source evidence, reviewed fields are corrected, and the Dashboard no longer shows blocking preparation issues.</p></div>
+        <div class="callout"><tv-icon name="check" /><p>{{ 'HelpFlow.StoppingPoint' | translate }}</p></div>
       </section>
 
       <section class="guide-section visual-guides" aria-labelledby="visual-guides-title">
         <div class="section-heading">
-          <div><p class="section-kicker">Follow along</p><h2 id="visual-guides-title">What to click, in order</h2></div>
-          <p>These examples mirror the TaxVault workspace. Use the numbered markers as a quick visual map, then open the real screen with the button.</p>
+          <div><p class="section-kicker">{{ 'Help.VisualGuidesKicker' | translate }}</p><h2 id="visual-guides-title">{{ 'HelpFlow.VisualTitle' | translate }}</h2></div>
+          <p>{{ 'HelpFlow.VisualIntro' | translate }}</p>
         </div>
 
         <div class="visual-guide-grid">
           <article class="visual-guide-card">
-            <div class="visual-guide-copy"><span class="guide-number">1</span><div><h3>Create or choose the financial year</h3><p>Start here when you first sign in, or whenever you need to work on a different tax year.</p><a routerLink="/financial-years">Open Financial years <tv-icon name="arrowRight" /></a></div></div>
+            <div class="visual-guide-copy"><span class="guide-number">1</span><div><h3>{{ 'HelpFlow.Guide1Title' | translate }}</h3><p>{{ 'HelpFlow.Guide1Body' | translate }}</p><a routerLink="/financial-years">{{ 'Help.OpenFinancialYears' | translate }} <tv-icon name="arrowRight" /></a></div></div>
             <div class="mock-screen" aria-label="Example Financial years screen">
-              <div class="mock-sidebar"><span class="mock-brand">TaxVault</span><span class="mock-nav muted">Overview</span><span class="mock-nav active">Financial years</span><span class="mock-nav">Documents</span><span class="mock-nav">Reviews</span></div>
-              <div class="mock-main"><div class="mock-topline"><span>Financial years</span><b>+ New financial year</b></div><div class="mock-panel"><span class="mock-label">Financial year</span><strong>FY 2026 - 27</strong><small>1 July 2026 — 30 June 2027</small><i class="marker m1">1</i></div><div class="mock-panel short"><span class="mock-label">Status</span><strong class="good">Active</strong><i class="marker m2">2</i></div></div>
+              <div class="mock-sidebar"><span class="mock-brand">TaxVault</span><span class="mock-nav muted">{{ 'Overview.Title' | translate }}</span><span class="mock-nav active">{{ 'FinancialYears.Title' | translate }}</span><span class="mock-nav">{{ 'Documents.Title' | translate }}</span><span class="mock-nav">{{ 'Reviews.Title' | translate }}</span></div>
+              <div class="mock-main"><div class="mock-topline"><span>{{ 'FinancialYears.Title' | translate }}</span><b>+ {{ 'FinancialYears.Add' | translate }}</b></div><div class="mock-panel"><span class="mock-label">{{ 'FinancialYears.Field' | translate }}</span><strong>FY 2026 - 27</strong><small>1 July 2026 — 30 June 2027</small><i class="marker m1">1</i></div><div class="mock-panel short"><span class="mock-label">{{ 'FinancialYears.Status' | translate }}</span><strong class="good">Active</strong><i class="marker m2">2</i></div></div>
             </div>
           </article>
 
           <article class="visual-guide-card">
-            <div class="visual-guide-copy"><span class="guide-number">2</span><div><h3>Add your evidence</h3><p>Choose the year and document type, then use the local upload card or the OneDrive card.</p><a routerLink="/documents/upload">Open Upload documents <tv-icon name="arrowRight" /></a></div></div>
+            <div class="visual-guide-copy"><span class="guide-number">2</span><div><h3>{{ 'HelpFlow.Guide2Title' | translate }}</h3><p>{{ 'HelpFlow.Guide2Body' | translate }}</p><a routerLink="/documents/upload">{{ 'Upload.Title' | translate }} <tv-icon name="arrowRight" /></a></div></div>
             <div class="mock-screen upload-mock" aria-label="Example Upload documents screen">
-              <div class="mock-toolbar"><span>Upload documents</span><small>FY 2026 - 27</small></div><div class="mock-choice"><span>Financial year</span><b>FY 2026 - 27</b><span>Document type</span><b>Receipt</b></div><div class="mock-columns"><div class="mock-card"><span class="mock-label">Connected storage</span><strong>OneDrive</strong><small>Browse OneDrive</small><i class="marker m1">1</i></div><div class="mock-card dashed"><span class="mock-label">This device</span><strong>Upload from your device</strong><small>Choose files · Choose folder · Take photo</small><i class="marker m2">2</i></div></div>
+              <div class="mock-toolbar"><span>{{ 'Upload.Title' | translate }}</span><small>FY 2026 - 27</small></div><div class="mock-choice"><span>{{ 'Upload.FinancialYear' | translate }}</span><b>FY 2026 - 27</b><span>{{ 'Upload.DocumentType' | translate }}</span><b>Receipt</b></div><div class="mock-columns"><div class="mock-card"><span class="mock-label">{{ 'Settings.StorageProvider' | translate }}</span><strong>OneDrive</strong><small>{{ 'Upload.ChooseFiles' | translate }}</small><i class="marker m1">1</i></div><div class="mock-card dashed"><span class="mock-label">{{ 'Upload.SecureStorage' | translate }}</span><strong>{{ 'Upload.ChooseFiles' | translate }}</strong><small>{{ 'Upload.ChooseFiles' | translate }} · {{ 'Upload.ChooseFolder' | translate }} · {{ 'Upload.TakePhoto' | translate }}</small><i class="marker m2">2</i></div></div>
             </div>
           </article>
 
           <article class="visual-guide-card">
-            <div class="visual-guide-copy"><span class="guide-number">3</span><div><h3>Review what TaxVault found</h3><p>Open Reviews, compare every important field with the original, and save corrections before moving on.</p><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div></div>
+            <div class="visual-guide-copy"><span class="guide-number">3</span><div><h3>{{ 'HelpFlow.Guide3Title' | translate }}</h3><p>{{ 'HelpFlow.Guide3Body' | translate }}</p><a routerLink="/reviews">{{ 'Help.OpenReviews' | translate }} <tv-icon name="arrowRight" /></a></div></div>
             <div class="mock-screen review-mock" aria-label="Example Reviews screen">
               <div class="mock-toolbar"><span>Review document</span><small>Needs attention</small></div><div class="mock-review-columns"><div class="mock-document"><span class="mock-label">Original document</span><div class="paper-lines"></div><div class="paper-lines short-line"></div><div class="paper-lines"></div></div><div class="mock-fields"><span class="mock-label">Extracted details</span><label>Supplier <b>Officeworks</b></label><label>Issue date <b>12 Nov 2026</b></label><label>Total <b>$48.90</b></label><button>Save review</button><i class="marker m3">3</i></div></div>
             </div>
           </article>
 
           <article class="visual-guide-card">
-            <div class="visual-guide-copy"><span class="guide-number">4</span><div><h3>Prepare the accountant handoff</h3><p>Use the readiness preview, resolve blockers, then share the right access with your accountant.</p><a routerLink="/tax-return">Open Accountant Pack <tv-icon name="arrowRight" /></a></div></div>
+            <div class="visual-guide-copy"><span class="guide-number">4</span><div><h3>{{ 'HelpFlow.Guide4Title' | translate }}</h3><p>{{ 'HelpFlow.Guide4Body' | translate }}</p><a routerLink="/tax-return">{{ 'Help.OpenReports' | translate }} <tv-icon name="arrowRight" /></a></div></div>
             <div class="mock-screen pack-mock" aria-label="Example Accountant Pack screen">
               <div class="mock-toolbar"><span>Accountant Pack</span><small>FY 2026 - 27</small></div><div class="mock-score"><div><span class="mock-label">Year readiness</span><strong>Ready to review</strong><small>18 of 18 key items checked</small></div><div class="score-ring">92%</div><i class="marker m1">1</i></div><div class="mock-pack-row"><span>Evidence and corrections</span><b>Included</b></div><div class="mock-pack-row"><span>Accountant access</span><b>Manage access →</b><i class="marker m2">2</i></div>
             </div>
@@ -102,133 +102,133 @@
       </section>
 
       <section id="financial-years" class="guide-section" aria-labelledby="financial-years-title">
-        <div class="section-heading"><div><p class="section-kicker">Foundation</p><h2 id="financial-years-title">Financial years</h2></div><a routerLink="/financial-years">Open Financial years <tv-icon name="arrowRight" /></a></div>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.FinancialYearsKicker' | translate }}</p><h2 id="financial-years-title">{{ 'Help.FinancialYears' | translate }}</h2></div><a routerLink="/financial-years">{{ 'Help.OpenFinancialYears' | translate }} <tv-icon name="arrowRight" /></a></div>
         <div class="feature-grid">
-          <article><span class="feature-icon"><tv-icon name="financialYear" /></span><h3>Create the year</h3><p>Open Financial years, add the Australian financial year label and confirm the 1 July to 30 June dates. Use one year for one reporting period.</p></article>
-          <article><span class="feature-icon"><tv-icon name="check" /></span><h3>Use the header picker</h3><p>The financial year selector in the header is the shared context for the workspace. Change it before reviewing documents, transactions or reports.</p></article>
-          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Watch readiness</h3><p>Dashboard readiness signals missing evidence, incomplete records and next actions for the selected year.</p></article>
+          <article><span class="feature-icon"><tv-icon name="financialYear" /></span><h3>{{ 'HelpFoundation.CreateTitle' | translate }}</h3><p>{{ 'HelpFoundation.CreateBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="check" /></span><h3>{{ 'HelpFoundation.PickerTitle' | translate }}</h3><p>{{ 'HelpFoundation.PickerBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>{{ 'HelpFoundation.ReadinessTitle' | translate }}</h3><p>{{ 'HelpFoundation.ReadinessBody' | translate }}</p></article>
         </div>
-        <div class="how-to"><strong>Do this first</strong><span>1. Open Financial years</span><span>2. Choose New financial year</span><span>3. Enter the year dates</span><span>4. Save, then select the year in the header</span></div>
+        <div class="how-to"><strong>{{ 'HelpFoundation.FirstTitle' | translate }}</strong><span>1. {{ 'HelpFoundation.First1' | translate }}</span><span>2. {{ 'HelpFoundation.First2' | translate }}</span><span>3. {{ 'HelpFoundation.First3' | translate }}</span><span>4. {{ 'HelpFoundation.First4' | translate }}</span></div>
       </section>
 
       <section id="documents" class="guide-section" aria-labelledby="documents-title">
-        <div class="section-heading"><div><p class="section-kicker">Evidence</p><h2 id="documents-title">Documents</h2></div><a routerLink="/documents">Open Documents <tv-icon name="arrowRight" /></a></div>
-        <p class="section-intro">Documents is the evidence list for the selected financial year. The status and action area tells you whether a file still needs review, whether payment has been confirmed, and what can safely happen next.</p>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.DocumentsKicker' | translate }}</p><h2 id="documents-title">{{ 'Help.Documents' | translate }}</h2></div><a routerLink="/documents">{{ 'Help.OpenDocuments' | translate }} <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">{{ 'Help.DocumentsIntro' | translate }}</p>
         <div class="documents-visual" aria-label="Example Documents list with review and payment actions">
-          <div class="documents-visual-header"><span>Documents · FY 2025 - 26</span><b>＋ Upload receipt</b></div>
-          <div class="documents-visual-filters"><span>All documents · 12</span><span>Review required · 12</span><span>Keyword</span><span>Payment: Any</span></div>
-          <div class="documents-visual-row"><div><strong>UrbanUtilities-Q4</strong><small>Receipt · OneDrive · FY 2025 - 26</small></div><span>22 Nov 2026</span><span>1.6 MB</span><div class="documents-visual-actions"><em>● Review required</em><button>Open review item</button><button>Mark as paid</button><u>Delete</u></div></div>
+          <div class="documents-visual-header"><span>{{ 'Documents.Title' | translate }} · FY 2025 - 26</span><b>＋ {{ 'Documents.UploadReceipt' | translate }}</b></div>
+          <div class="documents-visual-filters"><span>{{ 'Documents.AllDocuments' | translate }} · 12</span><span>{{ 'Dashboard.NeedsAttention' | translate }} · 12</span><span>{{ 'Documents.Keyword' | translate }}</span><span>{{ 'Documents.Payment' | translate }}: {{ 'Documents.Any' | translate }}</span></div>
+          <div class="documents-visual-row"><div><strong>UrbanUtilities-Q4</strong><small>Receipt · OneDrive · FY 2025 - 26</small></div><span>22 Nov 2026</span><span>1.6 MB</span><div class="documents-visual-actions"><em>● {{ 'Reviews.Status' | translate }}</em><button>{{ 'Reviews.OpenReview' | translate }}</button><button>{{ 'Documents.Paid' | translate }}</button><u>{{ 'Assets.Delete' | translate }}</u></div></div>
         </div>
         <div class="feature-grid two-up">
-          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Upload from your device</h3><p>Choose files, a folder or a photo. Select the financial year and document type first so each file starts with the right context.</p></article>
-          <article><span class="feature-icon"><tv-icon name="folder" /></span><h3>Import from OneDrive</h3><p>Connect OneDrive in Settings, then browse folders from the upload screen. Import one file or a folder without losing the original location.</p></article>
-          <article><span class="feature-icon"><tv-icon name="receipt" /></span><h3>Keep the original</h3><p>TaxVault stores the original document with its evidence metadata. Do not replace a source file with a cropped image when the full document is available.</p></article>
-          <article><span class="feature-icon"><tv-icon name="file" /></span><h3>Find it later</h3><p>Documents can be filtered by year, type and review state. Use Search when you remember a filename, supplier or document detail.</p></article>
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>{{ 'HelpDocuments.DeviceTitle' | translate }}</h3><p>{{ 'HelpDocuments.DeviceBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="folder" /></span><h3>{{ 'HelpDocuments.OneDriveTitle' | translate }}</h3><p>{{ 'HelpDocuments.OneDriveBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="receipt" /></span><h3>{{ 'HelpDocuments.OriginalTitle' | translate }}</h3><p>{{ 'HelpDocuments.OriginalBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="file" /></span><h3>{{ 'HelpDocuments.FindTitle' | translate }}</h3><p>{{ 'HelpDocuments.FindBody' | translate }}</p></article>
         </div>
         <div class="instruction-list document-actions-help">
-          <div><span>PAY</span><div><h3>When to use Mark as paid</h3><p>Use it after you have checked that the document represents a payment and you know the payment date, method and amount. It is useful for a receipt or bill that has not already been recorded as a transaction.</p><p>TaxVault opens a confirmation form. Check the suggested date and amount, choose the payment method, then select Confirm paid. The document changes to Paid and shows the recorded payment details. TaxVault also creates one linked, uncategorised expense, which you should review and categorise in Income &amp; expenses.</p></div></div>
-          <div><span>WAIT</span><div><h3>When Mark as paid is unavailable</h3><p>Assign a financial year first. If the document already has multiple or mixed transactions, use Income &amp; expenses instead so each transaction can be checked separately. Do not mark a year-to-date or statement total as a single payment.</p></div></div>
-          <div><span>DELETE</span><div><h3>What Delete does</h3><p>Delete is permanent and requires confirmation. It removes the original file, the document entry and its review items. Existing OCR extraction, evidence and transactions are kept, but detached from the deleted source document. This cannot be undone.</p><p>Before deleting, confirm that the file is a duplicate or was uploaded by mistake. If the document is still processing, wait for extraction to finish. If you only want to change its description, use Edit description instead.</p></div></div>
+          <div><span>PAY</span><div><h3>{{ 'HelpDetails.MarkPaidTitle' | translate }}</h3><p>{{ 'HelpDetails.MarkPaidBody' | translate }}</p><p>{{ 'HelpDetails.MarkPaidEffect' | translate }}</p></div></div>
+          <div><span>WAIT</span><div><h3>{{ 'HelpDetails.MarkPaidUnavailableTitle' | translate }}</h3><p>{{ 'HelpDetails.MarkPaidUnavailableBody' | translate }}</p></div></div>
+          <div><span>DELETE</span><div><h3>{{ 'HelpDetails.DeleteDocumentTitle' | translate }}</h3><p>{{ 'HelpDetails.DeleteDocumentBody' | translate }}</p><p>{{ 'HelpDetails.DeleteDocumentBefore' | translate }}</p></div></div>
         </div>
       </section>
 
       <section id="reviews" class="guide-section" aria-labelledby="reviews-title">
-        <div class="section-heading"><div><p class="section-kicker">Accuracy</p><h2 id="reviews-title">Reviews and extraction</h2></div><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div>
-        <p class="section-intro">Review is the checkpoint between a document and a financial record. TaxVault can read a document, but you confirm whether the value is correct before it becomes part of the year.</p>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.ReviewsKicker' | translate }}</p><h2 id="reviews-title">{{ 'Reviews.Title' | translate }}</h2></div><a routerLink="/reviews">{{ 'Help.OpenReviews' | translate }} <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">{{ 'Help.ReviewsIntro' | translate }}</p>
         <div class="review-workspace-visual" aria-label="Example Review detail workspace with source document, extraction and decision">
-          <div class="review-visual-top"><span><tv-icon name="review" /> Review queue → Review item</span><b>Pending review</b></div>
+          <div class="review-visual-top"><span><tv-icon name="review" /> {{ 'Reviews.Title' | translate }} → {{ 'Reviews.ReviewItem' | translate }}</span><b>{{ 'HelpVisual.PendingReview' | translate }}</b></div>
           <div class="review-visual-body">
-            <div class="review-visual-source"><span class="mock-label">1 · Source document</span><div class="visual-paper"><strong>OFFICEWORKS</strong><span>Tax invoice · 12 Nov 2026</span><i></i><i></i><i class="short"></i><strong>$48.90</strong></div><small>Preview or download the original before deciding.</small></div>
-            <div class="review-visual-extraction"><span class="mock-label">2 · Extracted data</span><div class="visual-field"><span>Supplier</span><b>Officeworks</b><em class="confidence-high">98%</em></div><div class="visual-field"><span>Issue date</span><b>12 Nov 2026</b><em class="confidence-high">96%</em></div><div class="visual-field attention"><span>Total</span><b>$48.90</b><em class="confidence-low">61%</em></div><div class="visual-field-actions"><span>3 · Correct, then decide</span><button>Save correction</button></div></div>
+            <div class="review-visual-source"><span class="mock-label">1 · {{ 'HelpVisual.SourceDocument' | translate }}</span><div class="visual-paper"><strong>OFFICEWORKS</strong><span>Tax invoice · 12 Nov 2026</span><i></i><i></i><i class="short"></i><strong>$48.90</strong></div><small>{{ 'HelpVisual.PreviewOriginal' | translate }}</small></div>
+            <div class="review-visual-extraction"><span class="mock-label">2 · {{ 'HelpVisual.ExtractedData' | translate }}</span><div class="visual-field"><span>{{ 'HelpVisual.Supplier' | translate }}</span><b>Officeworks</b><em class="confidence-high">98%</em></div><div class="visual-field"><span>{{ 'HelpVisual.IssueDate' | translate }}</span><b>12 Nov 2026</b><em class="confidence-high">96%</em></div><div class="visual-field attention"><span>{{ 'HelpVisual.Total' | translate }}</span><b>$48.90</b><em class="confidence-low">61%</em></div><div class="visual-field-actions"><span>3 · {{ 'HelpVisual.CorrectThenDecide' | translate }}</span><button>{{ 'HelpVisual.SaveCorrection' | translate }}</button></div></div>
           </div>
-          <div class="review-visual-decision"><span>4 · Complete review</span><small>Add notes, check existing income, then approve or reject.</small><button>Approve</button><button class="reject">Reject</button></div>
+          <div class="review-visual-decision"><span>4 · {{ 'HelpVisual.CompleteReview' | translate }}</span><small>{{ 'HelpVisual.CompleteReviewHint' | translate }}</small><button>{{ 'HelpVisual.Approve' | translate }}</button><button class="reject">{{ 'HelpVisual.Reject' | translate }}</button></div>
         </div>
         <div class="instruction-list">
-          <div><span>01</span><div><h3>Start in the queue</h3><p>Open Reviews and set the correct financial year. Use Status to focus on pending items and Type to narrow the list. Each card shows the document, extracted-field count and low-confidence values.</p></div></div>
-          <div><span>02</span><div><h3>Read the original first</h3><p>Open Source document, then preview it in TaxVault or download the original. Check the complete page, not only the text that OCR found.</p></div></div>
-          <div><span>03</span><div><h3>Work field by field</h3><p>In Document Extraction, compare every OCR value with the source. Confidence is a warning signal, not proof; low confidence means “look closely”.</p></div></div>
-          <div><span>04</span><div><h3>Fill gaps and save corrections</h3><p>If OCR missed a value, use Add missing details. If it is wrong, use Correct this value and Save Correction. The authoritative correction keeps the original OCR result traceable.</p></div></div>
-          <div><span>05</span><div><h3>Approve, reject or record money</h3><p>Add notes, then Approve or Reject. If the document should create records, enable Also save transactions in Income &amp; expenses and enter each payment as its own income or expense.</p></div></div>
-          <div><span>06</span><div><h3>Prevent duplicate income</h3><p>Use Check existing income to search by payment date or cumulative period. Link an existing transaction, or explicitly confirm that this is additional income.</p></div></div>
-          <div><span>07</span><div><h3>Know when it is complete</h3><p>A completed review has a decision and, when applicable, linked transactions. Reopen it later to inspect notes, corrections and linked transaction details.</p></div></div>
+          <div><span>01</span><div><h3>{{ 'HelpReview.Step1Title' | translate }}</h3><p>{{ 'HelpReview.Step1Body' | translate }}</p></div></div>
+          <div><span>02</span><div><h3>{{ 'HelpReview.Step2Title' | translate }}</h3><p>{{ 'HelpReview.Step2Body' | translate }}</p></div></div>
+          <div><span>03</span><div><h3>{{ 'HelpReview.Step3Title' | translate }}</h3><p>{{ 'HelpReview.Step3Body' | translate }}</p></div></div>
+          <div><span>04</span><div><h3>{{ 'HelpReview.Step4Title' | translate }}</h3><p>{{ 'HelpReview.Step4Body' | translate }}</p></div></div>
+          <div><span>05</span><div><h3>{{ 'HelpReview.Step5Title' | translate }}</h3><p>{{ 'HelpReview.Step5Body' | translate }}</p></div></div>
+          <div><span>06</span><div><h3>{{ 'HelpReview.Step6Title' | translate }}</h3><p>{{ 'HelpReview.Step6Body' | translate }}</p></div></div>
+          <div><span>07</span><div><h3>{{ 'HelpReview.Step7Title' | translate }}</h3><p>{{ 'HelpReview.Step7Body' | translate }}</p></div></div>
         </div>
-        <div class="review-checklist"><strong>Before you approve</strong><span>☐ Original opened</span><span>☐ Date is in the right year</span><span>☐ Amount and tax agree</span><span>☐ Low-confidence fields checked</span><span>☐ Duplicate income ruled out</span><span>☐ Notes added for anything unusual</span></div>
+        <div class="review-checklist"><strong>{{ 'HelpReview.ChecklistTitle' | translate }}</strong><span>☐ {{ 'HelpReview.ChecklistOriginal' | translate }}</span><span>☐ {{ 'HelpReview.ChecklistYear' | translate }}</span><span>☐ {{ 'HelpReview.ChecklistAmount' | translate }}</span><span>☐ {{ 'HelpReview.ChecklistConfidence' | translate }}</span><span>☐ {{ 'HelpReview.ChecklistDuplicate' | translate }}</span><span>☐ {{ 'HelpReview.ChecklistNotes' | translate }}</span></div>
       </section>
 
       <section id="money" class="guide-section" aria-labelledby="money-title">
-        <div class="section-heading"><div><p class="section-kicker">Records</p><h2 id="money-title">Income, expenses and assets</h2></div><a routerLink="/transactions">Open Income &amp; expenses <tv-icon name="arrowRight" /></a></div>
-        <p class="section-intro">This is the ledger for the selected financial year. Use it to explain the money behind your evidence, then check totals and categories before preparing the accountant pack.</p>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.MoneyKicker' | translate }}</p><h2 id="money-title">{{ 'Help.Money' | translate }}</h2></div><a routerLink="/transactions">{{ 'Help.OpenTransactions' | translate }} <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">{{ 'Help.MoneyIntro' | translate }}</p>
         <div class="money-visual" aria-label="Example Income and expenses workspace">
-          <div class="money-visual-header"><span>Income &amp; expenses · FY 2026 - 27</span><b>+ Add</b></div>
-          <div class="money-metrics"><span><small>Income</small><strong>$42,800</strong></span><span><small>Expenses</small><strong>$8,460</strong></span><span><small>Net records</small><strong>$34,340</strong></span></div>
-          <div class="money-visual-row"><b>ATO category</b><span>Search description</span><span>All · Income · Expenses</span><em>Bulk actions</em></div>
-          <div class="money-visual-row"><strong>Office supplies</strong><span>12 Nov 2026</span><span class="expense-pill">expense</span><span>Not categorised</span></div>
+          <div class="money-visual-header"><span>{{ 'Transactions.Title' | translate }} · FY 2026 - 27</span><b>+ {{ 'Transactions.Add' | translate }}</b></div>
+          <div class="money-metrics"><span><small>{{ 'Transactions.Income' | translate }}</small><strong>$42,800</strong></span><span><small>{{ 'Transactions.Expenses' | translate }}</small><strong>$8,460</strong></span><span><small>{{ 'Transactions.NetRecords' | translate }}</small><strong>$34,340</strong></span></div>
+          <div class="money-visual-row"><b>{{ 'Transactions.TaxReturnItem' | translate }}</b><span>{{ 'Transactions.SearchDescriptions' | translate }}</span><span>{{ 'Transactions.AllTypes' | translate }} · {{ 'Transactions.Income' | translate }} · {{ 'Transactions.Expenses' | translate }}</span><em>{{ 'Transactions.BulkCategorise' | translate }}</em></div>
+          <div class="money-visual-row"><strong>Office supplies</strong><span>12 Nov 2026</span><span class="expense-pill">{{ 'Transactions.Expense' | translate }}</span><span>{{ 'Transactions.NotCategorised' | translate }}</span></div>
         </div>
         <div class="feature-grid three-up">
-          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Add a transaction</h3><p>Choose Add, enter a description, select Income or Expense, set the date and AUD amount, then choose the Tax return item. If a category needs a rental property, select it before saving.</p></article>
-          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Import and check bank rows</h3><p>Use Import bank file for a supported bank export. Check description, date, direction and amount; importing is not the same as categorising or proving the expense.</p></article>
-          <article><span class="feature-icon"><tv-icon name="classification" /></span><h3>Categorise confidently</h3><p>Apply a tax-return item to one row, or select several rows and apply a category in bulk. Verify Suggest from description before applying it.</p></article>
-          <article><span class="feature-icon"><tv-icon name="search" /></span><h3>Find and filter</h3><p>Search descriptions, switch between All, Income and Expenses, and sort by description, date, type, year or amount. Attention rows still need action.</p></article>
-          <article><span class="feature-icon"><tv-icon name="edit" /></span><h3>Edit or remove</h3><p>Use Edit to correct description, direction, date, amount, category or property. Delete only when the row is genuinely wrong.</p></article>
-          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Track recurring income</h3><p>Add a recurring rule with source, gross amount, day and start/end dates. Preview missing income before backfilling, then pause or resume it.</p></article>
-          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>Properties</h3><p>Keep property details, ownership, loan information, rental evidence and relevant periods together.</p></article>
-          <article><span class="feature-icon"><tv-icon name="investment" /></span><h3>Investments</h3><p>Capture holdings, disposals, income and cost-base information so capital gains records have their supporting context.</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>{{ 'HelpMoney.AddTitle' | translate }}</h3><p>{{ 'HelpMoney.AddBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>{{ 'HelpMoney.ImportTitle' | translate }}</h3><p>{{ 'HelpMoney.ImportBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="classification" /></span><h3>{{ 'HelpMoney.CategoriseTitle' | translate }}</h3><p>{{ 'HelpMoney.CategoriseBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="search" /></span><h3>{{ 'HelpMoney.FindTitle' | translate }}</h3><p>{{ 'HelpMoney.FindBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="edit" /></span><h3>{{ 'HelpMoney.EditTitle' | translate }}</h3><p>{{ 'HelpMoney.EditBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>{{ 'HelpMoney.RecurringTitle' | translate }}</h3><p>{{ 'HelpMoney.RecurringBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>{{ 'HelpMoney.PropertiesTitle' | translate }}</h3><p>{{ 'HelpMoney.PropertiesBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="investment" /></span><h3>{{ 'HelpMoney.InvestmentsTitle' | translate }}</h3><p>{{ 'HelpMoney.InvestmentsBody' | translate }}</p></article>
         </div>
-        <div class="how-to"><strong>Recommended order</strong><span>1. Import or add</span><span>2. Check date and direction</span><span>3. Categorise</span><span>4. Resolve attention rows</span><span>5. Recheck totals</span></div>
-        <p class="section-note">Use the Dashboard to see the combined picture. A complete year is not only a folder of receipts; it also explains the money and assets those receipts support.</p>
+        <div class="how-to"><strong>{{ 'HelpMoney.OrderTitle' | translate }}</strong><span>1. {{ 'HelpMoney.Order1' | translate }}</span><span>2. {{ 'HelpMoney.Order2' | translate }}</span><span>3. {{ 'HelpMoney.Order3' | translate }}</span><span>4. {{ 'HelpMoney.Order4' | translate }}</span><span>5. {{ 'HelpMoney.Order5' | translate }}</span></div>
+        <p class="section-note">{{ 'HelpMoney.Note' | translate }}</p>
       </section>
 
       <section id="properties" class="guide-section" aria-labelledby="properties-title">
-        <div class="section-heading"><div><p class="section-kicker">Assets</p><h2 id="properties-title">Properties: what each part is for</h2></div><a routerLink="/assets">Open Properties <tv-icon name="arrowRight" /></a></div>
-        <p class="section-intro">Properties keeps the information your accountant needs to understand rental income, ownership, debt and deductions. Complete the property card first, then connect the year’s transactions to it.</p>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.PropertiesKicker' | translate }}</p><h2 id="properties-title">{{ 'Help.Properties' | translate }}: what each part is for</h2></div><a routerLink="/assets">{{ 'Help.OpenProperties' | translate }} <tv-icon name="arrowRight" /></a></div>
+        <p class="section-intro">{{ 'Help.PropertiesIntro' | translate }}</p>
         <div class="property-visual" aria-label="Example property details screen">
-          <div class="property-visual-header"><span>Properties · 1 property</span><b>Portfolio readiness 0 / 1</b></div>
-          <div class="property-visual-body"><div><strong>U610/42</strong><small>610/42 Wyandra ST, Newstead, QLD, 4006</small></div><span class="property-value">Current value<br><b>Not set</b></span><span class="property-action">Edit</span></div>
-          <div class="property-visual-row"><strong>Property deductions</strong><span>Capital works deduction (Division 43)</span><span>FY 2025 - 26</span><span>Save deduction</span></div>
-          <div class="property-visual-row"><strong>Mortgages</strong><span>No mortgage on this property</span><span>Add mortgage</span></div>
-          <div class="property-visual-row"><strong>Rental summary</strong><span>No rental income or expenses recorded</span><span>Income &amp; expenses →</span></div>
+          <div class="property-visual-header"><span>{{ 'Assets.Title' | translate }} · 1 {{ 'Assets.Property' | translate }}</span><b>{{ 'Assets.PortfolioReadiness' | translate }} 0 / 1</b></div>
+          <div class="property-visual-body"><div><strong>U610/42</strong><small>610/42 Wyandra ST, Newstead, QLD, 4006</small></div><span class="property-value">{{ 'Assets.CurrentValue' | translate }}<br><b>{{ 'Assets.NotSet' | translate }}</b></span><span class="property-action">{{ 'Assets.Edit' | translate }}</span></div>
+          <div class="property-visual-row"><strong>{{ 'Assets.PropertyDeductions' | translate }}</strong><span>{{ 'Assets.CapitalWorks' | translate }}</span><span>FY 2025 - 26</span><span>{{ 'Assets.SaveDeduction' | translate }}</span></div>
+          <div class="property-visual-row"><strong>{{ 'HelpProperties.MortgageTitle' | translate }}</strong><span>{{ 'HelpPropertyVisual.NoMortgage' | translate }}</span><span>{{ 'HelpPropertyVisual.AddMortgage' | translate }}</span></div>
+          <div class="property-visual-row"><strong>{{ 'HelpProperties.RentalTitle' | translate }}</strong><span>{{ 'HelpPropertyVisual.NoRental' | translate }}</span><span>{{ 'Transactions.Title' | translate }} →</span></div>
         </div>
         <div class="feature-grid two-up">
-          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>Add or edit the property</h3><p>Enter the address, reference, ownership and other property details. Use Edit when the address or current information changes. Keep the property linked to the correct financial year when reviewing records.</p></article>
-          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Current value and readiness</h3><p>Current value contributes to the portfolio summary. If it shows Not set, look up a reasonable current value using the linked property.com.au check, then enter the value with Edit. Readiness highlights assets missing important information.</p></article>
-          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>Property deductions</h3><p>Record a deduction for a selected financial year, choose the deduction type such as Capital works deduction (Division 43), enter the amount and add notes. Keep the quantity and supporting schedule consistent with your accountant’s records.</p></article>
-          <article><span class="feature-icon"><tv-icon name="currency" /></span><h3>Mortgages</h3><p>Use Add mortgage to record loan details and balances for the property. The mortgage balance contributes to Total debt; update it when the statement or year-end balance changes.</p></article>
-          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Rental summary</h3><p>The summary is built from transactions tagged with a rental tax item and this property. If it is empty, open Income &amp; expenses, edit the transaction, choose the rental category and select the property.</p></article>
-          <article><span class="feature-icon"><tv-icon name="delete" /></span><h3>Delete carefully</h3><p>Delete a property only when it was created by mistake or is no longer meant to be tracked. Before deleting, check linked rental transactions and records so the accountant understands any remaining evidence.</p></article>
+          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>{{ 'HelpProperties.AddTitle' | translate }}</h3><p>{{ 'HelpProperties.AddBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>{{ 'HelpProperties.ValueTitle' | translate }}</h3><p>{{ 'HelpProperties.ValueBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>{{ 'HelpProperties.DeductionsTitle' | translate }}</h3><p>{{ 'HelpProperties.DeductionsBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="currency" /></span><h3>{{ 'HelpProperties.MortgageTitle' | translate }}</h3><p>{{ 'HelpProperties.MortgageBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>{{ 'HelpProperties.RentalTitle' | translate }}</h3><p>{{ 'HelpProperties.RentalBody' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="delete" /></span><h3>{{ 'HelpProperties.DeleteTitle' | translate }}</h3><p>{{ 'HelpProperties.DeleteBody' | translate }}</p></article>
         </div>
-        <div class="how-to"><strong>Property workflow</strong><span>1. Add property</span><span>2. Set current value</span><span>3. Add mortgage</span><span>4. Record deductions</span><span>5. Tag rental transactions</span><span>6. Check rental summary</span></div>
+        <div class="how-to"><strong>{{ 'HelpProperties.WorkflowTitle' | translate }}</strong><span>1. {{ 'HelpProperties.Workflow1' | translate }}</span><span>2. {{ 'HelpProperties.Workflow2' | translate }}</span><span>3. {{ 'HelpProperties.Workflow3' | translate }}</span><span>4. {{ 'HelpProperties.Workflow4' | translate }}</span><span>5. {{ 'HelpProperties.Workflow5' | translate }}</span><span>6. {{ 'HelpProperties.Workflow6' | translate }}</span></div>
       </section>
 
       <section id="reports" class="guide-section" aria-labelledby="reports-title">
-        <div class="section-heading"><div><p class="section-kicker">Preparation</p><h2 id="reports-title">Reports and accountant pack</h2></div><a routerLink="/tax-return">Open Accountant Pack <tv-icon name="arrowRight" /></a></div>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.ReportsKicker' | translate }}</p><h2 id="reports-title">{{ 'Help.Reports' | translate }}</h2></div><a routerLink="/tax-return">{{ 'Help.OpenReports' | translate }} <tv-icon name="arrowRight" /></a></div>
         <div class="feature-grid two-up">
-          <article><span class="feature-icon"><tv-icon name="news" /></span><h3>Tax News</h3><p>Read relevant tax updates and keep notes that may affect what you ask your accountant about. News is context, not a lodged return or tax advice.</p></article>
-          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>Accountant Pack</h3><p>Review the readiness preview, select the financial year and prepare a clearer summary of records, evidence and open items.</p></article>
+          <article><span class="feature-icon"><tv-icon name="news" /></span><h3>{{ 'TaxNews.Title' | translate }}</h3><p>{{ 'TaxNews.Description' | translate }}</p></article>
+          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>{{ 'TaxReturn.Title' | translate }}</h3><p>{{ 'TaxReturn.Description' | translate }}</p></article>
         </div>
       </section>
 
       <section id="settings" class="guide-section" aria-labelledby="settings-title">
-        <div class="section-heading"><div><p class="section-kicker">Control centre</p><h2 id="settings-title">Settings</h2></div><a routerLink="/settings">Open Settings <tv-icon name="arrowRight" /></a></div>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.SettingsKicker' | translate }}</p><h2 id="settings-title">{{ 'Help.Settings' | translate }}</h2></div><a routerLink="/settings">{{ 'Help.OpenSettings' | translate }} <tv-icon name="arrowRight" /></a></div>
         <div class="settings-grid">
-          <article><h3>General</h3><p>Choose language and the financial year shown when you sign in.</p></article>
-          <article><h3>Document storage</h3><p>See the active storage provider, configure OneDrive and manage connected storage accounts.</p></article>
-          <article><h3>AI features</h3><p>Configure optional tax-news summaries and remove a saved provider key when it is no longer needed.</p></article>
-          <article><h3>Notifications</h3><p>Choose document, transaction and tax-news notifications, deadline reminders and test email delivery.</p></article>
-          <article><h3>Billing</h3><p>Review your plan, open the Stripe customer portal and manage a subscription when billing is enabled.</p></article>
-          <article><h3>Access</h3><p>Open Accountants to invite a professional, choose the right access and manage the sharing relationship.</p></article>
+          <article><h3>{{ 'HelpSettings.GeneralTitle' | translate }}</h3><p>{{ 'HelpSettings.GeneralBody' | translate }}</p></article>
+          <article><h3>{{ 'HelpSettings.StorageTitle' | translate }}</h3><p>{{ 'HelpSettings.StorageBody' | translate }}</p></article>
+          <article><h3>{{ 'HelpSettings.AiTitle' | translate }}</h3><p>{{ 'HelpSettings.AiBody' | translate }}</p></article>
+          <article><h3>{{ 'HelpSettings.NotificationsTitle' | translate }}</h3><p>{{ 'HelpSettings.NotificationsBody' | translate }}</p></article>
+          <article><h3>{{ 'HelpSettings.BillingTitle' | translate }}</h3><p>{{ 'HelpSettings.BillingBody' | translate }}</p></article>
+          <article><h3>{{ 'HelpSettings.AccessTitle' | translate }}</h3><p>{{ 'HelpSettings.AccessBody' | translate }}</p></article>
         </div>
       </section>
 
       <section id="send" class="guide-section final-section" aria-labelledby="send-title">
-        <div class="section-heading"><div><p class="section-kicker">Handoff</p><h2 id="send-title">When the year is ready, send it clearly</h2></div><a routerLink="/accountants">Manage Accountants <tv-icon name="arrowRight" /></a></div>
+        <div class="section-heading"><div><p class="section-kicker">{{ 'Help.SendKicker' | translate }}</p><h2 id="send-title">{{ 'HelpSend.Title' | translate }}</h2></div><a routerLink="/accountants">{{ 'Help.ManageAccountants' | translate }} <tv-icon name="arrowRight" /></a></div>
         <ol class="handoff-list">
-          <li><strong>Resolve the blockers</strong><span>Use Dashboard readiness and Reviews to finish missing or uncertain items for the selected year.</span></li>
-          <li><strong>Prepare the pack</strong><span>Open Accountant Pack, check the included records and confirm that the summary matches the evidence.</span></li>
-          <li><strong>Invite or select your accountant</strong><span>In Accountants, invite the professional or manage an existing connection. Share only the access needed for the work.</span></li>
-          <li><strong>Send a short note</strong><span>Tell your accountant which year is ready, what is unusual, and which questions still need their judgement.</span></li>
-          <li><strong>Keep the source connected</strong><span>Do not delete originals after sending. TaxVault is designed to keep evidence, corrections and the handoff traceable.</span></li>
+          <li><strong>{{ 'HelpSend.ResolveTitle' | translate }}</strong><span>{{ 'HelpSend.ResolveBody' | translate }}</span></li>
+          <li><strong>{{ 'HelpSend.PackTitle' | translate }}</strong><span>{{ 'HelpSend.PackBody' | translate }}</span></li>
+          <li><strong>{{ 'HelpSend.InviteTitle' | translate }}</strong><span>{{ 'HelpSend.InviteBody' | translate }}</span></li>
+          <li><strong>{{ 'HelpSend.NoteTitle' | translate }}</strong><span>{{ 'HelpSend.NoteBody' | translate }}</span></li>
+          <li><strong>{{ 'HelpSend.SourceTitle' | translate }}</strong><span>{{ 'HelpSend.SourceBody' | translate }}</span></li>
         </ol>
-        <div class="callout final-callout"><tv-icon name="check" /><p><strong>Finished?</strong> Open the Dashboard once more, confirm the correct financial year is selected, and keep the original files in TaxVault after sharing.</p></div>
+        <div class="callout final-callout"><tv-icon name="check" /><p><strong>{{ 'HelpSend.FinishedTitle' | translate }}</strong> {{ 'HelpSend.FinishedBody' | translate }}</p></div>
       </section>
     </main>
   </div>
