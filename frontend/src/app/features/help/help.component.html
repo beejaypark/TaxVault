@@ -1,0 +1,116 @@
+<div class="help-page tv-workspace-page">
+  <header class="help-hero">
+    <div>
+      <p class="eyebrow">TaxVault guide</p>
+      <h1>Make your financial year ready</h1>
+      <p class="hero-copy">Use this guide to collect evidence, review what was extracted, keep your records connected, and send a clear pack to your accountant.</p>
+    </div>
+    <a class="hero-action" routerLink="/financial-years">Start with a financial year <tv-icon name="arrowRight" /></a>
+  </header>
+
+  <div class="help-layout">
+    <aside class="help-nav" aria-label="Help sections">
+      <p class="help-nav-title">In this guide</p>
+      <a href="#workflow">The TaxVault flow</a>
+      <a href="#financial-years">Financial years</a>
+      <a href="#documents">Documents</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#money">Income, expenses and assets</a>
+      <a href="#reports">Reports and accountant pack</a>
+      <a href="#settings">Settings</a>
+      <a href="#send">Send to your accountant</a>
+    </aside>
+
+    <main class="help-content">
+      <section id="workflow" class="guide-section workflow-section" aria-labelledby="workflow-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Start here</p>
+            <h2 id="workflow-title">One connected path from receipt to review</h2>
+          </div>
+          <p>Choose the financial year first. Every document, transaction, correction and report should point back to the same year.</p>
+        </div>
+
+        <div class="workflow" aria-label="TaxVault workflow">
+          <div class="flow-step"><span class="flow-number">1</span><tv-icon name="financialYear" /><strong>Set up the year</strong><small>Dates, label and starting point</small></div>
+          <div class="flow-step"><span class="flow-number">2</span><tv-icon name="document" /><strong>Bring in evidence</strong><small>Upload, OneDrive or email</small></div>
+          <div class="flow-step"><span class="flow-number">3</span><tv-icon name="review" /><strong>Review extraction</strong><small>Check dates, suppliers and totals</small></div>
+          <div class="flow-step"><span class="flow-number">4</span><tv-icon name="transactions" /><strong>Record the money</strong><small>Income, expenses and categories</small></div>
+          <div class="flow-step"><span class="flow-number">5</span><tv-icon name="property" /><strong>Complete assets</strong><small>Property and investment details</small></div>
+          <div class="flow-step"><span class="flow-number">6</span><tv-icon name="send" /><strong>Prepare and share</strong><small>Accountant pack and access</small></div>
+        </div>
+
+        <div class="callout"><tv-icon name="check" /><p><strong>A good stopping point:</strong> every important figure has source evidence, reviewed fields are corrected, and the Dashboard no longer shows blocking preparation issues.</p></div>
+      </section>
+
+      <section id="financial-years" class="guide-section" aria-labelledby="financial-years-title">
+        <div class="section-heading"><div><p class="section-kicker">Foundation</p><h2 id="financial-years-title">Financial years</h2></div><a routerLink="/financial-years">Open Financial years <tv-icon name="arrowRight" /></a></div>
+        <div class="feature-grid">
+          <article><span class="feature-icon"><tv-icon name="financialYear" /></span><h3>Create the year</h3><p>Open Financial years, add the Australian financial year label and confirm the 1 July to 30 June dates. Use one year for one reporting period.</p></article>
+          <article><span class="feature-icon"><tv-icon name="check" /></span><h3>Use the header picker</h3><p>The financial year selector in the header is the shared context for the workspace. Change it before reviewing documents, transactions or reports.</p></article>
+          <article><span class="feature-icon"><tv-icon name="chart" /></span><h3>Watch readiness</h3><p>Dashboard readiness signals missing evidence, incomplete records and next actions for the selected year.</p></article>
+        </div>
+      </section>
+
+      <section id="documents" class="guide-section" aria-labelledby="documents-title">
+        <div class="section-heading"><div><p class="section-kicker">Evidence</p><h2 id="documents-title">Documents</h2></div><a routerLink="/documents">Open Documents <tv-icon name="arrowRight" /></a></div>
+        <div class="feature-grid two-up">
+          <article><span class="feature-icon"><tv-icon name="upload" /></span><h3>Upload from your device</h3><p>Choose files, a folder or a photo. Select the financial year and document type first so each file starts with the right context.</p></article>
+          <article><span class="feature-icon"><tv-icon name="folder" /></span><h3>Import from OneDrive</h3><p>Connect OneDrive in Settings, then browse folders from the upload screen. Import one file or a folder without losing the original location.</p></article>
+          <article><span class="feature-icon"><tv-icon name="receipt" /></span><h3>Keep the original</h3><p>TaxVault stores the original document with its evidence metadata. Do not replace a source file with a cropped image when the full document is available.</p></article>
+          <article><span class="feature-icon"><tv-icon name="file" /></span><h3>Find it later</h3><p>Documents can be filtered by year, type and review state. Use Search when you remember a filename, supplier or document detail.</p></article>
+        </div>
+      </section>
+
+      <section id="reviews" class="guide-section" aria-labelledby="reviews-title">
+        <div class="section-heading"><div><p class="section-kicker">Accuracy</p><h2 id="reviews-title">Reviews and extraction</h2></div><a routerLink="/reviews">Open Reviews <tv-icon name="arrowRight" /></a></div>
+        <div class="instruction-list">
+          <div><span>01</span><div><h3>Open the review queue</h3><p>Start with items that need attention. The review page keeps the original document beside the extracted fields.</p></div></div>
+          <div><span>02</span><div><h3>Compare, then correct</h3><p>Check supplier, issue date, total, tax and category against the original. Save corrections rather than relying on memory.</p></div></div>
+          <div><span>03</span><div><h3>Keep a traceable decision</h3><p>Reviewed values remain connected to the source document and the history of corrections, which makes the accountant handoff easier to explain.</p></div></div>
+        </div>
+      </section>
+
+      <section id="money" class="guide-section" aria-labelledby="money-title">
+        <div class="section-heading"><div><p class="section-kicker">Records</p><h2 id="money-title">Income, expenses and assets</h2></div><a routerLink="/transactions">Open Income &amp; expenses <tv-icon name="arrowRight" /></a></div>
+        <div class="feature-grid three-up">
+          <article><span class="feature-icon"><tv-icon name="transactions" /></span><h3>Transactions</h3><p>Record income and expenses, import bank rows when connected, and categorise the items that support the year.</p></article>
+          <article><span class="feature-icon"><tv-icon name="property" /></span><h3>Properties</h3><p>Keep property details, ownership, loan information, rental evidence and relevant periods together.</p></article>
+          <article><span class="feature-icon"><tv-icon name="investment" /></span><h3>Investments</h3><p>Capture holdings, disposals, income and cost-base information so capital gains records have their supporting context.</p></article>
+        </div>
+        <p class="section-note">Use the Dashboard to see the combined picture. A complete year is not only a folder of receipts; it also explains the money and assets those receipts support.</p>
+      </section>
+
+      <section id="reports" class="guide-section" aria-labelledby="reports-title">
+        <div class="section-heading"><div><p class="section-kicker">Preparation</p><h2 id="reports-title">Reports and accountant pack</h2></div><a routerLink="/tax-return">Open Accountant Pack <tv-icon name="arrowRight" /></a></div>
+        <div class="feature-grid two-up">
+          <article><span class="feature-icon"><tv-icon name="news" /></span><h3>Tax News</h3><p>Read relevant tax updates and keep notes that may affect what you ask your accountant about. News is context, not a lodged return or tax advice.</p></article>
+          <article><span class="feature-icon"><tv-icon name="taxReturn" /></span><h3>Accountant Pack</h3><p>Review the readiness preview, select the financial year and prepare a clearer summary of records, evidence and open items.</p></article>
+        </div>
+      </section>
+
+      <section id="settings" class="guide-section" aria-labelledby="settings-title">
+        <div class="section-heading"><div><p class="section-kicker">Control centre</p><h2 id="settings-title">Settings</h2></div><a routerLink="/settings">Open Settings <tv-icon name="arrowRight" /></a></div>
+        <div class="settings-grid">
+          <article><h3>General</h3><p>Choose language and the financial year shown when you sign in.</p></article>
+          <article><h3>Document storage</h3><p>See the active storage provider, configure OneDrive and manage connected storage accounts.</p></article>
+          <article><h3>AI features</h3><p>Configure optional tax-news summaries and remove a saved provider key when it is no longer needed.</p></article>
+          <article><h3>Notifications</h3><p>Choose document, transaction and tax-news notifications, deadline reminders and test email delivery.</p></article>
+          <article><h3>Billing</h3><p>Review your plan, open the Stripe customer portal and manage a subscription when billing is enabled.</p></article>
+          <article><h3>Access</h3><p>Open Accountants to invite a professional, choose the right access and manage the sharing relationship.</p></article>
+        </div>
+      </section>
+
+      <section id="send" class="guide-section final-section" aria-labelledby="send-title">
+        <div class="section-heading"><div><p class="section-kicker">Handoff</p><h2 id="send-title">When the year is ready, send it clearly</h2></div><a routerLink="/accountants">Manage Accountants <tv-icon name="arrowRight" /></a></div>
+        <ol class="handoff-list">
+          <li><strong>Resolve the blockers</strong><span>Use Dashboard readiness and Reviews to finish missing or uncertain items for the selected year.</span></li>
+          <li><strong>Prepare the pack</strong><span>Open Accountant Pack, check the included records and confirm that the summary matches the evidence.</span></li>
+          <li><strong>Invite or select your accountant</strong><span>In Accountants, invite the professional or manage an existing connection. Share only the access needed for the work.</span></li>
+          <li><strong>Send a short note</strong><span>Tell your accountant which year is ready, what is unusual, and which questions still need their judgement.</span></li>
+          <li><strong>Keep the source connected</strong><span>Do not delete originals after sending. TaxVault is designed to keep evidence, corrections and the handoff traceable.</span></li>
+        </ol>
+      </section>
+    </main>
+  </div>
+</div>

@@ -15,6 +15,7 @@ import { FinancialYearsComponent } from './features/financial-years/financial-ye
 import { SettingsComponent } from './features/settings/settings.component';
 import { TaxNewsComponent } from './features/tax-news/tax-news.component';
 import { LandingComponent } from './features/landing/landing.component';
+import { HelpComponent } from './features/help/help.component';
 
 export const routes: Routes = [
   {
@@ -61,6 +62,7 @@ export const routes: Routes = [
       { path: 'tax-news', component: TaxNewsComponent },
       { path: 'accountants', component: AccountantsComponent, canActivate: [ownerGuard] },
       { path: 'settings', component: SettingsComponent },
+      { path: 'help', component: HelpComponent },
       { path: 'admin', component: AdminComponent, canActivate: [platformAdminGuard] },
     ],
   },

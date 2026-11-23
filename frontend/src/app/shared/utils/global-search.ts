@@ -20,6 +20,7 @@ export const SEARCH_PAGES: SearchResult[] = [
   { kind: 'Page', title: 'Accountant pack', subtitle: 'Tax return items and exports', link: '/tax-return' },
   { kind: 'Page', title: 'Accountants', subtitle: 'Invite and manage accountants', link: '/accountants' },
   { kind: 'Page', title: 'Settings', subtitle: 'Preferences and notifications', link: '/settings' },
+  { kind: 'Page', title: 'Help', subtitle: 'TaxVault guide and accountant handoff', link: '/help' },
 ];
 
 export function searchResults(query: string, candidates: SearchResult[], limit = 30): SearchResult[] {

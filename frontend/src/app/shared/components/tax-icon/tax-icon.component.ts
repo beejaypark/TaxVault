@@ -8,6 +8,7 @@ import {
   faChartLine,
   faCircleCheck,
   faCircleExclamation,
+  faCircleQuestion,
   faClipboardCheck,
   faCloudArrowUp,
   faDollarSign,
@@ -66,7 +67,8 @@ export type TaxIconName =
   | 'search'
   | 'bell'
   | 'news'
-  | 'settings';
+  | 'settings'
+  | 'help';
 
 const ICONS: Record<TaxIconName, IconDefinition> = {
   arrowLeft: faArrowLeft,
@@ -100,6 +102,7 @@ const ICONS: Record<TaxIconName, IconDefinition> = {
   bell: faBell,
   news: faNewspaper,
   settings: faGear,
+  help: faCircleQuestion,
 };
 
 @Component({

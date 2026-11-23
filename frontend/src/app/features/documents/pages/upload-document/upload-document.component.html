@@ -56,61 +56,71 @@
       </p>
     }
 
-    @if (oneDriveConnections.length > 0) {
-      <div class="external-import">
-        <div class="external-import-header">
-          <div>
-            <span class="source-eyebrow">Connected storage</span>
-            <h2>OneDrive</h2>
-            <p>Choose a document from your connected OneDrive account</p>
-          </div>
-          <button type="button" class="browse-button browse-button-secondary" (click)="browseOneDrive()" [disabled]="oneDriveLoading || isUploading">
-            {{ oneDriveLoading ? 'Loading…' : oneDriveOpen ? 'Refresh files' : 'Browse OneDrive' }}
-          </button>
-        </div>
-        @if (oneDriveOpen) {
-          <div class="external-browser">
-            <nav class="external-breadcrumbs" aria-label="OneDrive location">
-              @for (crumb of oneDrivePath; track crumb.id; let last = $last) {
-                @if (last) {
-                  <span aria-current="page">{{ crumb.name }}</span>
-                } @else {
-                  <button type="button" (click)="openOneDrivePath(crumb.id, $index)">{{ crumb.name }}</button>
-                  <span aria-hidden="true">/</span>
-                }
-              }
-            </nav>
-            <div class="external-items" aria-label="OneDrive files">
-              @if (oneDriveItems.length === 0 && !oneDriveLoading) { <p class="file-hint">This folder is empty.</p> }
-              @for (item of oneDriveItems; track item.id) {
-                <div class="external-item" [class.external-folder]="item.folder">
-                  @if (item.folder) {
-                    <button type="button" class="external-item-main" (click)="openOneDriveFolder(item)" [disabled]="oneDriveFolderImportingId !== null">
-                      <span class="external-item-icon"><tv-icon name="folder" /> Folder</span>
-                      <span class="external-item-name">{{ item.name }}</span>
-                    </button>
-                    <div class="external-folder-actions">
-                      <span class="file-hint">Open folder</span>
-                      <button type="button" class="link-button" (click)="importOneDriveFolder(item)" [disabled]="oneDriveFolderImportingId !== null || !selectedDocumentTypeId">
-                        {{ oneDriveFolderImportingId === item.id ? oneDriveFolderImportLabel : 'Import folder' }}
-                      </button>
-                    </div>
-                  } @else {
-                    <span class="external-item-main">
-                      <span class="external-item-icon file-icon"><tv-icon name="file" /> File</span>
-                      <span class="external-item-name" [title]="item.name">{{ item.name }}</span>
-                    </span>
-                    <button type="button" class="link-button" (click)="importOneDriveItem(item)" [disabled]="oneDriveImportingItemId !== null || !selectedDocumentTypeId">
-                      {{ oneDriveImportingItemId === item.id ? 'Importing…' : 'Import' }}
-                    </button>
-                  }
-                </div>
-              }
+    <div class="source-cards">
+      @if (oneDriveConnections.length > 0) {
+        <section class="source-card external-import">
+          <div class="external-import-header">
+            <div>
+              <span class="source-eyebrow">Connected storage</span>
+              <h2>OneDrive</h2>
+              <p>Choose a document from your connected OneDrive account</p>
             </div>
+            <button type="button" class="browse-button browse-button-secondary" (click)="browseOneDrive()" [disabled]="oneDriveLoading || isUploading">
+              {{ oneDriveLoading ? 'Loading…' : oneDriveOpen ? 'Refresh files' : 'Browse OneDrive' }}
+            </button>
           </div>
-        }
-      </div>
-    }
+          @if (oneDriveOpen) {
+            <div class="external-browser">
+              <nav class="external-breadcrumbs" aria-label="OneDrive location">
+                @for (crumb of oneDrivePath; track crumb.id; let last = $last) {
+                  @if (last) {
+                    <span aria-current="page">{{ crumb.name }}</span>
+                  } @else {
+                    <button type="button" (click)="openOneDrivePath(crumb.id, $index)">{{ crumb.name }}</button>
+                    <span aria-hidden="true">/</span>
+                  }
+                }
+              </nav>
+              <div class="external-items" aria-label="OneDrive files">
+                @if (oneDriveItems.length === 0 && !oneDriveLoading) { <p class="file-hint">This folder is empty.</p> }
+                @for (item of oneDriveItems; track item.id) {
+                  <div class="external-item" [class.external-folder]="item.folder">
+                    @if (item.folder) {
+                      <button type="button" class="external-item-main" (click)="openOneDriveFolder(item)" [disabled]="oneDriveFolderImportingId !== null">
+                        <span class="external-item-icon"><tv-icon name="folder" /> Folder</span>
+                        <span class="external-item-name">{{ item.name }}</span>
+                      </button>
+                      <div class="external-folder-actions">
+                        <span class="file-hint">Open folder</span>
+                        <button type="button" class="link-button" (click)="importOneDriveFolder(item)" [disabled]="oneDriveFolderImportingId !== null || !selectedDocumentTypeId">
+                          {{ oneDriveFolderImportingId === item.id ? oneDriveFolderImportLabel : 'Import folder' }}
+                        </button>
+                      </div>
+                    } @else {
+                      <span class="external-item-main">
+                        <span class="external-item-icon file-icon"><tv-icon name="file" /> File</span>
+                        <span class="external-item-name" [title]="item.name">{{ item.name }}</span>
+                      </span>
+                      <button type="button" class="link-button" (click)="importOneDriveItem(item)" [disabled]="oneDriveImportingItemId !== null || !selectedDocumentTypeId">
+                        {{ oneDriveImportingItemId === item.id ? 'Importing…' : 'Import' }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      <section class="source-card local-upload-card">
+        <div class="source-card-header">
+          <div>
+            <span class="source-eyebrow">This device</span>
+            <h2>Upload from your device</h2>
+            <p>Choose files, a folder, or take a photo</p>
+          </div>
+        </div>
 
     @if (isLoadingOptions) {
       <p class="file-hint" role="status">{{ 'Upload.LoadingOptions' | translate }}</p>
@@ -300,6 +310,8 @@
         </button>
       </div>
     }
+      </section>
+    </div>
 
     @if (errorMessage) {
       <div class="error-message" role="alert">
