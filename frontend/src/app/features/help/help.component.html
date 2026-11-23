@@ -11,14 +11,14 @@
   <div class="help-layout">
     <aside class="help-nav" aria-label="Help sections">
       <p class="help-nav-title">In this guide</p>
-      <a href="#workflow">The TaxVault flow</a>
-      <a href="#financial-years">Financial years</a>
-      <a href="#documents">Documents</a>
-      <a href="#reviews">Reviews</a>
-      <a href="#money">Income, expenses and assets</a>
-      <a href="#reports">Reports and accountant pack</a>
-      <a href="#settings">Settings</a>
-      <a href="#send">Send to your accountant</a>
+      <a href="#workflow" (click)="scrollTo('workflow', $event)">The TaxVault flow</a>
+      <a href="#financial-years" (click)="scrollTo('financial-years', $event)">Financial years</a>
+      <a href="#documents" (click)="scrollTo('documents', $event)">Documents</a>
+      <a href="#reviews" (click)="scrollTo('reviews', $event)">Reviews</a>
+      <a href="#money" (click)="scrollTo('money', $event)">Income, expenses and assets</a>
+      <a href="#reports" (click)="scrollTo('reports', $event)">Reports and accountant pack</a>
+      <a href="#settings" (click)="scrollTo('settings', $event)">Settings</a>
+      <a href="#send" (click)="scrollTo('send', $event)">Send to your accountant</a>
     </aside>
 
     <main class="help-content">

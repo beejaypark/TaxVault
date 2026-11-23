@@ -10,4 +10,9 @@ import { TaxIconComponent } from '../../shared/components/tax-icon/tax-icon.comp
   styleUrl: './help.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HelpComponent {}
+export class HelpComponent {
+  scrollTo(sectionId: string, event: Event): void {
+    event.preventDefault();
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
