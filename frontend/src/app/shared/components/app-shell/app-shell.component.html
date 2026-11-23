@@ -65,7 +65,9 @@
   </header>
 
   <aside class="sidebar no-print" [class.open]="menuOpen">
-    <tv-brand-logo class="brand" [size]="32" />
+    <a routerLink="/dashboard" class="brand-link" aria-label="TaxVault dashboard">
+      <tv-brand-logo class="brand" [size]="32" />
+    </a>
 
     <nav class="navigation" [attr.aria-label]="'Common.MainNavigation' | translate" (click)="closeMenu()">
       <div class="nav-section-label">{{ 'Overview.Title' | translate }}</div>
