@@ -13,6 +13,11 @@ Schedule::command('notifications:send-emails')
     ->timezone(config('notifications.timezone'))
     ->withoutOverlapping();
 
+Schedule::command('billing:send-trial-notifications')
+    ->dailyAt('08:00')
+    ->timezone(config('notifications.timezone'))
+    ->withoutOverlapping();
+
 Schedule::command('tax-news:sync')
     ->dailyAt('07:30')
     ->timezone(config('notifications.timezone'))

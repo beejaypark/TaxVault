@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'acting' => ActAsGrantedOwner::class,
             'session.active' => RequireActiveSession::class,
             'require.platform.admin' => RequirePlatformAdmin::class,
+            'billing.upload' => \App\Http\Middleware\RequireDocumentUploadAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

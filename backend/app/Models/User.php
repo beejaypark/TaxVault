@@ -35,6 +35,7 @@ class User extends Authenticatable
         'stripe_customer_id',
         'stripe_subscription_id',
         'stripe_subscription_status',
+        'billing_plan',
         'trial_ends_at',
         'subscription_ends_at',
         'billing_exempt',

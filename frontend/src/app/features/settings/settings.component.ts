@@ -35,6 +35,8 @@ interface BillingStatusDto {
   trial_ends_at: string | null;
   subscription_ends_at: string | null;
   active: boolean;
+  upload_access?: boolean;
+  plan: 'monthly' | 'yearly' | null;
   price: { amount: number | null; currency: string; interval: string | null; interval_count: number } | null;
 }
 
@@ -228,7 +230,12 @@ interface BillingStatusDto {
                 <small>Free trial ends {{ billingStatus?.trial_ends_at | date:'mediumDate' }}</small>
               }
             </div>
-            @if (billingStatus?.active) {
+            @if (billingStatus?.status === 'trialing' && billingStatus?.active) {
+              <div class="billing-actions trial-plan-summary">
+                <strong>{{ billingStatus?.plan === 'yearly' ? 'Annual plan · $79.90 AUD/year' : 'Monthly plan · $7.99 AUD/month' }}</strong>
+                <small>No payment is taken during your 30-day free trial. Choose Subscribe now after it ends to begin billing.</small>
+              </div>
+            } @else if (billingStatus?.active) {
               <div class="billing-actions">
                 @if (!billingCancellationRequested) {
                   <button type="button" class="link-button danger-link" (click)="cancelSubscription()" [disabled]="billingLoading">{{ billingLoading ? 'Updating…' : 'Cancel subscription' }}</button>
@@ -237,8 +244,13 @@ interface BillingStatusDto {
               </div>
             } @else {
               <div class="billing-actions">
-                <button type="button" class="link-button" (click)="startCheckout(true)" [disabled]="billingLoading">Start 30-day free trial</button>
-                <button type="button" class="link-button secondary-button" (click)="startCheckout(false)" [disabled]="billingLoading">Subscribe now</button>
+                @if (!billingStatus?.trial_ends_at) {
+                  <label class="plan-select"><span>Choose your plan</span><select name="billingPlan" [(ngModel)]="selectedBillingPlan"><option value="monthly">Monthly · $7.99 AUD/month</option><option value="yearly">Yearly · $79.90 AUD/year</option></select></label>
+                  <button type="button" class="link-button" (click)="startCheckout(true, selectedBillingPlan)" [disabled]="billingLoading">Start 30-day free trial</button>
+                } @else {
+                  <strong>{{ billingStatus?.plan === 'yearly' ? 'Annual plan · $79.90 AUD/year' : 'Monthly plan · $7.99 AUD/month' }}</strong>
+                  <button type="button" class="link-button" (click)="startCheckout(false, billingStatus?.plan || 'monthly')" [disabled]="billingLoading">Subscribe now</button>
+                }
               </div>
             }
           </div>
@@ -337,6 +349,11 @@ interface BillingStatusDto {
     .subscription-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: 10px; background: var(--tv-color-background); }
     .subscription-summary > div { display: grid; gap: 3px; }
     .billing-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .plan-select { display: grid; gap: 4px; color: var(--tv-color-text-secondary); font-size: 12px; }
+    .plan-select select { min-height: 40px; }
+    .trial-plan-summary { align-items: flex-end; }
+    .trial-plan-summary strong { font-size: 14px; }
+    .trial-plan-summary small { max-width: 360px; }
     .secondary-button { background: transparent; }
     .pricing-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 12px 0; padding: 16px; border: 1px solid var(--tv-color-border); border-radius: 10px; background: var(--tv-color-background); }
     .pricing-card > div { display: grid; gap: 3px; }
@@ -380,6 +397,7 @@ export class SettingsComponent {
   billingMessage = '';
   billingCheckoutStarted = false;
   billingCancellationRequested = false;
+  selectedBillingPlan: 'monthly' | 'yearly' = 'monthly';
   readonly aiModels = [
     { value: 'gpt-4o-mini', label: 'GPT-4o mini' },
     { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini' },
@@ -408,6 +426,7 @@ export class SettingsComponent {
     this.http.get<{ data: BillingStatusDto }>('/api/billing/status').subscribe({
       next: (response) => {
         this.billingStatus = response.data;
+        if (response.data.plan === 'monthly' || response.data.plan === 'yearly') this.selectedBillingPlan = response.data.plan;
         const plan = this.route.snapshot.queryParamMap.get('plan');
         const checkoutRequested = this.route.snapshot.queryParamMap.get('billing') === 'checkout'
           && (plan === 'monthly' || plan === 'trial' || plan === 'yearly');

@@ -110,7 +110,7 @@ services:
     working_dir: /var/www/html
     environment:
       APP_NAME: ${APP_NAME:-TaxVault}
-      APP_ENV: ${APP_ENV:-production}
+      APP_ENV: ${APP_ENV:-local}
       APP_DEBUG: ${APP_DEBUG:-false}
       APP_URL: ${APP_URL:-https://localhost:8443}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}

@@ -195,9 +195,10 @@ import { Meta, Title } from '@angular/platform-browser';
     article h3 { margin:28px 0 10px; color:#234466; font-size:17px; }
     article p { margin:0; color:#6d8197; font-size:13px; line-height:1.6; }
     .workspace-section { max-width:1180px; margin:auto; padding:0 32px 100px; }
-    .workspace-heading { max-width:620px; }
+    .workspace-heading { display:grid; gap:14px; max-width:620px; }
+    .workspace-heading .eyebrow { margin:0; }
     .workspace-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
-    .workspace-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
+    .workspace-heading p:not(.eyebrow) { margin:0; color:#6d8197; font-size:15px; line-height:1.7; }
     .workspace-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; }
     .workspace-grid article { min-height:150px; }
     .workspace-tag { color:#1f7ac4; font-size:11px; font-weight:700; letter-spacing:.08em; }
@@ -224,16 +225,17 @@ import { Meta, Title } from '@angular/platform-browser';
     .backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:24px; background:rgb(15 35 58 / 42%); overflow-y:auto; }
     .modal { position:relative; width:min(100%,520px); max-height:calc(100vh - 48px); overflow-y:auto; border-radius:18px; background:#f5f7fb; box-shadow:0 24px 80px rgb(15 35 58 / 28%); }
     .close { position:absolute; z-index:2; top:12px; right:14px; width:32px; height:32px; border:0; border-radius:50%; color:#52677f; background:transparent; font-size:24px; cursor:pointer; }
-    .pricing-section { padding-top:72px; }
+    .pricing-section { padding-top:64px; padding-bottom:72px; }
     @media (max-width:850px) { .site-nav { gap:20px; } .nav-links { gap:18px; } .hero { grid-template-columns:1fr; gap:48px; padding-top:48px; } .fit-grid,.workspace-grid { grid-template-columns:1fr; } .trust-strip,.contact-section { align-items:start; flex-direction:column; } .contact-section { display:flex; } .faq-section { grid-template-columns:1fr; } }
     @media (max-width:620px) { .site-nav { flex-wrap:wrap; padding:14px 20px; } .nav-links { order:3; width:100%; justify-content:space-between; } .hero,.benefits,.pricing-section,.fit-section,.flow-section,.workspace-section,.trust-strip,.faq-section,.contact-section,footer { padding-left:20px; padding-right:20px; } .benefit-grid,.pricing-grid { grid-template-columns:1fr; } footer { align-items:start; flex-direction:column; gap:16px; } .footer-links { grid-template-columns:repeat(2,1fr); } .footer-bottom { align-items:flex-start; flex-direction:column; gap:8px; } }
-    .pricing-heading { max-width:620px; }
+    .pricing-heading { display:grid; gap:14px; max-width:620px; }
+    .pricing-heading .eyebrow { margin:0; }
     .pricing-heading h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
-    .pricing-heading p:not(.eyebrow) { color:#6d8197; font-size:15px; line-height:1.7; }
-    .pricing-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; margin-top:32px; }
-    .pricing-card { display:flex; flex-direction:column; min-height:300px; padding:28px; border:1px solid #dce5ee; border-radius:14px; background:#fff; transition:transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
-    .pricing-card:hover { transform:translateY(-5px); box-shadow:0 14px 34px rgb(31 63 101 / 10%); }
-    .pricing-card.selected { border-color:#2b8f88; outline:3px solid rgb(43 143 136 / 22%); outline-offset:4px; transform:translateY(-9px); box-shadow:0 20px 42px rgb(31 63 101 / 16%); }
+    .pricing-heading p:not(.eyebrow) { margin:0; color:#6d8197; font-size:15px; line-height:1.7; }
+    .pricing-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); align-items:stretch; gap:16px; margin-top:32px; }
+    .pricing-card { box-sizing:border-box; display:flex; flex-direction:column; min-height:380px; padding:32px; border:1px solid #dce5ee; border-radius:14px; background:#fff; transition:box-shadow 180ms ease, border-color 180ms ease; }
+    .pricing-card:hover { box-shadow:0 14px 34px rgb(31 63 101 / 10%); }
+    .pricing-card.selected { border-color:#2b8f88; outline:3px solid rgb(43 143 136 / 22%); outline-offset:4px; box-shadow:0 20px 42px rgb(31 63 101 / 16%); }
     .pricing-card.featured { border-width:1px; }
     .pricing-label { color:#1f7ac4; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
     .pricing-card h3 { margin:16px 0 10px; color:#234466; font-size:21px; }
@@ -332,7 +334,7 @@ import { Meta, Title } from '@angular/platform-browser';
     .faq-list summary:hover { color:#065b54; }
     .faq-list p { margin:0; padding:0 4px 16px; color:#526983; font-size:14px; line-height:1.6; }
     .faq-section :focus-visible { outline:2px solid #087369; outline-offset:3px; }
-    .benefits { padding-top:72px; }
+    .benefits { padding-top:0; }
     @media (max-width:850px) {
       .hero-scene {
         background-image: linear-gradient(90deg, #071727f2, #07172780),
@@ -345,6 +347,10 @@ import { Meta, Title } from '@angular/platform-browser';
     @media (max-width:480px) {
       .preview { padding:14px; }
       .review-example { grid-template-columns:minmax(0, 1fr); }
+    }
+    @media (max-width:620px) {
+      .pricing-card { min-height:340px; padding:26px; }
+      .pricing-section { padding-top:48px; padding-bottom:56px; }
     }
     @media (max-width:620px) {
       .section-intro { grid-template-columns:minmax(0, 1fr); gap:20px; }
@@ -480,7 +486,9 @@ export class LandingComponent {
       error: (error: HttpErrorResponse) => {
         this.contactError.set(error.status === 429
           ? 'Too many messages were submitted. Please wait a few minutes and try again.'
-          : 'We couldn’t send your enquiry. Please try again or use Ask TaxVault for product questions.');
+          : error.status === 503
+            ? 'Contact email is not configured or temporarily unavailable. Please use Ask TaxVault for product questions.'
+            : 'We couldn’t send your enquiry. Please try again or use Ask TaxVault for product questions.');
       },
     });
   }

@@ -167,10 +167,10 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
         ->middleware('audit:storage_connection.disconnect,storage_connection');
     Route::get('/document-storage/onedrive/redirect', [OneDriveController::class, 'redirect']);
     Route::get('/document-storage/connections/{id}/items', [OneDriveController::class, 'items']);
-    Route::post('/document-storage/connections/{id}/import', [OneDriveController::class, 'import']);
+    Route::post('/document-storage/connections/{id}/import', [OneDriveController::class, 'import'])->middleware('billing.upload');
 
     Route::get('/documents', [DocumentController::class, 'index']);
-    Route::post('/documents', [DocumentController::class, 'store']);
+    Route::post('/documents', [DocumentController::class, 'store'])->middleware('billing.upload');
     Route::get('/documents/{id}', [DocumentController::class, 'show']);
     Route::patch('/documents/{id}/description', [DocumentController::class, 'updateDescription']);
     Route::post('/documents/{id}/payment', [DocumentController::class, 'confirmPayment'])->middleware('audit:document.payment_confirmed,document');

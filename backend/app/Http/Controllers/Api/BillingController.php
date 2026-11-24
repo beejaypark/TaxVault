@@ -19,6 +19,7 @@ class BillingController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $this->scheduleTrialEndWithoutCharge($user);
         $price = null;
         if (config('services.stripe.secret') && config('services.stripe.price_id')) {
             try {
@@ -38,9 +39,10 @@ class BillingController extends Controller
             'status' => $user->stripe_subscription_status,
             'trial_ends_at' => $user->trial_ends_at?->toISOString(),
             'subscription_ends_at' => $user->subscription_ends_at?->toISOString(),
-            'active' => in_array($user->stripe_subscription_status, [
-                'trialing', 'active', 'past_due',
-            ], true),
+            'active' => in_array($user->stripe_subscription_status, ['active', 'past_due'], true)
+                || ($user->stripe_subscription_status === 'trialing' && $user->trial_ends_at?->isFuture()),
+            'plan' => $user->billing_plan,
+            'upload_access' => app(\App\Domain\Billing\DocumentUploadAccess::class)->allows($user),
             'billing_exempt' => (bool) $user->billing_exempt,
             'price' => $price,
         ]]);
@@ -51,16 +53,40 @@ class BillingController extends Controller
         /** @var User $user */
         $user = $request->user();
         abort_if($user->billing_exempt, 403, 'This account is exempt from subscription billing.');
-        $plan = $request->string('plan')->toString() ?: 'monthly';
+        $validated = $request->validate(['plan' => ['required', 'in:monthly,yearly'], 'trial' => ['sometimes', 'boolean']]);
+        $plan = $validated['plan'];
         $trial = $request->boolean('trial', true);
-        $this->ensureConfigured();
+        if (! $trial) {
+            abort_unless($user->trial_ends_at !== null && $user->trial_ends_at->isPast(), 403, 'Subscription starts after your 30-day free trial ends.');
+            abort_if(in_array($user->stripe_subscription_status, ['active', 'trialing'], true), 409, 'Your current plan is already active.');
+        } else {
+            abort_if($user->trial_ends_at !== null || $user->stripe_subscription_id !== null || in_array($user->stripe_subscription_status, ['active', 'trialing'], true), 409, 'The free trial has already been started.');
+        }
+
+        $this->ensurePlanConfigured($plan);
 
         $priceId = $plan === 'yearly'
             ? config('services.stripe.yearly_price_id')
             : config('services.stripe.monthly_price_id');
         abort_unless(is_string($priceId) && $priceId !== '', 503, 'The selected Stripe plan is not configured.');
 
-        $customerId = $user->stripe_customer_id;
+        if (! $trial) {
+            $stripePrice = $this->stripe('get', '/prices/'.rawurlencode($priceId), []);
+            $expectedAmount = $plan === 'yearly' ? 7990 : 799;
+            $expectedInterval = $plan === 'yearly' ? 'year' : 'month';
+            abort_unless(
+                (int) ($stripePrice['unit_amount'] ?? 0) === $expectedAmount
+                    && ($stripePrice['recurring']['interval'] ?? null) === $expectedInterval
+                    && (int) ($stripePrice['recurring']['interval_count'] ?? 0) === 1
+                    && strtolower((string) ($stripePrice['currency'] ?? '')) === 'aud',
+                503,
+                'The selected Stripe price must be A$'.number_format($expectedAmount / 100, 2).' per '.$expectedInterval.'.',
+            );
+        }
+
+        // Start every trial on a clean Stripe customer so an old default card
+        // cannot turn the free trial into an automatic charge at its end.
+        $customerId = $trial ? null : $user->stripe_customer_id;
         if (! is_string($customerId) || $customerId === '') {
             $customer = $this->stripe('post', '/customers', [
                 'email' => $user->email,
@@ -79,15 +105,27 @@ class BillingController extends Controller
             'line_items[0][price]' => $priceId,
             'line_items[0][quantity]' => 1,
             'subscription_data[metadata][taxvault_user_id]' => $user->getKey(),
+            'subscription_data[metadata][taxvault_billing_plan]' => $plan,
             'success_url' => $url.'/settings?billing=success',
             'cancel_url' => $url.'/settings?billing=cancelled',
             'client_reference_id' => $user->getKey(),
         ];
         if ($trial) {
+            $checkoutData['payment_method_collection'] = 'if_required';
             $checkoutData['subscription_data[trial_period_days]'] = 30;
+            $checkoutData['subscription_data[trial_settings][end_behavior][missing_payment_method]'] = 'pause';
         }
 
+        $user->billing_plan = $plan;
+        $user->save();
+
         $session = $this->stripe('post', '/checkout/sessions', $checkoutData);
+        if (! $trial && is_string($user->stripe_subscription_id) && $user->stripe_subscription_id !== '') {
+            $this->stripe('delete', '/subscriptions/'.rawurlencode($user->stripe_subscription_id), []);
+            $user->stripe_subscription_id = null;
+            $user->stripe_subscription_status = 'canceled';
+            $user->save();
+        }
 
         return response()->json(['data' => ['url' => $session['url']]]);
     }
@@ -147,6 +185,7 @@ class BillingController extends Controller
                 'checkout.session.completed' => $this->checkoutCompleted($object),
                 'customer.subscription.created',
                 'customer.subscription.updated',
+                'customer.subscription.paused',
                 'customer.subscription.deleted' => $this->subscriptionUpdated($object),
                 default => null,
             };
@@ -187,7 +226,10 @@ class BillingController extends Controller
         $user->stripe_customer_id = $subscription['customer'] ?? $user->stripe_customer_id;
         $user->stripe_subscription_id = $subscription['id'] ?? $user->stripe_subscription_id;
         $user->stripe_subscription_status = $subscription['status'] ?? null;
-        $user->trial_ends_at = $this->timestamp($subscription['trial_end'] ?? null);
+        $user->billing_plan = $subscription['metadata']['taxvault_billing_plan'] ?? $user->billing_plan;
+        if (isset($subscription['trial_end'])) {
+            $user->trial_ends_at = $this->timestamp($subscription['trial_end']);
+        }
         $user->subscription_ends_at = $this->timestamp($subscription['cancel_at'] ?? $subscription['ended_at'] ?? null);
         $user->save();
     }
@@ -195,9 +237,11 @@ class BillingController extends Controller
     private function stripe(string $method, string $path, array $data): array
     {
         $client = Http::asForm()->withBasicAuth((string) config('services.stripe.secret'), '');
-        $response = strtolower($method) === 'get'
-            ? $client->get(self::STRIPE_URL.$path, $data)
-            : $client->post(self::STRIPE_URL.$path, $data);
+        $response = match (strtolower($method)) {
+            'get' => $client->get(self::STRIPE_URL.$path, $data),
+            'delete' => $client->delete(self::STRIPE_URL.$path),
+            default => $client->post(self::STRIPE_URL.$path, $data),
+        };
 
         if ($response->failed()) {
             Log::error('Stripe API request failed.', [
@@ -217,12 +261,57 @@ class BillingController extends Controller
     {
         abort_unless(
             is_string(config('services.stripe.secret'))
-                && config('services.stripe.secret') !== ''
-                && is_string(config('services.stripe.price_id'))
-                && config('services.stripe.price_id') !== '',
+                && config('services.stripe.secret') !== '',
             503,
             'Stripe billing is not configured.',
         );
+    }
+
+    private function ensurePlanConfigured(string $plan): void
+    {
+        $priceId = $plan === 'yearly'
+            ? config('services.stripe.yearly_price_id')
+            : config('services.stripe.monthly_price_id');
+        abort_unless(
+            is_string(config('services.stripe.secret')) && config('services.stripe.secret') !== ''
+                && is_string($priceId) && $priceId !== '',
+            503,
+            'The selected Stripe plan is not configured.',
+        );
+    }
+
+    /** Ensure older Stripe trials created before payment-less trials do not auto-charge. */
+    private function scheduleTrialEndWithoutCharge(User $user): void
+    {
+        if ($user->stripe_subscription_status !== 'trialing'
+            || $user->trial_ends_at === null
+            || ! $user->trial_ends_at->isFuture()
+            || ! is_string($user->stripe_subscription_id)
+            || $user->stripe_subscription_id === ''
+            || $user->subscription_ends_at !== null
+            || ! config('services.stripe.secret')) {
+            return;
+        }
+
+        try {
+            $subscription = $this->stripe('post', '/subscriptions/'.rawurlencode($user->stripe_subscription_id), [
+                'cancel_at_period_end' => 'true',
+            ]);
+            $user->subscription_ends_at = $this->timestamp($subscription['current_period_end'] ?? null)
+                ?? $user->trial_ends_at;
+            $priceId = $subscription['items']['data'][0]['price']['id'] ?? null;
+            if ($priceId === config('services.stripe.yearly_price_id')) {
+                $user->billing_plan = 'yearly';
+            } elseif ($priceId === config('services.stripe.monthly_price_id')) {
+                $user->billing_plan = 'monthly';
+            }
+            $user->save();
+        } catch (\Throwable $exception) {
+            Log::warning('Unable to schedule free trial to end without charge.', [
+                'user_id' => $user->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function validSignature(string $payload, string $header, string $secret): bool

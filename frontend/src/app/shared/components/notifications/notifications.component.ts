@@ -8,6 +8,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, interval, of } from 'rxjs';
@@ -26,6 +27,13 @@ export interface AppNotification {
   queryParams?: Record<string, string>;
 }
 
+interface BillingNotificationStatus {
+  status: string | null;
+  trial_ends_at: string | null;
+  upload_access: boolean;
+  billing_exempt: boolean;
+}
+
 const REFRESH_MS = 60_000;
 const DEADLINE_WARNING_DAYS = 30;
 
@@ -38,6 +46,7 @@ const DEADLINE_WARNING_DAYS = 30;
 })
 export class NotificationsComponent {
   private readonly documentsApi = inject(DocumentApiService);
+  private readonly http = inject(HttpClient);
   private readonly api = inject(TaxWorkspaceApiService);
   private readonly preferences = inject(UserPreferencesService);
   private readonly router = inject(Router);
@@ -93,6 +102,7 @@ export class NotificationsComponent {
     const yearId = this.documentsApi.selectedFinancialYearId();
 
     forkJoin({
+      billing: this.http.get<{ data: BillingNotificationStatus }>('/api/billing/status').pipe(catchError(() => of({ data: { status: null, trial_ends_at: null, upload_access: true, billing_exempt: true } as BillingNotificationStatus }))),
       documents: prefs.notifyDocuments
         ? this.documentsApi.listDocuments().pipe(catchError(() => of([])))
         : of([]),
@@ -103,10 +113,26 @@ export class NotificationsComponent {
       taxNews: prefs.notifyTaxNews
         ? this.api.listTaxNews().pipe(catchError(() => of([] as TaxNewsDto[])))
         : of([] as TaxNewsDto[]),
-    }).subscribe(({ documents, transactions, deadlines, taxNews }) => {
+    }).subscribe(({ documents, transactions, deadlines, taxNews, billing }) => {
       const items: AppNotification[] = [];
+      const billingStatus = billing.data;
       const count = (status: string) => documents.filter((document) => document.status === status).length;
       const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+      if (!billingStatus.billing_exempt && billingStatus.trial_ends_at) {
+        const daysLeft = Math.ceil((new Date(billingStatus.trial_ends_at).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86_400_000);
+        if ([10, 5, 1, 0].includes(daysLeft)) {
+          items.push({
+            id: 'trial-ending',
+            severity: daysLeft <= 1 ? 'warning' : 'info',
+            title: daysLeft === 0 ? 'Your free trial ends today' : `Your free trial ends in ${plural(daysLeft, 'day')}`,
+            detail: 'Choose a monthly or yearly plan in Settings to keep uploading documents.',
+            link: '/settings',
+          });
+        } else if (!billingStatus.upload_access) {
+          items.push({ id: 'trial-ended', severity: 'warning', title: 'Your free trial has ended', detail: 'Choose a monthly or yearly plan to resume document uploads.', link: '/settings' });
+        }
+      }
 
       const due = deadlines.find((deadline) => !deadline.completed && deadline.days_left >= 0 && deadline.days_left <= DEADLINE_WARNING_DAYS);
       if (due) {

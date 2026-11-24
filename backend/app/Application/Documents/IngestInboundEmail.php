@@ -3,6 +3,7 @@
 namespace App\Application\Documents;
 
 use App\Domain\Documents\Models\DocumentType;
+use App\Domain\Billing\DocumentUploadAccess;
 use App\Models\InboundEmailAddress;
 use Illuminate\Http\UploadedFile;
 use Throwable;
@@ -11,7 +12,7 @@ final class IngestInboundEmail
 {
     private const MAX_BYTES = 20 * 1024 * 1024;
 
-    public function __construct(private readonly UploadDocument $uploadDocument) {}
+    public function __construct(private readonly UploadDocument $uploadDocument, private readonly DocumentUploadAccess $uploadAccess) {}
 
     /**
      * Postmark-style inbound payload. Returns counts of stored/skipped attachments.
@@ -28,6 +29,9 @@ final class IngestInboundEmail
         }
 
         $user = $address->user;
+        if (! $this->uploadAccess->allows($user)) {
+            return ['matched' => true, 'stored' => 0, 'skipped' => count((array) ($payload['Attachments'] ?? []))];
+        }
         $typeId = DocumentType::query()->where('status', 'active')->where('code', 'other')->value('id')
             ?? DocumentType::query()->where('status', 'active')->orderBy('sort_order')->value('id');
 
