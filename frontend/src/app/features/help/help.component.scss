@@ -132,6 +132,13 @@
 .settings-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .settings-grid article { padding: 18px 20px; }
 .settings-grid h3 { margin: 0; }
+.subscribe-guide { margin-top: 16px; padding: 20px 22px; border: 1px solid var(--tv-color-border); border-radius: 11px; background: var(--tv-color-table-stripe); }
+.subscribe-guide h3 { margin: 0; font-size: 16px; }
+.subscribe-guide p, .subscribe-guide li { color: var(--tv-color-text-secondary); font-size: 13px; line-height: 1.6; }
+.subscribe-guide > p { margin: 7px 0 0; }
+.subscribe-guide ol { display: grid; gap: 8px; margin: 14px 0 0; padding-left: 22px; }
+.subscribe-guide li { padding-left: 4px; }
+.subscribe-guide .subscribe-note { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--tv-color-border); }
 .handoff-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: handoff; }
 .handoff-list li { display: grid; grid-template-columns: 28px minmax(120px, .55fr) 1fr; gap: 14px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--tv-color-border); counter-increment: handoff; }
 .handoff-list li::before { content: counter(handoff); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--tv-color-primary-soft); color: var(--tv-color-primary); font-size: 11px; font-weight: 700; }
