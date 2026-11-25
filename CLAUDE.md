@@ -23,6 +23,7 @@ Core workflows include document upload and OCR review, income and expense record
 - Read `.agents/skills/deployment-and-development/SKILL.md` before changing deployment configuration and before every Git commit or push.
 - Keep local development, staging, and the production release VPS separate. The local setup uses `localhost`; `taxvaultapp.com.au` belongs to the production release. Never share environment secrets, databases, storage volumes or encryption keys between environments.
 - Complete the skill's staged-diff and environment-boundary checklist before committing or pushing. This instruction does not itself authorize a commit, push or deployment.
+- After every successful commit and push, include a VPS follow-up section in the final response. State the concrete production VPS steps needed for that commit (for example: pull the commit, rebuild/restart affected services, run database migrations, or update production-only configuration). Clearly mark steps that are required versus unnecessary; if no VPS action is needed, say so explicitly. Never perform a VPS deployment unless the user separately requests it.
 
 Use the root README for local setup and the security guide at `docs/security.md` for data lifecycle and security details. Local development is Docker Compose based.
 

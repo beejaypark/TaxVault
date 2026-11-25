@@ -40,3 +40,9 @@ Before running `git commit` or `git push`, read this skill and check the exact c
 6. If environment ownership is unclear or a change could affect the live release VPS, stop before committing/pushing and ask the user to clarify the target.
 
 This checklist does not itself authorize a commit, push, or deployment. Perform those actions only when the user has requested them.
+
+## After a successful commit and push
+
+- In the final response, always give the concrete follow-up steps for the production VPS based on the pushed changes. Consider whether the VPS needs to pull the commit, rebuild or restart services, run migrations, or receive production-only configuration changes.
+- Separate required VPS actions from actions that are unnecessary. If no VPS action is needed, say so explicitly.
+- Do not deploy to or make changes on a VPS unless the user separately requests deployment.
