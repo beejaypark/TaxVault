@@ -432,6 +432,7 @@
     "KeepSavedSecret": "Déjalo en blanco para conservar el secreto guardado",
     "DirectoryTenantId": "ID de directorio (inquilino)",
     "RedirectUriHint": "URI de redirección que debes registrar en Microsoft Entra:",
+    "DropboxRedirectUriHint": "URI de redirección que debes registrar en la consola de aplicaciones de Dropbox:",
     "Loading": "Cargando…",
     "Saving": "Guardando…",
     "SaveOneDriveSettings": "Guardar configuración de OneDrive",

@@ -657,6 +657,7 @@
     "KeepSavedSecret": "저장된 시크릿을 유지하려면 비워 두세요",
     "DirectoryTenantId": "디렉터리 (테넌트) ID",
     "RedirectUriHint": "Microsoft Entra에 등록할 Redirect URI:",
+    "DropboxRedirectUriHint": "Dropbox App Console에 등록할 Redirect URI:",
     "Loading": "불러오는 중…",
     "Saving": "저장 중…",
     "SaveOneDriveSettings": "OneDrive 설정 저장",

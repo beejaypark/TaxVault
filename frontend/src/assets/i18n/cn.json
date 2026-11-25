@@ -432,6 +432,7 @@
     "KeepSavedSecret": "留空以保留已保存的密钥",
     "DirectoryTenantId": "目录（租户）ID",
     "RedirectUriHint": "要在 Microsoft Entra 中注册的重定向 URI：",
+    "DropboxRedirectUriHint": "要在 Dropbox 应用控制台中注册的重定向 URI：",
     "Loading": "正在加载…",
     "Saving": "正在保存…",
     "SaveOneDriveSettings": "保存 OneDrive 设置",

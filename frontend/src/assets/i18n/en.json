@@ -658,6 +658,7 @@
     ,"KeepSavedSecret": "Leave blank to keep the saved secret"
     ,"DirectoryTenantId": "Directory (tenant) ID"
     ,"RedirectUriHint": "Redirect URI to register in Microsoft Entra:"
+    ,"DropboxRedirectUriHint": "Redirect URI to register in the Dropbox App Console:"
     ,"Loading": "Loading…"
     ,"Saving": "Saving…"
     ,"SaveOneDriveSettings": "Save OneDrive settings"

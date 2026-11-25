@@ -160,7 +160,7 @@ interface BillingStatusDto {
           <p class="hint">Create a Dropbox app with Files.metadata.read and Files.content.read permissions.</p>
           <label class="field"><span>{{ 'Settings.ApplicationClientId' | translate }}</span><input type="text" name="dropboxClientId" [(ngModel)]="dropboxClientId" autocomplete="off" /></label>
           <label class="field"><span>{{ 'Settings.ClientSecret' | translate }}</span><input type="password" name="dropboxClientSecret" [(ngModel)]="dropboxClientSecret" autocomplete="new-password" placeholder="Leave blank to keep saved secret" /></label>
-          <p class="hint">{{ 'Settings.RedirectUriHint' | translate }} {{ dropboxRedirectUri || ('Settings.Loading' | translate) }}</p>
+          <p class="hint">{{ 'Settings.DropboxRedirectUriHint' | translate }} {{ dropboxRedirectUri || ('Settings.Loading' | translate) }}</p>
           <div class="actions"><button type="button" class="link-button" (click)="saveDropboxSettings()" [disabled]="storageSaving || !dropboxClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : 'Save Dropbox settings' }}</button></div>
         </div>
         } @else if (selectedStorageProviderKey === 'taxvault') {
