@@ -252,6 +252,14 @@ export class DocumentApiService {
     return this.http.post<ApiItem<DocumentDto>>(`/api/document-storage/google-drive/connections/${connectionId}/import`, { item_id: itemId, financial_year_id: financialYearId, document_type_id: documentTypeId }).pipe(map((response) => response.data));
   }
 
+  listDropboxItems(connectionId: string, parent = 'root'): Observable<StorageItemDto[]> {
+    return this.http.get<{ data: StorageItemDto[] }>(`/api/document-storage/dropbox/connections/${connectionId}/items`, { params: { parent } }).pipe(map((response) => response.data));
+  }
+
+  importDropboxDocument(connectionId: string, itemId: string, financialYearId: string | null, documentTypeId: string): Observable<DocumentDto> {
+    return this.http.post<ApiItem<DocumentDto>>(`/api/document-storage/dropbox/connections/${connectionId}/import`, { item_id: itemId, financial_year_id: financialYearId, document_type_id: documentTypeId }).pipe(map((response) => response.data));
+  }
+
   listDocuments(): Observable<DocumentDto[]> {
     return this.http
       .get<ApiList<DocumentDto>>('/api/documents')

@@ -14,6 +14,7 @@ use App\Application\Documents\StorageProviderRegistry;
 use App\Infrastructure\Storage\Providers\TaxVaultStorageProvider;
 use App\Infrastructure\Storage\Providers\OneDriveStorageProvider;
 use App\Infrastructure\Storage\Providers\GoogleDriveStorageProvider;
+use App\Infrastructure\Storage\Providers\DropboxStorageProvider;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use App\Infrastructure\OCR\Providers\HttpOcrProvider;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             app(TaxVaultStorageProvider::class),
             app(OneDriveStorageProvider::class),
             app(GoogleDriveStorageProvider::class),
+            app(DropboxStorageProvider::class),
         ]));
 
         $this->app->scoped(\App\Support\ViewerContext::class);

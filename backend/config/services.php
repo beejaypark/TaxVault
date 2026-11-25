@@ -71,6 +71,14 @@ return [
         'scopes' => ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive.readonly'],
     ],
 
+    'dropbox' => [
+        'authorize_url' => env('DROPBOX_AUTHORIZE_URL', 'https://www.dropbox.com/oauth2/authorize'),
+        'token_url' => env('DROPBOX_TOKEN_URL', 'https://api.dropboxapi.com/oauth2/token'),
+        'api_url' => env('DROPBOX_API_URL', 'https://api.dropboxapi.com'),
+        'content_url' => env('DROPBOX_CONTENT_URL', 'https://content.dropboxapi.com'),
+        'scopes' => ['account_info.read', 'files.metadata.read', 'files.content.read'],
+    ],
+
     'basiq' => [
         'api_key' => env('BASIQ_API_KEY'),
         'base_url' => env('BASIQ_BASE_URL', 'https://au-api.basiq.io'),

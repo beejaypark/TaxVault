@@ -11,7 +11,7 @@ final class StorageProviderSettingController extends Controller
 {
     public function show(Request $request, string $provider): JsonResponse
     {
-        abort_unless(in_array($provider, ['onedrive', 'google_drive'], true), 404);
+        abort_unless(in_array($provider, ['onedrive', 'google_drive', 'dropbox'], true), 404);
 
         $setting = StorageProviderSetting::query()
             ->where('user_id', $request->user()->getKey())
@@ -23,7 +23,7 @@ final class StorageProviderSettingController extends Controller
 
     public function update(Request $request, string $provider): JsonResponse
     {
-        abort_unless(in_array($provider, ['onedrive', 'google_drive'], true), 404);
+        abort_unless(in_array($provider, ['onedrive', 'google_drive', 'dropbox'], true), 404);
 
         $existing = StorageProviderSetting::query()
             ->where('user_id', $request->user()->getKey())
@@ -44,7 +44,7 @@ final class StorageProviderSettingController extends Controller
         if (isset($data['client_secret']) && $data['client_secret'] !== '') {
             $setting->client_secret = $data['client_secret'];
         }
-        $setting->tenant = $data['tenant'] ?? ($provider === 'google_drive' ? 'google' : 'common');
+        $setting->tenant = $data['tenant'] ?? ($provider === 'google_drive' ? 'google' : ($provider === 'dropbox' ? 'dropbox' : 'common'));
         $setting->save();
 
         return response()->json(['data' => $this->payload($request, $setting)]);

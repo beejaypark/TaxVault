@@ -115,6 +115,9 @@ interface BillingStatusDto {
                   Connect Google Drive
                 </button>
                 @if (provider.configured === false) { <small class="status-pill">Save Google Drive settings first</small> }
+              } @else if (provider.key === 'dropbox') {
+                <button type="button" class="link-button" (click)="connectDropbox()" [disabled]="provider.configured === false">Connect Dropbox</button>
+                @if (provider.configured === false) { <small class="status-pill">Save Dropbox settings first</small> }
               } @else {
                 <span class="status-pill">{{ provider.key === 'taxvault' ? ('Settings.DefaultStorage' | translate) : ('Settings.ComingSoon' | translate) }}</span>
               }
@@ -150,6 +153,15 @@ interface BillingStatusDto {
           <label class="field"><span>{{ 'Settings.ClientSecret' | translate }}</span><input type="password" name="googleDriveClientSecret" [(ngModel)]="googleDriveClientSecret" autocomplete="new-password" placeholder="Leave blank to keep saved secret" /></label>
           <p class="hint">{{ 'Settings.RedirectUriHint' | translate }} {{ googleDriveRedirectUri || ('Settings.Loading' | translate) }}</p>
           <div class="actions"><button type="button" class="link-button" (click)="saveGoogleDriveSettings()" [disabled]="storageSaving || !googleDriveClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : 'Save Google Drive settings' }}</button></div>
+        </div>
+        } @else if (selectedStorageProviderKey === 'dropbox') {
+        <div class="storage-settings">
+          <strong>Dropbox app settings</strong>
+          <p class="hint">Create a Dropbox app with Files.metadata.read and Files.content.read permissions.</p>
+          <label class="field"><span>{{ 'Settings.ApplicationClientId' | translate }}</span><input type="text" name="dropboxClientId" [(ngModel)]="dropboxClientId" autocomplete="off" /></label>
+          <label class="field"><span>{{ 'Settings.ClientSecret' | translate }}</span><input type="password" name="dropboxClientSecret" [(ngModel)]="dropboxClientSecret" autocomplete="new-password" placeholder="Leave blank to keep saved secret" /></label>
+          <p class="hint">{{ 'Settings.RedirectUriHint' | translate }} {{ dropboxRedirectUri || ('Settings.Loading' | translate) }}</p>
+          <div class="actions"><button type="button" class="link-button" (click)="saveDropboxSettings()" [disabled]="storageSaving || !dropboxClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : 'Save Dropbox settings' }}</button></div>
         </div>
         } @else if (selectedStorageProviderKey === 'taxvault') {
           <p class="hint storage-provider-description">{{ 'Settings.TaxVaultStorageHint' | translate }}</p>
@@ -408,6 +420,9 @@ export class SettingsComponent {
   googleDriveClientId = '';
   googleDriveClientSecret = '';
   googleDriveRedirectUri = '';
+  dropboxClientId = '';
+  dropboxClientSecret = '';
+  dropboxRedirectUri = '';
   storageSaving = false;
   billingStatus: BillingStatusDto | null = null;
   billingLoading = false;
@@ -435,6 +450,7 @@ export class SettingsComponent {
       if (user?.role !== 'accountant') {
         this.loadOneDriveSettings();
         this.loadGoogleDriveSettings();
+        this.loadDropboxSettings();
         this.loadStorageConnections();
       }
     });
@@ -626,6 +642,24 @@ export class SettingsComponent {
   connectGoogleDrive(): void {
     window.location.assign('/api/document-storage/google-drive/redirect?returnUrl=/settings');
   }
+
+  loadDropboxSettings(): void {
+    this.http.get<{ data: { client_id: string; redirect_uri: string } }>('/api/document-storage/settings/dropbox').subscribe({
+      next: (response) => { this.dropboxClientId = response.data.client_id; this.dropboxRedirectUri = response.data.redirect_uri; this.changeDetector.markForCheck(); },
+      error: () => { this.storageMessage = 'Unable to load Dropbox settings.'; this.changeDetector.markForCheck(); },
+    });
+  }
+
+  saveDropboxSettings(): void {
+    this.storageSaving = true;
+    this.storageMessage = '';
+    this.http.put<{ data: { redirect_uri: string } }>('/api/document-storage/settings/dropbox', { client_id: this.dropboxClientId.trim(), client_secret: this.dropboxClientSecret.trim() || null, tenant: 'dropbox' }).subscribe({
+      next: (response) => { this.dropboxClientSecret = ''; this.dropboxRedirectUri = response.data.redirect_uri; this.storageSaving = false; this.storageMessage = 'Dropbox settings saved.'; this.loadStorageProviders(); this.changeDetector.markForCheck(); },
+      error: () => { this.storageSaving = false; this.storageMessage = 'Unable to save Dropbox settings.'; this.changeDetector.markForCheck(); },
+    });
+  }
+
+  connectDropbox(): void { window.location.assign('/api/document-storage/dropbox/redirect?returnUrl=/settings'); }
 
   get availableAiModels(): { value: string; label: string }[] {
     if (this.aiProvider === 'anthropic') {

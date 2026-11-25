@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\StorageConnectionController;
 use App\Http\Controllers\Api\StorageProviderSettingController;
 use App\Http\Controllers\Api\OneDriveController;
 use App\Http\Controllers\Api\GoogleDriveController;
+use App\Http\Controllers\Api\DropboxController;
 use App\Http\Controllers\Api\ProductChatController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FinancialYearController;
@@ -51,6 +52,9 @@ Route::middleware('web')->group(function (): void {
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('session.active');
     Route::get('/document-storage/google-drive/callback', [GoogleDriveController::class, 'callback'])
+        ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
+        ->middleware('session.active');
+    Route::get('/document-storage/dropbox/callback', [DropboxController::class, 'callback'])
         ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
         ->middleware('session.active');
     Route::post('/auth/logout', [AuthController::class, 'logout'])
@@ -171,10 +175,13 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
         ->middleware('audit:storage_connection.disconnect,storage_connection');
     Route::get('/document-storage/onedrive/redirect', [OneDriveController::class, 'redirect']);
     Route::get('/document-storage/google-drive/redirect', [GoogleDriveController::class, 'redirect']);
+    Route::get('/document-storage/dropbox/redirect', [DropboxController::class, 'redirect']);
     Route::get('/document-storage/connections/{id}/items', [OneDriveController::class, 'items']);
     Route::post('/document-storage/connections/{id}/import', [OneDriveController::class, 'import'])->middleware('billing.upload');
     Route::get('/document-storage/google-drive/connections/{id}/items', [GoogleDriveController::class, 'items']);
     Route::post('/document-storage/google-drive/connections/{id}/import', [GoogleDriveController::class, 'import'])->middleware('billing.upload');
+    Route::get('/document-storage/dropbox/connections/{id}/items', [DropboxController::class, 'items']);
+    Route::post('/document-storage/dropbox/connections/{id}/import', [DropboxController::class, 'import'])->middleware('billing.upload');
 
     Route::get('/documents', [DocumentController::class, 'index']);
     Route::post('/documents', [DocumentController::class, 'store'])->middleware('billing.upload');

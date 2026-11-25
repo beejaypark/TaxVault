@@ -50,6 +50,13 @@ export class UploadDocumentComponent implements OnInit {
   oneDrivePath: { id: string; name: string }[] = [{ id: 'root', name: 'OneDrive' }];
   googleDriveConnections: StorageConnectionDto[] = [];
   selectedGoogleDriveConnectionId = '';
+  dropboxConnections: StorageConnectionDto[] = [];
+  selectedDropboxConnectionId = '';
+  dropboxItems: StorageItemDto[] = [];
+  dropboxOpen = false;
+  dropboxLoading = false;
+  dropboxPath: { id: string; name: string }[] = [{ id: 'root', name: 'Dropbox' }];
+  dropboxImportingItemId: string | null = null;
   googleDriveItems: StorageItemDto[] = [];
   googleDriveOpen = false;
   googleDriveLoading = false;
@@ -141,6 +148,10 @@ export class UploadDocumentComponent implements OnInit {
           this.googleDriveOpen = true;
           this.loadGoogleDriveItems(this.googleDrivePath[this.googleDrivePath.length - 1].id);
         }
+        this.dropboxConnections = connections.filter((connection) => connection.provider === 'dropbox' && connection.status === 'connected');
+        this.selectedDropboxConnectionId = this.dropboxConnections[0]?.id ?? '';
+        this.dropboxPath = this.restoreExternalPath('dropbox', this.selectedDropboxConnectionId, 'Dropbox');
+        if (this.dropboxPath.length > 1) { this.dropboxOpen = true; this.loadDropboxItems(this.dropboxPath[this.dropboxPath.length - 1].id); }
         this.cdr.markForCheck();
       },
     });
@@ -232,6 +243,12 @@ export class UploadDocumentComponent implements OnInit {
     this.googleDriveImportingItemId = item.id;
     this.api.importGoogleDriveDocument(connection.id, item.id, this.selectedFinancialYearId || null, this.selectedDocumentTypeId).subscribe({ next: () => { this.googleDriveImportingItemId = null; this.errorMessage = ''; this.cdr.markForCheck(); }, error: (error: { error?: { message?: string } }) => { this.googleDriveImportingItemId = null; this.errorMessage = error.error?.message ?? 'Unable to import the Google Drive file.'; this.cdr.markForCheck(); } });
   }
+
+  browseDropbox(): void { if (!this.dropboxConnections.find((item) => item.id === this.selectedDropboxConnectionId) || this.dropboxLoading) return; this.dropboxOpen = true; this.loadDropboxItems(this.dropboxPath[this.dropboxPath.length - 1]?.id ?? 'root'); }
+  openDropboxFolder(item: StorageItemDto): void { if (!item.folder || this.dropboxLoading) return; this.dropboxPath = [...this.dropboxPath, { id: item.id, name: item.name }]; this.persistExternalPath('dropbox', this.selectedDropboxConnectionId, this.dropboxPath); this.loadDropboxItems(item.id); }
+  openDropboxPath(id: string, index: number): void { if (this.dropboxLoading) return; this.dropboxPath = this.dropboxPath.slice(0, index + 1); this.persistExternalPath('dropbox', this.selectedDropboxConnectionId, this.dropboxPath); this.loadDropboxItems(id); }
+  private loadDropboxItems(parent: string): void { const connection = this.dropboxConnections.find((item) => item.id === this.selectedDropboxConnectionId); if (!connection) return; this.dropboxLoading = true; this.api.listDropboxItems(connection.id, parent).subscribe({ next: (items) => { this.dropboxItems = items; this.dropboxLoading = false; this.cdr.markForCheck(); }, error: () => { this.dropboxLoading = false; this.errorMessage = 'Unable to load Dropbox files.'; this.cdr.markForCheck(); } }); }
+  importDropboxItem(item: StorageItemDto): void { const connection = this.dropboxConnections.find((entry) => entry.id === this.selectedDropboxConnectionId); if (!connection || item.folder || !this.selectedDocumentTypeId || this.dropboxImportingItemId) return; this.dropboxImportingItemId = item.id; this.api.importDropboxDocument(connection.id, item.id, this.selectedFinancialYearId || null, this.selectedDocumentTypeId).subscribe({ next: () => { this.dropboxImportingItemId = null; this.errorMessage = ''; this.cdr.markForCheck(); }, error: (error: { error?: { message?: string } }) => { this.dropboxImportingItemId = null; this.errorMessage = error.error?.message ?? 'Unable to import the Dropbox file.'; this.cdr.markForCheck(); } }); }
 
   importOneDriveItem(item: StorageItemDto): void {
     const connection = this.oneDriveConnections.find((item) => item.id === this.selectedOneDriveConnectionId);
@@ -328,6 +345,8 @@ export class UploadDocumentComponent implements OnInit {
     this.googleDrivePath = this.restoreExternalPath('google_drive', id, 'Google Drive');
     this.googleDriveOpen = false;
   }
+
+  selectDropboxConnection(id: string): void { this.selectedDropboxConnectionId = id; this.dropboxPath = this.restoreExternalPath('dropbox', id, 'Dropbox'); this.dropboxOpen = false; }
 
   private externalPathKey(provider: string, connectionId: string): string {
     return `taxvault.upload-path.${provider}.${connectionId}`;
