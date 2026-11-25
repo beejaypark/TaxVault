@@ -39,6 +39,7 @@ export class UploadDocumentComponent implements OnInit {
   storageProviders: StorageProviderDto[] = [];
   defaultStorageProvider = 'taxvault';
   oneDriveConnections: StorageConnectionDto[] = [];
+  selectedOneDriveConnectionId = '';
   oneDriveItems: StorageItemDto[] = [];
   oneDriveOpen = false;
   oneDriveLoading = false;
@@ -48,6 +49,7 @@ export class UploadDocumentComponent implements OnInit {
   oneDriveImportMessage = '';
   oneDrivePath: { id: string; name: string }[] = [{ id: 'root', name: 'OneDrive' }];
   googleDriveConnections: StorageConnectionDto[] = [];
+  selectedGoogleDriveConnectionId = '';
   googleDriveItems: StorageItemDto[] = [];
   googleDriveOpen = false;
   googleDriveLoading = false;
@@ -126,7 +128,11 @@ export class UploadDocumentComponent implements OnInit {
     this.api.listStorageConnections().subscribe({
       next: (connections) => {
         this.oneDriveConnections = connections.filter((connection) => connection.provider === 'onedrive' && connection.status === 'connected');
+        this.selectedOneDriveConnectionId = this.oneDriveConnections[0]?.id ?? '';
+        this.oneDrivePath = this.restoreExternalPath('onedrive', this.selectedOneDriveConnectionId, 'OneDrive');
         this.googleDriveConnections = connections.filter((connection) => connection.provider === 'google_drive' && connection.status === 'connected');
+        this.selectedGoogleDriveConnectionId = this.googleDriveConnections[0]?.id ?? '';
+        this.googleDrivePath = this.restoreExternalPath('google_drive', this.selectedGoogleDriveConnectionId, 'Google Drive');
         this.cdr.markForCheck();
       },
     });
@@ -176,7 +182,7 @@ export class UploadDocumentComponent implements OnInit {
   }
 
   browseOneDrive(): void {
-    const connection = this.oneDriveConnections[0];
+    const connection = this.oneDriveConnections.find((item) => item.id === this.selectedOneDriveConnectionId);
     if (!connection || this.oneDriveLoading) return;
     this.oneDriveOpen = true;
     this.loadOneDriveItems(this.oneDrivePath[this.oneDrivePath.length - 1]?.id ?? 'root');
@@ -185,17 +191,19 @@ export class UploadDocumentComponent implements OnInit {
   openOneDriveFolder(item: StorageItemDto): void {
     if (!item.folder || this.oneDriveLoading) return;
     this.oneDrivePath = [...this.oneDrivePath, { id: item.id, name: item.name }];
+    this.persistExternalPath('onedrive', this.selectedOneDriveConnectionId, this.oneDrivePath);
     this.loadOneDriveItems(item.id);
   }
 
   openOneDrivePath(id: string, index: number): void {
     if (this.oneDriveLoading) return;
     this.oneDrivePath = this.oneDrivePath.slice(0, index + 1);
+    this.persistExternalPath('onedrive', this.selectedOneDriveConnectionId, this.oneDrivePath);
     this.loadOneDriveItems(id);
   }
 
   private loadOneDriveItems(parent: string): void {
-    const connection = this.oneDriveConnections[0];
+    const connection = this.oneDriveConnections.find((item) => item.id === this.selectedOneDriveConnectionId);
     if (!connection) return;
     this.oneDriveLoading = true;
     this.api.listOneDriveItems(connection.id, parent).subscribe({
@@ -204,21 +212,21 @@ export class UploadDocumentComponent implements OnInit {
     });
   }
 
-  browseGoogleDrive(): void { if (!this.googleDriveConnections[0] || this.googleDriveLoading) return; this.googleDriveOpen = true; this.loadGoogleDriveItems(this.googleDrivePath.at(-1)?.id ?? 'root'); }
-  openGoogleDriveFolder(item: StorageItemDto): void { if (!item.folder || this.googleDriveLoading) return; this.googleDrivePath = [...this.googleDrivePath, { id: item.id, name: item.name }]; this.loadGoogleDriveItems(item.id); }
-  openGoogleDrivePath(id: string, index: number): void { if (this.googleDriveLoading) return; this.googleDrivePath = this.googleDrivePath.slice(0, index + 1); this.loadGoogleDriveItems(id); }
+  browseGoogleDrive(): void { if (!this.googleDriveConnections.find((item) => item.id === this.selectedGoogleDriveConnectionId) || this.googleDriveLoading) return; this.googleDriveOpen = true; this.loadGoogleDriveItems(this.googleDrivePath[this.googleDrivePath.length - 1]?.id ?? 'root'); }
+  openGoogleDriveFolder(item: StorageItemDto): void { if (!item.folder || this.googleDriveLoading) return; this.googleDrivePath = [...this.googleDrivePath, { id: item.id, name: item.name }]; this.persistExternalPath('google_drive', this.selectedGoogleDriveConnectionId, this.googleDrivePath); this.loadGoogleDriveItems(item.id); }
+  openGoogleDrivePath(id: string, index: number): void { if (this.googleDriveLoading) return; this.googleDrivePath = this.googleDrivePath.slice(0, index + 1); this.persistExternalPath('google_drive', this.selectedGoogleDriveConnectionId, this.googleDrivePath); this.loadGoogleDriveItems(id); }
   private loadGoogleDriveItems(parent: string): void {
-    const connection = this.googleDriveConnections[0]; if (!connection) return; this.googleDriveLoading = true;
+    const connection = this.googleDriveConnections.find((item) => item.id === this.selectedGoogleDriveConnectionId); if (!connection) return; this.googleDriveLoading = true;
     this.api.listGoogleDriveItems(connection.id, parent).subscribe({ next: (items) => { this.googleDriveItems = items; this.googleDriveLoading = false; this.cdr.markForCheck(); }, error: () => { this.googleDriveLoading = false; this.errorMessage = 'Unable to load Google Drive files.'; this.cdr.markForCheck(); } });
   }
   importGoogleDriveItem(item: StorageItemDto): void {
-    const connection = this.googleDriveConnections[0]; if (!connection || item.folder || !this.selectedDocumentTypeId || this.googleDriveImportingItemId) return;
+    const connection = this.googleDriveConnections.find((item) => item.id === this.selectedGoogleDriveConnectionId); if (!connection || item.folder || !this.selectedDocumentTypeId || this.googleDriveImportingItemId) return;
     this.googleDriveImportingItemId = item.id;
     this.api.importGoogleDriveDocument(connection.id, item.id, this.selectedFinancialYearId || null, this.selectedDocumentTypeId).subscribe({ next: () => { this.googleDriveImportingItemId = null; this.errorMessage = ''; this.cdr.markForCheck(); }, error: (error: { error?: { message?: string } }) => { this.googleDriveImportingItemId = null; this.errorMessage = error.error?.message ?? 'Unable to import the Google Drive file.'; this.cdr.markForCheck(); } });
   }
 
   importOneDriveItem(item: StorageItemDto): void {
-    const connection = this.oneDriveConnections[0];
+    const connection = this.oneDriveConnections.find((item) => item.id === this.selectedOneDriveConnectionId);
     if (!connection || item.folder || !this.selectedDocumentTypeId || this.oneDriveImportingItemId) return;
     this.oneDriveImportingItemId = item.id;
     this.oneDriveImportMessage = '';
@@ -241,7 +249,7 @@ export class UploadDocumentComponent implements OnInit {
   }
 
   async importOneDriveFolder(folder: StorageItemDto): Promise<void> {
-    const connection = this.oneDriveConnections[0];
+    const connection = this.oneDriveConnections.find((item) => item.id === this.selectedOneDriveConnectionId);
     if (!connection || !folder.folder || !this.selectedDocumentTypeId || this.oneDriveFolderImportingId) return;
 
     this.oneDriveFolderImportingId = folder.id;
@@ -299,6 +307,36 @@ export class UploadDocumentComponent implements OnInit {
       }
     }
     return files;
+  }
+
+  selectOneDriveConnection(id: string): void {
+    this.selectedOneDriveConnectionId = id;
+    this.oneDrivePath = this.restoreExternalPath('onedrive', id, 'OneDrive');
+    this.oneDriveOpen = false;
+  }
+
+  selectGoogleDriveConnection(id: string): void {
+    this.selectedGoogleDriveConnectionId = id;
+    this.googleDrivePath = this.restoreExternalPath('google_drive', id, 'Google Drive');
+    this.googleDriveOpen = false;
+  }
+
+  private externalPathKey(provider: string, connectionId: string): string {
+    return `taxvault.upload-path.${provider}.${connectionId}`;
+  }
+
+  private restoreExternalPath(provider: string, connectionId: string, rootName: string): { id: string; name: string }[] {
+    if (!connectionId) return [{ id: 'root', name: rootName }];
+    try {
+      const value = JSON.parse(sessionStorage.getItem(this.externalPathKey(provider, connectionId)) ?? 'null');
+      return Array.isArray(value) && value.length > 0 ? value : [{ id: 'root', name: rootName }];
+    } catch {
+      return [{ id: 'root', name: rootName }];
+    }
+  }
+
+  private persistExternalPath(provider: string, connectionId: string, path: { id: string; name: string }[]): void {
+    if (connectionId) sessionStorage.setItem(this.externalPathKey(provider, connectionId), JSON.stringify(path));
   }
 
   onFinancialYearChange(event: Event): void {

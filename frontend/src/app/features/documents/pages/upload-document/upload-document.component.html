@@ -59,7 +59,7 @@
     <div class="source-cards">
       @if (googleDriveConnections.length > 0) {
         <section class="source-card external-import">
-          <div class="external-import-header"><div><span class="source-eyebrow">Connected storage</span><h2>Google Drive</h2><p>Choose a PDF or image from your connected Google Drive</p></div><button type="button" class="browse-button browse-button-secondary" (click)="browseGoogleDrive()" [disabled]="googleDriveLoading || isUploading">{{ googleDriveLoading ? 'Loading…' : googleDriveOpen ? 'Refresh files' : 'Browse Google Drive' }}</button></div>
+          <div class="external-import-header"><div><span class="source-eyebrow">Connected storage</span><h2>Google Drive</h2><p>Choose a PDF or image from your connected Google Drive</p>@if (googleDriveConnections.length > 1) { <label class="field"><span>Drive account</span><select [value]="selectedGoogleDriveConnectionId" (change)="selectGoogleDriveConnection($any($event.target).value)">@for (connection of googleDriveConnections; track connection.id) { <option [value]="connection.id">{{ connection.display_name || connection.external_account_id }}</option> }</select></label> }</div><button type="button" class="browse-button browse-button-secondary" (click)="browseGoogleDrive()" [disabled]="googleDriveLoading || isUploading">{{ googleDriveLoading ? 'Loading…' : googleDriveOpen ? 'Refresh files' : 'Browse Google Drive' }}</button></div>
           @if (googleDriveOpen) {
             <div class="external-browser"><nav class="external-breadcrumbs" aria-label="Google Drive location">@for (crumb of googleDrivePath; track crumb.id; let last = $last) { @if (last) { <span aria-current="page">{{ crumb.name }}</span> } @else { <button type="button" (click)="openGoogleDrivePath(crumb.id, $index)">{{ crumb.name }}</button><span aria-hidden="true">/</span> } }</nav>
               <div class="external-items" aria-label="Google Drive files">@if (googleDriveItems.length === 0 && !googleDriveLoading) { <p class="file-hint">This folder is empty.</p> } @for (item of googleDriveItems; track item.id) { <div class="external-item" [class.external-folder]="item.folder">@if (item.folder) { <button type="button" class="external-item-main" (click)="openGoogleDriveFolder(item)"><span class="external-item-icon"><tv-icon name="folder" /> Folder</span><span class="external-item-name">{{ item.name }}</span></button> } @else { <span class="external-item-main"><span class="external-item-icon file-icon"><tv-icon name="file" /> File</span><span class="external-item-name" [title]="item.name">{{ item.name }}</span></span><button type="button" class="link-button" (click)="importGoogleDriveItem(item)" [disabled]="googleDriveImportingItemId !== null || !selectedDocumentTypeId">{{ googleDriveImportingItemId === item.id ? 'Importing…' : 'Import' }}</button> }</div> }</div>
@@ -70,10 +70,11 @@
       @if (oneDriveConnections.length > 0) {
         <section class="source-card external-import">
           <div class="external-import-header">
-            <div>
+              <div>
               <span class="source-eyebrow">Connected storage</span>
               <h2>OneDrive</h2>
               <p>Choose a document from your connected OneDrive account</p>
+                @if (oneDriveConnections.length > 1) { <label class="field"><span>Drive account</span><select [value]="selectedOneDriveConnectionId" (change)="selectOneDriveConnection($any($event.target).value)">@for (connection of oneDriveConnections; track connection.id) { <option [value]="connection.id">{{ connection.display_name || connection.external_account_id }}</option> }</select></label> }
             </div>
             <button type="button" class="browse-button browse-button-secondary" (click)="browseOneDrive()" [disabled]="oneDriveLoading || isUploading">
               {{ oneDriveLoading ? 'Loading…' : oneDriveOpen ? 'Refresh files' : 'Browse OneDrive' }}
