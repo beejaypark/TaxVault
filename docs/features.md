@@ -50,6 +50,14 @@ connection record.
 - Preferences are saved to your account and follow you across browsers; a copy is kept in the browser as a fallback.
 - Preferences saved in a browser before this existed are uploaded to your account the first time you sign in.
 
+## Site announcements
+
+- Platform administrators can create, preview, edit, schedule, publish and delete site-wide announcements from the Admin page.
+- Published announcements appear above the landing page, sign-in page and signed-in workspace. Open pages refresh the active announcements every 30 seconds.
+- Each announcement supports a preset color, icon, font family, bold message, optional HTTPS/site-path action link, and optional visitor dismissal.
+- Start and end times use Australia/Sydney. A blank start time means immediately; a blank end time means no automatic expiry.
+- Announcement text is plain text. Changes to announcement controls and supported style choices require a code release; posting or editing the announcement content does not.
+
 ## Email reminders
 
 - Opt-in under Settings > Email reminders (off by default; not shown to accountants).

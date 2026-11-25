@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { AnnouncementManagerComponent } from './announcement-manager.component';
 
 interface AdminOverview {
   total_users: number;
@@ -12,11 +13,12 @@ interface AdminOverview {
 
 @Component({
   selector: 'app-admin',
-  imports: [DatePipe],
+  imports: [DatePipe, AnnouncementManagerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="admin-page">
       <header><p class="eyebrow">Platform administration</p><h1>TaxVault overview</h1><p>Monitor customer registrations and administrator notifications.</p></header>
+      <app-announcement-manager />
       @if (error) { <p class="error" role="alert">{{ error }}</p> }
       @if (data; as overview) {
         <section class="metrics">

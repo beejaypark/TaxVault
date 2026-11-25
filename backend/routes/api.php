@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AccountantController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BankConnectionController;
@@ -82,6 +83,7 @@ Route::post('/contact', ContactController::class)
     ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
     ->middleware('throttle:5,10');
 Route::get('/product-chat/suggestions', [ProductChatController::class, 'suggestions'])->middleware('throttle:30,1');
+Route::get('/announcements/active', [AnnouncementController::class, 'active'])->middleware('throttle:120,1');
 Route::post('/product-chat', ProductChatController::class)
     ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
     ->middleware('throttle:8,1');
@@ -212,6 +214,10 @@ Route::middleware(['auth', 'session.active', 'acting'])->group(function (): void
 
 Route::middleware(['auth', 'session.active', 'require.platform.admin'])->group(function (): void {
     Route::get('/admin/overview', [AdminController::class, 'overview']);
+    Route::get('/admin/announcements', [AnnouncementController::class, 'index']);
+    Route::post('/admin/announcements', [AnnouncementController::class, 'store'])->middleware('audit:announcement.create,announcement');
+    Route::put('/admin/announcements/{id}', [AnnouncementController::class, 'update'])->middleware('audit:announcement.update,announcement');
+    Route::delete('/admin/announcements/{id}', [AnnouncementController::class, 'destroy'])->middleware('audit:announcement.delete,announcement');
     Route::patch('/admin/users/{user}/billing-exemption', [AdminController::class, 'setBillingExemption']);
     Route::patch('/admin/users/{user}/status', [AdminController::class, 'setCustomerStatus']);
 });

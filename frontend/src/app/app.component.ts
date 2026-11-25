@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 
 import { activeLocale, angularLocale, isLocaleCode } from './i18n/locale';
 import { AuthService } from './shared/services/auth/auth.service';
+import { AnnouncementStripComponent } from './shared/components/announcement-strip/announcement-strip.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  template: '<router-outlet />',
+  imports: [RouterOutlet, AnnouncementStripComponent],
+  template: '<app-announcement-strip /><router-outlet />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
