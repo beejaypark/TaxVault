@@ -65,7 +65,14 @@ final class DropboxClient
     /** @return array<string, mixed> */
     public function account(string $accessToken): array
     {
-        return Http::withToken($accessToken)->post(rtrim((string) config('services.dropbox.api_url'), '/').'/2/users/get_current_account')->throw()->json();
+        // Dropbox expects an empty JSON object for this RPC call. Laravel's
+        // no-payload request serializes an empty array (`[]`), which Dropbox
+        // rejects with "expected string or object, got array".
+        return Http::withToken($accessToken)
+            ->withBody('{}', 'application/json')
+            ->post(rtrim((string) config('services.dropbox.api_url'), '/').'/2/users/get_current_account')
+            ->throw()
+            ->json();
     }
 
     /** @param array<string, mixed> $tokens */
