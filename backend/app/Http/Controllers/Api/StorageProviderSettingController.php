@@ -11,7 +11,7 @@ final class StorageProviderSettingController extends Controller
 {
     public function show(Request $request, string $provider): JsonResponse
     {
-        abort_unless($provider === 'onedrive', 404);
+        abort_unless(in_array($provider, ['onedrive', 'google_drive'], true), 404);
 
         $setting = StorageProviderSetting::query()
             ->where('user_id', $request->user()->getKey())
@@ -23,7 +23,7 @@ final class StorageProviderSettingController extends Controller
 
     public function update(Request $request, string $provider): JsonResponse
     {
-        abort_unless($provider === 'onedrive', 404);
+        abort_unless(in_array($provider, ['onedrive', 'google_drive'], true), 404);
 
         $existing = StorageProviderSetting::query()
             ->where('user_id', $request->user()->getKey())
@@ -33,7 +33,7 @@ final class StorageProviderSettingController extends Controller
         $data = $request->validate([
             'client_id' => ['required', 'string', 'max:255'],
             'client_secret' => [$existing ? 'nullable' : 'required', 'string', 'max:2048'],
-            'tenant' => ['required', 'string', 'max:255'],
+            'tenant' => ['nullable', 'string', 'max:255'],
         ]);
 
         $setting = $existing ?? new StorageProviderSetting([
@@ -44,7 +44,7 @@ final class StorageProviderSettingController extends Controller
         if (isset($data['client_secret']) && $data['client_secret'] !== '') {
             $setting->client_secret = $data['client_secret'];
         }
-        $setting->tenant = $data['tenant'];
+        $setting->tenant = $data['tenant'] ?? ($provider === 'google_drive' ? 'google' : 'common');
         $setting->save();
 
         return response()->json(['data' => $this->payload($request, $setting)]);
@@ -53,11 +53,11 @@ final class StorageProviderSettingController extends Controller
     private function payload(Request $request, ?StorageProviderSetting $setting): array
     {
         return [
-            'provider' => 'onedrive',
+            'provider' => $setting?->provider ?? $request->route('provider'),
             'configured' => $setting !== null && $setting->client_id !== '' && $setting->client_secret !== '',
             'client_id' => $setting?->client_id ?? '',
             'tenant' => $setting?->tenant ?? 'common',
-            'redirect_uri' => rtrim((string) config('app.url'), '/').'/api/document-storage/onedrive/callback',
+            'redirect_uri' => rtrim((string) config('app.url'), '/').'/api/document-storage/'.($setting?->provider ?? $request->route('provider')).'/callback',
         ];
     }
 }

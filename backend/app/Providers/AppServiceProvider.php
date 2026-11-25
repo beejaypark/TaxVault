@@ -13,6 +13,7 @@ use App\Application\OCR\Contracts\OcrProvider;
 use App\Application\Documents\StorageProviderRegistry;
 use App\Infrastructure\Storage\Providers\TaxVaultStorageProvider;
 use App\Infrastructure\Storage\Providers\OneDriveStorageProvider;
+use App\Infrastructure\Storage\Providers\GoogleDriveStorageProvider;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use App\Infrastructure\OCR\Providers\HttpOcrProvider;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(StorageProviderRegistry::class, fn () => new StorageProviderRegistry([
             app(TaxVaultStorageProvider::class),
             app(OneDriveStorageProvider::class),
+            app(GoogleDriveStorageProvider::class),
         ]));
 
         $this->app->scoped(\App\Support\ViewerContext::class);

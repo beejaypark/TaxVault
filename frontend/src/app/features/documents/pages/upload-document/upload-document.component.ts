@@ -47,6 +47,12 @@ export class UploadDocumentComponent implements OnInit {
   oneDriveFolderImportLabel = 'Importing…';
   oneDriveImportMessage = '';
   oneDrivePath: { id: string; name: string }[] = [{ id: 'root', name: 'OneDrive' }];
+  googleDriveConnections: StorageConnectionDto[] = [];
+  googleDriveItems: StorageItemDto[] = [];
+  googleDriveOpen = false;
+  googleDriveLoading = false;
+  googleDrivePath: { id: string; name: string }[] = [{ id: 'root', name: 'Google Drive' }];
+  googleDriveImportingItemId: string | null = null;
 
   selectedFinancialYearId = '';
   selectedDocumentTypeId = '';
@@ -120,6 +126,7 @@ export class UploadDocumentComponent implements OnInit {
     this.api.listStorageConnections().subscribe({
       next: (connections) => {
         this.oneDriveConnections = connections.filter((connection) => connection.provider === 'onedrive' && connection.status === 'connected');
+        this.googleDriveConnections = connections.filter((connection) => connection.provider === 'google_drive' && connection.status === 'connected');
         this.cdr.markForCheck();
       },
     });
@@ -195,6 +202,19 @@ export class UploadDocumentComponent implements OnInit {
       next: (items) => { this.oneDriveItems = items; this.oneDriveLoading = false; this.cdr.markForCheck(); },
       error: () => { this.oneDriveLoading = false; this.errorMessage = 'Unable to load OneDrive files.'; this.cdr.markForCheck(); },
     });
+  }
+
+  browseGoogleDrive(): void { if (!this.googleDriveConnections[0] || this.googleDriveLoading) return; this.googleDriveOpen = true; this.loadGoogleDriveItems(this.googleDrivePath.at(-1)?.id ?? 'root'); }
+  openGoogleDriveFolder(item: StorageItemDto): void { if (!item.folder || this.googleDriveLoading) return; this.googleDrivePath = [...this.googleDrivePath, { id: item.id, name: item.name }]; this.loadGoogleDriveItems(item.id); }
+  openGoogleDrivePath(id: string, index: number): void { if (this.googleDriveLoading) return; this.googleDrivePath = this.googleDrivePath.slice(0, index + 1); this.loadGoogleDriveItems(id); }
+  private loadGoogleDriveItems(parent: string): void {
+    const connection = this.googleDriveConnections[0]; if (!connection) return; this.googleDriveLoading = true;
+    this.api.listGoogleDriveItems(connection.id, parent).subscribe({ next: (items) => { this.googleDriveItems = items; this.googleDriveLoading = false; this.cdr.markForCheck(); }, error: () => { this.googleDriveLoading = false; this.errorMessage = 'Unable to load Google Drive files.'; this.cdr.markForCheck(); } });
+  }
+  importGoogleDriveItem(item: StorageItemDto): void {
+    const connection = this.googleDriveConnections[0]; if (!connection || item.folder || !this.selectedDocumentTypeId || this.googleDriveImportingItemId) return;
+    this.googleDriveImportingItemId = item.id;
+    this.api.importGoogleDriveDocument(connection.id, item.id, this.selectedFinancialYearId || null, this.selectedDocumentTypeId).subscribe({ next: () => { this.googleDriveImportingItemId = null; this.errorMessage = ''; this.cdr.markForCheck(); }, error: (error: { error?: { message?: string } }) => { this.googleDriveImportingItemId = null; this.errorMessage = error.error?.message ?? 'Unable to import the Google Drive file.'; this.cdr.markForCheck(); } });
   }
 
   importOneDriveItem(item: StorageItemDto): void {

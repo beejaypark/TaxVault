@@ -110,6 +110,11 @@ interface BillingStatusDto {
                 @if (provider.configured === false) {
                   <small class="status-pill">{{ 'Settings.SaveOneDriveFirst' | translate }}</small>
                 }
+              } @else if (provider.key === 'google_drive') {
+                <button type="button" class="link-button" (click)="connectGoogleDrive()" [disabled]="provider.configured === false">
+                  Connect Google Drive
+                </button>
+                @if (provider.configured === false) { <small class="status-pill">Save Google Drive settings first</small> }
               } @else {
                 <span class="status-pill">{{ provider.key === 'taxvault' ? ('Settings.DefaultStorage' | translate) : ('Settings.ComingSoon' | translate) }}</span>
               }
@@ -136,6 +141,15 @@ interface BillingStatusDto {
           <div class="actions">
             <button type="button" class="link-button" (click)="saveOneDriveSettings()" [disabled]="storageSaving || !onedriveClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : ('Settings.SaveOneDriveSettings' | translate) }}</button>
           </div>
+        </div>
+        } @else if (selectedStorageProviderKey === 'google_drive') {
+        <div class="storage-settings">
+          <strong>Google Drive app settings</strong>
+          <p class="hint">Create a Google Cloud OAuth web application and enter its client ID and secret.</p>
+          <label class="field"><span>{{ 'Settings.ApplicationClientId' | translate }}</span><input type="text" name="googleDriveClientId" [(ngModel)]="googleDriveClientId" autocomplete="off" /></label>
+          <label class="field"><span>{{ 'Settings.ClientSecret' | translate }}</span><input type="password" name="googleDriveClientSecret" [(ngModel)]="googleDriveClientSecret" autocomplete="new-password" placeholder="Leave blank to keep saved secret" /></label>
+          <p class="hint">{{ 'Settings.RedirectUriHint' | translate }} {{ googleDriveRedirectUri || ('Settings.Loading' | translate) }}</p>
+          <div class="actions"><button type="button" class="link-button" (click)="saveGoogleDriveSettings()" [disabled]="storageSaving || !googleDriveClientId.trim()">{{ storageSaving ? ('Settings.Saving' | translate) : 'Save Google Drive settings' }}</button></div>
         </div>
         } @else if (selectedStorageProviderKey === 'taxvault') {
           <p class="hint storage-provider-description">{{ 'Settings.TaxVaultStorageHint' | translate }}</p>
@@ -391,6 +405,9 @@ export class SettingsComponent {
   onedriveClientSecret = '';
   onedriveTenant = 'common';
   onedriveRedirectUri = '';
+  googleDriveClientId = '';
+  googleDriveClientSecret = '';
+  googleDriveRedirectUri = '';
   storageSaving = false;
   billingStatus: BillingStatusDto | null = null;
   billingLoading = false;
@@ -417,6 +434,7 @@ export class SettingsComponent {
       this.loadStorageProviders();
       if (user?.role !== 'accountant') {
         this.loadOneDriveSettings();
+        this.loadGoogleDriveSettings();
         this.loadStorageConnections();
       }
     });
@@ -530,6 +548,24 @@ export class SettingsComponent {
     });
   }
 
+  loadGoogleDriveSettings(): void {
+    this.http.get<{ data: { client_id: string; redirect_uri: string } }>('/api/document-storage/settings/google_drive').subscribe({
+      next: (response) => { this.googleDriveClientId = response.data.client_id; this.googleDriveRedirectUri = response.data.redirect_uri; this.changeDetector.markForCheck(); },
+      error: () => { this.storageMessage = 'Unable to load Google Drive settings.'; this.changeDetector.markForCheck(); },
+    });
+  }
+
+  saveGoogleDriveSettings(): void {
+    this.storageSaving = true;
+    this.storageMessage = '';
+    this.http.put<{ data: { redirect_uri: string } }>('/api/document-storage/settings/google_drive', {
+      client_id: this.googleDriveClientId.trim(), client_secret: this.googleDriveClientSecret.trim() || null, tenant: 'google',
+    }).subscribe({
+      next: (response) => { this.googleDriveClientSecret = ''; this.googleDriveRedirectUri = response.data.redirect_uri; this.storageSaving = false; this.storageMessage = 'Google Drive settings saved.'; this.loadStorageProviders(); this.changeDetector.markForCheck(); },
+      error: () => { this.storageSaving = false; this.storageMessage = 'Unable to save Google Drive settings.'; this.changeDetector.markForCheck(); },
+    });
+  }
+
   loadStorageProviders(): void {
     this.http.get<{ data: StorageProviderDto[]; default?: string }>('/api/document-storage/providers').subscribe({
       next: (response) => {
@@ -585,6 +621,10 @@ export class SettingsComponent {
 
   connectOneDrive(): void {
     window.location.assign('/api/document-storage/onedrive/redirect?returnUrl=/settings');
+  }
+
+  connectGoogleDrive(): void {
+    window.location.assign('/api/document-storage/google-drive/redirect?returnUrl=/settings');
   }
 
   get availableAiModels(): { value: string; label: string }[] {

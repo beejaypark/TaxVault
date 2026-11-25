@@ -63,6 +63,14 @@ return [
         'scopes' => ['openid', 'profile', 'email', 'offline_access', 'User.Read', 'Files.Read'],
     ],
 
+    'google_drive' => [
+        'authorize_url' => env('GOOGLE_DRIVE_AUTHORIZE_URL', 'https://accounts.google.com/o/oauth2/v2/auth'),
+        'token_url' => env('GOOGLE_DRIVE_TOKEN_URL', 'https://oauth2.googleapis.com/token'),
+        'userinfo_url' => env('GOOGLE_DRIVE_USERINFO_URL', 'https://openidconnect.googleapis.com/v1/userinfo'),
+        'api_url' => env('GOOGLE_DRIVE_API_URL', 'https://www.googleapis.com/drive/v3'),
+        'scopes' => ['openid', 'email', 'profile', 'https://www.googleapis.com/auth/drive.readonly'],
+    ],
+
     'basiq' => [
         'api_key' => env('BASIQ_API_KEY'),
         'base_url' => env('BASIQ_BASE_URL', 'https://au-api.basiq.io'),
