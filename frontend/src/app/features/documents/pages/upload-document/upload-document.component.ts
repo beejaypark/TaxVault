@@ -130,9 +130,17 @@ export class UploadDocumentComponent implements OnInit {
         this.oneDriveConnections = connections.filter((connection) => connection.provider === 'onedrive' && connection.status === 'connected');
         this.selectedOneDriveConnectionId = this.oneDriveConnections[0]?.id ?? '';
         this.oneDrivePath = this.restoreExternalPath('onedrive', this.selectedOneDriveConnectionId, 'OneDrive');
+        if (this.oneDrivePath.length > 1) {
+          this.oneDriveOpen = true;
+          this.loadOneDriveItems(this.oneDrivePath[this.oneDrivePath.length - 1].id);
+        }
         this.googleDriveConnections = connections.filter((connection) => connection.provider === 'google_drive' && connection.status === 'connected');
         this.selectedGoogleDriveConnectionId = this.googleDriveConnections[0]?.id ?? '';
         this.googleDrivePath = this.restoreExternalPath('google_drive', this.selectedGoogleDriveConnectionId, 'Google Drive');
+        if (this.googleDrivePath.length > 1) {
+          this.googleDriveOpen = true;
+          this.loadGoogleDriveItems(this.googleDrivePath[this.googleDrivePath.length - 1].id);
+        }
         this.cdr.markForCheck();
       },
     });
