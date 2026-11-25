@@ -42,6 +42,8 @@ docker compose up --build -d
 docker compose ps
 ```
 
+The root `.env.example` is for local development: it binds nginx to `127.0.0.1` on ports 8080/8443 and selects the local nginx and Keycloak realm files. Keep each VPS `.env` private and environment-specific. The production defaults in Compose use the production-domain nginx/realm files and standard ports 80/443; do not copy a developer's `.env` to a VPS.
+
 Open the app at <https://localhost:8443> (`http://localhost:8080` redirects there). On first startup, the backend creates
 an application key and runs the database migrations. The key, database, and
 uploaded files are kept in Docker volumes. Local development uses the backend's

@@ -84,7 +84,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: xforwarded
     volumes:
-      - ./infrastructure/keycloak/realm:/opt/keycloak/data/import:ro
+      - ${KEYCLOAK_REALM_IMPORT_DIR:-./infrastructure/keycloak/realm}:/opt/keycloak/data/import:ro
       - ./infrastructure/keycloak/themes/taxvault:/opt/keycloak/themes/taxvault:ro
     depends_on:
       postgres:
@@ -255,10 +255,10 @@ services:
     container_name: taxvault-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_PUBLISH:-80:80}"
+      - "${NGINX_HTTPS_PUBLISH:-443:443}"
     volumes:
-      - ./infrastructure/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${NGINX_CONFIG_FILE:-./infrastructure/docker/nginx/default.conf}:/etc/nginx/conf.d/default.conf:ro
       - ./infrastructure/certs:/etc/nginx/certs:ro
     depends_on:
       - frontend
