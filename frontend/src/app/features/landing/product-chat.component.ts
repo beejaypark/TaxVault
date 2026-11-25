@@ -69,7 +69,8 @@ interface ChatCategory {
     .launcher:hover, .send:hover { background:#0c305d; }
     .send:disabled { opacity:.6; cursor:default; }
     .chat-panel {
-      width:min(360px, calc(100vw - 48px)); max-height:min(480px, calc(100dvh - 100px)); min-height:0;
+      width:min(360px, calc(100vw - 48px)); height:min(480px, calc(100dvh - 100px));
+      min-height:min(320px, calc(100dvh - 100px)); max-height:calc(100dvh - 100px); resize:vertical;
       display:grid; grid-template-rows:auto minmax(0, 1fr) auto auto;
       overflow:hidden; border:1px solid #cbd8e5; border-radius:14px; background:#fff;
       color:#172b4d; box-shadow:0 12px 40px #07172735; font-size:14px;

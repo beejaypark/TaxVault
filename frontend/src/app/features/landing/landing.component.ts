@@ -21,6 +21,7 @@ import { Meta, Title } from '@angular/platform-browser';
           <div class="nav-links">
             <a href="#how-it-works">{{ 'Landing.HowItWorks' | translate }}</a>
             <a href="#benefits">{{ 'Landing.WhyTaxVault' | translate }}</a>
+            <a href="#pricing">{{ 'Landing.SimplePricing' | translate }}</a>
             <a href="#contact">{{ 'Landing.ContactUs' | translate }}</a>
           </div>
           <div class="nav-actions">
@@ -36,7 +37,7 @@ import { Meta, Title } from '@angular/platform-browser';
             <h1>{{ 'Landing.HeroTitle' | translate }}<br class="hero-break" /> <em>{{ 'Landing.HeroAccent' | translate }}</em></h1>
             <p>{{ 'Landing.HeroDescription' | translate }}</p>
             <div class="hero-actions">
-              <button type="button" class="primary" (click)="openLogin()">{{ 'Landing.GetStarted' | translate }}</button>
+              <a class="primary" href="#pricing">{{ 'Landing.PlanAndPricing' | translate }}</a>
               <a href="#how-it-works">{{ 'Landing.SeeHowItWorks' | translate }} <span aria-hidden="true">↓</span></a>
             </div>
           </div>
@@ -69,22 +70,7 @@ import { Meta, Title } from '@angular/platform-browser';
           </figure>
         </div>
       </section>
-      <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
-        <div class="pricing-heading"><p class="eyebrow">{{ 'Landing.SimplePricing' | translate }}</p><h2 id="pricing-title">{{ 'Landing.ChooseHowToStart' | translate }}</h2><p>{{ 'Landing.PricingDescription' | translate }}</p></div>
-        <div class="pricing-grid">
-          <article class="pricing-card featured" [class.selected]="selectedPricingPlan === 'trial'" (mouseenter)="selectedPricingPlan = 'trial'" (focusin)="selectedPricingPlan = 'trial'">
-            <span class="pricing-label">{{ 'Landing.MonthlyPlan' | translate }}</span><h3>{{ 'Landing.ThirtyDayTrial' | translate }}</h3><strong>A$7.99 <small>{{ 'Landing.PerMonth' | translate }}</small></strong>
-            <p>{{ 'Landing.MonthlyDescription' | translate }}</p>
-            <button type="button" class="primary" (click)="openPricingSignup('trial')">{{ 'Landing.StartTrial' | translate }}</button>
-          </article>
-          <article class="pricing-card annual-card" [class.selected]="selectedPricingPlan === 'yearly'" (mouseenter)="selectedPricingPlan = 'yearly'" (focusin)="selectedPricingPlan = 'yearly'">
-            <span class="pricing-label">{{ 'Landing.BestValue' | translate }}</span><h3>{{ 'Landing.AnnualPlan' | translate }}</h3><strong>A$79.90 <small>{{ 'Landing.PerYear' | translate }}</small></strong>
-            <p>{{ 'Landing.AnnualDescription' | translate }}</p>
-            <button type="button" class="primary" (click)="openPricingSignup('yearly')">{{ 'Landing.ChooseAnnual' | translate }}</button>
-          </article>
-        </div>
-        <p class="pricing-note">{{ 'Landing.PricingNote' | translate }}</p>
-      </section>
+      <section class="trust-strip"><div><p class="eyebrow">{{ 'Landing.BuiltForRecords' | translate }}</p><h2>{{ 'Landing.SimpleEveryWeek' | translate }}</h2></div><p>{{ 'Landing.TrustDescription' | translate }}</p></section>
       <section class="benefits" id="benefits"><p class="eyebrow">{{ 'Landing.ClearerTaxSeason' | translate }}</p><h2>{{ 'Landing.KeepEvidenceTogether' | translate }}</h2><div class="benefit-grid"><article><b>01</b><h3>{{ 'Landing.BringDocuments' | translate }}</h3><p>{{ 'Landing.BringDocumentsDescription' | translate }}</p></article><article class="accent"><b>02</b><h3>{{ 'Landing.FindDetails' | translate }}</h3><p>{{ 'Landing.FindDetailsDescription' | translate }}</p></article><article><b>03</b><h3>{{ 'Landing.ReviewConfidence' | translate }}</h3><p>{{ 'Landing.ReviewConfidenceDescription' | translate }}</p></article></div></section>
       <section class="fit-section" aria-labelledby="fit-title">
         <div class="section-intro">
@@ -114,7 +100,38 @@ import { Meta, Title } from '@angular/platform-browser';
         </div>
         <div class="accountant-branch"><span class="branch-line" aria-hidden="true">↘</span><div><small>{{ 'Landing.Optional' | translate }}</small><strong>{{ 'Landing.ShareAccountant' | translate }}</strong><p>{{ 'Landing.ShareAccountantDescription' | translate }}</p></div></div>
       </section>
-      <section class="trust-strip"><div><p class="eyebrow">{{ 'Landing.BuiltForRecords' | translate }}</p><h2>{{ 'Landing.SimpleEveryWeek' | translate }}</h2></div><p>{{ 'Landing.TrustDescription' | translate }}</p></section>
+      <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
+        <div class="pricing-heading"><p class="eyebrow">{{ 'Landing.SimplePricing' | translate }}</p><h2 id="pricing-title">{{ 'Landing.ChooseHowToStart' | translate }}</h2><p>{{ 'Landing.PricingDescription' | translate }}</p></div>
+        <div class="pricing-grid">
+          <article class="pricing-card featured" [class.selected]="selectedPricingPlan === 'trial'" (mouseenter)="selectedPricingPlan = 'trial'" (focusin)="selectedPricingPlan = 'trial'">
+            <span class="pricing-label">{{ 'Landing.MonthlyPlan' | translate }}</span><h3>{{ 'Landing.ThirtyDayTrial' | translate }}</h3><strong>A$7.99 <small>{{ 'Landing.PerMonth' | translate }}</small></strong>
+            <p>{{ 'Landing.MonthlyDescription' | translate }}</p>
+            <p class="plan-includes">{{ 'Landing.PlanIncludes' | translate }}</p>
+            <ul class="pricing-benefits">
+              <li>{{ 'Landing.PlanBenefitUpload' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitOneDrive' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitReview' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitFinancialYear' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitAccountantPack' | translate }}</li>
+            </ul>
+            <button type="button" class="primary" (click)="openPricingSignup('trial')">{{ 'Landing.StartTrial' | translate }}</button>
+          </article>
+          <article class="pricing-card annual-card" [class.selected]="selectedPricingPlan === 'yearly'" (mouseenter)="selectedPricingPlan = 'yearly'" (focusin)="selectedPricingPlan = 'yearly'">
+            <span class="pricing-label">{{ 'Landing.BestValue' | translate }}</span><h3>{{ 'Landing.AnnualPlan' | translate }}</h3><strong>A$79.90 <small>{{ 'Landing.PerYear' | translate }}</small></strong>
+            <p>{{ 'Landing.AnnualDescription' | translate }}</p>
+            <p class="plan-includes">{{ 'Landing.PlanIncludes' | translate }}</p>
+            <ul class="pricing-benefits">
+              <li>{{ 'Landing.PlanBenefitUpload' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitOneDrive' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitReview' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitFinancialYear' | translate }}</li>
+              <li>{{ 'Landing.PlanBenefitAccountantPack' | translate }}</li>
+            </ul>
+            <button type="button" class="primary" (click)="openPricingSignup('yearly')">{{ 'Landing.ChooseAnnual' | translate }}</button>
+          </article>
+        </div>
+        <p class="pricing-note">{{ 'Landing.PricingNote' | translate }}</p>
+      </section>
       <section class="faq-section" id="faq" aria-labelledby="faq-title">
         <div>
           <h2 id="faq-title">{{ 'Landing.FaqTitle' | translate }}</h2>
@@ -128,28 +145,28 @@ import { Meta, Title } from '@angular/platform-browser';
       </section>
       <section class="contact-section" id="contact" aria-labelledby="contact-title">
         <div class="contact-copy">
-          <h2 id="contact-title">Contact us</h2>
-          <p>Have a question about getting started, storing documents or sharing records with your accountant?</p>
-          <a href="#faq" class="contact-faq">Browse frequently asked questions <span aria-hidden="true">↑</span></a>
+          <h2 id="contact-title">{{ 'Landing.ContactUs' | translate }}</h2>
+          <p>{{ 'Landing.ContactDescription' | translate }}</p>
+          <a href="#faq" class="contact-faq">{{ 'Landing.BrowseFaq' | translate }} <span aria-hidden="true">↑</span></a>
           <img class="section-photo contact-photo" src="assets/branding/taxvault-contact.jpg" width="1672" height="941" loading="lazy" decoding="async" alt="A person writing a message on a laptop beside tax paperwork" />
         </div>
         @if (contactSubmitted()) {
           <div class="contact-success" role="status">
-            <strong>Thanks for getting in touch.</strong>
-            <span>Your enquiry was sent to TaxVault support.</span>
+            <strong>{{ 'Landing.ContactSuccessTitle' | translate }}</strong>
+            <span>{{ 'Landing.ContactSuccessBody' | translate }}</span>
           </div>
         } @else {
           <form class="contact-form" aria-describedby="contact-form-note" (submit)="submitContact($event)">
-            <h3>Write an enquiry</h3>
-            <p id="contact-form-note">Include an email address we can reply to. Keep tax file numbers and financial documents out of the message.</p>
-            <label for="contact-name">Name</label>
+            <h3>{{ 'Landing.WriteEnquiry' | translate }}</h3>
+            <p id="contact-form-note">{{ 'Landing.ContactFormNote' | translate }}</p>
+            <label for="contact-name">{{ 'Landing.Name' | translate }}</label>
             <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="120" required />
-            <label for="contact-email">Email</label>
+            <label for="contact-email">{{ 'Landing.Email' | translate }}</label>
             <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required />
-            <label for="contact-message">How can we help?</label>
+            <label for="contact-message">{{ 'Landing.HowCanWeHelp' | translate }}</label>
             <textarea id="contact-message" name="message" rows="5" maxlength="3000" required></textarea>
-            @if (contactError()) { <p class="contact-error" role="alert">{{ contactError() }}</p> }
-            <button type="submit" [disabled]="contactPending()">{{ contactPending() ? 'Sending…' : 'Send message' }}</button>
+            @if (contactError()) { <p class="contact-error" role="alert">{{ ('Landing.' + contactError()) | translate }}</p> }
+            <button type="submit" [disabled]="contactPending()">{{ (contactPending() ? 'Landing.Sending' : 'Landing.SendMessage') | translate }}</button>
           </form>
         }
       </section>
@@ -172,10 +189,10 @@ import { Meta, Title } from '@angular/platform-browser';
     .site-header { border-top:2px solid #172b4d; border-bottom:1px solid #dfe5ec; background:#fff; }
     .site-nav { display:flex; align-items:center; gap:32px; max-width:1180px; margin:auto; padding:16px 32px; }
     .brand { display:flex; margin-right:8px; color:inherit; text-decoration:none; }
-    .nav-links { display:flex; align-items:center; gap:34px; margin-right:auto; }
+    .nav-links { display:flex; align-items:center; gap:22px; margin-right:auto; }
     .nav-links a,.login-link { color:#1d2735; font:inherit; font-size:14px; font-weight:600; text-decoration:none; }
     .nav-links a:hover,.login-link:hover { color:#1269d3; }
-    .nav-actions { display:flex; align-items:center; gap:28px; }
+    .nav-actions { display:flex; align-items:center; gap:16px; }
     .nav-actions button { border:0; font:inherit; cursor:pointer; }
     .updates { min-height:44px; padding:0 24px; border-radius:8px; color:#fff; background:#087369; font-size:14px; font-weight:700; }
     .login-link { padding:8px 0; background:transparent; }
@@ -202,7 +219,7 @@ import { Meta, Title } from '@angular/platform-browser';
     .workspace-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px; }
     .workspace-grid article { min-height:150px; }
     .workspace-tag { color:#1f7ac4; font-size:11px; font-weight:700; letter-spacing:.08em; }
-    .trust-strip { display:flex; align-items:end; justify-content:space-between; gap:48px; max-width:1180px; margin:0 auto; padding:28px 32px 90px; border-top:1px solid #dce5ee; }
+    .trust-strip { display:flex; align-items:end; justify-content:space-between; gap:48px; max-width:1180px; margin:0 auto; padding:26px 32px 52px; border-top:1px solid #dce5ee; }
     .trust-strip > p { max-width:480px; margin:0; color:#6d8197; font-size:15px; line-height:1.7; }
     .faq-section { display:grid; grid-template-columns:minmax(220px,.75fr) minmax(0,1.25fr); gap:40px; max-width:1180px; margin:0 auto; padding:36px 32px 64px; border-top:1px solid #dce5ee; }
     .faq-section h2 { margin:0; color:#18385f; font-size:34px; font-weight:500; }
@@ -242,7 +259,11 @@ import { Meta, Title } from '@angular/platform-browser';
     .pricing-card > strong { color:#123f78; font-size:28px; }
     .pricing-card > strong small { color:#6d8197; font-size:14px; font-weight:500; }
     .pricing-card p { margin:18px 0 0; color:#6d8197; font-size:14px; line-height:1.6; }
-    .pricing-card .primary { align-self:flex-start; margin-top:auto; }
+    .pricing-card .plan-includes { margin-top:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#234466; font-size:12px; font-weight:700; }
+    .pricing-benefits { display:grid; gap:10px; margin:12px 0 24px; padding:0; list-style:none; }
+    .pricing-benefits li { position:relative; padding-left:22px; color:#526983; font-size:13px; line-height:1.45; }
+    .pricing-benefits li::before { position:absolute; left:0; color:#087369; content:'✓'; font-weight:700; }
+    .pricing-card .primary { align-self:center; margin-top:auto; }
     .pricing-note { margin:18px 0 0; color:#6d8197; font-size:12px; text-align:center; }
   `, `.modal > app-login { display:block; width:100%; } .process-flow { display:flex; align-items:stretch; gap:12px; margin-top:34px; padding:28px; border:1px solid #d8e5ef; border-radius:16px; background:#eef6fd; } .process-node { display:grid; flex:1; gap:7px; min-width:0; } .process-node > span { display:grid; place-items:center; width:38px; height:38px; border:2px solid #8db7d8; border-radius:50%; color:#123f78; background:#fff; font-size:12px; font-weight:700; } .process-node strong { color:#234466; font-size:14px; } .process-node small { color:#6d8197; font-size:11px; line-height:1.4; } .process-node.complete > span { border-color:#2c9a67; color:#fff; background:#2c9a67; } .process-arrow { align-self:center; flex:none; color:#6e9cc0; font-size:24px; } .accountant-branch { display:flex; align-items:flex-start; gap:12px; max-width:360px; margin:18px 0 0 auto; padding:16px 18px; border:1px dashed #9cc3df; border-radius:12px; background:#fff; } .branch-line { color:#6e9cc0; font-size:24px; line-height:1; } .accountant-branch div { display:grid; gap:5px; } .accountant-branch small { color:#1f7ac4; font-size:11px; font-weight:700; text-transform:uppercase; } .accountant-branch strong { color:#234466; font-size:14px; } .accountant-branch p { margin:0; color:#6d8197; font-size:12px; line-height:1.5; } @media (max-width:850px) { .process-flow { align-items:stretch; flex-direction:column; } .process-arrow { align-self:center; transform:rotate(90deg); } .accountant-branch { margin-left:0; } }`,
   `.site-nav, .hero, .benefits, .fit-section, .flow-section, .trust-strip, .contact-section, footer { max-width:1320px; }`,
@@ -398,7 +419,9 @@ import { Meta, Title } from '@angular/platform-browser';
       }
     }
   `,
-  `footer { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.6fr); gap:36px 72px; align-items:start; } .footer-brand { display:grid; gap:12px; } .footer-brand p { margin:0; color:#6d8197; font-size:13px; } .footer-links { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; } .footer-links div { display:grid; align-content:start; gap:9px; } .footer-links strong { color:#234466; font-size:12px; } .footer-links a, .footer-links button, .footer-links span { width:max-content; padding:0; border:0; color:#6d8197; background:transparent; font:inherit; font-size:12px; text-align:left; text-decoration:none; } .footer-links a:hover, .footer-links button:hover { color:#1269d3; cursor:pointer; } .footer-links span { max-width:160px; line-height:1.5; } .footer-bottom { display:flex; grid-column:1 / -1; justify-content:space-between; gap:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#8a99aa; font-size:11px; line-height:1.5; } @media (max-width:850px) { footer { display:grid; } } @media (max-width:620px) { .footer-links { grid-template-columns:repeat(2,1fr); } .footer-bottom { align-items:flex-start; flex-direction:column; gap:8px; } }`],
+  `footer { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.6fr); gap:36px 72px; align-items:start; } .footer-brand { display:grid; gap:12px; } .footer-brand p { margin:0; color:#6d8197; font-size:13px; } .footer-links { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; } .footer-links div { display:grid; align-content:start; gap:9px; } .footer-links strong { color:#234466; font-size:12px; } .footer-links a, .footer-links button, .footer-links span { width:max-content; padding:0; border:0; color:#6d8197; background:transparent; font:inherit; font-size:12px; text-align:left; text-decoration:none; } .footer-links a:hover, .footer-links button:hover { color:#1269d3; cursor:pointer; } .footer-links span { max-width:160px; line-height:1.5; } .footer-bottom { display:flex; grid-column:1 / -1; justify-content:space-between; gap:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#8a99aa; font-size:11px; line-height:1.5; } @media (max-width:850px) { footer { display:grid; } } @media (max-width:620px) { .footer-links { grid-template-columns:repeat(2,1fr); } .footer-bottom { align-items:flex-start; flex-direction:column; gap:8px; } }`,
+  `.site-header { position:sticky; top:0; z-index:10; } .landing-page :is(#top, #how-it-works, #benefits, #pricing, #contact) { scroll-margin-top:84px; } .trust-strip { border-bottom:1px solid #dce5ee; } .pricing-card { box-shadow:none; } .pricing-card:hover { box-shadow:0 8px 22px rgb(23 43 77 / 8%); } .pricing-card.selected { outline:2px solid rgb(43 143 136 / 18%); outline-offset:2px; box-shadow:0 10px 24px rgb(23 43 77 / 10%); } @media (hover:hover) and (prefers-reduced-motion:no-preference) { :is(.process-node, .accountant-branch, .preview, .benefit-grid article, .fit-grid article, .workspace-grid article):hover { translate:0 -2px; } } @media (max-width:1040px) and (min-width:851px) { .site-nav { gap:16px; } .brand { margin-right:0; } .nav-links { gap:14px; } .nav-links a { font-size:13px; } .nav-actions { gap:12px; } .updates { padding:0 16px; } } @media (max-width:850px) { .nav-links { flex-wrap:wrap; justify-content:center; } } @media (max-width:620px) { .nav-links { gap:10px; } .nav-actions { gap:12px; } }`
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingComponent {
@@ -472,7 +495,7 @@ export class LandingComponent {
     const email = String(fields.get('email') ?? '').trim();
     const message = String(fields.get('message') ?? '').trim();
     if (!name || !email || !message) {
-      this.contactError.set('Enter your name, email address and message.');
+      this.contactError.set('ContactValidationError');
       return;
     }
 
@@ -485,10 +508,10 @@ export class LandingComponent {
       next: () => this.contactSubmitted.set(true),
       error: (error: HttpErrorResponse) => {
         this.contactError.set(error.status === 429
-          ? 'Too many messages were submitted. Please wait a few minutes and try again.'
+          ? 'ContactRateLimitError'
           : error.status === 503
-            ? 'Contact email is not configured or temporarily unavailable. Please use Ask TaxVault for product questions.'
-            : 'We couldn’t send your enquiry. Please try again or use Ask TaxVault for product questions.');
+            ? 'ContactUnavailableError'
+            : 'ContactSendError');
       },
     });
   }
