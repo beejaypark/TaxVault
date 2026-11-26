@@ -23,8 +23,6 @@ class AccountantAccessMail extends Mailable
         public readonly ?string $fromName = null,
         public readonly ?string $subjectOverride = null,
         public readonly ?string $contentOverride = null,
-        /** @var list<array{data: string, name: string, mime: string}> */
-        public readonly array $attachments = [],
     ) {}
 
     public function envelope(): Envelope
