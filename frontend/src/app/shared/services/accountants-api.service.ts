@@ -15,6 +15,7 @@ export interface AccountantDto {
   last_invited_at: string | null;
   last_pack_sent_at: string | null;
   temporary_password?: string;
+  invitation_sent?: boolean;
 }
 
 export interface AccountantRequest {

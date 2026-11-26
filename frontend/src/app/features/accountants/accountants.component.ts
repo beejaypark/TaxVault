@@ -364,7 +364,11 @@ export class AccountantsComponent implements OnInit {
           this.temporaryPassword = item.temporary_password;
           this.temporaryFor = item.email;
         }
-        this.message = editing ? 'Access updated.' : 'Accountant added and invitation sent.';
+        this.message = editing
+          ? 'Access updated.'
+          : item.invitation_sent === false
+            ? 'Accountant added, but the invitation email could not be sent. Check the mail server settings before retrying.'
+            : 'Accountant added and invitation sent.';
         this.reload();
       },
       error: (e) => this.fail(e, 'Unable to save the accountant.'),

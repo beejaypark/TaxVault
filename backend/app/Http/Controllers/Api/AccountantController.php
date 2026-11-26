@@ -111,10 +111,13 @@ final class AccountantController extends Controller
             throw $exception;
         }
 
-        $this->sendMail($grant, $owner, 'invitation', $this->appUrl('/login'));
+        $invitationSent = $this->trySendMail($grant, $owner, 'invitation', $this->appUrl('/login'));
 
         return response()->json([
-            'data' => $this->present($grant) + ['temporary_password' => $temporaryPassword],
+            'data' => $this->present($grant) + [
+                'temporary_password' => $temporaryPassword,
+                'invitation_sent' => $invitationSent,
+            ],
         ], 201);
     }
 
@@ -227,7 +230,7 @@ final class AccountantController extends Controller
             ];
         }
 
-        $this->sendMail(
+        $mailSent = $this->trySendMail(
             grant: $grant,
             owner: $owner,
             kind: 'pack',
@@ -243,6 +246,13 @@ final class AccountantController extends Controller
             subject: $data['subject'] ?? null,
             content: $data['content'] ?? null,
         );
+
+        if (! $mailSent) {
+            return response()->json([
+                'message' => 'The accountant pack could not be emailed. The accountant access is unchanged; check the mail server settings and try again.',
+            ], 503);
+        }
+
         $grant->update(['last_pack_sent_at' => now()]);
 
         return response()->json(['data' => $this->present($grant->refresh())]);
@@ -293,6 +303,28 @@ final class AccountantController extends Controller
         }
 
         Mail::to($toEmail ?: $grant->email)->send($mail);
+    }
+
+    private function trySendMail(
+        AccountantGrant $grant,
+        User $owner,
+        string $kind,
+        string $link,
+        mixed ...$mailOptions,
+    ): bool {
+        try {
+            $this->sendMail($grant, $owner, $kind, $link, ...$mailOptions);
+
+            return true;
+        } catch (\Throwable $exception) {
+            Log::error('Accountant email delivery failed.', [
+                'grant_id' => $grant->getKey(),
+                'kind' => $kind,
+                'exception' => $exception::class,
+            ]);
+
+            return false;
+        }
     }
 
     private function findGrant(Request $request, string $id): AccountantGrant
