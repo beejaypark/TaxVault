@@ -136,5 +136,6 @@ header in `infrastructure/docker/nginx/default.conf`.
 ## Architecture Documentation
 
 Security, encryption, audit and data deletion policies are in [docs/security.md](docs/security.md).
+Production VPS update steps are in [docs/vps-deployment.md](docs/vps-deployment.md).
 
 The authoritative architecture and product decisions are maintained in the TaxVault Notion project documentation.
