@@ -49,7 +49,6 @@ final class DocumentController extends Controller
                 'review_id' => Review::query()
                     ->select('id')
                     ->whereColumn('document_id', 'documents.id')
-                    ->whereIn('status', ['pending', 'in_progress'])
                     ->latest('created_at')
                     ->limit(1),
             ])
