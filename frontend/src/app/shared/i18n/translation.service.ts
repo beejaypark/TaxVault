@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, effect, inject, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 
 import { activeLocale, LocaleCode } from '../../i18n/locale';
 
@@ -27,19 +27,26 @@ export class TranslationService {
 
     const value = read(this.messages()) ?? read(this.fallbackMessages());
 
-    return typeof value === 'string' ? value : key;
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    const leaf = key.split('.').pop() || key;
+    return leaf.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
   }
 
   private load(locale: LocaleCode): void {
     forkJoin({
-      messages: this.http.get<TranslationMap>(`/assets/i18n/${locale}.json`),
-      fallback: this.http.get<TranslationMap>('/assets/i18n/en.json'),
+      messages: this.http.get<TranslationMap>(`/assets/i18n/${locale}.json`).pipe(catchError(() => of(null))),
+      fallback: this.http.get<TranslationMap>('/assets/i18n/en.json').pipe(catchError(() => of(null))),
     }).subscribe({
       next: ({ messages, fallback }) => {
-        this.messages.set(messages);
-        this.fallbackMessages.set(fallback);
+        if (fallback) {
+          this.fallbackMessages.set(fallback);
+        }
+
+        this.messages.set(messages ?? fallback ?? this.messages());
       },
-      error: () => this.messages.set({}),
     });
   }
 }

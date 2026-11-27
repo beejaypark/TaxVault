@@ -14,6 +14,8 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+The production Nginx config serves `/sitemap.xml` as the generated XML asset and redirects `/sitemap.xml/` to its canonical URL. Keep these exact-match locations ahead of the SPA fallback when changing `nginx.conf`.
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).

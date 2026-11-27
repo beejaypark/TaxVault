@@ -171,13 +171,22 @@ import { Meta, Title } from '@angular/platform-browser';
         }
       </section>
       <footer>
-        <div class="footer-brand"><tv-brand-logo [size]="34" /><p>Keep your tax evidence together.</p></div>
-        <nav class="footer-links" aria-label="Footer navigation">
-          <div><strong>Explore</strong><a href="#how-it-works">How it works</a><a href="#benefits">Why TaxVault</a><a href="#faq">FAQs</a></div>
-          <div><strong>Get started</strong><button type="button" (click)="openLogin()">Log in</button><button type="button" (click)="openTrial()">Get free tax updates</button></div>
-          <div><strong>Contact</strong><a href="#contact">Contact us</a><span>Questions about your tax records?</span></div>
+        <div class="footer-brand"><tv-brand-logo [size]="34" /><p>{{ 'Landing.FooterBrandTagline' | translate }}</p></div>
+        <nav class="footer-links" [attr.aria-label]="'Landing.FooterNavigation' | translate">
+          <section aria-labelledby="footer-explore-heading">
+            <h3 id="footer-explore-heading">{{ 'Landing.FooterExplore' | translate }}</h3>
+            <ul><li><a href="#how-it-works">{{ 'Landing.HowItWorks' | translate }}</a></li><li><a href="#benefits">{{ 'Landing.WhyTaxVault' | translate }}</a></li><li><a href="#faq">{{ 'Landing.FooterFaqLink' | translate }}</a></li></ul>
+          </section>
+          <section aria-labelledby="footer-start-heading">
+            <h3 id="footer-start-heading">{{ 'Landing.GetStarted' | translate }}</h3>
+            <ul><li><button type="button" (click)="openLogin()">{{ 'Landing.LogIn' | translate }}</button></li><li><button type="button" (click)="openTrial()">{{ 'Landing.FooterGetFreeTaxUpdates' | translate }}</button></li></ul>
+          </section>
+          <section aria-labelledby="footer-contact-heading">
+            <h3 id="footer-contact-heading">{{ 'Landing.FooterContactHeading' | translate }}</h3>
+            <ul><li><a href="#contact">{{ 'Landing.ContactUs' | translate }}</a></li><li><span>{{ 'Landing.FooterContactPrompt' | translate }}</span></li></ul>
+          </section>
         </nav>
-        <div class="footer-bottom"><span>© 2026 TaxVault</span><span>TaxVault organises evidence. It does not prepare or lodge tax returns or provide tax advice.</span></div>
+        <div class="footer-bottom"><span>© 2026 TaxVault</span><span>{{ 'Landing.FooterDisclaimer' | translate }}</span></div>
       </footer>
       @if (loginOpen) { <div class="backdrop" (click)="closeLogin()"><section class="modal" role="dialog" aria-modal="true" aria-label="Log in to TaxVault" (click)="$event.stopPropagation()"><button class="close" type="button" aria-label="Close login" (click)="closeLogin()">×</button><app-login [embedded]="true" [trialMode]="trialMode" [returnUrl]="loginReturnUrl" /></section></div> }
     </main>
@@ -235,7 +244,8 @@ import { Meta, Title } from '@angular/platform-browser';
     .footer-brand { display:grid; gap:12px; }
     .footer-brand p { margin:0; color:#6d8197; font-size:13px; }
     .footer-links { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
-    .footer-links div { display:grid; align-content:start; gap:9px; }
+    .footer-links section { display:grid; align-content:start; gap:9px; }
+    .footer-links ul { display:grid; gap:9px; margin:0; padding:0; list-style:none; }
     .footer-links a,.footer-links button,.footer-links span { width:max-content; padding:0; border:0; color:#6d8197; background:transparent; font:inherit; font-size:12px; text-align:left; text-decoration:none; }
     .footer-bottom { display:flex; grid-column:1 / -1; justify-content:space-between; gap:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#8a99aa; font-size:11px; line-height:1.5; }
     footer { display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:auto; padding:26px 32px 34px; border-top:1px solid #dce5ee; color:#7b8da1; font-size:12px; }
@@ -419,7 +429,7 @@ import { Meta, Title } from '@angular/platform-browser';
       }
     }
   `,
-  `footer { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.6fr); gap:36px 72px; align-items:start; } .footer-brand { display:grid; gap:12px; } .footer-brand p { margin:0; color:#6d8197; font-size:13px; } .footer-links { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; } .footer-links div { display:grid; align-content:start; gap:9px; } .footer-links strong { color:#234466; font-size:12px; } .footer-links a, .footer-links button, .footer-links span { width:max-content; padding:0; border:0; color:#6d8197; background:transparent; font:inherit; font-size:12px; text-align:left; text-decoration:none; } .footer-links a:hover, .footer-links button:hover { color:#1269d3; cursor:pointer; } .footer-links span { max-width:160px; line-height:1.5; } .footer-bottom { display:flex; grid-column:1 / -1; justify-content:space-between; gap:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#8a99aa; font-size:11px; line-height:1.5; } @media (max-width:850px) { footer { display:grid; } } @media (max-width:620px) { .footer-links { grid-template-columns:repeat(2,1fr); } .footer-bottom { align-items:flex-start; flex-direction:column; gap:8px; } }`,
+  `footer { display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.6fr); gap:36px 72px; align-items:start; } .footer-brand { display:grid; gap:12px; } .footer-brand p { margin:0; color:#6d8197; font-size:13px; } .footer-links { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; } .footer-links section { display:grid; align-content:start; gap:9px; } .footer-links h3 { margin:0; color:#234466; font-size:12px; } .footer-links ul { display:grid; gap:9px; margin:0; padding:0; list-style:none; } .footer-links a, .footer-links button, .footer-links span { width:max-content; padding:0; border:0; color:#6d8197; background:transparent; font:inherit; font-size:12px; text-align:left; text-decoration:none; } .footer-links a:hover, .footer-links button:hover { color:#1269d3; cursor:pointer; } .footer-links span { max-width:160px; line-height:1.5; } .footer-bottom { display:flex; grid-column:1 / -1; justify-content:space-between; gap:24px; padding-top:18px; border-top:1px solid #dce5ee; color:#8a99aa; font-size:11px; line-height:1.5; } @media (max-width:850px) { footer { display:grid; } } @media (max-width:620px) { .footer-links { grid-template-columns:repeat(2,1fr); } .footer-bottom { align-items:flex-start; flex-direction:column; gap:8px; } }`,
   `.site-header { position:sticky; top:0; z-index:10; } .landing-page :is(#top, #how-it-works, #benefits, #pricing, #contact) { scroll-margin-top:84px; } .trust-strip { border-bottom:1px solid #dce5ee; } .pricing-card { box-shadow:none; } .pricing-card:hover { box-shadow:0 8px 22px rgb(23 43 77 / 8%); } .pricing-card.selected { outline:2px solid rgb(43 143 136 / 18%); outline-offset:2px; box-shadow:0 10px 24px rgb(23 43 77 / 10%); } @media (hover:hover) and (prefers-reduced-motion:no-preference) { :is(.process-node, .accountant-branch, .preview, .benefit-grid article, .fit-grid article, .workspace-grid article):hover { translate:0 -2px; } } @media (max-width:1040px) and (min-width:851px) { .site-nav { gap:16px; } .brand { margin-right:0; } .nav-links { gap:14px; } .nav-links a { font-size:13px; } .nav-actions { gap:12px; } .updates { padding:0 16px; } } @media (max-width:850px) { .nav-links { flex-wrap:wrap; justify-content:center; } } @media (max-width:620px) { .nav-links { gap:10px; } .nav-actions { gap:12px; } }`
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
