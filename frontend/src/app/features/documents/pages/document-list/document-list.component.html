@@ -115,19 +115,21 @@
 
               <div class="document-name">
                 <strong>{{ displayName(document) }}</strong>
-                @if (auth.canEdit && editingDescriptionDocumentId === document.id) {
-                  <span class="description-editor"><input [(ngModel)]="descriptionDraft" maxlength="255" placeholder="Add a description" /><button type="button" class="secondary-button" (click)="saveDescription(document)">Save</button><button type="button" class="secondary-button" (click)="cancelDescriptionEdit()">Cancel</button></span>
-                } @else if (auth.canEdit) {
-                  <button type="button" class="description-edit" (click)="editDescription(document)">{{ document.description ? 'Edit description' : 'Add description' }}</button>
-                }
-                @if (displayName(document) !== document.original_filename) {
-                  <small class="original-filename">Original: {{ document.original_filename }}</small>
-                }
-                <span>{{ getDocumentTypeName(document) }}</span>
-                <span class="document-storage-provider">{{ getStorageProviderLabel(document) }}</span>
-                <span class="document-financial-year">
-                  {{ getFinancialYearLabel(document) }}
-                </span>
+                <div class="document-subtitle">
+                  @if (auth.canEdit && editingDescriptionDocumentId === document.id) {
+                    <div class="description-editor"><input [(ngModel)]="descriptionDraft" maxlength="255" placeholder="Add a description" /><button type="button" class="secondary-button" (click)="saveDescription(document)">Save</button><button type="button" class="secondary-button" (click)="cancelDescriptionEdit()">Cancel</button></div>
+                  } @else if (auth.canEdit) {
+                    <button type="button" class="description-edit" (click)="editDescription(document)">{{ document.description ? 'Edit description' : 'Add description' }}</button>
+                  }
+                  @if (displayName(document) !== document.original_filename) {
+                    <small class="original-filename">Original: {{ document.original_filename }}</small>
+                  }
+                </div>
+                <div class="document-meta">
+                  <span class="document-type-label">{{ getDocumentTypeName(document) }}</span>
+                  <span class="document-storage-provider">{{ getStorageProviderLabel(document) }}</span>
+                  <span class="document-financial-year">{{ getFinancialYearLabel(document) }}</span>
+                </div>
               </div>
             </div>
 
