@@ -170,6 +170,21 @@
   background: var(--tv-color-background);
   color: var(--tv-color-text-secondary);
   font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.document-icon:hover,
+.document-icon:focus-visible {
+  border-color: var(--tv-color-primary);
+  background: var(--tv-color-primary-soft);
+  color: var(--tv-color-primary);
+}
+
+.document-icon:focus-visible {
+  outline: 2px solid var(--tv-color-primary);
+  outline-offset: 2px;
 }
 
 .date-cell {

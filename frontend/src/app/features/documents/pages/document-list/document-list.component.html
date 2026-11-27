@@ -109,9 +109,14 @@
         @for (document of filteredDocuments; track document.id) {
           <div class="document-row">
             <div class="supplier-cell">
-              <div class="document-icon" aria-hidden="true">
+              <a
+                class="document-icon"
+                [routerLink]="document.review_id ? ['/reviews', document.review_id] : ['/reviews']"
+                [attr.title]="document.review_id ? 'Open this document review' : 'Open Review Queue'"
+                [attr.aria-label]="document.review_id ? 'Open review for ' + displayName(document) : 'Open Review Queue'"
+              >
                 <tv-icon name="document" />
-              </div>
+              </a>
 
               <div class="document-name">
                 <strong>{{ displayName(document) }}</strong>
