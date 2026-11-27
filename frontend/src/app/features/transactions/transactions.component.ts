@@ -344,7 +344,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   recurringFieldError(field: 'year' | 'name' | 'amount' | 'day' | 'start' | 'end'): string | null {
-    if (field === 'year') return this.recurringForm.financial_year_id ? null : this.i18n.translate('Common.Required');
+    if (field === 'year') return this.recurringForm.financial_year_id ? null : this.i18n.translate('Dashboard.SelectFinancialYear');
     if (field === 'name') return this.recurringForm.name.trim() ? null : this.i18n.translate('Common.Required');
     if (field === 'amount') return Number(this.recurringForm.amount) > 0 ? null : this.i18n.translate('Common.ValidationFailed');
     if (field === 'day') return Number(this.recurringForm.day_of_month) >= 1 && Number(this.recurringForm.day_of_month) <= 28 ? null : this.i18n.translate('Common.ValidationFailed');
@@ -533,9 +533,7 @@ export class TransactionsComponent implements OnInit {
 
   startRecurringForm(): void {
     this.resetRecurringForm();
-    const financialYearId = this.documentsApi.selectedFinancialYearId()
-      ?? this.documentsApi.defaultFinancialYearId(this.financialYears)
-      ?? '';
+    const financialYearId = this.documentsApi.selectedFinancialYearId() ?? '';
     const year = this.financialYears.find((item) => item.id === financialYearId);
     const today = new Date().toISOString().slice(0, 10);
     this.recurringForm = {
