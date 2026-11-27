@@ -32,6 +32,7 @@ import { documentDisplayName } from '../../../../shared/utils/document-display-n
 import { TaxWorkspaceApiService, TransactionDto } from '../../../../shared/services/tax-workspace-api.service';
 import { ReviewDocumentTransaction } from '../../../../shared/models/reviews/review-extraction.model';
 import { TranslationService } from '../../../../shared/i18n/translation.service';
+import { NavigationHistoryService } from '../../../../shared/services/navigation-history.service';
 
 @Component({
   imports: [CurrencyPipe, DecimalPipe, FormsModule, TaxIconComponent, BackNavigationComponent, CollapsibleCardDirective],
@@ -53,6 +54,7 @@ export class ReviewDetailComponent
   private readonly destroyRef = inject(DestroyRef);
   private readonly workspaceApi = inject(TaxWorkspaceApiService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly navigationHistory = inject(NavigationHistoryService);
 
   readonly Object = Object;
   private statusRefreshStarted = false;
@@ -110,6 +112,9 @@ export class ReviewDetailComponent
     amount: number | null;
     description: string;
   }[] = [this.emptyExpenseDraft()];
+  private initialTransactionDrafts: typeof this.transactionDrafts = [];
+  showUnsavedApprovalDialog = false;
+  private pendingApprovalNotes = '';
 
   // Kept as a compatibility alias for existing callers and tests.
   get expenseDraft() {
@@ -402,6 +407,7 @@ export class ReviewDetailComponent
   submitDecision(
     decision: ReviewDecision,
     notes?: string,
+    continueWithUnsavedChanges = false,
   ): void {
     const id =
       this.review?.id;
@@ -438,6 +444,13 @@ export class ReviewDetailComponent
         this.decisionError = 'Choose an existing income transaction, keep the document as evidence only, or confirm that this amount is additional income.';
         return;
       }
+    }
+
+    if (decision === 'approved' && this.recordExpense && !continueWithUnsavedChanges
+      && this.hasUnsavedTransactionDrafts()) {
+      this.pendingApprovalNotes = notes ?? '';
+      this.showUnsavedApprovalDialog = true;
+      return;
     }
 
     const request:
@@ -484,6 +497,9 @@ export class ReviewDetailComponent
           this.isSubmitting = false;
           this.decisionSuccess = true;
           this.cdr.markForCheck();
+          if (decision === 'approved') {
+            this.navigationHistory.goBack();
+          }
         },
 
         error: (error: { status?: number; error?: { message?: string } }) => {
@@ -493,6 +509,29 @@ export class ReviewDetailComponent
           this.cdr.markForCheck();
         },
       });
+  }
+
+  cancelApprovalAndRestoreDrafts(): void {
+    this.transactionDrafts = this.cloneTransactionDrafts(this.initialTransactionDrafts);
+    this.resetIncomeSelection();
+    this.showUnsavedApprovalDialog = false;
+    this.pendingApprovalNotes = '';
+    this.cdr.markForCheck();
+  }
+
+  confirmApprovalWithUnsavedChanges(): void {
+    const notes = this.pendingApprovalNotes;
+    this.showUnsavedApprovalDialog = false;
+    this.pendingApprovalNotes = '';
+    this.submitDecision('approved', notes, true);
+  }
+
+  private hasUnsavedTransactionDrafts(): boolean {
+    return JSON.stringify(this.transactionDrafts) !== JSON.stringify(this.initialTransactionDrafts);
+  }
+
+  private cloneTransactionDrafts(drafts: typeof this.transactionDrafts): typeof this.transactionDrafts {
+    return drafts.map(draft => ({ ...draft }));
   }
 
   setCorrectionValue(
@@ -700,6 +739,7 @@ export class ReviewDetailComponent
         : null,
       description: displayName,
     }];
+    this.initialTransactionDrafts = this.cloneTransactionDrafts(this.transactionDrafts);
     this.recordExpense = false;
   }
 

@@ -443,6 +443,22 @@
                 {{ isSubmitting ? 'Submitting...' : 'Reject' }}
               </button>
             </div>
+            @if (showUnsavedApprovalDialog) {
+              <div class="unsaved-dialog-backdrop">
+                <section class="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-dialog-title">
+                  <h2 id="unsaved-dialog-title">Unsaved changes</h2>
+                  <p>Your transaction date, amount, or other details have changed and are not saved yet. Approving will save the updated values with this review.</p>
+                  <div class="decision-actions">
+                    <button type="button" class="secondary-button" (click)="cancelApprovalAndRestoreDrafts()">
+                      Cancel and restore previous values
+                    </button>
+                    <button type="button" class="approve-button" (click)="confirmApprovalWithUnsavedChanges()">
+                      Approve with changes
+                    </button>
+                  </div>
+                </section>
+              </div>
+            }
           </section>
         } @else {
           <section class="detail-card read-only-card" tvCollapsibleCard>

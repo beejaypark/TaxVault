@@ -109,6 +109,10 @@ h2 { font-size: 15px; font-weight: 650; }
 .decision-card textarea { box-sizing: border-box; width: 100%; min-height: 90px; padding: 10px; resize: vertical; }
 .decision-card textarea::placeholder { color: var(--tv-color-text-muted); }
 .decision-actions { display: grid; gap: 8px; margin-top: 11px; }
+.unsaved-dialog-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(15 23 42 / 48%); }
+.unsaved-dialog { display: grid; gap: 12px; width: min(100%, 440px); padding: 22px; border: 1px solid var(--tv-color-border); border-radius: var(--tv-radius-lg); background: var(--tv-color-surface); box-shadow: 0 20px 60px rgb(15 23 42 / 24%); }
+.unsaved-dialog p { color: var(--tv-color-text-secondary); font-size: 12px; line-height: 1.55; }
+.unsaved-dialog .decision-actions { margin-top: 4px; }
 .approve-button, .reject-button, .primary-button { min-height: 39px; border: 0; border-radius: var(--tv-radius-md); font-size: 11px; font-weight: 700; cursor: pointer; }
 .approve-button, .primary-button { background: var(--tv-color-primary); color: white; }
 .approve-button:hover:not(:disabled), .primary-button:hover:not(:disabled) { background: var(--tv-color-primary-dark); }
