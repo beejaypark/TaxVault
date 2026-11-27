@@ -191,6 +191,7 @@ export interface CreateTransactionRequest {
 
 export interface RecurringIncomeRuleDto {
   id: string;
+  financial_year_id: string | null;
   name: string;
   description: string;
   amount: string | number;
@@ -202,6 +203,7 @@ export interface RecurringIncomeRuleDto {
 }
 
 export interface RecurringIncomeRuleRequest {
+  financial_year_id: string;
   name: string;
   description: string;
   amount: number;

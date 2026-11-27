@@ -3,7 +3,6 @@
 namespace App\Application\Income;
 
 use App\Application\Transactions\CreateTransaction;
-use App\Domain\FinancialYears\Models\FinancialYear;
 use App\Domain\Income\Models\RecurringIncomeRule;
 use App\Domain\Transactions\Models\Transaction;
 use Carbon\CarbonImmutable;
@@ -24,25 +23,28 @@ final class BackfillRecurringIncome
     public function preview(RecurringIncomeRule $rule): array
     {
         $today = $this->today();
-        $year = FinancialYear::query()
-            ->where('user_id', $rule->user_id)
-            ->whereDate('start_date', '<=', $today->toDateString())
-            ->whereDate('end_date', '>=', $today->toDateString())
-            ->first();
+        $year = $rule->financialYear;
         $preview = ['year' => $year?->year_code, 'amount' => $rule->amount, 'missing' => [], 'existing' => []];
 
         if ($year === null || ! $rule->active) {
             return $preview;
         }
 
-        $firstDate = $year->start_date->toDateString();
-        $lastDate = $today->toDateString();
+        $firstDate = max($year->start_date->toDateString(), $rule->start_date->toDateString());
+        $lastDate = min($year->end_date->toDateString(), $today->toDateString());
+        if ($rule->end_date !== null) {
+            $lastDate = min($lastDate, $rule->end_date->toDateString());
+        }
+        if ($firstDate > $lastDate) {
+            return $preview;
+        }
+
         for ($month = CarbonImmutable::parse($firstDate, $today->timezone)->startOfMonth();
             $month->toDateString() <= $lastDate;
             $month = $month->addMonth()
         ) {
             $date = $month->day($rule->day_of_month)->toDateString();
-            if ($date >= $firstDate && $this->isDue($rule, $date, $lastDate)) {
+            if ($date >= $firstDate && $this->isDue($rule, $date, $today->toDateString())) {
                 $preview[$this->hasIncome($rule, $date) ? 'existing' : 'missing'][] = $date;
             }
         }
@@ -52,12 +54,21 @@ final class BackfillRecurringIncome
 
     public function isDue(RecurringIncomeRule $rule, string $date, string $today): bool
     {
-        return $rule->active && $date <= $today && $date >= $rule->start_date->toDateString()
+        $year = $rule->financialYear;
+
+        return $year !== null && $rule->active
+            && $date >= $year->start_date->toDateString()
+            && $date <= $year->end_date->toDateString()
+            && $date <= $today && $date >= $rule->start_date->toDateString()
             && ($rule->end_date === null || $date <= $rule->end_date->toDateString());
     }
 
     public function createMissing(RecurringIncomeRule $rule, string $date): bool
     {
+        if (! $this->isDue($rule, $date, $this->today()->toDateString())) {
+            return false;
+        }
+
         if ($this->hasIncome($rule, $date)) {
             return false;
         }

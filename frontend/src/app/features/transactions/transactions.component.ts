@@ -85,7 +85,7 @@ export class TransactionsComponent implements OnInit {
   backfillBusy = false;
   backfillError = '';
   backfillResult: { created: number; skipped: number } | null = null;
-  recurringForm = { name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+  recurringForm = { financial_year_id: '', name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
   showRecurringForm = false;
   editingRecurringId: string | null = null;
   incomeSource = 'manual';
@@ -277,6 +277,18 @@ export class TransactionsComponent implements OnInit {
     return year ? `FY ${formatFinancialYear(year.year_code)}` : 'All financial years';
   }
 
+  get recurringIncomeForSelectedYear(): RecurringIncomeRuleDto[] {
+    const selectedYearId = this.documentsApi.selectedFinancialYearId();
+    return this.recurringIncome.filter((rule) =>
+      !selectedYearId || rule.financial_year_id === selectedYearId,
+    );
+  }
+
+  recurringFinancialYearLabel(financialYearId: string | null): string {
+    const year = this.financialYears.find((item) => item.id === financialYearId);
+    return year ? formatFinancialYear(year.year_code) : '—';
+  }
+
   get totalIncome(): number {
     return this.filteredTransactions
       .filter((transaction) => transaction.direction === 'income')
@@ -301,7 +313,20 @@ export class TransactionsComponent implements OnInit {
     return !this.transactionDateError()
       && !this.transactionDescriptionError()
       && !this.transactionAmountError()
+      && !this.incomeSourceFinancialYearError()
       && (!this.needsProperty || !!this.form.property_id);
+  }
+
+  incomeSourceFinancialYearError(): string | null {
+    if (this.incomeSource === 'manual' || this.form.direction !== 'income') return null;
+    const rule = this.recurringIncome.find((item) => item.id === this.incomeSource);
+    if (!rule) return null;
+    const year = this.financialYears.find((item) =>
+      this.form.transaction_date >= item.start_date && this.form.transaction_date <= item.end_date,
+    );
+    return year?.id === rule.financial_year_id
+      ? null
+      : 'This recurring income rule belongs to a different financial year. Choose Manual income or change the transaction date.';
   }
 
   transactionDateError(): string | null {
@@ -318,13 +343,26 @@ export class TransactionsComponent implements OnInit {
     return Number.isFinite(Number(this.form.amount)) && Number(this.form.amount) > 0 ? null : this.i18n.translate('Common.ValidationFailed');
   }
 
-  recurringFieldError(field: 'name' | 'amount' | 'day' | 'start' | 'end'): string | null {
+  recurringFieldError(field: 'year' | 'name' | 'amount' | 'day' | 'start' | 'end'): string | null {
+    if (field === 'year') return this.recurringForm.financial_year_id ? null : this.i18n.translate('Common.Required');
     if (field === 'name') return this.recurringForm.name.trim() ? null : this.i18n.translate('Common.Required');
     if (field === 'amount') return Number(this.recurringForm.amount) > 0 ? null : this.i18n.translate('Common.ValidationFailed');
     if (field === 'day') return Number(this.recurringForm.day_of_month) >= 1 && Number(this.recurringForm.day_of_month) <= 28 ? null : this.i18n.translate('Common.ValidationFailed');
-    if (field === 'start') return this.recurringForm.start_date ? null : this.i18n.translate('Common.Required');
+    if (field === 'start') {
+      if (!this.recurringForm.start_date) return this.i18n.translate('Common.Required');
+      const year = this.financialYears.find((item) => item.id === this.recurringForm.financial_year_id);
+      return !year || (this.recurringForm.start_date >= year.start_date && this.recurringForm.start_date <= year.end_date)
+        ? null
+        : this.i18n.translate('Common.ValidationFailed');
+    }
     if (!this.recurringForm.end_date) return null;
-    return new Date(`${this.recurringForm.end_date}T00:00:00Z`).toString() === 'Invalid Date' ? this.i18n.translate('Common.ValidationFailed') : null;
+    const year = this.financialYears.find((item) => item.id === this.recurringForm.financial_year_id);
+    return new Date(`${this.recurringForm.end_date}T00:00:00Z`).toString() === 'Invalid Date'
+      || !year
+      || this.recurringForm.end_date < this.recurringForm.start_date
+      || this.recurringForm.end_date > year.end_date
+      ? this.i18n.translate('Common.ValidationFailed')
+      : null;
   }
 
   onDirectionChange(): void {
@@ -463,8 +501,9 @@ export class TransactionsComponent implements OnInit {
     const amount = Number(this.recurringForm.amount);
     const name = this.recurringForm.name.trim();
     const description = this.recurringForm.description.trim() || name;
-    if (!name || !Number.isFinite(amount) || amount <= 0) {
-      this.errorMessage = 'Enter a company/source and a gross amount greater than zero.';
+    if (!this.recurringForm.financial_year_id || !name || !Number.isFinite(amount) || amount <= 0
+      || this.recurringFieldError('day') || this.recurringFieldError('start') || this.recurringFieldError('end')) {
+      this.errorMessage = 'Choose a financial year and enter valid dates within that year, a company/source, and a gross amount greater than zero.';
       this.cdr.markForCheck();
       return;
     }
@@ -481,15 +520,39 @@ export class TransactionsComponent implements OnInit {
 
   editRecurringIncome(item: RecurringIncomeRuleDto): void {
     this.editingRecurringId = item.id;
-    this.recurringForm = { name: item.name, description: item.description, amount: Number(item.amount), day_of_month: item.day_of_month, start_date: item.start_date.slice(0, 10), end_date: item.end_date?.slice(0, 10) ?? '' };
+    this.recurringForm = { financial_year_id: item.financial_year_id ?? '', name: item.name, description: item.description, amount: Number(item.amount), day_of_month: item.day_of_month, start_date: item.start_date.slice(0, 10), end_date: item.end_date?.slice(0, 10) ?? '' };
     this.showRecurringForm = true;
     this.errorMessage = '';
   }
 
   resetRecurringForm(): void {
     this.editingRecurringId = null;
-    this.recurringForm = { name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
+    this.recurringForm = { financial_year_id: '', name: '', description: '', amount: 0, day_of_month: 1, start_date: new Date().toISOString().slice(0, 10), end_date: '' };
     this.showRecurringForm = false;
+  }
+
+  startRecurringForm(): void {
+    this.resetRecurringForm();
+    const financialYearId = this.documentsApi.selectedFinancialYearId()
+      ?? this.documentsApi.defaultFinancialYearId(this.financialYears)
+      ?? '';
+    const year = this.financialYears.find((item) => item.id === financialYearId);
+    const today = new Date().toISOString().slice(0, 10);
+    this.recurringForm = {
+      ...this.recurringForm,
+      financial_year_id: financialYearId,
+      start_date: year && today >= year.start_date && today <= year.end_date ? today : year?.start_date ?? today,
+    };
+    this.showRecurringForm = true;
+  }
+
+  onRecurringYearChange(financialYearId: string): void {
+    this.recurringForm.financial_year_id = financialYearId;
+    const year = this.financialYears.find((item) => item.id === financialYearId);
+    if (year && (this.recurringForm.start_date < year.start_date || this.recurringForm.start_date > year.end_date)) {
+      this.recurringForm.start_date = year.start_date;
+    }
+    if (year && this.recurringForm.end_date > year.end_date) this.recurringForm.end_date = '';
   }
 
   toggleRecurringIncome(item: RecurringIncomeRuleDto): void {
